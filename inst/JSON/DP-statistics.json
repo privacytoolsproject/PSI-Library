@@ -1,0 +1,51 @@
+{
+  "DP Statistics": [
+    {
+      "histogram": {
+        "statistic": ["Histogram"],
+        "description": ["Differentially Private Histogram"],
+        "mechanisms": ["noisy", "random", "stability"],
+        "variableTypes": {
+          "numeric": {
+            "rTypes": ["numeric", "integer"],
+            "fields": {
+              "n": ["Number of observations"],
+              "range": ["Ordered pair indicating effective lower and upper bounds"],
+              "n_bins": ["Number of cells in output (optional, default Sturges method)"]
+            }
+          },
+          "categorical": {
+            "rTypes": ["character", "factor"],
+            "fields": {
+              "n": ["Number of observations"],
+              "bins": ["Vector indicating levels for which to produce frequencies"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "mean": {
+        "statistic": ["Mean"],
+        "description": ["Differentially Private Mean"],
+        "mechanisms": ["Laplace"],
+        "variableTypes": {
+          "numeric": {
+            "rTypes": ["numeric", "integer"],
+            "fields": {
+              "n": ["Number of observations"],
+              "range": ["Ordered pair indicating effective lower and upper bounds"]
+            }
+          },
+          "categorical": {
+            "rTypes": ["logical"],
+            "fields": {
+              "n": ["Number of observations"],
+              "range": ["Should be (0, 1)"]
+            }
+          }
+        }
+      }
+    }
+  ]
+} 
