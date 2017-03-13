@@ -16,35 +16,52 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 
 #' Random draw from Laplace distribution
 #'
-#' @param loc numeric, center of the distribution
-#' @param scale numeric, spread
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
 #' @param n integer, number of draws
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlap(size=1000)
 
-rlap = function(loc=0, scale=1, size=1) { 
-    p <- runif(size)
+rlap = function(mu=0, b=1, size=1) {
+    p <- runif(size) - 0.5
     sgn <- sample(c(-1, 1), size=size, replace=TRUE)
-    draws <- loc - scale * sgn * (p - 0.5) * log(1 - 2 * abs(p - 0.5))
+    draws <- mu - b * sgn * p * log(1 - 2 * abs(p))
     return(draws)
 }
 
 
-#' Probability density for Laplace distribution 
+#' Probability density for Laplace distribution
 #'
-#' @param x numeric, value 
-#' @param loc numeric, center of the distribution
-#' @param scale numeric, spread
+#' @param x numeric, value
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
 #' @return Density for elements of x
 #' @examples
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
 
-dlap <- function(x, loc=0, scale=1) { 
-    dens <- 0.5 * scale * exp(-1 * abs(x - loc) / scale)    
+dlap <- function(x, mu=0, b=1) {
+    dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
-} 
+}
+
+
+#' Cumulative distribution function for Laplace distribution
+#'
+#' @param x numeric, value
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
+#' @return Probability equal to or lesser than x
+#' @examples
+#' x <- 0
+#' plap(x)
+
+plap <- function(x, mu=0, b=1) {
+    sgn <- sample(c(-1, 1), size=1)
+    cdf <- 0.5 + 0.5 * sgn * (x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
+    return(cdf)
+}
 
 
 #' Utility function for checking that range is ordered pair
