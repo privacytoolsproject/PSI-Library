@@ -25,8 +25,7 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 
 rlap = function(mu=0, b=1, size=1) {
     p <- runif(size) - 0.5
-    sgn <- sample(c(-1, 1), size=size, replace=TRUE)
-    draws <- mu - b * sgn * p * log(1 - 2 * abs(p))
+    draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
     return(draws)
 }
 
@@ -58,9 +57,20 @@ dlap <- function(x, mu=0, b=1) {
 #' plap(x)
 
 plap <- function(x, mu=0, b=1) {
-    sgn <- sample(c(-1, 1), size=1)
-    cdf <- 0.5 + 0.5 * sgn * (x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
+    cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
     return(cdf)
+}
+
+
+#' Sign function
+#'
+#' @param x numeric, value or vector or values
+#' @return The sign of passed values
+#' @examples
+#' sgn(rnrom(10))
+
+sgn <- function(x) {
+    return(ifelse(x < 0, -1, 1))
 }
 
 
