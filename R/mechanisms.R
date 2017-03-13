@@ -37,7 +37,7 @@ mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...)
 
     truevalue <- fun(x, ...)
     #noise <- rlaplace(n=length(truevalue), sensitivity=sensitivity, epsilon=epsilon)
-    noise <- rlap(mu=0, b=(epsilon / sensitivity), size=length(truevalue))
+    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(truevalue))
     release <- truevalue + noise
     return(release)
 }
