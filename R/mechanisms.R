@@ -32,6 +32,9 @@ mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...)
     true.value <- fun(x, ...)
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     release <- truevalue$stat + noise
+    accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
+    parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
+    interval.func <- match.fun(paste0(true.value$name, '.getCI'))
     out <- list(
         'mechanism' = 'laplace',
         'release' = 'release',
