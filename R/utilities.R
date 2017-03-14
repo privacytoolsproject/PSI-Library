@@ -1,13 +1,13 @@
 #' Random draw from Laplace distribution
 #'
-#' @param sensitivity numeric 
+#' @param sensitivity numeric
 #' @param epsilon numeric
 #' @param n integer, number of draws
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlaplace(sensitivity=1, epsilon=0.1)
 
-rlaplace = function(n=1, sensitivity, epsilon) { 
+rlaplace = function(n=1, sensitivity, epsilon) {
     flip <- sample(c(-1, 1), size=n, replace=TRUE)
     expon <- rexp(n=n, rate=(epsilon / sensitivity))
     return(flip * expon)
@@ -16,41 +16,68 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 
 #' Random draw from Laplace distribution
 #'
-#' @param loc numeric, center of the distribution
-#' @param scale numeric, spread
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
 #' @param n integer, number of draws
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlap(size=1000)
 
-rlap = function(loc=0, scale=1, size=1) { 
-    p <- runif(size)
-    sgn <- sample(c(-1, 1), size=size, replace=TRUE)
-    draws <- loc - scale * sgn * (p - 0.5) * log(1 - 2 * abs(p - 0.5))
+rlap = function(mu=0, b=1, size=1) {
+    p <- runif(size) - 0.5
+    draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
     return(draws)
 }
 
 
-#' Probability density for Laplace distribution 
+#' Probability density for Laplace distribution
 #'
-#' @param x numeric, value 
-#' @param loc numeric, center of the distribution
-#' @param scale numeric, spread
+#' @param x numeric, value
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
 #' @return Density for elements of x
 #' @examples
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
 
-dlap <- function(x, loc=0, scale=1) { 
-    dens <- 0.5 * scale * exp(-1 * abs(x - loc) / scale)    
+dlap <- function(x, mu=0, b=1) {
+    dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
-} 
+}
+
+
+#' Cumulative distribution function for Laplace distribution
+#'
+#' @param x numeric, value
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
+#' @return Probability less than or equal to x
+#' @examples
+#' x <- 0
+#' plap(x)
+
+plap <- function(x, mu=0, b=1) {
+    cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
+    return(cdf)
+}
+
+
+#' Sign function
+#'
+#' @param x numeric, value or vector or values
+#' @return The sign of passed values
+#' @examples
+#' sgn(rnrom(10))
+
+sgn <- function(x) {
+    return(ifelse(x < 0, -1, 1))
+}
 
 
 #' Utility function for checking that range is ordered pair
 #'
 #' @param range A vector, that ought to be an ordered pair
-#' @return An ordered pair 
+#' @return An ordered pair
 #'
 #' Checks if a supplied range is an ordered pair.  Coerces any vector of length two
 #'   or greater into an ordered pair, and issues an error for shorter vectors.
@@ -59,13 +86,13 @@ dlap <- function(x, loc=0, scale=1) {
 #' checkrange(1:3)
 #' \dontrun{checkrange(1)}
 
-checkrange = function(range){
-	if (length(range)<2){
+checkrange = function(range) {
+	if (length(range) < 2) {
 		stop("range argument in error: requires upper and lower values as vector of length 2.")
-	} else if (length(range)>2){
+	} else if (length(range) > 2) {
 		warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
 		range <- c(min(range),max(range))
-	}else{
+	} else {
 		range <- sort(range)
 	}
 	return(range)
@@ -82,12 +109,12 @@ checkrange = function(range){
 #' \dontrun{checkepsilon(-2)}
 #' \dontrun{checkepsilon(c(0.1,0.5))}
 
-checkepsilon = function(epsilon){
-	if (epsilon<=0){
+checkepsilon = function(epsilon) {
+	if (epsilon <= 0) {
 		stop("Privacy parameter epsilon must be a value greater than zero.")
 	}
-	if (length(epsilon)>1){
-		stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length ",length(epsilon)) )
+	if (length(epsilon) > 1) {
+		stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length ", length(epsilon)))
 	}
 	return(epsilon)
 }
@@ -95,19 +122,20 @@ checkepsilon = function(epsilon){
 
 #' Utility function for censoring data
 #'
-#' @param x A vector of values to censor within a range
-#' @param range A vector (min, max) of the bounds of the range
-#' @return Original vector with values outide the bounds of the range censored to the bounds
+#' @param x A vector of numeric or categorial values to censor
+#' @param var_type Character indicating the variable type
+#' @param range For numeric types, a vector (min, max) of the bounds of the range,
+#' @param levels For categorical types, a vector containing the levels to be returned
+#' @return Original vector with values outside the bounds censored to the bounds
 #'
-#' Checks if val is in range = (min, max)
-#'   and censors values to either min or max if it is 
-#'   out of the range
+#' For numeric types, checks if x is in range = (min, max) and censors values to either min
+#' or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
 #'
 #' @examples
-#' censordata(x=1:10, var_type='integer', range=c(2.5,7)) 
+#' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+#' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 
 censordata = function(x, var_type, range=NULL, levels=NULL) {
-
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
             stop('`levels` are required for categorical types')
@@ -127,8 +155,9 @@ censordata = function(x, var_type, range=NULL, levels=NULL) {
 
 #' Utility function to check type of variable is within set of acceptable types 
 #'
-#' @param type String specifying the type of the variable
+#' @param type Character specifying the type of the variable
 #' @param in_types Vector of acceptable types 
+#' @return The original character string indicating the variable type
 #' 
 #' Verifies that the variable is an element in the set of acceptable types
 #' 
@@ -175,7 +204,7 @@ make_logical <- function(x) {
 
 
 #' Utility function to verify the type of histogram mechanism
-#' 
+#'
 #' @param mechanism Character string specifying the mechanism
 #' 
 #' Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
@@ -208,6 +237,7 @@ check_histogram_categorical <- function(x, bins) {
 #' 
 #' @param n_bins Number of cells in which to tabulate values
 #' @param n Number of observations
+#' @return Number of bins
 #' 
 #' If number of bins is not provided, use the Sturges method
 

@@ -1,7 +1,3 @@
-source('mechanisms.R')
-source('utilities.R')
-
-
 #' Function for differentially private release of mean
 #'
 #' @param x Numeric vector 
