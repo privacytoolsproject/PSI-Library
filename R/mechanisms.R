@@ -15,31 +15,29 @@
 #' sensitivity <- diff(range)/n
 #' mechanism.laplace(mean,x=x,sensitivity=sensitivity, epsilon=.1)
 
-#mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, levels=NULL, ...){
 mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...) {
-
     epsilon <- checkepsilon(epsilon)
-
     if (hasArg(var_levels)) { 
         var_levels <- list(...)$var_levels
     } 
-
     if (var_type == 'logical') { # allow any dichotomous variable to be treated as logical type
         x <- make_logical(x)
     }
-
     if (var_type %in% c('numeric', 'integer', 'logical')) {
         range <- checkrange(range)
         x <- censordata(x, var_type, range=range)
     } else {
         x <- censordata(x, var_type, levels=var_levels)
     }
-
-    truevalue <- fun(x, ...)
-    #noise <- rlaplace(n=length(truevalue), sensitivity=sensitivity, epsilon=epsilon)
-    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(truevalue))
-    release <- truevalue + noise
-    return(release)
+    true.value <- fun(x, ...)
+    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
+    release <- truevalue$stat + noise
+    out <- list(
+        'mechanism' = 'laplace',
+        'release' = 'release',
+        'statistic' = true.value$name
+    )
+    return(out)
 }
 
 
