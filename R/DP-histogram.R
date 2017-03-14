@@ -1,7 +1,3 @@
-#source('utilities.R')
-#source('mechanisms.R')
-
-
 #' Release differentially private histogram 
 #' 
 #' @param x Vector, numeric or categorical
@@ -48,9 +44,7 @@
 #' r_fac <- histogram.release(x_fac, var_type='factor', n=100, epsilon=0.1, bins=bins)
 
 histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, range=NULL, bins=NULL, n_bins=NULL, mechanism=NULL) {
-
     var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'factor', 'character'))
-
     if (is.null(mechanism)) {
         mechs <- c('noisy', 'stability', 'random')
         accuracies <- c(
@@ -61,39 +55,19 @@ histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, r
         mechanism <- mechs[which.min(accuracies)]
     }
     mechanism <- check_histogram_mechanism(mechanism)
-
     if (mechanism == 'random') {
-
         release <- mechanism.histogram.random(x, var_type, epsilon, levels, n_bins) 
-
     } else {
-
         if (var_type %in% c('factor', 'character')) {
-            
-            my_categorical_hist <- function(x, var_levels) {
-                n <- length(var_levels)  # avoid unused argument error in mechanism
-                histogram <- table(x, useNA='ifany')
-                return(histogram)
-            }
-            release <- mechanism.laplace(fun=my_categorical_hist, x=x, var_type=var_type, range=range, sensitivity=2, epsilon=epsilon, var_levels=bins)
-        
+            release <- mechanism.laplace(dp.histogram.categorical, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=bins)
         } else { 
-
-            my_numeric_hist <- function(x, var_levels) {
-                histogram <- table(cut(x, breaks=var_levels, include.lowest=TRUE, right=TRUE))
-                return(histogram)
-            }
-            n_bins <- check_histogram_bins(n_bins=n_bins, n=n)
-            var_levels <- seq(range[1], range[2], length.out=(n_bins + 1))
-            release <- mechanism.laplace(fun=my_numeric_hist, x=x, var_type=var_type, range=range, sensitivity=2, epsilon=epsilon, var_levels=var_levels)
+            n.bins <- check_histogram_bins(n_bins=n_bins, n=n)
+            var.levels <- seq(range[1], range[2], length.out=(n.bins + 1))
+            release <- mechanism.laplace(dp.histogram.numeric, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
         } 
-
         if (mechanism == 'noisy') {
-
             release <- ifelse(release < 0, 0, round(release))
-            
         } else {
-            
             accuracy <- histogram.getAccuracy(mechanism, n_bins, n, epsilon)
             if (check_histogram_n(accuracy, n, n_bins, epsilon, delta, beta)) {
                 a <- accuracy * n / 2
@@ -101,7 +75,6 @@ histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, r
             }
         }
     }
-
     return(release)
 }
 
