@@ -1,7 +1,3 @@
-source('DP-histogram.R')
-source('DP-mean.R')
-
-
 #' Function to create JSON file defining differentially private statistics
 #' 
 #' @include DP-histogram.R
