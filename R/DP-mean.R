@@ -19,18 +19,19 @@
 #' r_bool <- mean.release(x=x_bool, var_type='logical', epsilon=0.5, n=n, range=c(0, 1))
 #' r_dich <- mean.release(x=x_dich, var_type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
 
-mean.release = function(x, var_type, n, epsilon, range) {
+mean.release = function(x, var_type, n, epsilon, rng) {
     var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'logical'))
-    range <- ifelse(var_type == 'logical', c(0, 1), range)
-    range <- checkrange(range)
-    sensitivity <- diff(range) / n
+    #rng <- ifelse(var_type == 'logical', c(0, 1), rng)
+    if (var_type == 'logical') { rng = c(0, 1) }
+    rng <- checkrange(rng)
+    sensitivity <- diff(rng) / n
     release <- mechanism.laplace(
-        fun=dp.mean, 
-        x=x, 
-        var_type=var_type, 
-        range=range, 
-        sensitivity=sensitivity, 
-        epsilon=epsilon, 
+        fun=dp.mean,
+        x=x,
+        var_type=var_type,
+        rng=rng,
+        sensitivity=sensitivity,
+        epsilon=epsilon,
         n=n)
     return(release)
 }
@@ -65,9 +66,9 @@ mean.getParameters = function(accuracy, n, alpha=0.05) {
 #' @param alpha
 #' @return Confidence bounds for differentially private release
 
-mean.getCI = function(release, epsilon, n, range, alpha=0.05) {
-    range <- checkrange(range)
-    sensitivity <- diff(range) / n
+mean.getCI = function(release, epsilon, n, rng, alpha=0.05) {
+    rng <- checkrange(rng)
+    sensitivity <- diff(rng) / n
     z <- qexp((1 - alpha), rate=(epsilon / sensitivity))
     interval <- c(release - z, release + z)
     return(interval)
