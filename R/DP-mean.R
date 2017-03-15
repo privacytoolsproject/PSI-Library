@@ -20,28 +20,25 @@
 #' r_dich <- mean.release(x=x_dich, var_type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
 
 mean.release = function(x, var_type, n, epsilon, range) {
-
     var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'logical'))
-
-    if (var_type == 'logical') {
-        range <- c(0, 1)
-    }
+    range <- ifelse(var_type == 'logical', c(0, 1), range)
     range <- checkrange(range)
     sensitivity <- diff(range) / n
-
-    my_mean <- function(x) {
-        m <- sum(x) / length(x)
-        return(m)
-    }
-
-    release <- mechanism.laplace(fun=my_mean, x=x, var_type=var_type, range=range, sensitivity=sensitivity, epsilon=epsilon)
+    release <- mechanism.laplace(
+        fun=dp.mean, 
+        x=x, 
+        var_type=var_type, 
+        range=range, 
+        sensitivity=sensitivity, 
+        epsilon=epsilon, 
+        n=n)
     return(release)
-} 
+}
 
 
 #' @param epsilon Privacy parameter epsilon
 #' @param n Number of observations
-#' @param alpha Level of significance
+#' @param alpha The statistical significance level
 #' @return Accuracy guarantee for mean release given epsilon
 
 mean.getAccuracy = function(epsilon, n, alpha=0.05) {
@@ -51,15 +48,12 @@ mean.getAccuracy = function(epsilon, n, alpha=0.05) {
 
 
 #' @param accuracy The accuracy we need to guarantee (percent)
-#' @param delta The delta to be used - not required for mean
-#' @param x_range An a priori estimate of the range (UNUSED)
 #' @param n The number of samples
-#' @param beta The statistical signifcance level
+#' @param alpha The statistical signifcance level
 #' @return The scalar epsilon necessary to guarantee the accuracy needed
 
-mean.getParameters = function(accuracy, delta=0,x_range, n, beta) {
-    t <- accuracy #/ range  # Adjust accuracy to be range agnostic
-    epsilon <- log(1/beta)/(n*t)
+mean.getParameters = function(accuracy, n, alpha=0.05) {
+    epsilon <- log(1 / alpha) / (n * accuracy)
     return(epsilon)
 }
 
