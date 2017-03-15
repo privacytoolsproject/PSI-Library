@@ -3,11 +3,12 @@
 #' @param x Numeric vector
 #' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
 
-dp.mean <- function(x) { 
-    value <- sum(x) / length(x)
-    out <- list('name' = 'mean', 'stat' = value)
+dp.mean <- function(x, n) {
+    out <- list('name' = 'mean',
+                'stat' = mean(x),
+                'n' = n)
     return(out)
-} 
+}
 
 
 #' Function to evaluate a histogram for a numeric variable
