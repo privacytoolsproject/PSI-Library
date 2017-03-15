@@ -13,9 +13,9 @@
 #' range <- c(0,1)
 #' x <- runif(n, min=min(range), max=max(range))
 #' sensitivity <- diff(range)/n
-#' mechanism.laplace(mean,x=x,sensitivity=sensitivity, epsilon=.1)
+#' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
 
-mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...) {
+mechanism.laplace = function(fun, x, var_type, rng, sensitivity, epsilon, ...) {
     epsilon <- checkepsilon(epsilon)
     if (hasArg(var_levels)) { 
         var_levels <- list(...)$var_levels
@@ -24,21 +24,27 @@ mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...)
         x <- make_logical(x)
     }
     if (var_type %in% c('numeric', 'integer', 'logical')) {
-        range <- checkrange(range)
-        x <- censordata(x, var_type, range=range)
+        rng <- checkrange(rng)
+        x <- censordata(x, var_type, range=rng)
     } else {
         x <- censordata(x, var_type, levels=var_levels)
     }
     true.value <- fun(x, ...)
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
-    release <- truevalue$stat + noise
+    release <- true.value$stat + noise
     accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
+    accuracy <- do.call(accuracy.func, c(list(epsilon=epsilon), getFuncArgs(true.value, accuracy.func)))
     parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
+    parameters <- do.call(parameters.func, c(list(accuracy=accuracy), getFuncArgs(true.value, parameters.func)))
     interval.func <- match.fun(paste0(true.value$name, '.getCI'))
+    interval <- do.call(interval.func, c(list(release=release, epsilon=epsilon, rng=rng), getFuncArgs(true.value, interval.func)))
     out <- list(
         'mechanism' = 'laplace',
-        'release' = 'release',
-        'statistic' = true.value$name
+        'release' = release,
+        'statistic' = true.value$name, 
+        'accuracy' = accuracy,
+        'parameters' = parameters,
+        'interval' = interval
     )
     return(out)
 }
