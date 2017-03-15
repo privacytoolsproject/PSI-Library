@@ -265,3 +265,20 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, beta) {
     } 
     return(TRUE)
 } 
+
+
+#' Utility function to match arguments of a function with list output of another function
+#'
+#' @param output List with output of a function
+#' @param target.func Character name of the function with arguments that need to be filled by output
+#' @return List of arguments and values needed for specification of \code{target.func}
+
+getFuncArgs <- function(output, target.func) {
+    spec <- list()
+    for (element in names(output)) {
+        if (element %in% names(formals(target.func))) {
+            spec[[element]] <- out[[element]]
+        }
+    }
+    return(spec)
+}
