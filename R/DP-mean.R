@@ -66,8 +66,8 @@ mean.getParameters = function(accuracy, n, alpha=0.05) {
 #' @return Confidence bounds for differentially private release
 
 mean.getCI = function(release, epsilon, n, range, alpha=0.05) {
-    x_range <- checkrange(x_range)
-    sensitivity <- diff(x_range) / n
+    range <- checkrange(range)
+    sensitivity <- diff(range) / n
     z <- qexp((1 - alpha), rate=(epsilon / sensitivity))
     interval <- c(release - z, release + z)
     return(interval)
