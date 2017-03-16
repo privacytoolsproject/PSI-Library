@@ -277,7 +277,7 @@ getFuncArgs <- function(output, target.func) {
     spec <- list()
     for (element in names(output)) {
         if (element %in% names(formals(target.func))) {
-            spec[[element]] <- out[[element]]
+            spec[[element]] <- output[[element]]
         }
     }
     return(spec)

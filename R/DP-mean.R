@@ -34,7 +34,6 @@ dp.mean <- function(x, n) {
 
 mean.release = function(x, var_type, n, epsilon, rng) {
     var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'logical'))
-    #rng <- ifelse(var_type == 'logical', c(0, 1), rng)
     if (var_type == 'logical') { rng = c(0, 1) }
     rng <- checkrange(rng)
     sensitivity <- diff(rng) / n
