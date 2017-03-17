@@ -108,6 +108,31 @@ histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, r
 }
 
 
+# need to update the dp.histogram fns to include boolean argument for stability
+# those fns need to evaluate accuracy under both stability and not, then choose best
+histogramRelease <- function(x, var.type, n, epsilon, rng, bins=NULL, n.bins=NULL) {
+    var.type = check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
+    if (var.type %in$% c('factor', 'character')) {
+        release <- mechanism.laplace(dp.histogram.categorical, x, var.type, rng, sensitivity=1, epsilon=epsilon, var.levels=bins)
+    } else {
+        n.bins <- check_histogram_bins(n.bins, n)
+        var.levels <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+        release <- mechanism.laplace(dp.histogram.numeric, x, var.type, rng, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
+    }
+    if (release$stability == TRUE) {
+        if (check_histogram_n(release$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)) {
+            a <- release$accuracy * n / 2
+            release$release <- release$release[release$release >= a]
+        } else {
+            stop('error')
+        }
+    } else {
+        release$release <- ifelse(release$release < 0, 0, round(release$release))
+    }
+    return(release)
+}
+
+
 #' Accuracy of release 
 #' 
 #' @param mechanism Specify the histogram mechanism 
