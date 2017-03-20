@@ -4,10 +4,13 @@
 #' @param var.levels Vector specifying the bins
 #' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
 
-dp.histogram.numeric <- function(x, hist.type, var.levels) {
+dp.histogram.numeric <- function(x, var.levels, stability, n.bins, n) {
     values <- table(cut(x, breaks=var_levels, include.lowest=TRUE, right=TRUE))
     out <- list('name' = 'histogram',
-                'stat' = values)
+                'stat' = values,
+                'stability' = stability,
+                'n.bins' = n.bins,
+                'n' = n)
     return(out)
 }
 
@@ -18,17 +21,46 @@ dp.histogram.numeric <- function(x, hist.type, var.levels) {
 #' @param var.levels Vector specifying the bins
 #' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
 
-dp.histogram.categorical <- function(x, var.levels) {
-    n <- length(var.levels)  # avoid unused argument error in mechanism
+dp.histogram.categorical <- function(x, var.levels, stability, n.bins, n) {
+    k <- length(var.levels)  # avoid unused argument error in mechanism
     values <- table(x, useNA='ifany')
     out <- list('name' = 'histogram',
-                'stat' = values)
+                'stat' = values,
+                'stability' = stability,
+                'n.bins' = n.bins,
+                'n' = n)
     return(out)
 }
 
 
-#' Release differentially private histogram 
-#' 
+#' Function to evaluate a histogram and specify arguments
+#'
+#' @param x Vector of categorical or numeric values
+#' @param var.type Character string indicating the variable type
+#' @param stability Logical indicating if the stability mechanism is to be used
+#' @param bins Vector of bins
+#' @param n.bins Integer indicating the number of bins
+#' @param n Integer indicating the number of observations in \code{x}
+#' @return List with the true value of the statistic and arguments to be passed to other functions
+
+dp.histogram <- function(x, var.type, stability, bins, n.bins, n) {
+    if (var.type %in% c('numeric', 'integer')) {
+        values <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
+    } else {
+        values <- table(x, useNA='ifany')
+    }
+    out <- list('name' = 'histogram',
+                'stat' = values,
+                'stability' = stability,
+                'n.bins' = n.bins,
+                'n' = n,
+                'bins' = bins)
+    return(out)
+}
+
+
+#' Release differentially private histogram
+#'
 #' @param x Vector, numeric or categorical
 #' @param var_type String, specifies the type of x
 #' @param range Tuple, range of x
@@ -42,15 +74,15 @@ dp.histogram.categorical <- function(x, var.levels) {
 #'
 #' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 #' used to construct the table. The vector is pre-processed so that observed levels not specified in these
-#' bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA` 
+#' bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
 #' in the output table.
 #'
 #' If the variable is numeric, the number of bins `n_bins` is set by the user optionally, else the Sturges
-#' method is used to select the number of bins given the number of observations `n`. The bins are then 
-#' constructed to be equal intervals between the provided range. 
+#' method is used to select the number of bins given the number of observations `n`. The bins are then
+#' constructed to be equal intervals between the provided range.
 #'
 #' If the mechanism is not explicitly provided, use the mechanism with highest accuracy given the epsilon.
-#' 
+#'
 #' @examples
 #' # numeric types
 #' x_num <- rnorm(100)
@@ -61,7 +93,7 @@ dp.histogram.categorical <- function(x, var.levels) {
 #' r_num_na <- histogram.release(x_num_na, var_type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
 #' r_int <- histogram.release(x_int, var_type='integer', range=c(-40, 40), n=100, epsilon=0.1)
 #' r_num_random <- histogram.release(x_num, var_type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='random')
-#' # accuracy is returning inf, which filters the entire release for stability histogram 
+#' # accuracy is returning inf, which filters the entire release for stability histogram
 #' r_num_stability <- histogram.release(x_num, var_type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='stability')
 #' r_num_noisy <- histogram.release(x_num, var_type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='noisy')
 #'
@@ -85,15 +117,15 @@ histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, r
     }
     mechanism <- check_histogram_mechanism(mechanism)
     if (mechanism == 'random') {
-        release <- mechanism.histogram.random(x, var_type, epsilon, levels, n_bins) 
+        release <- mechanism.histogram.random(x, var_type, epsilon, levels, n_bins)
     } else {
         if (var_type %in% c('factor', 'character')) {
             release <- mechanism.laplace(dp.histogram.categorical, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=bins)
-        } else { 
+        } else {
             n.bins <- check_histogram_bins(n_bins=n_bins, n=n)
             var.levels <- seq(range[1], range[2], length.out=(n.bins + 1))
             release <- mechanism.laplace(dp.histogram.numeric, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
-        } 
+        }
         if (mechanism == 'noisy') {
             release <- ifelse(release < 0, 0, round(release))
         } else {
@@ -108,28 +140,65 @@ histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, r
 }
 
 
-# need to update the dp.histogram fns to include boolean argument for stability
-# those fns need to evaluate accuracy under both stability and not, then choose best
+# new release function
 histogramRelease <- function(x, var.type, n, epsilon, rng, bins=NULL, n.bins=NULL) {
-    var.type = check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
-    if (var.type %in$% c('factor', 'character')) {
-        release <- mechanism.laplace(dp.histogram.categorical, x, var.type, rng, sensitivity=1, epsilon=epsilon, var.levels=bins)
-    } else {
+    var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
+    if (var.type %in% c('numeric', 'integer')) {
         n.bins <- check_histogram_bins(n.bins, n)
-        var.levels <- seq(rng[1], rng[2], length.out=(n.bins + 1))
-        release <- mechanism.laplace(dp.histogram.numeric, x, var.type, rng, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
+        bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+    } else {
+        n.bins <- length(bins)
     }
-    if (release$stability == TRUE) {
+    release.noisy <- mechanism.laplace(
+        fun=dp.histogram,
+        x=x, var_type=var.type, rng=rng,
+        sensitivity=1, epsilon=epsilon,
+        stability=FALSE, bins=bins, n.bins=n.bins, n=n)
+    release.stability <- mechanism.laplace(
+        fun=dp.histogram,
+        x=x, var_type=var.type, rng=rng,
+        sensitivity=1, epsilon=epsilon,
+        stability=TRUE, bins=bins, n.bins=n.bins, n=n)
+    if (release.stability$accuracy < release.noisy$accuracy) {
+        release <- release.stability
         if (check_histogram_n(release$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)) {
             a <- release$accuracy * n / 2
             release$release <- release$release[release$release >= a]
         } else {
-            stop('error')
+            release <- release.noisy
+            release$release <- ifelse(release$release < 0, 0, round(release$release))
         }
     } else {
+        release <- release.noisy
         release$release <- ifelse(release$release < 0, 0, round(release$release))
     }
     return(release)
+}
+
+
+# new accuracy function
+histogramGetAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alpha=0.05, error=1e-9) {
+    if (stability) {
+        lo <- 0
+        hi <- 1
+        eval <- alpha + error
+        while ((eval <= alpha - error) || (eval > alpha)) {
+            acc <- (hi + lo) / 2
+            eval <- min((4 / acc), n.bins) * exp(-acc * n * epsilon / 4)
+            if (eval < alpha) {
+                hi <- acc
+            } else {
+                lo <- acc
+            }
+            if (hi - lo <= 0) {
+                return(Inf)
+            }
+        }
+        acc <- max(acc, (8 / n) * (0.5 - log(delta) / epsilon))
+    } else {
+        acc <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
+    }
+    return(acc)
 }
 
 
