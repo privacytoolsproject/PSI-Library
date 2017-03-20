@@ -104,44 +104,44 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n) {
 #' r_char <- histogram.release(x_char, var_type='character', n=100, epsilon=0.1, bins=bins)
 #' r_fac <- histogram.release(x_fac, var_type='factor', n=100, epsilon=0.1, bins=bins)
 
-histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, range=NULL, bins=NULL, n_bins=NULL, mechanism=NULL) {
-    var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'factor', 'character'))
-    if (is.null(mechanism)) {
-        mechs <- c('noisy', 'stability', 'random')
-        accuracies <- c(
-            histogram.getAccuracy('noisy', n_bins, n, epsilon),
-            histogram.getAccuracy('stability', n_bins, n, epsilon),
-            histogram.getAccuracy('random', n_bins, n, epsilon)
-        )
-        mechanism <- mechs[which.min(accuracies)]
-    }
-    mechanism <- check_histogram_mechanism(mechanism)
-    if (mechanism == 'random') {
-        release <- mechanism.histogram.random(x, var_type, epsilon, levels, n_bins)
-    } else {
-        if (var_type %in% c('factor', 'character')) {
-            release <- mechanism.laplace(dp.histogram.categorical, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=bins)
-        } else {
-            n.bins <- check_histogram_bins(n_bins=n_bins, n=n)
-            var.levels <- seq(range[1], range[2], length.out=(n.bins + 1))
-            release <- mechanism.laplace(dp.histogram.numeric, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
-        }
-        if (mechanism == 'noisy') {
-            release <- ifelse(release < 0, 0, round(release))
-        } else {
-            accuracy <- histogram.getAccuracy(mechanism, n_bins, n, epsilon)
-            if (check_histogram_n(accuracy, n, n_bins, epsilon, delta, beta)) {
-                a <- accuracy * n / 2
-                release <- release[release >= a]
-            }
-        }
-    }
-    return(release)
-}
+#histogram.release <- function(x, var_type, n, epsilon, delta=2^-30, beta=0.05, range=NULL, bins=NULL, n_bins=NULL, mechanism=NULL) {
+#    var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'factor', 'character'))
+#    if (is.null(mechanism)) {
+#        mechs <- c('noisy', 'stability', 'random')
+#        accuracies <- c(
+#            histogram.getAccuracy('noisy', n_bins, n, epsilon),
+#            histogram.getAccuracy('stability', n_bins, n, epsilon),
+#            histogram.getAccuracy('random', n_bins, n, epsilon)
+#        )
+#        mechanism <- mechs[which.min(accuracies)]
+#    }
+#    mechanism <- check_histogram_mechanism(mechanism)
+#    if (mechanism == 'random') {
+#        release <- mechanism.histogram.random(x, var_type, epsilon, levels, n_bins)
+#    } else {
+#        if (var_type %in% c('factor', 'character')) {
+#            release <- mechanism.laplace(dp.histogram.categorical, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=bins)
+#        } else {
+#            n.bins <- check_histogram_bins(n_bins=n_bins, n=n)
+#            var.levels <- seq(range[1], range[2], length.out=(n.bins + 1))
+#            release <- mechanism.laplace(dp.histogram.numeric, x, var_type, range, sensitivity=1, epsilon=epsilon, var.levels=var.levels)
+#        }
+#        if (mechanism == 'noisy') {
+#            release <- ifelse(release < 0, 0, round(release))
+#        } else {
+#            accuracy <- histogram.getAccuracy(mechanism, n_bins, n, epsilon)
+#            if (check_histogram_n(accuracy, n, n_bins, epsilon, delta, beta)) {
+#                a <- accuracy * n / 2
+#                release <- release[release >= a]
+#            }
+#        }
+#    }
+#    return(release)
+#}
 
 
 # new release function
-histogramRelease <- function(x, var.type, n, epsilon, rng, bins=NULL, n.bins=NULL) {
+histogram.release <- function(x, var.type, n, epsilon, rng, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
     if (var.type %in% c('numeric', 'integer')) {
         n.bins <- check_histogram_bins(n.bins, n)
@@ -177,7 +177,7 @@ histogramRelease <- function(x, var.type, n, epsilon, rng, bins=NULL, n.bins=NUL
 
 
 # new accuracy function
-histogramGetAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alpha=0.05, error=1e-9) {
+histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alpha=0.05, error=1e-9) {
     if (stability) {
         lo <- 0
         hi <- 1
@@ -204,33 +204,54 @@ histogramGetAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alp
 #' @param delta Delta value for differential privacy
 #' @param beta
 
-histogram.getAccuracy <- function(mechanism, n_bins, n, epsilon, delta=2^-30, beta=0.05, error=1e-9) { 
-    mechanism <- check_histogram_mechanism(mechanism)
+#histogram.getAccuracy <- function(mechanism, n_bins, n, epsilon, delta=2^-30, beta=0.05, error=1e-9) { 
+#    mechanism <- check_histogram_mechanism(mechanism)
+#
+#    if (mechanism == 'noisy') { 
+#        acc <- -2 * log(1 - (1 - beta)^(1 / n_bins)) / (n * epsilon)
+#    } else if (mechanism == 'stability') { 
+#        lo <- 0
+#        hi <- 1
+#        eval <- beta + error
+#        while ((eval <= beta - error) || (eval > beta)) { 
+#            acc <- (hi + lo) / 2
+#            eval <- min((4 / acc), n_bins) * exp(-acc * n * epsilon / 4)
+#            if (eval < beta) { 
+#                hi <- acc
+#            } else { 
+#                lo <- acc
+#            } 
+#            if (hi - lo <= 0) { 
+#                return(Inf)
+#            } 
+#        } 
+#        acc <- max(acc, (8 / n) * (0.5 - log(delta) / epsilon))
+#    } else { 
+#        acc <- Inf
+#    } 
+#    return(acc) 
+#} 
 
-    if (mechanism == 'noisy') { 
-        acc <- -2 * log(1 - (1 - beta)^(1 / n_bins)) / (n * epsilon)
-    } else if (mechanism == 'stability') { 
+
+# new get parameters fn
+histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30, alpha=0.05, error=1e-9) {
+    if (stability) {
         lo <- 0
         hi <- 1
-        eval <- beta + error
-        while ((eval <= beta - error) || (eval > beta)) { 
-            acc <- (hi + lo) / 2
-            eval <- min((4 / acc), n_bins) * exp(-acc * n * epsilon / 4)
-            if (eval < beta) { 
-                hi <- acc
-            } else { 
-                lo <- acc
-            } 
-            if (hi - lo <= 0) { 
-                return(Inf)
-            } 
-        } 
-        acc <- max(acc, (8 / n) * (0.5 - log(delta) / epsilon))
-    } else { 
-        acc <- Inf
-    } 
-    return(acc) 
-} 
+        eval <- n + 1
+        while ((eval <= n * (1 - error)) || (eval > n)) {
+            eps <- (hi + lo) / 2
+            eval <- 8 / accuracy * (0.5 - log(delta) / eps)
+            ifelse(eval < n, (hi <- eps), (lo <- eps))
+            if (hi - lo <= 0) { return(Inf) }
+        }
+        eps <- max(eps, 4 * log(min(n.bins, 4 / accuracy) / alpha) / (accuracy * n))
+    } else {
+        eps <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * accuracy)
+    }
+    return(eps)
+}
+
 
 
 #' Privacy parameters
@@ -242,33 +263,32 @@ histogram.getAccuracy <- function(mechanism, n_bins, n, epsilon, delta=2^-30, be
 #' @param beta
 #' @return epsilon Differential privacy parameter
 
-histogram.getParameters <- function(mechanism, n_bins, n, accuracy, delta, beta=0.05, error=1e-9) {
-    mechanism <- check_histogram_mechanism(mechanism)
-
-    if (mechanism == 'noisy') {
-        eps <- -2 * log(1 - (1 - beta)^(1 / n_bins)) / (n * accuracy)
-    } else if (mechanism == 'stability') {
-        lo <- 0
-        hi <- 1
-        eval <- n + 1
-        while ((eval <= n * (1 - error)) || (eval > n)) {
-            eps <- (hi + lo) / 2
-            eval <- 8 / accuracy * (0.5 - log(delta) / eps)
-            if (eval < n) {
-                hi <- eps
-            } else {
-                lo <- eps
-            }
-            if (hi - lo <= 0) {
-                return(Inf)
-            }
-        }
-        eps <- max(eps, 4 * log(min(n_bins, 4 / accuracy) / beta) / (accuracy * n))
-    } else {
-        eps <- log((n_bins + 1) / (n_bins - 1))
-    }
-    return(eps)
-}
+#histogram.getParameters <- function(mechanism, n_bins, n, accuracy, delta, beta=0.05, error=1e-9) {
+#    mechanism <- check_histogram_mechanism(mechanism)
+#    if (mechanism == 'noisy') {
+#        eps <- -2 * log(1 - (1 - beta)^(1 / n_bins)) / (n * accuracy)
+#    } else if (mechanism == 'stability') {
+#        lo <- 0
+#        hi <- 1
+#        eval <- n + 1
+#        while ((eval <= n * (1 - error)) || (eval > n)) {
+#            eps <- (hi + lo) / 2
+#            eval <- 8 / accuracy * (0.5 - log(delta) / eps)
+#            if (eval < n) {
+#                hi <- eps
+#            } else {
+#                lo <- eps
+#            }
+#            if (hi - lo <= 0) {
+#                return(Inf)
+#            }
+#        }
+#        eps <- max(eps, 4 * log(min(n_bins, 4 / accuracy) / beta) / (accuracy * n))
+#    } else {
+#        eps <- log((n_bins + 1) / (n_bins - 1))
+#    }
+#    return(eps)
+#}
 
 
 #' JSON doc for histogram
