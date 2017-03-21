@@ -159,6 +159,27 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 }
 
 
+#' Confidence interval
+#'
+
+histogram.getCI <- function(release, epsilon, sensitivity, n.bins, n, accuracy) {
+    params <- c(epsilon, sensitivity)
+    accxn <- accuracy * n
+    out <- list()
+    for (k in 1:n.bins) {
+        bin.count <- release$release[k]
+        if (bin.count == 0) {
+            out[[k]] <- c(0, accxn)
+        } else {
+            out[[k]] <- c(max(0, bin.count - accxn), accxn + bin.count)
+        }
+    }
+    out <- data.frame(out)
+    names(out) <- c('lower', 'upper')
+    return(out)
+}
+
+
 #' JSON doc for histogram
 #'
 #' @return JSON for histogram function
