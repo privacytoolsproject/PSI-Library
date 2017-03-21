@@ -2,11 +2,12 @@
 #'
 #' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.
 #' @param x A vector of data to run the function on.
-#' @param var_type Data type of vector x
+#' @param var.type Data type of vector x
 #' @param n The number of samples
 #' @param range An a priori estimate of the range
 #' @param sensitivity numeric
 #' @param epsilon numeric
+#' @param ... Other arguments passed to \code{fun}
 #' @return Differentially private release of function \code{fun} on data \code{x}
 #' @examples
 #' n <- 1000
@@ -15,21 +16,17 @@
 #' sensitivity <- diff(range)/n
 #' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
 
-mechanism.laplace = function(fun, x, var_type, rng, sensitivity, epsilon, ...) {
+mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
+    # transformations & checks
     epsilon <- checkepsilon(epsilon)
-    if (hasArg(var_levels)) { 
-        var_levels <- list(...)$var_levels
-    } 
-    if (var_type == 'logical') { # allow any dichotomous variable to be treated as logical type
-        x <- make_logical(x)
-    }
-    if (var_type %in% c('numeric', 'integer', 'logical')) {
+    if (var.type == 'logical') { x <- make_logical(x) }
+    if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
-        x <- censordata(x, var_type, range=rng)
+        x <- censordata(x, var.type, range=rng)
     } else {
-        x <- censordata(x, var_type, levels=var_levels)
+        x <- censordata(x, var.type, levels=bins)
     }
-    true.value <- fun(x, ...)
+    true.value <- do.call(fun, c(list(x=x, var.type=var.type), list(...)))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     release <- true.value$stat + noise
     accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
@@ -37,7 +34,7 @@ mechanism.laplace = function(fun, x, var_type, rng, sensitivity, epsilon, ...) {
     parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
     parameters <- do.call(parameters.func, c(list(accuracy=accuracy), getFuncArgs(true.value, parameters.func)))
     interval.func <- match.fun(paste0(true.value$name, '.getCI'))
-    interval <- do.call(interval.func, c(list(release=release, epsilon=epsilon, rng=rng), getFuncArgs(true.value, interval.func)))
+    interval <- do.call(interval.func, c(list(release=release, epsilon=epsilon, sensitivity=sensitivity), getFuncArgs(true.value, interval.func)))
     out <- list(
         'mechanism' = 'laplace',
         'release' = release,
