@@ -24,7 +24,7 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, range=rng)
     } else {
-        x <- censordata(x, var.type, levels=bins)
+        x <- censordata(x, var.type, levels=list(...)$bins)
     }
     # evaluate statistic & performance
     true.value <- do.call(fun, c(list(x=x, var.type=var.type), list(...)))
