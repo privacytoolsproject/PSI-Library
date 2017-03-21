@@ -26,22 +26,25 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
     } else {
         x <- censordata(x, var.type, levels=bins)
     }
+    # evaluate statistic & performance
     true.value <- do.call(fun, c(list(x=x, var.type=var.type), list(...)))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
-    release <- true.value$stat + noise
+    true.value$release <- true.value$stat + noise
+    true.value$epsilon <- epsilon
+    true.value$sensitivity <- sensitivity
     accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
-    accuracy <- do.call(accuracy.func, c(list(epsilon=epsilon), getFuncArgs(true.value, accuracy.func)))
+    true.value$accuracy <- do.call(accuracy.func, getFuncArgs(true.value, accuracy.func))
     parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
-    parameters <- do.call(parameters.func, c(list(accuracy=accuracy), getFuncArgs(true.value, parameters.func)))
+    true.value$parameters <- do.call(parameters.func, getFuncArgs(true.value, parameters.func))
     interval.func <- match.fun(paste0(true.value$name, '.getCI'))
-    interval <- do.call(interval.func, c(list(release=release, epsilon=epsilon, sensitivity=sensitivity), getFuncArgs(true.value, interval.func)))
+    true.value$interval <- do.call(interval.func, getFuncArgs(true.value, interval.func))
     out <- list(
         'mechanism' = 'laplace',
-        'release' = release,
+        'release' = true.value$release,
         'statistic' = true.value$name, 
-        'accuracy' = accuracy,
-        'parameters' = parameters,
-        'interval' = interval
+        'accuracy' = true.value$accuracy,
+        'parameters' = true.value$parameters,
+        'interval' = true.value$interval
     )
     return(out)
 }
