@@ -257,11 +257,12 @@ check_histogram_bins <- function(n_bins, n) {
 #' Utility function to check sufficient n 
 #' 
 
-check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, beta) { 
+check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) { 
     cond1 <- (8 / accuracy) * (0.5 - log(delta) / epsilon)
-    cond2 <- 4 * log(min(n_bins, (4 / accuracy)) / beta) / (accuracy * epsilon)
+    cond2 <- 4 * log(min(n_bins, (4 / accuracy)) / alpha) / (accuracy * epsilon)
     if (n < max(cond1, cond2, na.rm=TRUE)) { 
-        stop('number of rows insufficient to provide privacy or accuracy with given parameters')
+        return(FALSE)
+        #stop('number of rows insufficient to provide privacy or accuracy with given parameters')
     } 
     return(TRUE)
 } 
