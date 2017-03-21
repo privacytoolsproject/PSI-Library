@@ -84,8 +84,6 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
         x=x, var.type=var.type, rng=rng,
         sensitivity=1, epsilon=epsilon,
         stability=TRUE, bins=bins, n.bins=n.bins, n=n)
-    print(release.noisy)
-    print(release.stability)
     stability.accurate <- release.stability$accuracy < release.noisy$accuracy
     stability.check <- check_histogram_n(release.stability$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)
     if (stability.accurate && stability.check) {
@@ -162,19 +160,18 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 #' Confidence interval
 #'
 
-histogram.getCI <- function(release, epsilon, sensitivity, n.bins, n, accuracy) {
-    params <- c(epsilon, sensitivity)
+histogram.getCI <- function(release, n.bins, n, accuracy) {
     accxn <- accuracy * n
     out <- list()
     for (k in 1:n.bins) {
-        bin.count <- release$release[k]
+        bin.count <- release[k]
         if (bin.count == 0) {
             out[[k]] <- c(0, accxn)
         } else {
             out[[k]] <- c(max(0, bin.count - accxn), accxn + bin.count)
         }
     }
-    out <- data.frame(out)
+    out <- data.frame(do.call(rbind, out))
     names(out) <- c('lower', 'upper')
     return(out)
 }
