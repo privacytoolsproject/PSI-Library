@@ -1,7 +1,6 @@
 #' Binary tree in vector form
 
-binary.tree <- function(x, n, rng, gran) {
-    universe.size <- diff(rng) / gran + 1
+binary.tree <- function(x, n, rng, gran, universe.size) {
     depth <- ceiling(log2(universe.size))
     tree <- rep(0, times=(2^depth + universe.size))
     for (i in 1:n) {
@@ -19,6 +18,27 @@ binary.tree <- function(x, n, rng, gran) {
         depth.counter <- depth.counter - 1
     }
     return(tree)
+}
+
+
+#' Release differentially private quantiles
+
+quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
+    var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
+    rng <- checkrange(rng)
+    release <- mechanism.laplace(
+        fun=binary.tree,
+        x=x,
+        var.type=var.type,
+        rng=rng,
+        sensitivity=(2 * log2(diff(rng) / gran + 1)),
+        epsilon=epsilon,
+        n=n,
+        gran=gran,
+        cdf.step=cdf.step
+    )
+    # post-process the noisy tree
+    return(release)
 }
 
 
