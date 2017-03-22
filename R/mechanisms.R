@@ -27,7 +27,8 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
         x <- censordata(x, var.type, levels=list(...)$bins)
     }
     # evaluate statistic & performance
-    true.value <- do.call(fun, c(list(x=x, var.type=var.type), list(...)))
+    mechanism.args <- c(as.list(environment()), list(...))
+    true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     true.value$release <- true.value$stat + noise
     true.value$epsilon <- epsilon
