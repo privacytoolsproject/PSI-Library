@@ -3,11 +3,13 @@
 #' @param x Numeric vector
 #' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
 
-dp.mean <- function(x, var.type, n) {
+dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list('name' = 'mean',
                 'stat' = mean(x),
                 'var.type' = var.type,
-                'n' = n)
+                'n' = n,
+                'sensitivity' = sensitivity,
+                'epsilon' = epsilon)
     return(out)
 }
 

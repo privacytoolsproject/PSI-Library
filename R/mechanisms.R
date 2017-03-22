@@ -31,8 +31,6 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
     true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     true.value$release <- true.value$stat + noise
-    true.value$epsilon <- epsilon
-    true.value$sensitivity <- sensitivity
     accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
     true.value$accuracy <- do.call(accuracy.func, getFuncArgs(true.value, accuracy.func))
     parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))

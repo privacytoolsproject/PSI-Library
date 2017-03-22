@@ -8,7 +8,7 @@
 #' @param n Integer indicating the number of observations in \code{x}
 #' @return List with the true value of the statistic and arguments to be passed to other functions
 
-dp.histogram <- function(x, var.type, stability, bins, n.bins, n) {
+dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon) {
     if (var.type %in% c('numeric', 'integer')) {
         values <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
     } else {
@@ -19,7 +19,9 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n) {
                 'stability' = stability,
                 'n.bins' = n.bins,
                 'n' = n,
-                'bins' = bins)
+                'bins' = bins,
+                'sensitivity' = sensitivity,
+                'epsilon' = epsilon)
     return(out)
 }
 
