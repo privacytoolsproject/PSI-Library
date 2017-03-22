@@ -62,6 +62,22 @@ plap <- function(x, mu=0, b=1) {
 }
 
 
+#' Quantile function for Laplace distribution
+#'
+#' @param p Numeric, vector of probabilities
+#' @param mu numeric, center of the distribution
+#' @param b numeric, spread
+#' @return Quantile function
+#' @examples
+#' probs <- c(0.05, 0.50, 0.95)
+#' qlap(probs)
+
+qlap <- function(p, mu=0, b=1) {
+    q <- ifelse(p < 0.5, mu + b * log(2 * p), mu - b * log(2 - 2 * p))
+    return(q)
+}
+
+
 #' Sign function
 #'
 #' @param x numeric, value or vector or values
