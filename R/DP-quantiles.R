@@ -1,3 +1,27 @@
+#' Binary tree in vector form
+
+binary.tree <- function(x, n, rng, gran) {
+    universe.size <- diff(rng) / gran + 1
+    depth <- ceiling(log2(universe.size))
+    tree <- rep(0, times=(2^depth + universe.size))
+    for (i in 1:n) {
+        idx <- ((x[i] - rng[1]) / gran) + 2^depth
+        tree[idx] <- tree[idx] + 1
+    }
+    for (i in seq(2^depth, 2^depth - 1 + universe.size, 2)) {
+        tree[i / 2] <- tree[i] + tree[i + 1]
+    }
+    depth.counter <- depth - 1
+    while (depth.counter > 0) {
+        for (i in seq(2^depth.counter, 2^(depth.counter + 1) - 1, 2)) {
+            tree[i / 2] <- tree[i] + tree[i + 1]
+        }
+        depth.counter <- depth.counter - 1
+    }
+    return(tree)
+}
+
+
 #' Release differentially private quantiles
 #'
 #' @param x A vector of the data
