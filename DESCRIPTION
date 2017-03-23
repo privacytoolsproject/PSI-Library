@@ -3,9 +3,9 @@ License: GPL (>=3)
 Title: Differentially Private Statistical Releases for Privacy Preservation
 Authors@R: c(
     person("Thomas", "Brawner", role = "aut"),
-    person("James", "Honaker", role = c("aut", "cre")),
+    person("James", "Honaker", email = "jameshonaker2@gmail.com", role = c("aut", "cre"))
     )
-Version: 0.1
+Version: 0.1-1
 Date: 2017-02-21
 Description: Differentially Private Statistical Releases for Privacy
     Preservation

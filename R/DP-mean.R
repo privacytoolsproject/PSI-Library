@@ -51,7 +51,8 @@ mean.release = function(x, var.type, n, epsilon, rng) {
     return(release)
 }
 
-
+#' Describe Here
+#'
 #' @param epsilon Privacy parameter epsilon
 #' @param n Number of observations
 #' @param alpha The statistical significance level
@@ -62,7 +63,8 @@ mean.getAccuracy = function(epsilon, n, alpha=0.05) {
     return(accuracy)
 }
 
-
+#' Describe Here
+#'
 #' @param accuracy The accuracy we need to guarantee (percent)
 #' @param n The number of samples
 #' @param alpha The statistical signifcance level
@@ -73,13 +75,14 @@ mean.getParameters = function(accuracy, n, alpha=0.05) {
     return(epsilon)
 }
 
-
-#' @param release
-#' @param epsilon
-#' @param sensitivity
-#' @param n
-#' @param range
-#' @param alpha
+#' Describe Here
+#'
+#' @param release something here
+#' @param epsilon something here
+#' @param sensitivity something here
+#' @param n something here
+#' @param range something here
+#' @param alpha something here
 #' @return Confidence bounds for differentially private release
 
 mean.getCI = function(release, epsilon, sensitivity, n, rng, alpha=0.05) {

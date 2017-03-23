@@ -2,21 +2,21 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getParameters}
 \alias{mean.getParameters}
+\title{Describe Here}
 \usage{
-\method{mean}{getParameters}(accuracy, delta = 0, x_range, n, beta)
+\method{mean}{getParameters}(accuracy, n, alpha = 0.05)
 }
 \arguments{
 \item{accuracy}{The accuracy we need to guarantee (percent)}
 
-\item{delta}{The delta to be used - not required for mean}
-
-\item{x_range}{An a priori estimate of the range (UNUSED)}
-
 \item{n}{The number of samples}
 
-\item{beta}{The statistical signifcance level}
+\item{alpha}{The statistical signifcance level}
 }
 \value{
 The scalar epsilon necessary to guarantee the accuracy needed
+}
+\description{
+Describe Here
 }
 

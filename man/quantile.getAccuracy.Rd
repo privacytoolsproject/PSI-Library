@@ -4,19 +4,16 @@
 \alias{quantile.getAccuracy}
 \title{Get the accuracy of quantile statistic for a given value of epsilon}
 \usage{
-\method{quantile}{getAccuracy}(epsilon, beta, range, gran, n)
+\method{quantile}{getAccuracy}(epsilon, n, universe.size, alpha = 0.05)
 }
 \arguments{
-\item{epsilon}{Epsilon value for DP}
+\item{epsilon}{Numeric, epsilon value for DP}
 
-\item{beta}{The true value is within the accuracy range with
-probability 1-beta}
+\item{n}{Integer, number of observations}
 
-\item{range}{The range of the universe as a vector (min, max)}
+\item{universe.size}{Integer, the universe size}
 
-\item{gran}{The granularity of the universe between the min and max}
-
-\item{n}{Number of observations of the variable}
+\item{alpha}{Numeric, statistical significance level}
 }
 \value{
 The accuracy guaranteed by the given epsilon

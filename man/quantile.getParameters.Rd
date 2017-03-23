@@ -4,18 +4,16 @@
 \alias{quantile.getParameters}
 \title{Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release}
 \usage{
-\method{quantile}{getParameters}(alpha, beta, range, gran, n)
+\method{quantile}{getParameters}(accuracy, n, universe.size, alpha = 0.05)
 }
 \arguments{
-\item{alpha}{the accuracy parameter}
+\item{n}{Integer, number of observations}
 
-\item{beta}{the true value is within the accuracy range (alpha)}
+\item{universe.size}{Integer, the universe size}
 
-\item{range}{The range of the universe as a vector (min, max)}
+\item{alpha}{Numeric, statistical significance level}
 
-\item{gran}{The granularity of the universe between the min and max}
-
-\item{n}{Number of observations of the variable}
+\item{Accuracy}{Numeric, the accuracy parameter}
 }
 \value{
 The epsilon value necessary to gaurantee the given accuracy

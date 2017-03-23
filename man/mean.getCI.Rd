@@ -2,10 +2,27 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getCI}
 \alias{mean.getCI}
+\title{Describe Here}
 \usage{
-\method{mean}{getCI}(release, epsilon, n, range, alpha = 0.05)
+\method{mean}{getCI}(release, epsilon, sensitivity, n, rng, alpha = 0.05)
+}
+\arguments{
+\item{release}{something here}
+
+\item{epsilon}{something here}
+
+\item{sensitivity}{something here}
+
+\item{n}{something here}
+
+\item{alpha}{something here}
+
+\item{range}{something here}
 }
 \value{
 Confidence bounds for differentially private release
+}
+\description{
+Describe Here
 }
 

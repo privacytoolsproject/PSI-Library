@@ -7,21 +7,25 @@
 censordata(x, var_type, range = NULL, levels = NULL)
 }
 \arguments{
-\item{x}{A vector of values to censor within a range}
+\item{x}{A vector of numeric or categorial values to censor}
 
-\item{range}{A vector (min, max) of the bounds of the range}
+\item{var_type}{Character indicating the variable type}
+
+\item{range}{For numeric types, a vector (min, max) of the bounds of the range,}
+
+\item{levels}{For categorical types, a vector containing the levels to be returned}
 }
 \value{
-Original vector with values outide the bounds of the range censored to the bounds
+Original vector with values outside the bounds censored to the bounds
 
-Checks if val is in range = (min, max)
-  and censors values to either min or max if it is 
-  out of the range
+For numeric types, checks if x is in range = (min, max) and censors values to either min
+or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
 }
 \description{
 Utility function for censoring data
 }
 \examples{
-censordata(x=1:10, var_type='integer', range=c(2.5,7)) 
+censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 }
 

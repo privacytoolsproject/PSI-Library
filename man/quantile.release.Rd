@@ -4,36 +4,9 @@
 \alias{quantile.release}
 \title{Release differentially private quantiles}
 \usage{
-\method{quantile}{release}(x, epsilon, n, range, cdfstep, gran)
-}
-\arguments{
-\item{x}{A vector of the data}
-
-\item{epsilon}{Epsilon value for differential privacy}
-
-\item{n}{Number of observations of the variable}
-
-\item{range}{The range of the universe as a vector (min, max)}
-
-\item{cdfstep}{The step sized used in outputting the approximate CDF; the values output are [min, min + cdfstep], [min, min + 2 * cdfstep], etc.}
-
-\item{gran}{The granularity of the universe between the min and max. It is assumed that the data input is rounded to the granularity}
-}
-\value{
-A vector whose values are the approximate counts of [min, min + cdfstep], [min, min + 2 * cdfstep], etc.
+\method{quantile}{release}(x, var.type, n, epsilon, rng, gran, cdf.step)
 }
 \description{
 Release differentially private quantiles
-}
-\examples{
-n <- 1000
-x <- round(runif(n, min=0, max=100))/100
-quantile.release(x=x, epsilon=0.1, n=n, range=c(0,1), cdfstep=.1, gran=.01)
-}
-\author{
-Nathan Manohar
-
-Releases an approximate CDF of a data set in a differentially private manner. Returns these values in a vector. 
-  This is done by outputting an approximate CDF of the data which can be used to approximate any quantile.
 }
 

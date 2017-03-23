@@ -7,11 +7,14 @@
 check_variable_type(type, in_types)
 }
 \arguments{
-\item{type}{String specifying the type of the variable}
+\item{type}{Character specifying the type of the variable}
 
-\item{in_types}{Vector of acceptable types 
+\item{in_types}{Vector of acceptable types}
+}
+\value{
+The original character string indicating the variable type
 
-Verifies that the variable is an element in the set of acceptable types}
+Verifies that the variable is an element in the set of acceptable types
 }
 \description{
 Utility function to check type of variable is within set of acceptable types
