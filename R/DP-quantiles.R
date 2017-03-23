@@ -61,127 +61,46 @@ quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
 }
 
 
-#' Release differentially private quantiles
-#'
-#' @param x A vector of the data
-#' @param epsilon Epsilon value for differential privacy
-#' @param n Number of observations of the variable
-#' @param range The range of the universe as a vector (min, max)
-#' @param cdfstep The step sized used in outputting the approximate CDF; the values output are [min, min + cdfstep], [min, min + 2 * cdfstep], etc.
-#' @param gran The granularity of the universe between the min and max. It is assumed that the data input is rounded to the granularity
-#' @return A vector whose values are the approximate counts of [min, min + cdfstep], [min, min + 2 * cdfstep], etc.
-#' @author Nathan Manohar
-#'
-#' Releases an approximate CDF of a data set in a differentially private manner. Returns these values in a vector. 
-#'   This is done by outputting an approximate CDF of the data which can be used to approximate any quantile. 
-#'
-#' @examples 
-#' n <- 1000
-#' x <- round(runif(n, min=0, max=100))/100
-#' quantile.release(x=x, epsilon=0.1, n=n, range=c(0,1), cdfstep=.1, gran=.01)
-
-#quantile.release <- function(x, epsilon, n, range, cdfstep, gran){
-#  
-#  range <- checkrange(range)
-#  data <- censordata(x=x, range=range)
-#  
-#  #Create binary tree stored as an array
-#  universe_size <- ((range[2] - range[1]) / gran) + 1
-#  tree_depth <- ceiling(log2(universe_size))
-#  tree <- rep(0, times = (2^tree_depth + universe_size))
-#  
-#  #Add the counts of the data to the binary tree
-#  for(i in 1:n) {
-#    index <- ((as.numeric(data[i]) - range[1]) / gran) + 2^tree_depth
-#    tree[index] <- tree[index] + 1
-#  }
-#  
-#  #Sum adjacent nodes to complete binary tree
-#  for(i in seq(2^tree_depth, 2^tree_depth - 1 + universe_size, 2)) {
-#    tree[i/2] <- tree[i] + tree[i+1]    
-#  }
-#  
-#  tree_counter <- tree_depth - 1
-#  
-#  while(tree_counter > 0) {
-#    for(i in seq(2^tree_counter, 2^(tree_counter + 1) - 1, 2)) {
-#        tree[i/2] <- tree[i] + tree[i+1]
-#    }
-#    tree_counter <- tree_counter - 1
-#  }
-#  
-#
-### Need to think about how to incorporate ranges
-#
-#  #Add Laplace noise to the nodes of the tree
-#  treeSensitivity <- 2*log2(universe_size) # This is value in original source.  Check this.
-#  for(i in 1:(2^tree_depth - 1 + universe_size)) {
-#    tree[i] <- tree[i] + rlaplace(n=1, sensitivity=treeSensitivity, epsilon=epsilon)      # DOESN'T THIS EPSILON NEED TO BE PARTITIONED?
-#  }
-#
-#  # Could loop be replaced with:
-#  n.tree <- length(tree)  #ought to be: 2^tree_depth - 1 + universe_size
-#  tree <- tree + rlaplace(n=n.tree, sensitivity=treeSensitivity, epsilon=epsilon)
-#
-#
-#  # Or one way to use mechanism code
-#  myfunction=function(x){x}
-#  for(i in 1:(2^tree_depth - 1 + universe_size)) {
-#    tree[i] <- mechanism.laplace(fun=myfunction, x=tree[i], sensitivity=treeSensitivity, epsilon=epsilon) 
-#  }
-#  
-#
-#
-#  returnValue <- rep(0, times = length(seq(range[1] + cdfstep, range[2], cdfstep)))
-#  
-#  #Call computeInterval function to obtain the counts in the desired intervals
-#  for(i in 1:length(returnValue)) {
-#    returnValue[i] <- quantile.computeInterval(tree, range[1] + (cdfstep * i), range, gran)
-#  }
-#  
-#  return(returnValue)
-#}
-
 #' Get the accuracy of quantile statistic for a given value of epsilon
 #'
-#' @param epsilon Epsilon value for DP
-#' @param beta The true value is within the accuracy range with
-#'    probability 1-beta
-#' @param range The range of the universe as a vector (min, max)
-#' @param gran The granularity of the universe between the min and max
-#' @param n Number of observations of the variable
+#' @param epsilon Numeric, epsilon value for DP
+#' @param n Integer, number of observations
+#' @param universe.size Integer, the universe size
+#' @param alpha Numeric, statistical significance level
 #' @return The accuracy guaranteed by the given epsilon
 #' @author Nathan Manohar
 #'
 #' The accuracy is interpreted as follows: The alpha value returned means that with 
 #'   probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's 
 #'   estimate of the count in [min, t] is within alpha of the true value.
-  
-#quantile.getAccuracy <- function(epsilon, beta, range, gran, n) {
-  #range <- checkrange(range)
-  #universe_size <- ((range[2] - range[1]) / gran) + 1
-  #accuracy <- ((4/epsilon) * log2(1/beta) * log2(universe_size)^(1.5))/(n*100) #/(n*100) added by JM on 8/5/14 for consistency among accuracies 
-  #return(accuracy) 
-#}
+
+quantile.getAccuracy <- function(epsilon, n, universe.size, alpha=0.05) {
+    accuracy <- ((4 / epsilon) * log(1 / alpha) * log2(universe.size)^1.5) / (n * 100)
+    return(accuracy)
+}
+
 
 #' Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release
 #'
-#' @param alpha the accuracy parameter
-#' @param beta the true value is within the accuracy range (alpha)
-#    with probability 1-beta
-#' @param range The range of the universe as a vector (min, max)
-#' @param gran The granularity of the universe between the min and max
-#' @param n Number of observations of the variable
+#' @param Accuracy Numeric, the accuracy parameter
+#' @param n Integer, number of observations
+#' @param universe.size Integer, the universe size
+#' @param alpha Numeric, statistical significance level
 #' @return The epsilon value necessary to gaurantee the given accuracy
 #' @author Nathan Manohar
 
-#quantile.getParameters <- function(alpha, beta, range, gran, n) {
-  #range <- checkrange(range)
-  #alpha <- alpha*100   #added by JM on 8/5/14 for consistency among accuracies
-  #universe_size <- ((range[2] - range[1]) / gran) + 1
-  #epsilon <- ((4/alpha) * log2(1/beta) * log2(universe_size)^(1.5))/n
-  #return(epsilon)
-#}
+quantile.getParameters <- function(accuracy, n, universe.size, alpha=0.05) {
+    accuracy <- accuracy * 100  # added by JM on 8/5/14 for consistency among accuracies
+    epsilon <- ((4 / accuracy) * log2(1 / alpha) * log2(universe.size)^1.5) / n
+    return(epsilon)
+}
+
+
+#' Placeholder for a confidence interval
+
+quantile.getCI <- function() {
+    return(NULL)
+}
   
 
 #' Utility function to compute the count in a range from a binary tree
