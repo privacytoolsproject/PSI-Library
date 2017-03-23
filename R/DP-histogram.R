@@ -34,7 +34,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' @param epsilon Float, Epsilon value for differential privacy
 #' @param rng Tuple, range of x, required for numeric types
 #' @param bins Vector of bins for which values are counted, required for categorical types
-#' @param n.bins Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type %in% c('factor', 'categorical')}
+#' @param n.bins Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}
 #'
 #' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 #' used to construct the table. The vector is pre-processed so that observed levels not specified in these

@@ -74,12 +74,12 @@ mean.getParameters = function(accuracy, n, alpha=0.05) {
 }
 
 
-#' @param release
-#' @param epsilon
-#' @param sensitivity
-#' @param n
-#' @param range
-#' @param alpha
+#' @param release something here
+#' @param epsilon something here
+#' @param sensitivity something here
+#' @param n something here
+#' @param range something here
+#' @param alpha something here
 #' @return Confidence bounds for differentially private release
 
 mean.getCI = function(release, epsilon, sensitivity, n, rng, alpha=0.05) {

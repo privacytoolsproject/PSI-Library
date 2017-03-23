@@ -68,7 +68,7 @@ heavyhitters.getAccuracy <- function(epsilon, delta, beta=0.05, gap) {
 #' @param delta Delta value for DP
 #' @param beta the true value is within the accuracy range (alpha)
 #    with probability 1-beta
-#' @param gap
+#' @param gap something here
 #' @return The epsilon value necessary to gaurantee the given accuracy
 #' @author Victor Balcer
 
