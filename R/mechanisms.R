@@ -48,6 +48,15 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
     return(out)
 }
 
+#' Describe Here
+#'
+#' @param x something here
+#' @param var_type something here
+#' @param epsilon something here
+#' @param levels something here
+#' @param bins something here
+#' @param n_bins something here
+#' @return something here
 
 mechanism.histogram.random <- function(x, var_type, epsilon, levels, bins, n_bins) {
 
