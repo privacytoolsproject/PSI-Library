@@ -4,7 +4,7 @@
 \alias{check_histogram_n}
 \title{Utility function to check sufficient n}
 \usage{
-check_histogram_n(accuracy, n, n_bins, epsilon, delta, beta)
+check_histogram_n(accuracy, n, n_bins, epsilon, delta, alpha)
 }
 \description{
 Utility function to check sufficient n

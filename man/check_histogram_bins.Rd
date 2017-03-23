@@ -9,9 +9,12 @@ check_histogram_bins(n_bins, n)
 \arguments{
 \item{n_bins}{Number of cells in which to tabulate values}
 
-\item{n}{Number of observations
+\item{n}{Number of observations}
+}
+\value{
+Number of bins
 
-If number of bins is not provided, use the Sturges method}
+If number of bins is not provided, use the Sturges method
 }
 \description{
 Utility function to check bins argument to histogram

@@ -10,7 +10,7 @@ checkrange(range)
 \item{range}{A vector, that ought to be an ordered pair}
 }
 \value{
-An ordered pair 
+An ordered pair
 
 Checks if a supplied range is an ordered pair.  Coerces any vector of length two
   or greater into an ordered pair, and issues an error for shorter vectors.

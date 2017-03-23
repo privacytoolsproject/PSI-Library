@@ -2,6 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getAccuracy}
 \alias{mean.getAccuracy}
+\title{Describe Here}
 \usage{
 \method{mean}{getAccuracy}(epsilon, n, alpha = 0.05)
 }
@@ -10,9 +11,12 @@
 
 \item{n}{Number of observations}
 
-\item{alpha}{Level of significance}
+\item{alpha}{The statistical significance level}
 }
 \value{
 Accuracy guarantee for mean release given epsilon
+}
+\description{
+Describe Here
 }
 

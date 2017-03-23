@@ -10,6 +10,8 @@ heavyhitters.getParameters(delta, beta = 0.05, gap)
 \item{delta}{Delta value for DP}
 
 \item{beta}{the true value is within the accuracy range (alpha)}
+
+\item{gap}{something here}
 }
 \value{
 The epsilon value necessary to gaurantee the given accuracy
