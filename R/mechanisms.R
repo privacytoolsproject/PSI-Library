@@ -2,44 +2,50 @@
 #'
 #' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.
 #' @param x A vector of data to run the function on.
-#' @param var_type Data type of vector x
+#' @param var.type Data type of vector x
 #' @param n The number of samples
 #' @param range An a priori estimate of the range
 #' @param sensitivity numeric
 #' @param epsilon numeric
+#' @param ... Other arguments passed to \code{fun}
 #' @return Differentially private release of function \code{fun} on data \code{x}
 #' @examples
 #' n <- 1000
 #' range <- c(0,1)
 #' x <- runif(n, min=min(range), max=max(range))
 #' sensitivity <- diff(range)/n
-#' mechanism.laplace(mean,x=x,sensitivity=sensitivity, epsilon=.1)
+#' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
 
-#mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, levels=NULL, ...){
-mechanism.laplace = function(fun, x, var_type, range, sensitivity, epsilon, ...) {
-
+mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
+    # transformations & checks
     epsilon <- checkepsilon(epsilon)
-
-    if (hasArg(var_levels)) { 
-        var_levels <- list(...)$var_levels
-    } 
-
-    if (var_type == 'logical') { # allow any dichotomous variable to be treated as logical type
-        x <- make_logical(x)
-    }
-
-    if (var_type %in% c('numeric', 'integer', 'logical')) {
-        range <- checkrange(range)
-        x <- censordata(x, var_type, range=range)
+    if (var.type == 'logical') { x <- make_logical(x) }
+    if (var.type %in% c('numeric', 'integer', 'logical')) {
+        rng <- checkrange(rng)
+        x <- censordata(x, var.type, range=rng)
     } else {
-        x <- censordata(x, var_type, levels=var_levels)
+        x <- censordata(x, var.type, levels=list(...)$bins)
     }
-
-    truevalue <- fun(x, ...)
-    #noise <- rlaplace(n=length(truevalue), sensitivity=sensitivity, epsilon=epsilon)
-    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(truevalue))
-    release <- truevalue + noise
-    return(release)
+    # evaluate statistic & performance
+    mechanism.args <- c(as.list(environment()), list(...))
+    true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
+    true.value$release <- true.value$stat + noise
+    accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
+    true.value$accuracy <- do.call(accuracy.func, getFuncArgs(true.value, accuracy.func))
+    parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
+    true.value$parameters <- do.call(parameters.func, getFuncArgs(true.value, parameters.func))
+    interval.func <- match.fun(paste0(true.value$name, '.getCI'))
+    true.value$interval <- do.call(interval.func, getFuncArgs(true.value, interval.func))
+    out <- list(
+        'mechanism' = 'laplace',
+        'release' = true.value$release,
+        'statistic' = true.value$name, 
+        'accuracy' = true.value$accuracy,
+        'parameters' = true.value$parameters,
+        'interval' = true.value$interval
+    )
+    return(out)
 }
 
 

@@ -1,3 +1,19 @@
+#' Function to evaluate the mean and specify parameters for mean functions
+#'
+#' @param x Numeric vector
+#' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
+
+dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
+    out <- list('name' = 'mean',
+                'stat' = mean(x),
+                'var.type' = var.type,
+                'n' = n,
+                'sensitivity' = sensitivity,
+                'epsilon' = epsilon)
+    return(out)
+}
+
+
 #' Function for differentially private release of mean
 #'
 #' @param x Numeric vector 
@@ -14,34 +30,31 @@
 #' x_bool <- x_num >= 0.5
 #' x_dich <- ifelse(x_bool, 3.483, -9.657)
 #' 
-#' r_num <- mean.release(x=x_num, var_type='numeric', epsilon=0.5, n=n, range=c(0, 1))
-#' r_int <- mean.release(x=x_int, var_type='integer', epsilon=0.5, n=n, range=c(5, 95))
-#' r_bool <- mean.release(x=x_bool, var_type='logical', epsilon=0.5, n=n, range=c(0, 1))
-#' r_dich <- mean.release(x=x_dich, var_type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
+#' r_num <- mean.release(x=x_num, var.type='numeric', epsilon=0.5, n=n, range=c(0, 1))
+#' r_int <- mean.release(x=x_int, var.type='integer', epsilon=0.5, n=n, range=c(5, 95))
+#' r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, range=c(0, 1))
+#' r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
 
-mean.release = function(x, var_type, n, epsilon, range) {
-
-    var_type <- check_variable_type(var_type, in_types=c('numeric', 'integer', 'logical'))
-
-    if (var_type == 'logical') {
-        range <- c(0, 1)
-    }
-    range <- checkrange(range)
-    sensitivity <- diff(range) / n
-
-    my_mean <- function(x) {
-        m <- sum(x) / length(x)
-        return(m)
-    }
-
-    release <- mechanism.laplace(fun=my_mean, x=x, var_type=var_type, range=range, sensitivity=sensitivity, epsilon=epsilon)
+mean.release = function(x, var.type, n, epsilon, rng) {
+    var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
+    if (var.type == 'logical') { rng = c(0, 1) }
+    rng <- checkrange(rng)
+    sensitivity <- diff(rng) / n
+    release <- mechanism.laplace(
+        fun=dp.mean,
+        x=x,
+        var.type=var.type,
+        rng=rng,
+        sensitivity=sensitivity,
+        epsilon=epsilon,
+        n=n)
     return(release)
-} 
+}
 
 
 #' @param epsilon Privacy parameter epsilon
 #' @param n Number of observations
-#' @param alpha Level of significance
+#' @param alpha The statistical significance level
 #' @return Accuracy guarantee for mean release given epsilon
 
 mean.getAccuracy = function(epsilon, n, alpha=0.05) {
@@ -51,30 +64,26 @@ mean.getAccuracy = function(epsilon, n, alpha=0.05) {
 
 
 #' @param accuracy The accuracy we need to guarantee (percent)
-#' @param delta The delta to be used - not required for mean
-#' @param x_range An a priori estimate of the range (UNUSED)
 #' @param n The number of samples
-#' @param beta The statistical signifcance level
+#' @param alpha The statistical signifcance level
 #' @return The scalar epsilon necessary to guarantee the accuracy needed
 
-mean.getParameters = function(accuracy, delta=0,x_range, n, beta) {
-    t <- accuracy #/ range  # Adjust accuracy to be range agnostic
-    epsilon <- log(1/beta)/(n*t)
+mean.getParameters = function(accuracy, n, alpha=0.05) {
+    epsilon <- log(1 / alpha) / (n * accuracy)
     return(epsilon)
 }
 
 
 #' @param release
 #' @param epsilon
+#' @param sensitivity
 #' @param n
 #' @param range
 #' @param alpha
 #' @return Confidence bounds for differentially private release
 
-mean.getCI = function(release, epsilon, n, range, alpha=0.05) {
-    x_range <- checkrange(x_range)
-    sensitivity <- diff(x_range) / n
-    z <- qexp((1 - alpha), rate=(epsilon / sensitivity))
+mean.getCI = function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
+    z <- qlap((1 - alpha), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
 }
