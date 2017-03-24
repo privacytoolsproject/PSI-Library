@@ -16,7 +16,7 @@
 #' sensitivity <- diff(range)/n
 #' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
 
-mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
+mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
     # transformations & checks
     epsilon <- checkepsilon(epsilon)
     if (var.type == 'logical') { x <- make_logical(x) }
@@ -31,22 +31,46 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
     true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     true.value$release <- true.value$stat + noise
-    accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
-    true.value$accuracy <- do.call(accuracy.func, getFuncArgs(true.value, accuracy.func))
-    parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
-    true.value$parameters <- do.call(parameters.func, getFuncArgs(true.value, parameters.func))
-    interval.func <- match.fun(paste0(true.value$name, '.getCI'))
-    true.value$interval <- do.call(interval.func, getFuncArgs(true.value, interval.func))
+
     out <- list(
         'mechanism' = 'laplace',
-        'release' = true.value$release,
-        'statistic' = true.value$name, 
-        'accuracy' = true.value$accuracy,
-        'parameters' = true.value$parameters,
-        'interval' = true.value$interval
+        'statistic' = true.value$name,
+        'release' = true.value$release
     )
+    if(!is.null(postlist)){
+        out <- postprocess(out, var.type, rng, sensitivity, epsilon, postlist, ...)
+    }
+}
+
+#' Cycle through available postprocessing functions for a released statistic
+#'
+#' @param out list containing differentially private released statistic, and mechanism and statistic names
+#' @param var.type Data type of vector x
+#' @param n The number of samples
+#' @param range An a priori estimate of the range
+#' @param sensitivity numeric
+#' @param epsilon numeric
+#' @param ... Other arguments passed to \code{fun}
+#' @param Original list with released statistic, appended with available postprocessed releases
+
+postprocess = function(out, var.type, rng, sensitivity, epsilon, postlist, ...){
+    release <- out$release
+
+    post.out <- list()
+    for(i in 1:length(postlist)){
+        get.name <- (paste0(out$statistic, ".", postlist[i]))
+        if(exists(get.name, mode="function")){
+            post.out[[i]] <- do.call(get.name, getFuncArgs(release, get.name)))
+        }else{
+            post.out[[i]] <- NA # or perhaps "Function Not Provided"
+        }
+    }
+    names(post.out) <- post.out
+
+    out <- c(out, post.out)
     return(out)
 }
+
 
 #' Describe Here
 #'

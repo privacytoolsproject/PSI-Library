@@ -37,7 +37,11 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 
 mean.release = function(x, var.type, n, epsilon, rng) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
-    if (var.type == 'logical') { rng = c(0, 1) }
+    postlist=c("getAccuracy", "getParameters", "getCI")
+    if (var.type == 'logical'){ 
+        rng = c(0, 1) 
+        postlist=c("getAccuracy", "getParameters", "getCI", "postStandard_Deviation", "postMedian")
+    }
     rng <- checkrange(rng)
     sensitivity <- diff(rng) / n
     release <- mechanism.laplace(
@@ -47,8 +51,29 @@ mean.release = function(x, var.type, n, epsilon, rng) {
         rng=rng,
         sensitivity=sensitivity,
         epsilon=epsilon,
-        n=n)
+        n=n, 
+        postlist=postlist)
     return(release)
+}
+
+#' Postprocessed Standard Deviation for Logical Variables
+#'
+#' @param release Differentially private release of a mean for a logical variable
+
+mean.postStandard_Deviation = function(release){
+    return(sqrt(release*(1-release)))
+}
+
+#' Postprocessed Median for Logical Variables
+#'
+#' @param release Differentially private release of a mean for a logical variable
+
+mean.postMedian = function(release){
+    if(release<0.5){
+        return(0)
+    }else{
+        return(1)
+    }
 }
 
 #' Describe Here
