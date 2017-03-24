@@ -60,7 +60,7 @@ postprocess = function(out, var.type, rng, sensitivity, epsilon, postlist, ...){
     for(i in 1:length(postlist)){
         get.name <- (paste0(out$statistic, ".", postlist[i]))
         if(exists(get.name, mode="function")){
-            post.out[[i]] <- do.call(get.name, getFuncArgs(release, get.name)))
+            post.out[[i]] <- do.call(get.name, getFuncArgs(release, get.name))
         }else{
             post.out[[i]] <- NA # or perhaps "Function Not Provided"
         }
