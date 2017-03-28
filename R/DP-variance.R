@@ -32,7 +32,7 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 variance.release <- function(x, var.type, n, epsilon, rng) {
     rng <- checkrange(rng)
     sensitivity <- (n - 1) / n^2 * diff(rng)^2
-    postlist <- c('post.std')
+    postlist <- list('std' = 'post.std')
     release <- mechanism.laplace(
         fun=dp.variance,
         x=x,
@@ -52,7 +52,7 @@ variance.release <- function(x, var.type, n, epsilon, rng) {
 #' @param release Numeric noisy estimate of variance
 #' @return Noisy estimate of standard deviation
 
-post.std <- function(release) {
+variance.post.std <- function(release) {
     std <- sqrt(release)
     return(std)
 }
