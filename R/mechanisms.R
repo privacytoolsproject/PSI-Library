@@ -53,10 +53,10 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 #'
 #' @param out list containing differentially private released statistic, and mechanism and statistic names
 #' @param var.type Data type of vector x
-#' @param n The number of samples
-#' @param range An a priori estimate of the range
+#' @param rng An a priori estimate of the range
 #' @param sensitivity numeric
 #' @param epsilon numeric
+#' @param postlist List with name, function pairs for post-processing statistics
 #' @param ... Other arguments passed to \code{fun}
 #' @param Original list with released statistic, appended with available postprocessed releases
 
@@ -67,8 +67,7 @@ postprocess <- function(out, var.type, rng, sensitivity, epsilon, postlist, ...)
     for (process in names(postlist)) {
         get.name <- paste0(out$statistic, ".", postlist[[process]])
         if (exists(get.name, mode='function')) {
-            out[[process]] <- do.call(get.name, getFuncArgs(available.attrs, get.name))
-            available.attrs[[process]] = out[[process]]
+            available.attrs[[process]] <- out[[process]] <- do.call(get.name, getFuncArgs(available.attrs, get.name))
         } else {
             out[[process]] <- 'Function not provided'
         }
