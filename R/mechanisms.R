@@ -16,8 +16,9 @@
 #' sensitivity <- diff(range)/n
 #' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
 
-mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
-    # transformations & checks
+mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
+
+    # checks & transformations
     epsilon <- checkepsilon(epsilon)
     if (var.type == 'logical') { x <- make_logical(x) }
     if (var.type %in% c('numeric', 'integer', 'logical')) {
@@ -26,27 +27,54 @@ mechanism.laplace = function(fun, x, var.type, rng, sensitivity, epsilon, ...) {
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
     }
-    # evaluate statistic & performance
+
+    # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
     noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
     true.value$release <- true.value$stat + noise
-    accuracy.func <- match.fun(paste0(true.value$name, '.getAccuracy'))
-    true.value$accuracy <- do.call(accuracy.func, getFuncArgs(true.value, accuracy.func))
-    parameters.func <- match.fun(paste0(true.value$name, '.getParameters'))
-    true.value$parameters <- do.call(parameters.func, getFuncArgs(true.value, parameters.func))
-    interval.func <- match.fun(paste0(true.value$name, '.getCI'))
-    true.value$interval <- do.call(interval.func, getFuncArgs(true.value, interval.func))
+
+    # output
     out <- list(
         'mechanism' = 'laplace',
-        'release' = true.value$release,
-        'statistic' = true.value$name, 
-        'accuracy' = true.value$accuracy,
-        'parameters' = true.value$parameters,
-        'interval' = true.value$interval
+        'statistic' = true.value$name,
+        'release' = true.value$release
     )
+
+    # post-processing
+    if (!is.null(postlist)) {
+        out <- postprocess(out, var.type, rng, sensitivity, epsilon, postlist, ...)
+    }
     return(out)
 }
+
+
+#' Cycle through available postprocessing functions for a released statistic
+#'
+#' @param out list containing differentially private released statistic, and mechanism and statistic names
+#' @param var.type Data type of vector x
+#' @param rng An a priori estimate of the range
+#' @param sensitivity numeric
+#' @param epsilon numeric
+#' @param postlist List with name, function pairs for post-processing statistics
+#' @param ... Other arguments passed to \code{fun}
+#' @param Original list with released statistic, appended with available postprocessed releases
+
+postprocess <- function(out, var.type, rng, sensitivity, epsilon, postlist, ...) {
+    environ <- as.list(environment())
+    environ <- environ[which(names(environ) != 'out')]
+    available.attrs <- c(out, environ, list(...))
+    for (process in names(postlist)) {
+        get.name <- paste0(out$statistic, ".", postlist[[process]])
+        if (exists(get.name, mode='function')) {
+            available.attrs[[process]] <- out[[process]] <- do.call(get.name, getFuncArgs(available.attrs, get.name))
+        } else {
+            out[[process]] <- 'Function not provided'
+        }
+    }
+    return(out)
+}
+
 
 #' Describe Here
 #'

@@ -35,9 +35,16 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 #' r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, range=c(0, 1))
 #' r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
 
-mean.release = function(x, var.type, n, epsilon, rng) {
+mean.release <- function(x, var.type, n, epsilon, rng) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
-    if (var.type == 'logical') { rng = c(0, 1) }
+    postlist <- list('accuracy' = 'getAccuracy',
+                     'epsilon' = 'getParameters',
+                     'interval' = 'getCI')
+    if (var.type == 'logical') {
+        rng <- c(0, 1)
+        postlist <- c(postlist, list('std' = 'postStandard_Deviation',
+                                     'median' = 'postMedian'))
+    }
     rng <- checkrange(rng)
     sensitivity <- diff(rng) / n
     release <- mechanism.laplace(
@@ -47,9 +54,33 @@ mean.release = function(x, var.type, n, epsilon, rng) {
         rng=rng,
         sensitivity=sensitivity,
         epsilon=epsilon,
-        n=n)
+        n=n, 
+        postlist=postlist)
     return(release)
 }
+
+
+#' Postprocessed Standard Deviation for Logical Variables
+#'
+#' @param release Differentially private release of a mean for a logical variable
+
+mean.postStandard_Deviation <- function(release) {
+    return(sqrt(release * (1 - release)))
+}
+
+
+#' Postprocessed Median for Logical Variables
+#'
+#' @param release Differentially private release of a mean for a logical variable
+
+mean.postMedian <- function(release) {
+    if (release < 0.5) {
+        return(0)
+    } else {
+        return(1)
+    }
+}
+
 
 #' Describe Here
 #'
@@ -58,10 +89,11 @@ mean.release = function(x, var.type, n, epsilon, rng) {
 #' @param alpha The statistical significance level
 #' @return Accuracy guarantee for mean release given epsilon
 
-mean.getAccuracy = function(epsilon, n, alpha=0.05) {
+mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
     accuracy <- log(1 / alpha) / (n * epsilon)
     return(accuracy)
 }
+
 
 #' Describe Here
 #'
@@ -70,7 +102,7 @@ mean.getAccuracy = function(epsilon, n, alpha=0.05) {
 #' @param alpha The statistical signifcance level
 #' @return The scalar epsilon necessary to guarantee the accuracy needed
 
-mean.getParameters = function(accuracy, n, alpha=0.05) {
+mean.getParameters <- function(accuracy, n, alpha=0.05) {
     epsilon <- log(1 / alpha) / (n * accuracy)
     return(epsilon)
 }
@@ -85,7 +117,7 @@ mean.getParameters = function(accuracy, n, alpha=0.05) {
 #' @param alpha something here
 #' @return Confidence bounds for differentially private release
 
-mean.getCI = function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
+mean.getCI <- function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
     z <- qlap((1 - alpha), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
