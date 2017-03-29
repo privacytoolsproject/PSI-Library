@@ -33,11 +33,13 @@ binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, e
 quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     rng <- checkrange(rng)
+    postlist <- list('accuracy' = 'getAccuracy',
+                     'epsilon' = 'getParameters')
     sensitivity <- (2 * log2(diff(rng) / gran + 1))
     universe.size <- floor(diff(rng) / gran + 1)
     release <- mechanism.laplace(fun=binary.tree, x=x, var.type=var.type, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, n=n, gran=gran,
-                                 cdf.step=cdf.step, universe.size=universe.size)
+                                 cdf.step=cdf.step, universe.size=universe.size, postlist=postlist)
     # post-process the noisy tree
     terminal <- tail(release$release, universe.size)
     terminal <- sapply(terminal, function(x) {round(max(0, x))})
@@ -86,13 +88,6 @@ quantile.getParameters <- function(accuracy, n, universe.size, alpha=0.05) {
     return(epsilon)
 }
 
-
-#' Placeholder for a confidence interval
-
-quantile.getCI <- function() {
-    return(NULL)
-}
-  
 
 #' Utility function to compute the count in a range from a binary tree
 #'
