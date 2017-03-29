@@ -35,18 +35,9 @@ quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
     rng <- checkrange(rng)
     sensitivity <- (2 * log2(diff(rng) / gran + 1))
     universe.size <- floor(diff(rng) / gran + 1)
-    release <- mechanism.laplace(
-        fun=binary.tree,
-        x=x,
-        var.type=var.type,
-        rng=rng,
-        sensitivity=sensitivity,
-        epsilon=epsilon,
-        n=n,
-        gran=gran,
-        cdf.step=cdf.step,
-        universe.size=universe.size
-    )
+    release <- mechanism.laplace(fun=binary.tree, x=x, var.type=var.type, rng=rng,
+                                 sensitivity=sensitivity, epsilon=epsilon, n=n, gran=gran,
+                                 cdf.step=cdf.step, universe.size=universe.size)
     # post-process the noisy tree
     terminal <- tail(release$release, universe.size)
     terminal <- sapply(terminal, function(x) {round(max(0, x))})

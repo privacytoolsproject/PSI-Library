@@ -47,15 +47,9 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
     }
     rng <- checkrange(rng)
     sensitivity <- diff(rng) / n
-    release <- mechanism.laplace(
-        fun=dp.mean,
-        x=x,
-        var.type=var.type,
-        rng=rng,
-        sensitivity=sensitivity,
-        epsilon=epsilon,
-        n=n, 
-        postlist=postlist)
+    release <- mechanism.laplace(fun=dp.mean, x=x, var.type=var.type, rng=rng,
+                                 sensitivity=sensitivity, epsilon=epsilon, n=n,
+                                 postlist=postlist)
     return(release)
 }
 

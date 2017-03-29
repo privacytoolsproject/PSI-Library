@@ -76,16 +76,12 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
     } else {
         n.bins <- length(bins)
     }
-    release.noisy <- mechanism.laplace(
-        fun=dp.histogram,
-        x=x, var.type=var.type, rng=rng,
-        sensitivity=1, epsilon=epsilon,
-        stability=FALSE, bins=bins, n.bins=n.bins, n=n)
-    release.stability <- mechanism.laplace(
-        fun=dp.histogram,
-        x=x, var.type=var.type, rng=rng,
-        sensitivity=1, epsilon=epsilon,
-        stability=TRUE, bins=bins, n.bins=n.bins, n=n)
+    release.noisy <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
+                                       sensitivity=1, epsilon=epsilon, stability=FALSE, bins=bins,
+                                       n.bins=n.bins, n=n)
+    release.stability <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
+                                           sensitivity=1, epsilon=epsilon, stability=TRUE, bins=bins,
+                                           n.bins=n.bins, n=n)
     stability.accurate <- release.stability$accuracy < release.noisy$accuracy
     stability.check <- check_histogram_n(release.stability$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)
     if (stability.accurate && stability.check) {
