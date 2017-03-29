@@ -70,15 +70,16 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 
 histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
+    postlist <- list('accuracy' = 'getAccuracy',
+                     'epsilon' = 'getParameters',
+                     'interval' = 'getCI')
     if (var.type %in% c('numeric', 'integer')) {
         n.bins <- check_histogram_bins(n.bins, n)
         bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
     } else {
         n.bins <- length(bins)
+        postlist <- c(postlist, list('herfindahl' = 'postHerfindahl'))
     }
-    postlist <- list('accuracy' = 'getAccuracy',
-                     'epsilon' = 'getParameters',
-                     'interval' = 'getCI')
     release.noisy <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
                                        sensitivity=1, epsilon=epsilon, stability=FALSE, bins=bins,
                                        n.bins=n.bins, n=n, postlist=postlist)
@@ -180,6 +181,19 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
     out <- data.frame(do.call(rbind, out))
     names(out) <- c('lower', 'upper')
     return(out)
+}
+
+
+#' Herfindahl index for categorical types
+#'
+#' @param release Numeric vector with noisy counts for each level
+#' @param n Integer indicating number of observations
+#' @return Herfindahl index
+
+histogram.postHerfindahl <- function(release, n) {
+    share <- release / n
+    herfindahl <- sum(share^2)
+    return(herfindahl)
 }
 
 
