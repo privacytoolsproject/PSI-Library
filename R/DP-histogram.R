@@ -76,12 +76,15 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
     } else {
         n.bins <- length(bins)
     }
+    postlist <- list('accuracy' = 'getAccuracy',
+                     'epsilon' = 'getParameters',
+                     'interval' = 'getCI')
     release.noisy <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
                                        sensitivity=1, epsilon=epsilon, stability=FALSE, bins=bins,
-                                       n.bins=n.bins, n=n)
+                                       n.bins=n.bins, n=n, postlist=postlist)
     release.stability <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
                                            sensitivity=1, epsilon=epsilon, stability=TRUE, bins=bins,
-                                           n.bins=n.bins, n=n)
+                                           n.bins=n.bins, n=n, postlist=postlist)
     stability.accurate <- release.stability$accuracy < release.noisy$accuracy
     stability.check <- check_histogram_n(release.stability$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)
     if (stability.accurate && stability.check) {
@@ -157,6 +160,11 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 
 #' Confidence interval
 #'
+#' @param release Numeric vector with noisy estimate of bin counts
+#' @param n.bins Integer indicating the number of bines
+#' @param n Integer indicating the number of observations
+#' @param accuracy Numeric the accuracy of the noisy estimate
+#' @return Confidence interval for the noisy counts in each bin
 
 histogram.getCI <- function(release, n.bins, n, accuracy) {
     accxn <- accuracy * n
