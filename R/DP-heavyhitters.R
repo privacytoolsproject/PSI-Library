@@ -1,3 +1,23 @@
+#' Function to evaluate most common values and specify arguments to post-processing
+#'
+#' @param x
+
+dp.heavyhitters <- function(x, var.type, n, epsilon, sensitivity, k) {
+    hist <- table(x, useNA='ifany')
+    if (k > length(hist) - 1) { stop('failure: k too large') }
+    idx <- 1:(k+1)
+    hist <- sort(-hist, partial=idx)[idx] * -1
+    gap <- hist[k] - hist[k+1] + rlap(b=(sensitivity / epsilon))
+    if (gap < -2 / epsilon * log(1e-7)) { stop('failure: gap too small') }
+    out <- list('name' = 'heavyhitters',
+                'stat' = gap,
+                'var.type' = var.type,
+                'k' = k,
+                'heavyhitters' = names(hist)[1:k])
+    return(out)
+}
+
+
 #' Release differentially private most common values.
 #'
 #' @param x A vector of the data
@@ -16,6 +36,11 @@
 #' range <- c(0,20)
 #' x <- rbinom(n, size=max(range), prob=0.7)
 #' heavyhitters.release(x=x, epsilon=.1, delta=.0000001)
+
+heavyhitters.release <- function(x, var.type, n, epsilon, k) {
+    var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
+}
+
 
 heavyhitters.release <- function(x, epsilon, delta, k=1, symb=NA){
   
