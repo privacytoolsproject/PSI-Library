@@ -1,10 +1,3 @@
-# might require having the mechanism use and amend the list returned by the dp.x functions, 
-# instead of assigning a new list that is a subset. this would allow the 'heavyhitters' element
-# to be viewed by the post-processing calls in the release fn. probably would not need a separate
-# and redundant postprocessing function then. 
-#
-# just need to be sure that attributes in the release aren't duplicated (e.g., epsilon)
-
 #' Function to evaluate most common values and specify arguments to post-processing
 #'
 #' @param x
@@ -52,9 +45,10 @@ heavyhitters.release <- function(x, var.type, epsilon, n, k, bins) {
                                  epsilon=epsilon, sensitivity=1, n=n, k=k, bins=bins,
                                  postlist=postlist)
     if (release$release < -2 / epsilon * log(1e-7)) {
-        release$release <- 'failure: gap too small'
+        release$release <- 'failure: gap too small'  # or throw error here?
     } else {
-        release[['release']] <- release$heavyhitters
+        release$release <- release$heavyhitters
+        release <- release[names(release) != 'heavyhitters']  # remove redundant element
     }
     return(release)
 }
