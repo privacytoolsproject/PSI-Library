@@ -1,3 +1,10 @@
+# might require having the mechanism use and amend the list returned by the dp.x functions, 
+# instead of assigning a new list that is a subset. this would allow the 'heavyhitters' element
+# to be viewed by the post-processing calls in the release fn. probably would not need a separate
+# and redundant postprocessing function then. 
+#
+# just need to be sure that attributes in the release aren't duplicated (e.g., epsilon)
+
 #' Function to evaluate most common values and specify arguments to post-processing
 #'
 #' @param x
@@ -12,6 +19,7 @@ dp.heavyhitters <- function(x, var.type, n, epsilon, sensitivity, k) {
                 'stat' = gap,
                 'var.type' = var.type,
                 'k' = k,
+                'epsilon' = epsilon,
                 'heavyhitters' = names(hist)[1:k])
     return(out)
 }
@@ -36,17 +44,17 @@ dp.heavyhitters <- function(x, var.type, n, epsilon, sensitivity, k) {
 #' x <- rbinom(n, size=max(range), prob=0.7)
 #' heavyhitters.release(x=x, epsilon=.1, delta=.0000001)
 
-heavyhitters.release <- function(x, var.type, epsilon, n, k) {
+heavyhitters.release <- function(x, var.type, epsilon, n, k, bins) {
     var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
     postlist <- list('accuracy' = 'getAccuracy',
                      'epsilon' = 'getParameters')
-    release <- mechanism.laplace(fun=dp.heavyhitters, x=x, var.type=var.type,
-                                 epsilon=epsilon, sensitivity=1, n=n, k=k,
+    release <- mechanism.laplace(fun=dp.heavyhitters, x=x, var.type=var.type, rng=NULL,
+                                 epsilon=epsilon, sensitivity=1, n=n, k=k, bins=bins,
                                  postlist=postlist)
     if (release$release < -2 / epsilon * log(1e-7)) {
-        stop('failure: gap too small')
+        release$release <- 'failure: gap too small'
     } else {
-        release$release <- release$heavyhitters
+        release[['release']] <- release$heavyhitters
     }
     return(release)
 }
