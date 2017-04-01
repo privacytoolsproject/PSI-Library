@@ -48,8 +48,8 @@ heavyhitters.release <- function(x, var.type, epsilon, n, k, bins) {
         release$release <- 'failure: gap too small'  # or throw error here?
     } else {
         release$release <- release$heavyhitters
-        release <- release[names(release) != 'heavyhitters']  # remove redundant element
     }
+    release <- release[names(release) != 'heavyhitters']  # remove redundant element
     return(release)
 }
 
