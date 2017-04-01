@@ -30,20 +30,13 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
-    true.value <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    noise <- rlap(mu=0, b=(sensitivity / epsilon), size=length(true.value$stat))
-    true.value$release <- true.value$stat + noise
-
-    # output
-    out <- list(
-        'mechanism' = 'laplace',
-        'statistic' = true.value$name,
-        'release' = true.value$release
-    )
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    out$release <- out$stat + rlap(mu=0, b=(sensitivity / epsilon), size=length(out$stat))
+    out <- out[names(out) != 'stat']
 
     # post-processing
     if (!is.null(postlist)) {
-        out <- postprocess(out, var.type, rng, sensitivity, epsilon, postlist, ...)
+        out <- postprocess(out, postlist, ...)
     }
     return(out)
 }
@@ -60,12 +53,10 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 #' @param ... Other arguments passed to \code{fun}
 #' @param Original list with released statistic, appended with available postprocessed releases
 
-postprocess <- function(out, var.type, rng, sensitivity, epsilon, postlist, ...) {
-    environ <- as.list(environment())
-    environ <- environ[which(names(environ) != 'out')]
-    available.attrs <- c(out, environ, list(...))
+postprocess <- function(out, postlist, ...) {
+    available.attrs <- c(out, list(...))
     for (process in names(postlist)) {
-        get.name <- paste0(out$statistic, ".", postlist[[process]])
+        get.name <- paste0(out$name, ".", postlist[[process]])
         if (exists(get.name, mode='function')) {
             available.attrs[[process]] <- out[[process]] <- do.call(get.name, getFuncArgs(available.attrs, get.name))
         } else {
