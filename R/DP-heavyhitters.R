@@ -1,8 +1,14 @@
 #' Function to evaluate most common values and specify arguments to post-processing
 #'
-#' @param x
+#' @param x Vector of categorical data (character, factor)
+#' @param var.type Character string indicating data type
+#' @param epsilon Epsilon value for differential privacy
+#' @param n Integer indicating number of observations
+#' @param k Integer querying the most common \code{k} categories
+#' @param sensitivity Numeric the sensitivity of the statistic
+#' @return List with true value of statistic and parameters to be passed to post-processing
 
-dp.heavyhitters <- function(x, var.type, n, epsilon, sensitivity, k) {
+dp.heavyhitters <- function(x, var.type, epsilon, n, k, sensitivity) {
     hist <- table(x, useNA='ifany')
     if (k > length(hist) - 1) { stop('failure: k too large') }
     idx <- 1:(k+1)
@@ -20,22 +26,25 @@ dp.heavyhitters <- function(x, var.type, n, epsilon, sensitivity, k) {
 
 #' Release differentially private most common values
 #'
-#' @param x A vector of the data
+#' @param x Vector of categorical data (character, factor)
+#' @param var.type Character string indicating data type
 #' @param epsilon Epsilon value for differential privacy
-#' @param delta Delta value for differential privacy
-#' @param k top-k elements to return
-#' @param symb Symbol to return on failure (default : NA)
-#' @return A vector whose values are k most common values or a failure return symbol
+#' @param n Integer indicating number of observations
+#' @param k Integer querying the most common \code{k} categories
+#' @param bins Vector of categories from which the top \code{k} categories are evaluated
+#' @return A vector whose values are \code{k} most common categories, or a failure message
 #' @author Victor Balcer
 #'
 #' Contains functions for privately releasing the top-k heavy hitters, that is,
 #'  the k most common unique values.  For example, k=1 releases the mode.
 #'
 #' @examples
-#' n <- 10000
-#' range <- c(0,20)
-#' x <- rbinom(n, size=max(range), prob=0.7)
-#' heavyhitters.release(x=x, epsilon=.1, delta=.0000001)
+#' N <- 1000
+#' epsilon <- 0.5
+#' observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+#' probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
+#' y <- sample(observed.levels, size=N, prob=probs, replace=TRUE)
+#' release <- heavyhitters.release(y, 'character', epsilon, N, k=3, bins=bins)
 
 heavyhitters.release <- function(x, var.type, epsilon, n, k, bins) {
     var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
@@ -54,38 +63,11 @@ heavyhitters.release <- function(x, var.type, epsilon, n, k, bins) {
 }
 
 
-#heavyhitters.release <- function(x, epsilon, delta, k=1, symb=NA){
-#
-#  hist <- table(factor(x, exclude=c()), useNA="ifany")
-#
-#  # TODO: possible violation of privacy
-#  if(k > length(hist) - 1)
-#  {
-#    return(symb)
-#  }
-#
-#  # TODO: should be replaced with a partial sorting algorithm
-#  hist <- sort(hist, decreasing=TRUE)[1:(k+1)]
-#
-#  gap <- hist[k] - hist[k+1] + rlaplace(n=1, sensitivity=2, epsilon=epsilon)
-#
-#  testfailure <- gap < -2 / epsilon * log(delta)
-#
-#  if(testfailure){
-#    return(symb)
-#  }else{
-#    return(names(hist[1:k]))
-#  }
-#
-#}
-
-
 #' Get the accuracy of heavyhitters statistic for a given value of epsilon
 #'
+#' @param release The noisy estimate
 #' @param epsilon Epsilon value for differential privacy
 #' @param delta Delta value for differential privacy
-#' @param beta The true value is within the accuracy range with probability 1-beta
-#' @param gap
 #' @return The accuracy guaranteed by the given epsilon
 #' @author Victor Balcer
 #'
@@ -101,9 +83,9 @@ heavyhitters.getAccuracy <- function(release, epsilon, delta=1e-7) {
 
 #' Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release
 #'
-#' @param delta Delta value for DP
-#' @param beta the true value is within the accuracy range (alpha) with probability 1-beta
-#' @param gap something here
+#' @param release The noisy estimate
+#' @param delta Delta value for differential privacy
+#' @param alpha The true value is within the accuracy range with probability 1 - \code{alpha}
 #' @return The epsilon value necessary to gaurantee the given accuracy
 #' @author Victor Balcer
 
