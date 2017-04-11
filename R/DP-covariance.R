@@ -7,13 +7,34 @@
 #' @param columns Character vector indicating columns in \code{x}, if NULL then use all columns
 #' @param trim.thresh Numeric, default 0.95
 
-dp.covariance <- function(x, n, rng, epsilon, columns, trim.thresh=0.95) {
-    data <- x[, columns]
-    data.scaled <- scale(data)
-    means <- attr(data.scaled, 'scaled:center')
-    std.devs <- attr(data.scaled, 'scaled:scale')
-    covariance <- cov(data.scaled)
+dp.covariance <- function(x, n, rng, epsilon, columns, intercept, trim, trim.thresh) {
 
+    # subset and standardize
+    data <- x[, columns]
+    data <- scale(data)
+
+    # optionally append an intercept
+    if (intercept) {
+        data <- cbind(1, data)
+    }
+
+    # trim the extreme values
+    if (trim) {
+        dist <- order(apply(data, 1, function(x) { max(abs(x)) } ))
+        n.trim <- as.integer(trim.thresh * n)
+        data <- data[1:n.trim, ]
+    }
+
+    # means and st devs to unscale, use this instead of info in scale() to account for trimming
+    means <- apply(data, 2, mean)
+    std.devs <- apply(data, 2, sd)
+
+    # the true statistic, return only the lower triangle
+    covariance <- cov(data)
+    lower <- lower.tri(covariance, diag=TRUE)
+    covariance <- covariance[lower]
+
+    # specify the output
     return(list('stat' = covariance,
                 'n' = n,
                 'rng' = rng,
@@ -24,15 +45,52 @@ dp.covariance <- function(x, n, rng, epsilon, columns, trim.thresh=0.95) {
 }
 
 
-mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
-    epsilon <- checkepsilon(epsilon)
-    mechanism.args <- c(as.list(environment()), list(...))
-    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+# need to allow for an intercept
+
+covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=2e-16, intercept=FALSE, trim=TRUE, trim.thresh=0.95) {
+
+    rng <- checkrange(rng)
+    sensitivity <- sqrt((rng[2] - rng[1])^2)  # L2 bound
+    postlist <- NULL
+
+    release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n,
+                                  rng=rng, epsilon=epsilon, delta=delta, columns=columns,
+                                  sensitivity=sensitivity, intercept=intercept, postlist=postlist)
+
+    # convert release back to symmetric matrix
+    out.dim <- ifelse(intercept, length(columns) + 1, length(columns))
+    out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
+    out.matrix[lower.tri(out.matrix, diag=TRUE)] <- release$release
+    out.matrix[upper.tri(out.matrix, diag=FALSE)] <- t(out.matrix)[upper.tri(out.matrix, diag=FALSE)]
+    release$release <- out.matrix
+
+    return(release)
 }
 
+#' Gaussian mechanism
+
+mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
+
+    epsilon <- checkepsilon(epsilon)
+    x <- censor(x, rng)
+
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta) / epsilon)))
+    out$release <- out$stat + noise
+    out <- out[names(out) != 'stat']
+
+    # post-processing
+    if (!is.null(postlist)) {
+        out <- postprocess(out, postlist, ...)
+    }
+    return(out)
+}
+
+
 # if rng is expressed in standard deviations, then trim the orginal data frame by column?
-# any reason not to use censordata fn here?
-trimmer <- function(z, rng) {
+# does censordata fn work here?
+censor <- function(z, rng) {
     rng <- sort(rng)
     z[z < rng[1]] <- rng[1]
     z[z > rng[2]] <- rng[2]
