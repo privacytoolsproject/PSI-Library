@@ -25,7 +25,7 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, trim, trim.thr
         data <- data[1:n.trim, ]
     }
 
-    # means and st devs to unscale, use this instead of info in scale() to account for trimming
+    # means and st devs to unscale, use this instead of info in scale() to account for trimming??
     means <- apply(data, 2, mean)
     std.devs <- apply(data, 2, sd)
 
@@ -55,12 +55,18 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=2e-1
 
     release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n,
                                   rng=rng, epsilon=epsilon, delta=delta, columns=columns,
-                                  sensitivity=sensitivity, intercept=intercept, postlist=postlist)
+                                  sensitivity=sensitivity, intercept=intercept, trim=trim,
+                                  trim.thresh=trim.thresh, postlist=postlist)
 
-    # convert release back to symmetric matrix
+    # unscale release and convert to symmetric matrix
     out.dim <- ifelse(intercept, length(columns) + 1, length(columns))
     out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
     out.matrix[lower.tri(out.matrix, diag=TRUE)] <- release$release
+    for (row in 1:nrow(out.matrix)) {
+        for (col in row:ncol(out.matrix)) {
+            out.matrix[row, col] <- out.matrix[row, col] * release$std.devs[row] * release$std.devs[col]
+        }
+    }
     out.matrix[upper.tri(out.matrix, diag=FALSE)] <- t(out.matrix)[upper.tri(out.matrix, diag=FALSE)]
     release$release <- out.matrix
 
