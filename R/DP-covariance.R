@@ -68,7 +68,8 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=2e-1
         }
     }
     out.matrix[upper.tri(out.matrix, diag=FALSE)] <- t(out.matrix)[upper.tri(out.matrix, diag=FALSE)]
-    release$release <- out.matrix
+    release$release <- data.frame(out.matrix)
+    rownames(release$release) <- colnames(release$release) <- ifelse(intercept, c('intercept', columns), columns)
 
     return(release)
 }
