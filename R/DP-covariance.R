@@ -1,21 +1,49 @@
-#' Function to evaluate the covariance matrix from a design matrix
+#' Function to evaluate the covariance matrix from input matrix and specify parameters for post-processing
 #'
-#' @param z Numeric design matrix
+#' @param x Numeric data frame
 #' @param n Integer indicating the number of observations
+#' @param rng Numeric 2-tuple, lower and upper bounds for standardized data
 #' @param epsilon Numeric differential privacy parameter epsilon
+#' @param columns Character vector indicating columns in \code{x}, if NULL then use all columns
 #' @param trim.thresh Numeric, default 0.95
 
-dp.covariance <- function(z, n, epsilon, trim.thresh=0.95) {
-    return(list('z' = z,
+dp.covariance <- function(x, n, rng, epsilon, columns, trim.thresh=0.95) {
+    data <- x[, columns]
+    data.scaled <- scale(data)
+    means <- attr(data.scaled, 'scaled:center')
+    std.devs <- attr(data.scaled, 'scaled:scale')
+    covariance <- cov(data.scaled)
+
+    return(list('stat' = covariance,
                 'n' = n,
+                'rng' = rng,
                 'epsilon' = epsilon,
-                'trim.thresh' = trim.thresh))
+                'trim.thresh' = trim.thresh,
+                'means' = means,
+                'std.devs' = std.devs))
+}
+
+
+mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
+    epsilon <- checkepsilon(epsilon)
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+}
+
+# if rng is expressed in standard deviations, then trim the orginal data frame by column?
+# any reason not to use censordata fn here?
+trimmer <- function(z, rng) {
+    rng <- sort(rng)
+    z[z < rng[1]] <- rng[1]
+    z[z > rng[2]] <- rng[2]
+    return(z)
 }
 
 
 if (interactive()) {
 
     library(mvtnorm)
+    set.seed(2)
 
     # fake data
     N <- 5000
@@ -58,12 +86,12 @@ if (interactive()) {
     delta <- 2e-16
     epsilon <- 0.1
 
+    # symmetric noise matrix
     the.matrix <- matrix(NA, nrow=nrow(vc), ncol=ncol(vc))
-    for (row in 1:nrow(vc)) {
-        n.draws <- nrow(vc) - row + 1
-        draws <- rnorm(n.draws, mean=0, sd=(l2.bound^2 * sqrt(2 * log(1.25 / delta) / epsilon)))
-        the.matrix[row, row:nrow(vc)] <- the.matrix[row:nrow(vc), row] <- draws
-    }
+    n.draws <- (nrow(the.matrix) + 1) * nrow(the.matrix) / 2
+    draws <- rnorm(n.draws, mean=0, sd=(l2.bound^2 * sqrt(2 * log(1.25 / delta) / epsilon)))
+    the.matrix[upper.tri(the.matrix, diag=TRUE)] <- draws
+    the.matrix[lower.tri(the.matrix, diag=FALSE)] <- t(the.matrix)[lower.tri(the.matrix, diag=FALSE)]
 
     # jackknife the vc matrix for local sensitivity
     vc.lower <- vc.upper <- inner(df.trim[1, , drop=FALSE])
@@ -76,6 +104,7 @@ if (interactive()) {
     }
     jack.vc.diff <- vc.upper - vc.lower
 
+    # symmetric noise
     trim.matrix <- matrix(NA, nrow=nrow(vc.trim), ncol=ncol(vc.trim))
     for(row in 1:nrow(vc.trim)) {
         for (col in row:ncol(vc.trim)) {
