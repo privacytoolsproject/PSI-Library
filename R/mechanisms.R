@@ -42,6 +42,33 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 }
 
 
+#' Gaussian mechanism
+
+mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
+
+    # checks
+    epsilon <- checkepsilon(epsilon)
+    if (var.type %in% c('numeric', 'integer', 'logical')) {
+        rng <- checkrange(rng)
+        x <- censordata(x, var.type, range=rng)
+    } else {
+        x <- censordata(x, var.type, levels=list(...)$bins)
+    }
+
+    # evaluate the noisy statistic
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta) * epsilon)))
+    out$release <- out$stat + noise
+    out <- out[names(out) != 'stat']
+
+    # post-processing
+    if (!is.null(postlist)) {
+        out <- postprocess(out, postlist, ...)
+    }
+    return(out)
+}
+
 #' Cycle through available postprocessing functions for a released statistic
 #'
 #' @param out list containing differentially private released statistic, and mechanism and statistic names
