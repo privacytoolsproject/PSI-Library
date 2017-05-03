@@ -4,17 +4,17 @@
 #' @param x A vector of data to run the function on.
 #' @param var.type Data type of vector x
 #' @param n The number of samples
-#' @param range An a priori estimate of the range
+#' @param rng An a priori estimate of the range
 #' @param sensitivity numeric
 #' @param epsilon numeric
 #' @param ... Other arguments passed to \code{fun}
 #' @return Differentially private release of function \code{fun} on data \code{x}
 #' @examples
 #' n <- 1000
-#' range <- c(0,1)
-#' x <- runif(n, min=min(range), max=max(range))
-#' sensitivity <- diff(range)/n
-#' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
+#' rng <- c(0,1)
+#' x <- runif(n, min=min(rng), max=max(rng))
+#' sensitivity <- diff(rng) / n
+#' mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
 
 mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
 
@@ -23,7 +23,7 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
     if (var.type == 'logical') { x <- make_logical(x) }
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
-        x <- censordata(x, var.type, range=rng)
+        x <- censordata(x, var.type, rng=rng)
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
     }
@@ -50,7 +50,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     epsilon <- checkepsilon(epsilon)
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
-        x <- censordata(x, var.type, range=rng)
+        x <- censordata(x, var.type, rng=rng)
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
     }
