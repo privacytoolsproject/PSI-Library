@@ -102,16 +102,22 @@ sgn <- function(x) {
 #' checkrange(1:3)
 #' \dontrun{checkrange(1)}
 
-checkrange = function(range) {
-	if (length(range) < 2) {
-		stop("range argument in error: requires upper and lower values as vector of length 2.")
-	} else if (length(range) > 2) {
-		warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
-		range <- c(min(range),max(range))
-	} else {
-		range <- sort(range)
-	}
-	return(range)
+checkrange <- function(rng) {
+    if (NCOL(rng) > 1) {
+        for (i in 1:nrow(rng)) {
+            rng[i, ] <- sort(rng[i, ])
+        }
+    } else {
+        if (length(rng) < 2) {
+            stop("range argument in error: requires upper and lower values as vector of length 2.")
+        } else if (length(rng) > 2) {
+            warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
+            rng <- c(min(rng), max(rng))
+        } else {
+            rng <- sort(rng)
+        }
+    }
+	return(rng)
 }
 
 
@@ -140,7 +146,7 @@ checkepsilon = function(epsilon) {
 #'
 #' @param x A vector of numeric or categorial values to censor
 #' @param var_type Character indicating the variable type
-#' @param range For numeric types, a vector (min, max) of the bounds of the range,
+#' @param rng For numeric vectors, a vector (min, max) of the bounds of the range. For numeric matrices with nrow N and ncol P, a Px2 matrix of (min, max) bounds.
 #' @param levels For categorical types, a vector containing the levels to be returned
 #' @return Original vector with values outside the bounds censored to the bounds
 #'
@@ -151,19 +157,27 @@ checkepsilon = function(epsilon) {
 #' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
 #' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 
-censordata = function(x, var_type, range=NULL, levels=NULL) {
+censordata = function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
             stop('`levels` are required for categorical types')
         }
         x <- factor(x, levels=levels, exclude=NULL)
     } else {
-        if (is.null(range)) {
-            stop('`range` is required for numeric types')
+        if (is.null(rng)) {
+            stop('range `rng` is required for numeric types')
         }
-        range <- checkrange(range)
-        x[x < range[1]] <- range[1]
-        x[x > range[2]] <- range[2]
+        if (NCOL(x) > 1) {
+            for (j in 1:ncol(x)) {
+                rng[j, ] <- checkrange(rng[j, ])
+                x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
+                x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
+            }
+        } else {
+            rng <- checkrange(rng)
+            x[x < rng[1]] <- rng[1]
+            x[x > rng[2]] <- rng[2]
+        }
     }
     return(x)
 }

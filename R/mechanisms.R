@@ -4,17 +4,17 @@
 #' @param x A vector of data to run the function on.
 #' @param var.type Data type of vector x
 #' @param n The number of samples
-#' @param range An a priori estimate of the range
+#' @param rng An a priori estimate of the range
 #' @param sensitivity numeric
 #' @param epsilon numeric
 #' @param ... Other arguments passed to \code{fun}
 #' @return Differentially private release of function \code{fun} on data \code{x}
 #' @examples
 #' n <- 1000
-#' range <- c(0,1)
-#' x <- runif(n, min=min(range), max=max(range))
-#' sensitivity <- diff(range)/n
-#' mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
+#' rng <- c(0,1)
+#' x <- runif(n, min=min(rng), max=max(rng))
+#' sensitivity <- diff(rng) / n
+#' mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
 
 mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
 
@@ -23,7 +23,7 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
     if (var.type == 'logical') { x <- make_logical(x) }
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
-        x <- censordata(x, var.type, range=rng)
+        x <- censordata(x, var.type, rng=rng)
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
     }
@@ -41,6 +41,33 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
     return(out)
 }
 
+
+#' Gaussian mechanism
+
+mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
+
+    # checks
+    epsilon <- checkepsilon(epsilon)
+    if (var.type %in% c('numeric', 'integer', 'logical')) {
+        rng <- checkrange(rng)
+        x <- censordata(x, var.type, rng=rng)
+    } else {
+        x <- censordata(x, var.type, levels=list(...)$bins)
+    }
+
+    # evaluate the noisy statistic
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta) * epsilon)))
+    out$release <- out$stat + noise
+    out <- out[names(out) != 'stat']
+
+    # post-processing
+    if (!is.null(postlist)) {
+        out <- postprocess(out, postlist, ...)
+    }
+    return(out)
+}
 
 #' Cycle through available postprocessing functions for a released statistic
 #'
