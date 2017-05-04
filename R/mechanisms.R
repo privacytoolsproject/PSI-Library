@@ -58,7 +58,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta) * epsilon)))
+    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta)) / epsilon))
     out$release <- out$stat + noise
     out <- out[names(out) != 'stat']
 
