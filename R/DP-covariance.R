@@ -45,14 +45,12 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
     # get the vector of sensitivities from the ranges
     diffs = apply(rng, 1, diff)
     if (intercept) { diffs <- c(1, diffs) }
-    diffs.combns <- c()
+    sensitivity <- c()
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
-            diffs.combns <- c(diffs.combns, c(diffs[i], diffs[j]))
+            sensitivity <- ((n - 1) / n) * diffs[i] * diffs[j]
         }
     }
-    diffs = matrix(diffs.combns, ncol=2, byrow=TRUE)
-    sensitivity <- ((n - 1) / n) * diffs[, 1] * diffs[, 2]
 
     # pass to mechanism
     postlist <- NULL
