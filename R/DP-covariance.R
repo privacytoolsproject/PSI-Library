@@ -76,7 +76,7 @@ if (interactive()) {
     x1 <- rnorm(n, mean=73, sd=17)
     x2 <- rpois(n, lambda=4)
     x3 <- as.integer(rnorm(n, mean=25, sd=4))
-    y <- 0.145 * x1 - 0.565 * x2 + 0.013 * x3 + rnorm(n, sd=1.5)
+    y <- 1.276 + 0.145 * x1 - 0.565 * x2 + 0.013 * x3 + rnorm(n, sd=1.5)
     df <- as.data.frame(cbind(y, x1, x2, x3))
     cols <- names(df)
 
@@ -84,11 +84,55 @@ if (interactive()) {
     dtypes <- 'numeric'
     eps <- 0.5
 
-    release <- covariance.release(df, dtypes, n, eps, rng, cols)
-    observe <- t(as.matrix(df)) %*% as.matrix(df)
+    #release <- covariance.release(df, dtypes, n, eps, rng, cols)
+    #observe <- t(as.matrix(df)) %*% as.matrix(df)
 
     release2 <- covariance.release(df, dtypes, n, eps, rng, cols, intercept=TRUE)
     df2 <- cbind(1, df)
     names(df2) <- c('intercept', names(df))
     observe2 <- t(as.matrix(df2)) %*% as.matrix(df2)
+
+    source('mechanisms.R')
+    source('utilities.R')
+
+
+    extract.locs <- function(formula, data, intercept) {
+        t <- terms(formula, data=data)
+        x.locs <- which(names(data) %in% attr(t, 'term.labels'))
+        x.labels <- names(data)[x.locs]
+        y.loc <- attr(t, 'response')
+        if (intercept) {
+            intercept.loc <- which(names(data) == 'intercept')
+            x.locs <- c(intercept.loc, x.locs)
+            x.labels <- append(x.labels, 'intercept', after=(intercept.loc - 1))
+            if (intercept.loc <= y.loc) { y.loc <- y.loc + 1 }
+        }
+        return(list('y.loc' = y.loc,
+                    'x.locs' = x.locs,
+                    'x.labels' = x.labels))
+    }
+
+    regress <- function(form, release, n, intercept) {
+        xy.locs <- extract.locs(form, release, intercept)
+        x.locs <- xy.locs$x.locs
+        y.loc <- xy.locs$y.loc
+        loc.vec <- rep(TRUE, (length(x.locs) + 1))
+        loc[y.loc] <- FALSE
+        coefs <- amsweep((as.matrix(release) / n), loc.vec)[y.loc, x.locs]
+        coefs <- data.frame(coefs)
+        rownames(coefs) <- xy.locs$x.labels
+        names(coefs) <- 'Estimate'
+        return(coefs)
+    }
+
+    form <- as.formula('y ~ x1 + x2 + x3')
+    estimates <- regress(form, release2$release, release2$n, intercept=TRUE)
+
+    x <- c(1, 3, 4, 5)
+    y <- 2
+    loc <- rep(TRUE, 5)
+    loc[y] <- FALSE
+    swept <- amsweep((as.matrix(release2$release) / n), loc)[y, x]
+
+    linreg <- lm(form, data=df)
 }
