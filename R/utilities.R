@@ -313,3 +313,41 @@ getFuncArgs <- function(output, target.func) {
     }
     return(spec)
 }
+
+
+#' Sweep operator (from Amelia)
+
+amsweep <- function(g, m, reverse=FALSE) {
+    if (identical(m, vector(mode='logical', length=length(m)))) {
+        return(g)
+    } else {
+        p <- nrow(g)
+        rowsm <- sum(m)
+        if (rowsm == p) {
+            h <- solve(g)
+            h <- -h
+        } else {
+            kseq <- 1:p
+            k <- kseq[m]
+            kcompl <- kseq[-k]
+            g11 <- g[k, k, drop=FALSE]
+            g12 <- g[k, kcompl, drop=FALSE]
+            g21 <- t(g12)
+            g22 <- g[kcompl, kcompl, drop=FALSE]
+            h11a <- try(solve(g11), silent=TRUE)
+            if (inherits(h11a, "try-error")) {
+                h11a <- mpinv(g11)
+            }
+            h11 <- as.matrix((-h11a))
+            if (reverse) {sgn2 <- -1} else {sgn2 <- 1}
+            h12 <- as.matrix(sgn2 * (h11a %*% g12))
+            h21 <- as.matrix(t(h12))
+            h22 <- g22 - (g21 %*% h11a %*% g12)
+            hwo <- rbind(cbind(h11, h12), cbind(h21, h22))
+            xordering <- c(k, kcompl)
+            h <- matrix(0, p, p)
+            h[xordering, xordering] <- hwo
+        }
+        return(h)
+    }
+}
