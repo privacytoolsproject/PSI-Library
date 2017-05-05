@@ -26,7 +26,8 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept) {
                 'n' = n,
                 'rng' = rng,
                 'epsilon' = epsilon,
-                'columns' = columns))
+                'columns' = columns,
+                'intercept' = intercept))
 }
 
 
@@ -117,7 +118,7 @@ if (interactive()) {
         x.locs <- xy.locs$x.locs
         y.loc <- xy.locs$y.loc
         loc.vec <- rep(TRUE, (length(x.locs) + 1))
-        loc[y.loc] <- FALSE
+        loc.vec[y.loc] <- FALSE
         coefs <- amsweep((as.matrix(release) / n), loc.vec)[y.loc, x.locs]
         coefs <- data.frame(coefs)
         rownames(coefs) <- xy.locs$x.labels
@@ -126,7 +127,7 @@ if (interactive()) {
     }
 
     form <- as.formula('y ~ x1 + x2 + x3')
-    estimates <- regress(form, release2$release, release2$n, intercept=TRUE)
+    estimates <- regress(form, release2$release, release2$n, release2$intercept)
 
     x <- c(1, 3, 4, 5)
     y <- 2
