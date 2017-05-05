@@ -105,7 +105,7 @@ if (interactive()) {
         if (intercept) {
             intercept.loc <- which(names(data) == 'intercept')
             x.locs <- c(intercept.loc, x.locs)
-            x.labels <- append(x.labels, 'intercept', after=(intercept.loc - 1))
+            x.labels <- append(x.labels, 'Intercept', after=(intercept.loc - 1))
             if (intercept.loc <= y.loc) { y.loc <- y.loc + 1 }
         }
         return(list('y.loc' = y.loc,
@@ -128,6 +128,8 @@ if (interactive()) {
 
     form <- as.formula('y ~ x1 + x2 + x3')
     estimates <- regress(form, release2$release, release2$n, release2$intercept)
+    form2 <- as.formula('y ~ x1 + x2')
+    estimates2 <- regress(form2, release2$release, release2$n, release2$intercept)
 
     x <- c(1, 3, 4, 5)
     y <- 2
@@ -136,4 +138,5 @@ if (interactive()) {
     swept <- amsweep((as.matrix(release2$release) / n), loc)[y, x]
 
     linreg <- lm(form, data=df)
+    linreg2 <- lm(form2, data=df)
 }
