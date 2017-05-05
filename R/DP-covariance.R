@@ -43,7 +43,7 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept) {
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=FALSE) {
 
     # get the vector of sensitivities from the ranges
-    diffs = apply(rng, 1, diff)
+    diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(1, diffs) }
     sensitivity <- c()
     for (i in 1:length(diffs)) {
