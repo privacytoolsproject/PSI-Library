@@ -71,6 +71,14 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
 }
 
 
+#' Function to convert unique private covariances into symmetric matrix
+#'
+#' @param release Numeric private release of elements in lower triangle of covariance matrix
+#' @param intercept Logical indicating whether the intercept is included
+#' @param columns Character vector with column names
+#'
+#' This function is used by the mechanism in post-processing and not intended for interactive post-processing
+
 covariance.formatRelease <- function(release, intercept, columns) {
     out.dim <- length(columns)
     out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
@@ -82,6 +90,13 @@ covariance.formatRelease <- function(release, intercept, columns) {
 }
 
 
+#' Function to perform linear regression using private release of covariance matrix
+#'
+#' @param release Numeric private release of covariance matrix
+#' @param n Integer indicating number of observations
+#' @param intercept Logical indicating whether the intercept is included
+#' @param formulae List of R formulae
+
 covariance.postLinearRegression <- function(release, n, intercept, formulae) {
     out.summaries <- vector('list', length(formulae))
     for (f in 1:length(formulae)) {
@@ -90,6 +105,13 @@ covariance.postLinearRegression <- function(release, n, intercept, formulae) {
     return(out.summaries)
 }
 
+
+#' Function to perform regression using the covariance matrix via the sweep operator
+#'
+#' @param formula Formula
+#' @param release Numeric private release of covariance matrix
+#' @param n Integer indicating number of observations
+#' @param intercept Logical indicating whether the intercept is included
 
 regress <- function(formula, release, n, intercept) {
     xy.locs <- extract.indices(formula, release, intercept)
@@ -104,6 +126,12 @@ regress <- function(formula, release, n, intercept) {
     return(coefs)
 }
 
+
+#' Function to obtain indices in data frame for dependent & independent variables from a formula
+#'
+#' @param formula Formula
+#' @param data Data frame, in this case being the data frame of a private covariance matrix
+#' @param intercept Logical indicating whether the intercept is included
 
 extract.indices <- function(formula, data, intercept) {
     t <- terms(formula, data=data)
