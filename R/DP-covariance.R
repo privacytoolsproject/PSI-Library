@@ -50,13 +50,16 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
 
     # get the vector of sensitivities from the ranges
     diffs <- apply(rng, 1, diff)
-    if (intercept) { diffs <- c(1, diffs) }
+    if (intercept) { diffs <- c(-1, diffs) }
     sensitivity <- c()
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
-            sensitivity <- ((n - 1) / n) * diffs[i] * diffs[j]
+            s <- ((n - 1) / n) * diffs[i] * diffs[j]
+            sensitivity <- c(sensitivity, s)
         }
     }
+
+    print(sensitivity)
 
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
@@ -119,10 +122,13 @@ regress <- function(formula, release, n, intercept) {
     y.loc <- xy.locs$y.loc
     loc.vec <- rep(TRUE, (length(x.loc) + 1))
     loc.vec[y.loc] <- FALSE
-    coefs <- amsweep((as.matrix(release) / n), loc.vec)[y.loc, x.loc]
-    coefs <- data.frame(coefs)
+    sweep <- amsweep((as.matrix(release) / n), loc.vec)
+    coefs <- sweep[y.loc, x.loc]
+    se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+    coefs <- data.frame(cbind(coefs, se))
+    coefs <- format(round(coefs, 5), nsmall=5)
     rownames(coefs) <- xy.locs$x.label
-    names(coefs) <- 'Estimate'
+    names(coefs) <- c('Estimate', 'Std. Error')
     return(coefs)
 }
 
@@ -152,9 +158,6 @@ extract.indices <- function(formula, data, intercept) {
 
 if (interactive()) {
 
-    source('mechanisms.R')
-    source('utilities.R')
-
     set.seed(681521)
     n <- 10000
     x1 <- rnorm(n, mean=73, sd=17)
@@ -166,7 +169,7 @@ if (interactive()) {
 
     rng <- rbind(range(y), range(x1), range(x2), range(x3))
     dtypes <- 'numeric'
-    eps <- 0.5
+    eps <- 50
 
     # covariance example
     release <- covariance.release(df, dtypes, n, eps, rng, cols)
@@ -179,5 +182,4 @@ if (interactive()) {
     df2 <- cbind(1, df)
     names(df2) <- c('intercept', names(df))
     observe2 <- t(as.matrix(df2)) %*% as.matrix(df2)
-
 }
