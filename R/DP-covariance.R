@@ -59,8 +59,6 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
         }
     }
 
-    print(sensitivity)
-
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
     if (!is.null(formulae)) {
@@ -169,7 +167,7 @@ if (interactive()) {
 
     rng <- rbind(range(y), range(x1), range(x2), range(x3))
     dtypes <- 'numeric'
-    eps <- 50
+    eps <- 1.4
 
     # covariance example
     release <- covariance.release(df, dtypes, n, eps, rng, cols)
