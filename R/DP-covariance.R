@@ -59,6 +59,12 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
         }
     }
 
+    if (is.null(formulae)) {
+        formulae <- as.list(formulae)
+    } else {
+        if (inherits(formulae, 'formula')) { formulae <- list(formulae) }
+    }
+
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
     if (!is.null(formulae)) {
@@ -66,7 +72,7 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
     }
     release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
                                  rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
-                                 sensitivity=sensitivity, intercept=intercept, formulae=as.list(formulae),
+                                 sensitivity=sensitivity, intercept=intercept, formulae=formulae,
                                  postlist=postlist)
     return(release)
 }
@@ -156,28 +162,66 @@ extract.indices <- function(formula, data, intercept) {
 
 if (interactive()) {
 
+    source('mechanisms.R')
+    source('utilities.R')
+
     set.seed(681521)
-    n <- 10000
-    x1 <- rnorm(n, mean=73, sd=17)
-    x2 <- rpois(n, lambda=4)
-    x3 <- as.integer(rnorm(n, mean=25, sd=4))
-    y <- 1.276 + 0.145 * x1 - 0.565 * x2 + 0.013 * x3 + rnorm(n, sd=1.5)
-    df <- as.data.frame(cbind(y, x1, x2, x3))
-    cols <- names(df)
+    eps.list <- seq(0.1, 1.0, length.out=10)
+    n.list <- c(500, 1000, 2000, 5000, 10000)
 
-    rng <- rbind(range(y), range(x1), range(x2), range(x3))
-    dtypes <- 'numeric'
-    eps <- 1.4
+    out.priv.b0 <- matrix(NA, nrow=length(eps.list), ncol=length(n.list))
+    out.true.b0 <- matrix(NA, nrow=length(eps.list), ncol=length(n.list))
 
-    # covariance example
-    release <- covariance.release(df, dtypes, n, eps, rng, cols)
-    observe <- t(as.matrix(df)) %*% as.matrix(df)
+    out.priv.b1 <- matrix(NA, nrow=length(eps.list), ncol=length(n.list))
+    out.true.b1 <- matrix(NA, nrow=length(eps.list), ncol=length(n.list))
+    
+    out.priv.se <- matrix(NA, nrow=length(eps.list), ncol=length(n.list))
 
-    # example with regression
-    form1 <- as.formula('y ~ x1 + x2 + x3')
-    form2 <- as.formula('y ~ x1 + x2')
-    release2 <- covariance.release(df, dtypes, n, eps, rng, cols, intercept=TRUE, formulae=c(form1, form2))
-    df2 <- cbind(1, df)
-    names(df2) <- c('intercept', names(df))
-    observe2 <- t(as.matrix(df2)) %*% as.matrix(df2)
+    for (i in 1:length(eps.list)) {
+        eps <- eps.list[i]
+        for (j in 1:length(n.list)) { 
+            n <- n.list[j]
+            x <- rnorm(n, sd=2)
+            y <- 0.76 + 0.145 * x + rnorm(n)
+            df <- as.data.frame(cbind(y, x))
+            cols <- names(df)
+            rng <- rbind(range(y), range(x))
+            dtypes <- 'numeric'
+            form1 <- as.formula('y ~ x')
+
+            est.true <- lm(form1, df)$coefficients
+            out.true.b0[i, j] <- est.true[1]
+            out.true.b1[i, j] <- est.true[2]
+
+            n.sims <- 1000
+            est0.priv.out <- vector(mode='numeric', length=n.sims)
+            est1.priv.out <- vector(mode='numeric', length=n.sims)
+            se.priv.out <- vector(mode='numeric', length=n.sims)
+            for (k in 1:n.sims) {
+                release <- covariance.release(df, dtypes, n, eps, rng, cols, intercept=TRUE, formulae=form1)
+                est.priv <- release$linear.regression[[1]]
+                est.priv.b <- as.numeric(est.priv[, 1])
+                est.priv.se <- as.numeric(est.priv[, 2])
+                est0.priv.out[k] <- est.priv.b[1]
+                est1.priv.out[k] <- est.priv.b[2]
+                se.priv.out[k] <- !is.na(est.priv.se)[2]
+            }
+            out.priv.b0[i, j] <- mean(est0.priv.out)
+            out.priv.b1[i, j] <- mean(est1.priv.out)
+            out.priv.se[i, j] <- sum(se.priv.out) / n.sims
+        }
+    }
+
+    abs.error.b0 <- abs(out.true.b0 - out.priv.b0)
+    abs.error.b1 <- abs(out.true.b1 - out.priv.b1)
+    abs.error.b0 <- round(data.frame(abs.error.b0), 4)
+    abs.error.b1 <- round(data.frame(abs.error.b1), 4)
+    names(abs.error.b0) <- as.character(n.list)
+    rownames(abs.error.b0) <- as.character(eps.list)
+    names(abs.error.b1) <- as.character(n.list)
+    rownames(abs.error.b1) <- as.character(eps.list)
+    out.priv.se <- data.frame(out.priv.se)
+    names(out.priv.se) <- as.character(n.list)
+    rownames(out.priv.se) <- as.character(eps.list)
+
 }
