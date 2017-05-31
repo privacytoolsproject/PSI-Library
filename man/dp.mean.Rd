@@ -15,4 +15,3 @@ List with fields `name` specifying the statistic and `stat` with the value of th
 \description{
 Function to evaluate the mean and specify parameters for mean functions
 }
-

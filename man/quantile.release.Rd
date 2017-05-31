@@ -9,4 +9,3 @@
 \description{
 Release differentially private quantiles
 }
-

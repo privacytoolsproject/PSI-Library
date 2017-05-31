@@ -19,4 +19,3 @@ The scalar epsilon necessary to guarantee the accuracy needed
 \description{
 Describe Here
 }
-

@@ -22,4 +22,3 @@ Utility function to check type of variable is within set of acceptable types
 \examples{
 check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
 }
-

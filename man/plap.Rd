@@ -23,4 +23,3 @@ Cumulative distribution function for Laplace distribution
 x <- 0
 plap(x)
 }
-

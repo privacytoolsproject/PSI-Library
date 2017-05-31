@@ -4,7 +4,8 @@
 \alias{mechanism.laplace}
 \title{LaPlace mechanism for releasing differentially private queries}
 \usage{
-mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon, ...)
+mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon,
+  postlist = NULL, ...)
 }
 \arguments{
 \item{fun}{A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.}
@@ -13,6 +14,8 @@ mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon, ...)
 
 \item{var.type}{Data type of vector x}
 
+\item{rng}{An a priori estimate of the range}
+
 \item{sensitivity}{numeric}
 
 \item{epsilon}{numeric}
@@ -20,8 +23,6 @@ mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon, ...)
 \item{...}{Other arguments passed to \code{fun}}
 
 \item{n}{The number of samples}
-
-\item{range}{An a priori estimate of the range}
 }
 \value{
 Differentially private release of function \code{fun} on data \code{x}
@@ -31,9 +32,8 @@ LaPlace mechanism for releasing differentially private queries
 }
 \examples{
 n <- 1000
-range <- c(0,1)
-x <- runif(n, min=min(range), max=max(range))
-sensitivity <- diff(range)/n
-mechanism.laplace(dp.mean, x, 'numeric', range, sensitivity, 0.5, n)
+rng <- c(0,1)
+x <- runif(n, min=min(rng), max=max(rng))
+sensitivity <- diff(rng) / n
+mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
 }
-

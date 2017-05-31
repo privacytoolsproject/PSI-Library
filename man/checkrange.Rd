@@ -4,7 +4,7 @@
 \alias{checkrange}
 \title{Utility function for checking that range is ordered pair}
 \usage{
-checkrange(range)
+checkrange(rng)
 }
 \arguments{
 \item{range}{A vector, that ought to be an ordered pair}
@@ -22,4 +22,3 @@ Utility function for checking that range is ordered pair
 checkrange(1:3)
 \dontrun{checkrange(1)}
 }
-

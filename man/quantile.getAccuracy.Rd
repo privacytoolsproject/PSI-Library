@@ -28,4 +28,3 @@ The accuracy is interpreted as follows: The alpha value returned means that with
   probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's 
   estimate of the count in [min, t] is within alpha of the true value.
 }
-

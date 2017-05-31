@@ -19,4 +19,3 @@ If number of bins is not provided, use the Sturges method
 \description{
 Utility function to check bins argument to histogram
 }
-

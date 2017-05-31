@@ -57,4 +57,3 @@ bins <- c('a', 'b', 'c', 'd', 'e')
 r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
 r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
 }
-

@@ -4,17 +4,14 @@
 \alias{heavyhitters.getAccuracy}
 \title{Get the accuracy of heavyhitters statistic for a given value of epsilon}
 \usage{
-heavyhitters.getAccuracy(epsilon, delta, beta = 0.05, gap)
+heavyhitters.getAccuracy(release, epsilon, delta = 1e-07)
 }
 \arguments{
+\item{release}{The noisy estimate}
+
 \item{epsilon}{Epsilon value for differential privacy}
 
 \item{delta}{Delta value for differential privacy}
-
-\item{beta}{The true value is within the accuracy range with
-probability 1-beta}
-
-\item{gap}{}
 }
 \value{
 The accuracy guaranteed by the given epsilon
@@ -25,8 +22,7 @@ Get the accuracy of heavyhitters statistic for a given value of epsilon
 \author{
 Victor Balcer
 
-The accuracy is interpreted as follows: The alpha value returned means that with 
-  probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's 
+The accuracy is interpreted as follows: The alpha value returned means that with
+  probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's
   estimate of the count in [min, t] is within alpha of the true value.
 }
-

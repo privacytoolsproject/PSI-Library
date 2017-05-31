@@ -4,14 +4,14 @@
 \alias{heavyhitters.getParameters}
 \title{Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release}
 \usage{
-heavyhitters.getParameters(delta, beta = 0.05, gap)
+heavyhitters.getParameters(release, delta = 1e-07, alpha = 0.05)
 }
 \arguments{
-\item{delta}{Delta value for DP}
+\item{release}{The noisy estimate}
 
-\item{beta}{the true value is within the accuracy range (alpha)}
+\item{delta}{Delta value for differential privacy}
 
-\item{gap}{something here}
+\item{alpha}{The true value is within the accuracy range with probability 1 - \code{alpha}}
 }
 \value{
 The epsilon value necessary to gaurantee the given accuracy
@@ -22,4 +22,3 @@ Get the epsilon value necessary to guarantee a desired level of accuracy of a he
 \author{
 Victor Balcer
 }
-

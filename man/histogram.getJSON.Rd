@@ -12,4 +12,3 @@ JSON for histogram function
 \description{
 JSON doc for histogram
 }
-

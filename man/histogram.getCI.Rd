@@ -6,7 +6,18 @@
 \usage{
 histogram.getCI(release, n.bins, n, accuracy)
 }
+\arguments{
+\item{release}{Numeric vector with noisy estimate of bin counts}
+
+\item{n.bins}{Integer indicating the number of bines}
+
+\item{n}{Integer indicating the number of observations}
+
+\item{accuracy}{Numeric the accuracy of the noisy estimate}
+}
+\value{
+Confidence interval for the noisy counts in each bin
+}
 \description{
 Confidence interval
 }
-

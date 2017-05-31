@@ -9,12 +9,14 @@ Version: 0.1-1
 Date: 2017-02-21
 Description: Differentially Private Statistical Releases for Privacy
     Preservation
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Collate:
+    'DP-covariance.R'
     'DP-heavyhitters.R'
     'DP-histogram.R'
     'DP-mean.R'
     'DP-quantiles.R'
+    'DP-variance.R'
     'createJSON.R'
     'mechanisms.R'
     'utilities.R'

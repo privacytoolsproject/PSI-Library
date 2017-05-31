@@ -18,4 +18,3 @@ Sign function
 \examples{
 sgn(rnrom(10))
 }
-

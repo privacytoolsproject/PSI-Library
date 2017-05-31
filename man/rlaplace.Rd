@@ -22,4 +22,3 @@ Random draw from Laplace distribution
 \examples{
 rlaplace(sensitivity=1, epsilon=0.1)
 }
-

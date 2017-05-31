@@ -22,4 +22,3 @@ Random draw from Laplace distribution
 \examples{
 rlap(size=1000)
 }
-

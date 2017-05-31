@@ -4,14 +4,14 @@
 \alias{censordata}
 \title{Utility function for censoring data}
 \usage{
-censordata(x, var_type, range = NULL, levels = NULL)
+censordata(x, var_type, rng = NULL, levels = NULL)
 }
 \arguments{
 \item{x}{A vector of numeric or categorial values to censor}
 
 \item{var_type}{Character indicating the variable type}
 
-\item{range}{For numeric types, a vector (min, max) of the bounds of the range,}
+\item{rng}{For numeric vectors, a vector (min, max) of the bounds of the range. For numeric matrices with nrow N and ncol P, a Px2 matrix of (min, max) bounds.}
 
 \item{levels}{For categorical types, a vector containing the levels to be returned}
 }
@@ -28,4 +28,3 @@ Utility function for censoring data
 censordata(x=1:10, var_type='integer', range=c(2.5, 7))
 censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 }
-

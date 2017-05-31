@@ -24,4 +24,3 @@ Get the epsilon value necessary to guarantee a desired level of accuracy of a qu
 \author{
 Nathan Manohar
 }
-

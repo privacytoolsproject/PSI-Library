@@ -2,32 +2,36 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{heavyhitters.release}
 \alias{heavyhitters.release}
-\title{Release differentially private most common values.}
+\title{Release differentially private most common values}
 \usage{
-heavyhitters.release(x, epsilon, delta, k = 1, symb = NA)
+heavyhitters.release(x, var.type, epsilon, n, k, bins)
 }
 \arguments{
-\item{x}{A vector of the data}
+\item{x}{Vector of categorical data (character, factor)}
+
+\item{var.type}{Character string indicating data type}
 
 \item{epsilon}{Epsilon value for differential privacy}
 
-\item{delta}{Delta value for differential privacy}
+\item{n}{Integer indicating number of observations}
 
-\item{k}{top-k elements to return}
+\item{k}{Integer querying the most common \code{k} categories}
 
-\item{symb}{Symbol to return on failure (default : NA)}
+\item{bins}{Vector of categories from which the top \code{k} categories are evaluated}
 }
 \value{
-A vector whose values are k most common values or a failure return symbol.
+A vector whose values are \code{k} most common categories, or a failure message
 }
 \description{
-Release differentially private most common values.
+Release differentially private most common values
 }
 \examples{
-n <- 10000
-range <- c(0,20)
-x <- rbinom(n, size=max(range), prob=0.7)
-heavyhitters.release(x=x, epsilon=.1, delta=.0000001)
+N <- 1000
+epsilon <- 0.5
+observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
+y <- sample(observed.levels, size=N, prob=probs, replace=TRUE)
+release <- heavyhitters.release(y, 'character', epsilon, N, k=3, bins=bins)
 }
 \author{
 Victor Balcer
@@ -35,4 +39,3 @@ Victor Balcer
 Contains functions for privately releasing the top-k heavy hitters, that is,
  the k most common unique values.  For example, k=1 releases the mode.
 }
-

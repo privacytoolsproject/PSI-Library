@@ -34,4 +34,3 @@ r_int <- mean.release(x=x_int, var.type='integer', epsilon=0.5, n=n, range=c(5, 
 r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, range=c(0, 1))
 r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, range=c(-9.657, 3.483))
 }
-

@@ -18,4 +18,3 @@ Utility function to verify the type of histogram mechanism
 \examples{
 check_histogram_mechanism('stability')
 }
-

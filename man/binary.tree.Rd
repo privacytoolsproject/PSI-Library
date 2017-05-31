@@ -9,4 +9,3 @@ binary.tree(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon)
 \description{
 Binary tree in vector form
 }
-

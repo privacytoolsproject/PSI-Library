@@ -25,4 +25,3 @@ List with the true value of the statistic and arguments to be passed to other fu
 \description{
 Function to evaluate a histogram and specify arguments
 }
-
