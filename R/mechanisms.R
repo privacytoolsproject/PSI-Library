@@ -44,7 +44,7 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 
 #' Exponential mechanism
 
-mechanism.expontial(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
+mechanism.exponential(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
 
     epsilon <- checkepsilon(epsilon)
     x <- censordata(x, var.type, levels=list(...)$bins)
