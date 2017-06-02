@@ -143,3 +143,35 @@ mean.getJSON <- function(output.json=TRUE) {
     }
     return(out)
 }
+
+
+
+
+
+#' Reference class implementation of a differentially private mean
+
+dpMean <- setRefClass('dpMean') 
+
+dpMean$methods(initialize = function(x, var.type, n, epsilon, rng) {
+    .self$name <- 'mean'
+    .self$x <- x
+    .self$var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
+    .self$n <- n
+    .self$epsilon <- epsilon
+    .self$rng <- checkrange(rng)
+})
+
+dpMean$methods(evaluate = function() {
+    .self$release <- mean(.self$x)
+})
+
+dpMean$methods(release = function() {
+    .self$sensitivity <- diff(.self$rng) / .self$n
+    release <- mechanismLaplace()
+})
+
+mechanismLaplace <- function(dpStat) {
+    dpStat$evaluate()
+    dpStat$release <- dpStat$release + rlap(b=(dpStat$sensitivity / dpStat$epsilon), size=length(dpStat$release))
+    return(dpStat)
+}
