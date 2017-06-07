@@ -148,19 +148,28 @@ mean.getJSON <- function(output.json=TRUE) {
 
 
 
-#' Reference class implementation of a differentially private mean
+#' Example template for reference class implementation of a differentially private mean
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
 
 mechanism <- setRefClass(
     Class = 'mechanism',
     fields = list(
-        mechanism = 'character',
         name = 'character',
+        mechanism = 'character',
+        var.type = 'character',
         n = 'numeric',
         epsilon = 'numeric',
         rng = 'numeric',
-        result = 'ANY'
+        result = 'ANY',
+        alpha = 'numeric',
+        accuracy = 'numeric'
     )
 )
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
 
 mechanismLaplace <- setRefClass(
     Class = 'mechanismLaplace',
@@ -168,30 +177,55 @@ mechanismLaplace <- setRefClass(
 )
 
 mechanismLaplace$methods(
-    evaluate = function(fun, x, sens) {
-    xc <- ifelse(x > .self$rng[2], .self$rng[2],
-          ifelse(x < .self$rng[1], .self$rng[1], x))
-    true.val <- fun(xc)
-    return(true.val + rlap(sens / .self$epsilon, size=length(true.val)))
+    evaluate = function(fun, x, sens, postFun) {
+        xc <- ifelse(x > .self$rng[2], .self$rng[2],
+              ifelse(x < .self$rng[1], .self$rng[1], x))
+        true.val <- fun(xc)
+        scale <- sens / .self$epsilon
+        release <- true.val + rlap(b=scale, size=length(true.val))
+        z <- qlap((1 - (.self$alpha / 2)), b=scale)
+        interval <- c(release - z, release + z)
+        out <- list('release' = release, 'interval' = interval)
+        out <- postFun(out)
+        return(out)
 })
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace', 'mechLap')
+    contains = c('mechanismLaplace')
 )
 
 dpMean$methods(
-    initialize = function(mechanism, n, epsilon, rng) {
-        .self$mechanism <- mechanism
+    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
         .self$name <- 'Differentially private mean'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
+        .self$alpha <- alpha
 })
+
 
 dpMean$methods(
     release = function(x) {
-        fun <- mean
         sens <- diff(.self$rng) / .self$n
-        .self$result <- export(.self$mechanism)$evaluate(fun, x, sens)
+        .self$result <- export(.self$mechanism)$evaluate(mean, x, sens, .self$postProcess)
 })
+
+dpMean$methods(
+    postProcess = function(out) {
+        out$accuracy <- log(1 / alpha) / (n * epsilon)
+        out$epsilon <- log(1 / alpha) / (n * out$accuracy)
+        if (var.type == 'logical') {
+            out$std.dev <- sqrt(out$release * (1 - out$release))
+            out$median <- ifelse(out$release < 0.5, 0, 1)
+        }
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
