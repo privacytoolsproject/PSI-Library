@@ -153,46 +153,6 @@ mean.getJSON <- function(output.json=TRUE) {
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
 
-mechanism <- setRefClass(
-    Class = 'mechanism',
-    fields = list(
-        name = 'character',
-        mechanism = 'character',
-        var.type = 'character',
-        n = 'numeric',
-        epsilon = 'numeric',
-        rng = 'numeric',
-        result = 'ANY',
-        alpha = 'numeric',
-        accuracy = 'numeric'
-    )
-)
-
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
-
-mechanismLaplace <- setRefClass(
-    Class = 'mechanismLaplace',
-    contains = 'mechanism'
-)
-
-mechanismLaplace$methods(
-    evaluate = function(fun, x, sens, postFun) {
-        xc <- ifelse(x > .self$rng[2], .self$rng[2],
-              ifelse(x < .self$rng[1], .self$rng[1], x))
-        true.val <- fun(xc)
-        scale <- sens / .self$epsilon
-        release <- true.val + rlap(b=scale, size=length(true.val))
-        z <- qlap((1 - (.self$alpha / 2)), b=scale)
-        interval <- c(release - z, release + z)
-        out <- list('release' = release, 'interval' = interval)
-        out <- postFun(out)
-        return(out)
-})
-
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
-
 dpMean <- setRefClass(
     Class = 'dpMean',
     contains = c('mechanismLaplace')
@@ -212,8 +172,8 @@ dpMean$methods(
 
 dpMean$methods(
     release = function(x) {
-        sens <- diff(.self$rng) / .self$n
-        .self$result <- export(.self$mechanism)$evaluate(mean, x, sens, .self$postProcess)
+        sens <- diff(rng) / n
+        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess)
 })
 
 dpMean$methods(

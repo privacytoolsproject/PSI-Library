@@ -149,7 +149,7 @@ mechanismLaplace <- setRefClass(
 
 mechanismLaplace$methods(
     getFunArgs = function(fun) {
-    callSuper(fun)
+        callSuper(fun)
 })
 
 mechanismLaplace$methods(
