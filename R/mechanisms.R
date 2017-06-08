@@ -94,90 +94,74 @@ postprocess <- function(out, postlist, ...) {
 }
 
 
-#' Describe Here
-#'
-#' @param x something here
-#' @param var_type something here
-#' @param epsilon something here
-#' @param levels something here
-#' @param bins something here
-#' @param n_bins something here
-#' @return something here
+# ----------------------------------------------------------------------- #
+# ----------------------------------------------------------------------- #
+# base mechanism class
 
-mechanism.histogram.random <- function(x, var_type, epsilon, levels, bins, n_bins) {
+mechanism <- setRefClass(
+    Class = 'mechanism',
+    fields = list(
+        mechanism = 'character',
+        name = 'character',
+        var.type = 'character',
+        n = 'numeric',
+        epsilon = 'numeric',
+        rng = 'ANY',
+        result = 'ANY',
+        alpha = 'numeric',
+        accuracy = 'numeric',
+        bins = 'ANY',
+        n.bins = 'ANY'
+    )
+)
 
-    if (var_type %in% c('factor', 'character')) {
+mechanism$methods(
+    getFields = function() {
+        f <- names(getRefClass()$fields())
+        out <- setNames(vector('list', length(f)), f)
+        for (fd in f) {
+            out[[fd]] <- .self[[fd]]
+        }
+        return(out)
+})
 
-        x <- censordata(x, var_type=var_type, levels=bins)
-        bins <- unique(x)
-        n_bins <- length(bins)
-
-    } else {
-
-        n_bins <- check_histogram_bins(n_bins=n_bins, n=n)
-        x <- censordata(x, var_type=var_type, range=range)
-        levels <- seq(range[1], range[2], length.out=(n_bins + 1))
-    }
-
-    if (n_bins < 2) {
-        stop('mechanism `random` requires at least 2 bins for a numeric type')
-    }
-
-    if (epsilon > log((n_bins + 1) / (n_bins - 1))) {
-        stop('`epsilon` is too large to guarantee differential privacy')
-    }
-
-    levels_mapper <- function(data, map, pr_same) {
-        idx <- map[which(map[, 'level'] == data), 'index']
-        if (runif(1) >= pr_same) {
-            sampled_idx <- sample(1:(dim(map)[1] - 1), size=1)
-            if (sampled_idx >= idx) {
-                idx <- idx + 1
+mechanism$methods(
+    getFunArgs = function(fun) {
+        f <- .self$getFields()
+        spec <- list()
+        for (arg in names(f)) {
+            if (arg %in% names(formals(fun))) {
+                spec[[arg]] <- f[[arg]]
             }
         }
-        return(map[idx, 'level'])
-    }
-
-    pr_diff <- 1 / n_bins * exp(-epsilon)
-    pr_same <- 1 - (n_bins - 1) * pr_diff
-
-    if (var_type %in% c('numeric', 'integer')) {
-
-        levels_bins <- cut(x, breaks=levels, include.lowest=TRUE, right=TRUE)
-        levels_uniq <- data.frame('level' = sort(unique(levels_bins)), 'index' = 1:n_bins)
-        levels_out <- unlist(lapply(levels_bins, levels_mapper, levels_uniq, pr_same))
-
-    } else {
-
-        levels_uniq <- data.frame('level' = sort(unique(x), na.last=TRUE), 'index' = 1:n_bins)
-        levels_out <- unlist(lapply(x, levels_mapper, levels_uniq, pr_same))
-    }
-
-    m <- 1 / (pr_same - pr_diff)
-    b <- pr_diff * n * m
-    release <- m * table(levels_out) - b
-    return(release)
-}
+        return(spec)
+})
 
 
-## NOTES ##
-# [1] The user sometimes needs public information, like n, to determine the sensitivity.  We might check n is correct?  For example:
-#	if(length(x) != n)  stop("Supplied value of n is not the length of the dataset.")  
-# Not important at present, but there might become cases where argument x is not the data, but a reference to find the data.
-#
-# [2] Could possibly include an args argument with a NULL default as a way to override the args construction and supply a more general function.
-#	if(is.null(args)){   
-#		args = list(x=x)
-#	}
-# 
-# [3] On line 26, should `n` be the length of `truevalue`? Number of draws equal to the number 
-#   of values in the statistic. Cell counts for histogram, for example.
-# 
-# [4] Using ellipsis to pass flexible arguments to function in mechanism. Unsure how to do that 
-#   in context of do.call(). Motivating case is to allow users to specify number of bins in histogram, 
-#   also unsure if that is needed or appropriate functionality, or if we may want to allow this 
-#   flexibility for other functions. 
-# 
-# [5] Including additional argument for data type. I still want to use this function for categorical types, but assume we do not 
-#   need a numeric range or censor for these types. I am doing a censor of categorical types in the histogram.release function based
-#   on the bins supplied to the function. Not sure if that belongs here.
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# Laplace mechanism
+
+mechanismLaplace <- setRefClass(
+    Class = 'mechanismLaplace',
+    contains = 'mechanism'
+)
+
+mechanismLaplace$methods(
+    getFunArgs = function(fun) {
+    callSuper(fun)
+})
+
+mechanismLaplace$methods(
+    evaluate = function(fun, x, sens, postFun) {
+        xc <- censordata(x, .self$var.type, .self$rng)
+        field.vals <- .self$getFunArgs(fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals))
+        scale <- sens / .self$epsilon
+        release <- true.val + rlap(b=scale, size=length(true.val))
+        z <- qlap((1 - (.self$alpha / 2)), b=scale)
+        interval <- c(release - z, release + z)
+        out <- list('release' = release, 'interval' = interval)
+        out <- postFun(out)
+        return(out)
+})
