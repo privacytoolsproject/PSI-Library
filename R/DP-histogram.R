@@ -223,3 +223,56 @@ histogram.getJSON <- function(output.json=TRUE) {
     }
     return(out)
 }
+
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# dp histogram class
+
+fun.hist <- function(x, var.type, bins=NULL) {
+    if (var.type %in% c('numeric', 'integer')) {
+        hist <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
+    } else {
+        hist <- table(x, useNA='ifany')
+    }
+    return(hist)
+}
+
+dpHistogram <- setRefClass(
+    Class = 'dpHistogram',
+    contains = 'mechanismLaplace'
+)
+
+dpHistogram$methods(
+    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05) {
+        .self$name <- 'Differentially private histogram'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$rng <- rng
+        .self$bins <- bins
+        .self$n.bins <- n.bins
+        .self$alpha <- alpha
+})
+
+dpHistogram$methods(
+    release = function(x) {
+        if (var.type %in% c('numeric', 'integer')) {
+            .self$n.bins <- check_histogram_bins(n.bins, n)
+            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+        } else {
+            .self$n.bins <- length(bins)
+        }
+        .self$result <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+})
+
+dpHistogram$methods(
+    postProcess = function(out) {
+        out$accuracy <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
+        out$epsilon <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * out$accuracy)
+        if (var.type %in% c('factor', 'character')) {
+            out$herfindahl <- sum((release / n)^2)
+        }
+        return(out)
+})
