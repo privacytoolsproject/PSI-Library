@@ -158,7 +158,6 @@ mechanism$methods(
         return(spec)
 })
 
-
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
 # Laplace mechanism
@@ -186,3 +185,32 @@ mechanismLaplace$methods(
         out <- postFun(out)
         return(out)
 })
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+#' Gaussian mechanism
+
+mechanismGaussian <- setRefClass(
+    Class = 'mechanismGaussian',
+    contains = 'mechanism'
+)
+
+mechanismGaussian$methods(
+    getFunArgs = function(fun) {
+        callSuper(fun)
+})
+
+mechanismGaussian$methods(
+    evaluate = function(fun, x, sens, postFun) {
+        xc <- censordata(x, .self$var.type, .self$rng)
+        field.vals <- .self$getFunArgs(fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals))
+        scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
+        release <- true.val + rnorm(length(true.val), sd=scale)
+        out <- list('release' = release)
+        out <- postFun(out)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
