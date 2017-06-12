@@ -1,2 +1,3 @@
+import("jsonlite")
 importFrom("stats", "rexp", "rnorm", "runif", "terms", "var")
 importFrom("utils", "head", "tail")
