@@ -42,6 +42,27 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 }
 
 
+#' Exponential mechanism
+
+mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
+
+    epsilon <- checkepsilon(epsilon)
+    x <- censordata(x, var.type, levels=list(...)$bins)
+
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+    quality <- out$stat - max(out$stat)
+    probs <- ifelse(out$stat == 0, 0, exp((epsilon * quality) / (2 * sensitivity)))
+    out$release <- sample(names(out$stat), k, prob=probs)
+    out <- out[names(out) != 'stat']
+
+    if (!is.null(postlist)) {
+        out <- postprocess(out, postlist, ...)
+    }
+    return(out)
+}
+
+
 #' Gaussian mechanism
 
 mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
