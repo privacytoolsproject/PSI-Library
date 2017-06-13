@@ -111,7 +111,7 @@ mean.getParameters <- function(accuracy, n, alpha=0.05) {
 #' @param alpha something here
 #' @return Confidence bounds for differentially private release
 
-mean.getCI <- function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
+mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
     z <- qlap((1 - (alpha / 2)), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
@@ -174,8 +174,9 @@ dpMean$methods(
 
 dpMean$methods(
     postProcess = function(out) {
-        out$accuracy <- log(1 / alpha) / (n * epsilon)
-        out$epsilon <- log(1 / alpha) / (n * out$accuracy)
+        out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+        out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+        out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
         if (var.type == 'logical') {
             out$std.dev <- sqrt(out$release * (1 - out$release))
             out$median <- ifelse(out$release < 0.5, 0, 1)
