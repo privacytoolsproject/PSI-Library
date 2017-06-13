@@ -145,13 +145,9 @@ mean.getJSON <- function(output.json=TRUE) {
 }
 
 
-
-
-
-#' Example template for reference class implementation of a differentially private mean
-
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
+# Reference class implementation of mean
 
 dpMean <- setRefClass(
     Class = 'dpMean',

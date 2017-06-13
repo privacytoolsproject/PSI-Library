@@ -48,3 +48,39 @@ variance.post.std <- function(release) {
     std <- sqrt(release)
     return(std)
 }
+
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# Reference class implementation of variance
+
+dpVariance <- setRefClass(
+    Class = 'dpVariance',
+    contains = c('mechanismLaplace')
+)
+
+dpVariance$methods(
+    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
+        .self$name <- 'Differentially private variance'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$rng <- rng
+        .self$alpha <- alpha
+})
+
+dpVariance$methods(
+    release = function(x) {
+        sens <- (n - 1) / n^2 * diff(rng)^2
+        .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
+})
+
+dpVariance$methods(
+    postProcess = function(out) {
+        out$std <- sqrt(out$release)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
