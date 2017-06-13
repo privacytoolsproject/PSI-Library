@@ -127,12 +127,14 @@ mechanism <- setRefClass(
         var.type = 'character',
         n = 'numeric',
         epsilon = 'numeric',
+        delta = 'numeric',
         rng = 'ANY',
         result = 'ANY',
         alpha = 'numeric',
         accuracy = 'numeric',
         bins = 'ANY',
-        n.bins = 'ANY'
+        n.bins = 'ANY',
+        error = 'numeric'
     )
 )
 
@@ -173,16 +175,14 @@ mechanismLaplace$methods(
 })
 
 mechanismLaplace$methods(
-    evaluate = function(fun, x, sens, postFun) {
+    evaluate = function(fun, x, sens, postFun, ...) {
         xc <- censordata(x, .self$var.type, .self$rng)
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens / .self$epsilon
         release <- true.val + rlap(b=scale, size=length(true.val))
-        z <- qlap((1 - (.self$alpha / 2)), b=scale)
-        interval <- c(release - z, release + z)
-        out <- list('release' = release, 'interval' = interval)
-        out <- postFun(out)
+        out <- list('release' = release)
+        out <- postFun(out, ...)
         return(out)
 })
 
