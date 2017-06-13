@@ -244,7 +244,7 @@ dpHistogram <- setRefClass(
 )
 
 dpHistogram$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05) {
+    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -254,6 +254,8 @@ dpHistogram$methods(
         .self$bins <- bins
         .self$n.bins <- n.bins
         .self$alpha <- alpha
+        .self$delta <- delta
+        .self$error <- error
 })
 
 dpHistogram$methods(
@@ -264,15 +266,30 @@ dpHistogram$methods(
         } else {
             .self$n.bins <- length(bins)
         }
-        .self$result <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=FALSE)
+        stable <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=TRUE)
+        stable.accurate <- stable$accuracy < noisy$accuracy
+        stable.check <- check_histogram_n(stable$accuracy, n, n.bins, epsilon, delta, alpha)
+        if (stable.accurate && stable.check) {
+            a <- stable$accuracy * n / 2
+            stable$release <- stable$release[stable$release >= a]
+            .self$result <- stable
+        } else {
+            noisy$release <- ifelse(noisy$release < 0, 0, round(stable$release))
+            .self$result <- noisy
+        }
 })
 
 dpHistogram$methods(
-    postProcess = function(out) {
-        out$accuracy <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
-        out$epsilon <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * out$accuracy)
+    postProcess = function(out, stability) {
+        out$accuracy <- histogram.getAccuracy(n.bins, n, epsilon, stability, delta, alpha, error)
+        out$epsilon <- histogram.getParameters(n.bins, n, out$accuracy, stability, delta, alpha, error)
+        out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
         if (var.type %in% c('factor', 'character')) {
-            out$herfindahl <- sum((release / n)^2)
+            out$herfindahl <- sum((out$release / n)^2)
         }
         return(out)
 })
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
