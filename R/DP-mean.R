@@ -42,7 +42,7 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
                      'interval' = 'getCI')
     if (var.type == 'logical') {
         rng <- c(0, 1)
-        postlist <- c(postlist, list('std' = 'postStandard_Deviation',
+        postlist <- c(postlist, list('std' = 'postStandardDeviation',
                                      'median' = 'postMedian'))
     }
     rng <- checkrange(rng)
@@ -58,8 +58,9 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
 #'
 #' @param release Differentially private release of a mean for a logical variable
 
-mean.postStandard_Deviation <- function(release) {
-    return(sqrt(release * (1 - release)))
+mean.postStandardDeviation <- function(release) {
+    sd <- sqrt(release * (1 - release))
+    return(sd)
 }
 
 
@@ -68,11 +69,8 @@ mean.postStandard_Deviation <- function(release) {
 #' @param release Differentially private release of a mean for a logical variable
 
 mean.postMedian <- function(release) {
-    if (release < 0.5) {
-        return(0)
-    } else {
-        return(1)
-    }
+    m <- ifelse(release < 0.5, 0, 1)
+    return(m)
 }
 
 
@@ -178,8 +176,8 @@ dpMean$methods(
         out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
         out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
         if (var.type == 'logical') {
-            out$std.dev <- sqrt(out$release * (1 - out$release))
-            out$median <- ifelse(out$release < 0.5, 0, 1)
+            out$std.dev <- mean.postStandardDeviation(out$release)
+            out$median <- mean.postMedian(out$release)
         }
         return(out)
 })
