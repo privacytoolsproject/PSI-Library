@@ -13,6 +13,9 @@ extract.indices(formula, data, intercept)
 
 \item{intercept}{Logical indicating whether the intercept is included}
 }
+\value{
+something here
+}
 \description{
 Function to obtain indices in data frame for dependent & independent variables from a formula
 }

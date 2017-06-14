@@ -21,6 +21,11 @@ covariance.release(x, var.type, n, epsilon, rng, columns, intercept = FALSE,
 \item{columns}{Character vector indicating columns in \code{x}}
 
 \item{intercept}{Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE}
+
+\item{formulae}{something here}
+}
+\value{
+something here
 }
 \description{
 Function to release a differentially private inner product of input matrix

@@ -18,6 +18,11 @@ dp.covariance(x, n, rng, epsilon, columns, intercept, formulae)
 \item{columns}{Character vector indicating columns in \code{x}}
 
 \item{intercept}{Logical indicating whether an intercept should be added prior to evaluating the inner product x'x}
+
+\item{formulae}{something here}
+}
+\value{
+List containing covariance matrix of the input data and postprocessing parameters
 }
 \description{
 Function to evaluate the covariance matrix from input matrix and specify parameters for post-processing

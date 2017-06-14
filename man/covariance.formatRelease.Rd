@@ -11,9 +11,12 @@ covariance.formatRelease(release, intercept, columns)
 
 \item{intercept}{Logical indicating whether the intercept is included}
 
-\item{columns}{Character vector with column names
+\item{columns}{Character vector with column names}
+}
+\value{
+Release of private covariance matrix
 
-This function is used by the mechanism in post-processing and not intended for interactive post-processing}
+This function is used by the mechanism in post-processing and not intended for interactive post-processing
 }
 \description{
 Function to convert unique private covariances into symmetric matrix

@@ -6,6 +6,8 @@
 #' @param epsilon Numeric differential privacy parameter epsilon
 #' @param columns Character vector indicating columns in \code{x}
 #' @param intercept Logical indicating whether an intercept should be added prior to evaluating the inner product x'x
+#' @param formulae something here
+#' @return List containing covariance matrix of the input data and postprocessing parameters
 
 dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 
@@ -45,6 +47,8 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
 #' @param columns Character vector indicating columns in \code{x}
 #' @param intercept Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE
+#' @param formulae something here
+#' @return something here
 
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=FALSE, formulae=NULL) {
 
@@ -83,6 +87,7 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
 #' @param release Numeric private release of elements in lower triangle of covariance matrix
 #' @param intercept Logical indicating whether the intercept is included
 #' @param columns Character vector with column names
+#' @return Release of private covariance matrix
 #'
 #' This function is used by the mechanism in post-processing and not intended for interactive post-processing
 
@@ -103,6 +108,7 @@ covariance.formatRelease <- function(release, intercept, columns) {
 #' @param n Integer indicating number of observations
 #' @param intercept Logical indicating whether the intercept is included
 #' @param formulae List of R formulae
+#' @return something here
 
 covariance.postLinearRegression <- function(release, n, intercept, formulae) {
     out.summaries <- vector('list', length(formulae))
@@ -119,6 +125,7 @@ covariance.postLinearRegression <- function(release, n, intercept, formulae) {
 #' @param release Numeric private release of covariance matrix
 #' @param n Integer indicating number of observations
 #' @param intercept Logical indicating whether the intercept is included
+#' @return something here
 
 regress <- function(formula, release, n, intercept) {
     xy.locs <- extract.indices(formula, release, intercept)
@@ -142,6 +149,7 @@ regress <- function(formula, release, n, intercept) {
 #' @param formula Formula
 #' @param data Data frame, in this case being the data frame of a private covariance matrix
 #' @param intercept Logical indicating whether the intercept is included
+#' @return something here
 
 extract.indices <- function(formula, data, intercept) {
     t <- terms(formula, data=data)

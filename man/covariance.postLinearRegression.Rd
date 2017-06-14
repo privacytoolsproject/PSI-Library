@@ -15,6 +15,9 @@ covariance.postLinearRegression(release, n, intercept, formulae)
 
 \item{formulae}{List of R formulae}
 }
+\value{
+something here
+}
 \description{
 Function to perform linear regression using private release of covariance matrix
 }

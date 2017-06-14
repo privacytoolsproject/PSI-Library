@@ -15,6 +15,9 @@ regress(formula, release, n, intercept)
 
 \item{intercept}{Logical indicating whether the intercept is included}
 }
+\value{
+something here
+}
 \description{
 Function to perform regression using the covariance matrix via the sweep operator
 }
