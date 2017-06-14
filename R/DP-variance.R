@@ -1,8 +1,8 @@
 #' Function to evaluate true variance & specify post-processing parameters
 #'
 #' @param x Numeric vector
-#' @param var.trpe Character string indicating variable type
-#' @param n Integer indicating number of observations in \code{x}
+#' @param var.type Character string indicating variable type
+#' @param n Numeric, the number of observations in vector x
 #' @param sensitivity Numeric, the sensitivity of the estimate
 #' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @return List with fields providing values for the true statistic and post-processing
@@ -23,8 +23,8 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 #' Function for differentially private release of variance
 #'
 #' @param x Numeric vector
-#' @param var.trpe Character string indicating variable type
-#' @param n Integer indicating number of observations in \code{x}
+#' @param var.type Character string indicating variable type
+#' @param n Numeric, he number of observations in vector x
 #' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @param rng Numeric 2-tuple indicating range of numeric variable
 #' @return List output containing noisy estimate and post-processing values from the Laplace mechanism

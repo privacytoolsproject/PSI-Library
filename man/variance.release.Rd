@@ -9,13 +9,13 @@ variance.release(x, var.type, n, epsilon, rng)
 \arguments{
 \item{x}{Numeric vector}
 
-\item{n}{Integer indicating number of observations in \code{x}}
+\item{var.type}{Character string indicating variable type}
+
+\item{n}{Numeric, he number of observations in vector x}
 
 \item{epsilon}{Numeric, epsilon parameter for differential privacy}
 
 \item{rng}{Numeric 2-tuple indicating range of numeric variable}
-
-\item{var.trpe}{Character string indicating variable type}
 }
 \value{
 List output containing noisy estimate and post-processing values from the Laplace mechanism
