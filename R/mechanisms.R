@@ -119,13 +119,14 @@ postprocess <- function(out, postlist, ...) {
 #'
 #' @param x something here
 #' @param var_type something here
+#' @param n something here
 #' @param epsilon something here
 #' @param levels something here
 #' @param bins something here
 #' @param n_bins something here
 #' @return something here
 
-mechanism.histogram.random <- function(x, var_type, epsilon, levels, bins, n_bins) {
+mechanism.histogram.random <- function(x, var_type, n, epsilon, levels, bins, n_bins) {
 
     if (var_type %in% c('factor', 'character')) {
 

@@ -4,12 +4,14 @@
 \alias{mechanism.histogram.random}
 \title{Describe Here}
 \usage{
-mechanism.histogram.random(x, var_type, epsilon, levels, bins, n_bins)
+mechanism.histogram.random(x, var_type, n, epsilon, levels, bins, n_bins)
 }
 \arguments{
 \item{x}{something here}
 
 \item{var_type}{something here}
+
+\item{n}{something here}
 
 \item{epsilon}{something here}
 
