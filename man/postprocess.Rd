@@ -12,16 +12,9 @@ postprocess(out, postlist, ...)
 \item{postlist}{List with name, function pairs for post-processing statistics}
 
 \item{...}{Other arguments passed to \code{fun}}
-
-\item{var.type}{Data type of vector x}
-
-\item{rng}{An a priori estimate of the range}
-
-\item{sensitivity}{numeric}
-
-\item{epsilon}{numeric}
-
-\item{Original}{list with released statistic, appended with available postprocessed releases}
+}
+\value{
+something here
 }
 \description{
 Cycle through available postprocessing functions for a released statistic

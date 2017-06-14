@@ -7,6 +7,26 @@
 mechanism.exponential(fun, x, var.type, sensitivity, epsilon, k,
   postlist = NULL, ...)
 }
+\arguments{
+\item{fun}{A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}}
+
+\item{x}{A vector of data to run the function on}
+
+\item{var.type}{Character string indicating variable of vector \code{x}}
+
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+
+\item{k}{something here}
+
+\item{postlist}{List with name, function pairs for post-processing statistics}
+
+\item{...}{Other arguments passed to \code{fun}}
+}
+\value{
+something here
+}
 \description{
 Exponential mechanism
 }

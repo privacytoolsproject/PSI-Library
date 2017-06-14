@@ -8,21 +8,21 @@ mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon,
   postlist = NULL, ...)
 }
 \arguments{
-\item{fun}{A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.}
+\item{fun}{A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}}
 
-\item{x}{A vector of data to run the function on.}
+\item{x}{A vector of data to run the function on}
 
-\item{var.type}{Data type of vector x}
+\item{var.type}{Character string indicating variable of vector \code{x}}
 
 \item{rng}{An a priori estimate of the range}
 
-\item{sensitivity}{numeric}
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
 
-\item{epsilon}{numeric}
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+
+\item{postlist}{List with name, function pairs for post-processing statistics}
 
 \item{...}{Other arguments passed to \code{fun}}
-
-\item{n}{The number of samples}
 }
 \value{
 Differentially private release of function \code{fun} on data \code{x}

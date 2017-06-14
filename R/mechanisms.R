@@ -1,12 +1,12 @@
 #' LaPlace mechanism for releasing differentially private queries
 #'
-#' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.
-#' @param x A vector of data to run the function on.
-#' @param var.type Data type of vector x
-#' @param n The number of samples
+#' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}
+#' @param x A vector of data to run the function on
+#' @param var.type Character string indicating variable of vector \code{x}
 #' @param rng An a priori estimate of the range
-#' @param sensitivity numeric
-#' @param epsilon numeric
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param postlist List with name, function pairs for post-processing statistics
 #' @param ... Other arguments passed to \code{fun}
 #' @return Differentially private release of function \code{fun} on data \code{x}
 #' @examples
@@ -43,6 +43,16 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 
 
 #' Exponential mechanism
+#' 
+#' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}
+#' @param x A vector of data to run the function on
+#' @param var.type Character string indicating variable of vector \code{x}
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param k something here
+#' @param postlist List with name, function pairs for post-processing statistics
+#' @param ... Other arguments passed to \code{fun}
+#' @return something here
 
 mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
 
@@ -64,6 +74,17 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
 
 
 #' Gaussian mechanism
+#' 
+#' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}
+#' @param x A vector of data to run the function on
+#' @param var.type Character string indicating variable of vector \code{x}
+#' @param rng An a priori estimate of the range
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param delta something here
+#' @param postlist List with name, function pairs for post-processing statistics
+#' @param ... Other arguments passed to \code{fun}
+#' @return something here
 
 mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
 
@@ -93,13 +114,9 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
 #' Cycle through available postprocessing functions for a released statistic
 #'
 #' @param out list containing differentially private released statistic, and mechanism and statistic names
-#' @param var.type Data type of vector x
-#' @param rng An a priori estimate of the range
-#' @param sensitivity numeric
-#' @param epsilon numeric
 #' @param postlist List with name, function pairs for post-processing statistics
 #' @param ... Other arguments passed to \code{fun}
-#' @param Original list with released statistic, appended with available postprocessed releases
+#' @return something here
 
 postprocess <- function(out, postlist, ...) {
     available.attrs <- c(out, list(...))
