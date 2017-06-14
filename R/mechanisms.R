@@ -136,7 +136,7 @@ mechanism.histogram.random <- function(x, var_type, epsilon, levels, bins, n_bin
     } else {
 
         n_bins <- check_histogram_bins(n_bins=n_bins, n=n)
-        x <- censordata(x, var_type=var_type, range=range)
+        x <- censordata(x, var_type=var_type, rng=range)
         levels <- seq(range[1], range[2], length.out=(n_bins + 1))
     }
 
