@@ -9,11 +9,13 @@
 \arguments{
 \item{x}{Numeric vector}
 
-\item{n}{The number of samples}
+\item{var.type}{Character string indicating variable type}
 
-\item{epsilon}{Numeric}
+\item{n}{The number of observations in vector x}
 
-\item{range}{An a priori estimate of the range}
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+
+\item{rng}{An a priori estimate of the range}
 }
 \value{
 Differentially private release of mean of vector x

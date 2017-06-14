@@ -9,6 +9,9 @@
 \arguments{
 \item{release}{Differentially private release of a mean for a logical variable}
 }
+\value{
+something here
+}
 \description{
 Postprocessed Median for Logical Variables
 }

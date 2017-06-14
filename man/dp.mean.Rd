@@ -8,6 +8,14 @@ dp.mean(x, var.type, n, sensitivity, epsilon)
 }
 \arguments{
 \item{x}{Numeric vector}
+
+\item{var.type}{Character string indicating variable type}
+
+\item{n}{The number of observations in vector x}
+
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
 }
 \value{
 List with fields `name` specifying the statistic and `stat` with the value of the statistic

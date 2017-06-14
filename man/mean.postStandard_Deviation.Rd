@@ -9,6 +9,9 @@
 \arguments{
 \item{release}{Differentially private release of a mean for a logical variable}
 }
+\value{
+something here
+}
 \description{
 Postprocessed Standard Deviation for Logical Variables
 }

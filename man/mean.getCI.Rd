@@ -2,26 +2,26 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getCI}
 \alias{mean.getCI}
-\title{Describe Here}
+\title{Confidence Interval for Differentially Private Mean}
 \usage{
 \method{mean}{getCI}(release, epsilon, sensitivity, n, rng, alpha = 0.05)
 }
 \arguments{
-\item{release}{something here}
+\item{release}{Differentially private release of mean of vector x}
 
-\item{epsilon}{something here}
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
 
-\item{sensitivity}{something here}
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
 
-\item{n}{something here}
+\item{n}{The number of observations in the data}
 
-\item{alpha}{something here}
+\item{rng}{An a priori estimate of the range}
 
-\item{range}{something here}
+\item{alpha}{The statistical signifcance level}
 }
 \value{
 Confidence bounds for differentially private release
 }
 \description{
-Describe Here
+Confidence Interval for Differentially Private Mean
 }

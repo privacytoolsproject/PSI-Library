@@ -1,6 +1,10 @@
 #' Function to evaluate the mean and specify parameters for mean functions
 #'
 #' @param x Numeric vector
+#' @param var.type Character string indicating variable type
+#' @param n The number of observations in vector x
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @return List with fields `name` specifying the statistic and `stat` with the value of the statistic
 
 dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
@@ -16,10 +20,11 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 
 #' Function for differentially private release of mean
 #'
-#' @param x Numeric vector 
-#' @param epsilon Numeric
-#' @param n The number of samples
-#' @param range An a priori estimate of the range
+#' @param x Numeric vector
+#' @param var.type Character string indicating variable type
+#' @param n The number of observations in vector x
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param rng An a priori estimate of the range
 #' @return Differentially private release of mean of vector x
 #'
 #' @examples
@@ -57,6 +62,7 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
 #' Postprocessed Standard Deviation for Logical Variables
 #'
 #' @param release Differentially private release of a mean for a logical variable
+#' @return something here
 
 mean.postStandard_Deviation <- function(release) {
     return(sqrt(release * (1 - release)))
@@ -66,6 +72,7 @@ mean.postStandard_Deviation <- function(release) {
 #' Postprocessed Median for Logical Variables
 #'
 #' @param release Differentially private release of a mean for a logical variable
+#' @return something here
 
 mean.postMedian <- function(release) {
     if (release < 0.5) {
@@ -76,7 +83,7 @@ mean.postMedian <- function(release) {
 }
 
 
-#' Describe Here
+#' Accuracy Guarantee for Mean Release
 #'
 #' @param epsilon Privacy parameter epsilon
 #' @param n Number of observations
@@ -89,10 +96,10 @@ mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
 }
 
 
-#' Describe Here
+#' Epsilon Value Necessary to Guarantee Desired Accuracy
 #'
 #' @param accuracy The accuracy we need to guarantee (percent)
-#' @param n The number of samples
+#' @param n The number of observations in the data
 #' @param alpha The statistical signifcance level
 #' @return The scalar epsilon necessary to guarantee the accuracy needed
 
@@ -101,14 +108,14 @@ mean.getParameters <- function(accuracy, n, alpha=0.05) {
     return(epsilon)
 }
 
-#' Describe Here
+#' Confidence Interval for Differentially Private Mean
 #'
-#' @param release something here
-#' @param epsilon something here
-#' @param sensitivity something here
-#' @param n something here
-#' @param range something here
-#' @param alpha something here
+#' @param release Differentially private release of mean of vector x
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param n The number of observations in the data
+#' @param rng An a priori estimate of the range
+#' @param alpha The statistical signifcance level
 #' @return Confidence bounds for differentially private release
 
 mean.getCI <- function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
@@ -120,6 +127,7 @@ mean.getCI <- function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
 
 #' JSON doc for histogram
 #'
+#' @param output.json something here
 #' @return JSON for histogram function
 
 mean.getJSON <- function(output.json=TRUE) {

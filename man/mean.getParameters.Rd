@@ -2,14 +2,14 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getParameters}
 \alias{mean.getParameters}
-\title{Describe Here}
+\title{Epsilon Value Necessary to Guarantee Desired Accuracy}
 \usage{
 \method{mean}{getParameters}(accuracy, n, alpha = 0.05)
 }
 \arguments{
 \item{accuracy}{The accuracy we need to guarantee (percent)}
 
-\item{n}{The number of samples}
+\item{n}{The number of observations in the data}
 
 \item{alpha}{The statistical signifcance level}
 }
@@ -17,5 +17,5 @@
 The scalar epsilon necessary to guarantee the accuracy needed
 }
 \description{
-Describe Here
+Epsilon Value Necessary to Guarantee Desired Accuracy
 }
