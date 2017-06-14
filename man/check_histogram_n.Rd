@@ -6,6 +6,22 @@
 \usage{
 check_histogram_n(accuracy, n, n_bins, epsilon, delta, alpha)
 }
+\arguments{
+\item{accuracy}{The accuracy we need to guarantee}
+
+\item{n}{Number of observations}
+
+\item{n_bins}{Number of cells in which to tabulate values}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+
+\item{delta}{something here}
+
+\item{alpha}{something here}
+}
+\value{
+something here
+}
 \description{
 Utility function to check sufficient n
 }

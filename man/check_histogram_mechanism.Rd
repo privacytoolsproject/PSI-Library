@@ -7,10 +7,13 @@
 check_histogram_mechanism(mechanism)
 }
 \arguments{
-\item{mechanism}{Character string specifying the mechanism
+\item{mechanism}{Character string specifying the mechanism}
+}
+\value{
+something here
 
 Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
-the mechanism if so, else throws an error}
+the mechanism if so, else throws an error
 }
 \description{
 Utility function to verify the type of histogram mechanism

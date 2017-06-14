@@ -1,8 +1,8 @@
 #' Random draw from Laplace distribution
 #'
-#' @param sensitivity numeric
-#' @param epsilon numeric
 #' @param n integer, number of draws
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlaplace(sensitivity=1, epsilon=0.1)
@@ -18,7 +18,7 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 #'
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
-#' @param n integer, number of draws
+#' @param size number of observations
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlap(size=1000)
@@ -92,7 +92,7 @@ sgn <- function(x) {
 
 #' Utility function for checking that range is ordered pair
 #'
-#' @param range A vector, that ought to be an ordered pair
+#' @param rng A vector, that ought to be an ordered pair
 #' @return An ordered pair
 #'
 #' Checks if a supplied range is an ordered pair.  Coerces any vector of length two
@@ -123,7 +123,7 @@ checkrange <- function(rng) {
 
 #' Utility function for checking that epsilon is acceptably defined
 #'
-#' @param epsilon A vector, that ought to be positive and length of 1
+#' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @return The supplied epsilon if acceptable, otherwise an error message interupts
 #'
 #' @examples
@@ -236,6 +236,7 @@ make_logical <- function(x) {
 #' Utility function to verify the type of histogram mechanism
 #'
 #' @param mechanism Character string specifying the mechanism
+#' @return something here
 #' 
 #' Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
 #' the mechanism if so, else throws an error 
@@ -256,6 +257,7 @@ check_histogram_mechanism <- function(mechanism) {
 #'
 #' @param x Vector, categorical type
 #' @param bins Vector, depositor-provided list of levels for which to count values
+#' @return something here
 
 check_histogram_categorical <- function(x, bins) {
     x <- factor(x, levels=bins, exclude=NULL)
@@ -284,8 +286,14 @@ check_histogram_bins <- function(n_bins, n) {
 }
 
 
-#' Utility function to check sufficient n 
-#' 
+#' Utility function to check sufficient n
+#' @param accuracy The accuracy we need to guarantee
+#' @param n Number of observations
+#' @param n_bins Number of cells in which to tabulate values
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param delta something here
+#' @param alpha something here
+#' @return something here
 
 check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) { 
     cond1 <- (8 / accuracy) * (0.5 - log(delta) / epsilon)

@@ -9,9 +9,9 @@ rlaplace(n = 1, sensitivity, epsilon)
 \arguments{
 \item{n}{integer, number of draws}
 
-\item{sensitivity}{numeric}
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
 
-\item{epsilon}{numeric}
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
 }
 \value{
 Random draws from Laplace distribution

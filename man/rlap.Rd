@@ -11,7 +11,7 @@ rlap(mu = 0, b = 1, size = 1)
 
 \item{b}{numeric, spread}
 
-\item{n}{integer, number of draws}
+\item{size}{number of observations}
 }
 \value{
 Random draws from Laplace distribution

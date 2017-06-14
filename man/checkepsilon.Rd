@@ -7,7 +7,7 @@
 checkepsilon(epsilon)
 }
 \arguments{
-\item{epsilon}{A vector, that ought to be positive and length of 1}
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
 }
 \value{
 The supplied epsilon if acceptable, otherwise an error message interupts

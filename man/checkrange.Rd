@@ -7,7 +7,7 @@
 checkrange(rng)
 }
 \arguments{
-\item{range}{A vector, that ought to be an ordered pair}
+\item{rng}{A vector, that ought to be an ordered pair}
 }
 \value{
 An ordered pair

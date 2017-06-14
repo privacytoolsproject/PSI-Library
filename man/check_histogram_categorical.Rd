@@ -12,6 +12,9 @@ check_histogram_categorical(x, bins)
 
 \item{bins}{Vector, depositor-provided list of levels for which to count values}
 }
+\value{
+something here
+}
 \description{
 Utility function to include NA level for categorical types when vector of bins
 does not include all observed levels in the data vector.
