@@ -6,6 +6,24 @@
 \usage{
 \method{quantile}{release}(x, var.type, n, epsilon, rng, gran, cdf.step)
 }
+\arguments{
+\item{x}{Numeric vector}
+
+\item{var.type}{Character string indicating variable type}
+
+\item{n}{The number of observations in vector x}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+
+\item{rng}{An a priori estimate of the range}
+
+\item{gran}{something here}
+
+\item{cdf.step}{something here}
+}
+\value{
+something here
+}
 \description{
 Release differentially private quantiles
 }

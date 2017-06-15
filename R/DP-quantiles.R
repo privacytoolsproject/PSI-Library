@@ -1,4 +1,14 @@
 #' Binary tree in vector form
+#' 
+#' @param x Numeric vector
+#' @param var.type Character string indicating variable type
+#' @param n The number of observations in vector x
+#' @param rng An a priori estimate of the range
+#' @param gran something here
+#' @param universe.size something here
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @return something here
 
 binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon) {
     depth <- ceiling(log2(universe.size))
@@ -29,6 +39,15 @@ binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, e
 
 
 #' Release differentially private quantiles
+#' 
+#' @param x Numeric vector
+#' @param var.type Character string indicating variable type
+#' @param n The number of observations in vector x
+#' @param epsilon Numeric, epsilon parameter for differential privacy
+#' @param rng An a priori estimate of the range
+#' @param gran something here
+#' @param cdf.step something here
+#' @return something here 
 
 quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
@@ -75,7 +94,7 @@ quantile.getAccuracy <- function(epsilon, n, universe.size, alpha=0.05) {
 
 #' Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release
 #'
-#' @param Accuracy Numeric, the accuracy parameter
+#' @param accuracy Numeric, the accuracy parameter
 #' @param n Integer, number of observations
 #' @param universe.size Integer, the universe size
 #' @param alpha Numeric, statistical significance level

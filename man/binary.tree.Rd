@@ -6,6 +6,26 @@
 \usage{
 binary.tree(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon)
 }
+\arguments{
+\item{x}{Numeric vector}
+
+\item{var.type}{Character string indicating variable type}
+
+\item{n}{The number of observations in vector x}
+
+\item{rng}{An a priori estimate of the range}
+
+\item{gran}{something here}
+
+\item{universe.size}{something here}
+
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+}
+\value{
+something here
+}
 \description{
 Binary tree in vector form
 }

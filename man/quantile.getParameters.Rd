@@ -7,13 +7,13 @@
 \method{quantile}{getParameters}(accuracy, n, universe.size, alpha = 0.05)
 }
 \arguments{
+\item{accuracy}{Numeric, the accuracy parameter}
+
 \item{n}{Integer, number of observations}
 
 \item{universe.size}{Integer, the universe size}
 
 \item{alpha}{Numeric, statistical significance level}
-
-\item{Accuracy}{Numeric, the accuracy parameter}
 }
 \value{
 The epsilon value necessary to gaurantee the given accuracy
