@@ -154,7 +154,7 @@ checkepsilon = function(epsilon) {
 #' or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
 #'
 #' @examples
-#' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 #' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 
 censordata = function(x, var_type, rng=NULL, levels=NULL) {
