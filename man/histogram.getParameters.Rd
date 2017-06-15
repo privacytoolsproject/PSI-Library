@@ -14,6 +14,8 @@ histogram.getParameters(n.bins, n, accuracy, stability, delta = 2^-30,
 
 \item{accuracy}{Numeric}
 
+\item{stability}{something here}
+
 \item{delta}{Numeric delta value for differential privacy, fixed}
 
 \item{alpha}{Numeric statistical significance level, fixed}

@@ -20,7 +20,10 @@ histogram.release(x, var.type, n, epsilon, rng = NULL, bins = NULL,
 
 \item{bins}{Vector of bins for which values are counted, required for categorical types}
 
-\item{n.bins}{Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}
+\item{n.bins}{Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}}
+}
+\value{
+something here
 
 If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 used to construct the table. The vector is pre-processed so that observed levels not specified in these
@@ -31,7 +34,7 @@ If the variable is numeric, the number of bins `n_bins` is set by the user optio
 method is used to select the number of bins given the number of observations `n`. The bins are then
 constructed to be equal intervals between the provided range.
 
-Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.}
+Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
 }
 \description{
 Release differentially private histogram

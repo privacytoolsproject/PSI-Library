@@ -6,6 +6,8 @@
 #' @param bins Vector of bins
 #' @param n.bins Integer indicating the number of bins
 #' @param n Integer indicating the number of observations in \code{x}
+#' @param sensitivity Numeric, the sensitivity of the estimate
+#' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @return List with the true value of the statistic and arguments to be passed to other functions
 
 dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon) {
@@ -35,6 +37,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' @param rng Tuple, range of x, required for numeric types
 #' @param bins Vector of bins for which values are counted, required for categorical types
 #' @param n.bins Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}
+#' @return something here
 #'
 #' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 #' used to construct the table. The vector is pre-processed so that observed levels not specified in these
@@ -135,6 +138,7 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 #' @param n.bins Integer indicating number of cells in which to tabulate values
 #' @param n Integer indicating number of observations
 #' @param accuracy Numeric
+#' @param stability something here
 #' @param delta Numeric delta value for differential privacy, fixed
 #' @param alpha Numeric statistical significance level, fixed
 #' @param error Numeric, fixed
@@ -199,6 +203,7 @@ histogram.postHerfindahl <- function(release, n) {
 
 #' JSON doc for histogram
 #'
+#' @param output.json something here
 #' @return JSON for histogram function
 
 histogram.getJSON <- function(output.json=TRUE) {

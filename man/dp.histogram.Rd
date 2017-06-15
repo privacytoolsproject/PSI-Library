@@ -18,6 +18,10 @@ dp.histogram(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon)
 \item{n.bins}{Integer indicating the number of bins}
 
 \item{n}{Integer indicating the number of observations in \code{x}}
+
+\item{sensitivity}{Numeric, the sensitivity of the estimate}
+
+\item{epsilon}{Numeric, epsilon parameter for differential privacy}
 }
 \value{
 List with the true value of the statistic and arguments to be passed to other functions

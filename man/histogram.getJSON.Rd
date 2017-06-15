@@ -6,6 +6,9 @@
 \usage{
 histogram.getJSON(output.json = TRUE)
 }
+\arguments{
+\item{output.json}{something here}
+}
 \value{
 JSON for histogram function
 }
