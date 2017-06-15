@@ -6,6 +6,12 @@
 \usage{
 heavyhitters.postNoteFailure(failed)
 }
+\arguments{
+\item{failed}{something here}
+}
+\value{
+something here
+}
 \description{
 Function to see failed
 }

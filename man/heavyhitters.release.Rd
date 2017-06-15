@@ -13,6 +13,8 @@ heavyhitters.release(x, var.type, epsilon, delta, n, k, bins)
 
 \item{epsilon}{Epsilon value for differential privacy}
 
+\item{delta}{something here}
+
 \item{n}{Integer indicating number of observations}
 
 \item{k}{Integer querying the most common \code{k} categories}

@@ -3,6 +3,7 @@
 #' @param x Vector of categorical data (character, factor)
 #' @param var.type Character string indicating data type
 #' @param epsilon Epsilon value for differential privacy
+#' @param delta something here
 #' @param n Integer indicating number of observations
 #' @param k Integer querying the most common \code{k} categories
 #' @param sensitivity Numeric the sensitivity of the statistic
@@ -31,6 +32,7 @@ dp.heavyhitters <- function(x, var.type, epsilon, delta, n, k, sensitivity) {
 #' @param x Vector of categorical data (character, factor)
 #' @param var.type Character string indicating data type
 #' @param epsilon Epsilon value for differential privacy
+#' @param delta something here
 #' @param n Integer indicating number of observations
 #' @param k Integer querying the most common \code{k} categories
 #' @param bins Vector of categories from which the top \code{k} categories are evaluated
@@ -93,6 +95,8 @@ heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
 
 
 #' Function to see failed
+#' @param failed something here
+#' @return something here
 
 heavyhitters.postNoteFailure <- function(failed) {
     return(failed)
