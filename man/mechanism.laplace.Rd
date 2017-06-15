@@ -35,5 +35,5 @@ n <- 1000
 rng <- c(0,1)
 x <- runif(n, min=min(rng), max=max(rng))
 sensitivity <- diff(rng) / n
-mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
+mechanism.laplace(fun=dp.mean, x=x, var.type='numeric', rng=rng, sensitivity=sensitivity, epsilon=0.5, n=n)
 }

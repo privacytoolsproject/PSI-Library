@@ -83,7 +83,7 @@ qlap <- function(p, mu=0, b=1) {
 #' @param x numeric, value or vector or values
 #' @return The sign of passed values
 #' @examples
-#' sgn(rnrom(10))
+#' sgn(rnorm(10))
 
 sgn <- function(x) {
     return(ifelse(x < 0, -1, 1))
