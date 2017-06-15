@@ -25,6 +25,4 @@ Maintainer: \packageMaintainer{PSIlence}
 }
 
 \keyword{ package }
-\examples{
-~~ simple examples of the most important functions ~~
-}
+
