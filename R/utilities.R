@@ -216,7 +216,7 @@ check_variable_type = function(type, in_types) {
 #' @examples
 #' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 #' make_logical(sample(c(0, 1), size=8, replace=TRUE))
-#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE)
+#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
 
 make_logical <- function(x) {
     if (!length(unique(x)) <= 2) { # how to handle if contains 1 value only?
