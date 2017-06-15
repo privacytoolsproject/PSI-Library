@@ -6,6 +6,16 @@
 \usage{
 amsweep(g, m, reverse = FALSE)
 }
+\arguments{
+\item{g}{something here}
+
+\item{m}{something here}
+
+\item{reverse}{something here}
+}
+\value{
+something here
+}
 \description{
 Sweep operator (from Amelia)
 }

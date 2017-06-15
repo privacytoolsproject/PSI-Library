@@ -324,6 +324,11 @@ getFuncArgs <- function(output, target.func) {
 
 
 #' Sweep operator (from Amelia)
+#' 
+#' @param g something here
+#' @param m something here
+#' @param reverse something here
+#' @return something here
 
 amsweep <- function(g, m, reverse=FALSE) {
     if (identical(m, vector(mode='logical', length=length(m)))) {
