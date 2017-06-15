@@ -344,7 +344,7 @@ amsweep <- function(g, m, reverse=FALSE) {
             g22 <- g[kcompl, kcompl, drop=FALSE]
             h11a <- try(solve(g11), silent=TRUE)
             if (inherits(h11a, "try-error")) {
-                h11a <- mpinv(g11)
+                h11a <- MASS::ginv(g11)
             }
             h11 <- as.matrix((-h11a))
             if (reverse) {sgn2 <- -1} else {sgn2 <- 1}
