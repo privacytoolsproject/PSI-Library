@@ -81,12 +81,11 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
 #' Function to convert unique private covariances into symmetric matrix
 #'
 #' @param release Numeric private release of elements in lower triangle of covariance matrix
-#' @param intercept Logical indicating whether the intercept is included
 #' @param columns Character vector with column names
 #'
 #' This function is used by the mechanism in post-processing and not intended for interactive post-processing
 
-covariance.formatRelease <- function(release, intercept, columns) {
+covariance.formatRelease <- function(release, columns) {
     out.dim <- length(columns)
     out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
     out.matrix[lower.tri(out.matrix, diag=TRUE)] <- release
@@ -135,3 +134,54 @@ regress <- function(formula, release, n, intercept) {
     names(coefs) <- c('Estimate', 'Std. Error')
     return(coefs)
 }
+       
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# Reference class for covariance with Laplace noise
+
+fun.covar <- function(x, columns) {
+    data <- x[, columns]
+    if (intercept) { data <- cbind(1, data) }
+    covariance <- t(as.matrix(data)) %*% as.matrix(data)
+    lower <- lower.tri(covariance, diag=TRUE)
+    covariance <- covariance[lower]
+    return(covariance)
+}
+
+dpCovariance <- setRefClass(
+    Class = 'dpCovariance',
+    contains = c('mechanismLaplace')
+)
+
+dpCovariance$methods(
+    initialize = function(mechanism, var.type, n, epsilon, rng) {
+        .self$name <- 'Differentially private covariance matrix'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$rng
+})
+
+dpCovariance$methods(
+    release = function(x, columns=NULL, formulae=NULL, intercept=FALSE) {
+        if (intercept) { columns <- c('intercept', columns) }
+        sens <- c()
+        for (i in 1:length(diffs)) {
+            for (j in i:length(diffs)) {
+                s <- ((n - 1) / n) * diffs[i] * diffs[j]
+                sens <- c(sens, s)
+            }
+        }
+        .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sensitivity=sens, postFun=.self$postProcess,
+                                                   columns=columns, formulae=formulae)
+})
+
+dpCovariance$methods(
+    postProcess = function(out, columns, formulae) {
+        out$release <- covariance.formatRelease(out$release, columns)
+        out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formulae)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
