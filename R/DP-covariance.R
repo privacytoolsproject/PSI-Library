@@ -48,17 +48,7 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=FALSE, formulae=NULL) {
 
-    # get the vector of sensitivities from the ranges
-    diffs <- apply(rng, 1, diff)
-    if (intercept) { diffs <- c(-1, diffs) }
-    sensitivity <- c()
-    for (i in 1:length(diffs)) {
-        for (j in i:length(diffs)) {
-            s <- ((n - 1) / n) * diffs[i] * diffs[j]
-            sensitivity <- c(sensitivity, s)
-        }
-    }
-
+    sensitivity <- covariance.sensitivity(n, rng, intercept)
     if (is.null(formulae)) {
         formulae <- as.list(formulae)
     } else {
@@ -75,6 +65,26 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
                                  sensitivity=sensitivity, intercept=intercept, formulae=formulae,
                                  postlist=postlist)
     return(release)
+}
+
+
+#' Function to get the sensitivity of the covariance matrix
+#'
+#' @param n Integer indicating the number of observations
+#' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
+#' @param intercept Logical indicating whether an intercept should be included
+
+covariance.sensitivity <- function(n, rng, intercept) {
+    diffs <- apply(rng, 1, diff)
+    if (intercept) { diffs <- c(1, diffs) }
+    sensitivity <- c()
+    for (i in 1:length(diffs)) {
+        for (j in i:length(diffs)) {
+            s <- ((n - 1) / n) * diffs[i] * diffs[j]
+            sensitivity <- c(sensitivity, s)
+        }
+    }
+    return(sensitivity)
 }
 
 
@@ -164,15 +174,9 @@ dpCovariance$methods(
 })
 
 dpCovariance$methods(
-    release = function(x, columns=NULL, formulae=NULL, intercept=FALSE) {
+    release = function(x, columns, formulae=NULL, intercept=FALSE) {
         if (intercept) { columns <- c('intercept', columns) }
-        sens <- c()
-        for (i in 1:length(diffs)) {
-            for (j in i:length(diffs)) {
-                s <- ((n - 1) / n) * diffs[i] * diffs[j]
-                sens <- c(sens, s)
-            }
-        }
+        sens <- covariance.sensitivity(rng, n, intercept)
         .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sensitivity=sens, postFun=.self$postProcess,
                                                    columns=columns, formulae=formulae)
 })
