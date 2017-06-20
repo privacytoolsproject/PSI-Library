@@ -1,3 +1,28 @@
+#' Draw cryptographically secure random variates from uniform distribution
+
+dpUnif <- function(n, seed=NULL) {
+    if (!is.null(seed)) {
+        set.seed(seed)
+        return(runif(n))
+    }
+    return(openssl::rand_num(n))
+}
+
+
+#' Draw cryptographically secure random variates
+
+dpNoise <- function(n, scale, family, seed=NULL) {
+    u <- dpUnif(n, seed)
+    if (family == 'Laplace') {
+        return(qlap(u, b=scale))
+    } else if (family == 'Gaussian') {
+        return(qnorm(u, sd=scale))
+    } else {
+        stop(sprintf('family "%s" not understood', family))
+    }
+}
+
+
 #' Random draw from Laplace distribution
 #'
 #' @param sensitivity numeric
