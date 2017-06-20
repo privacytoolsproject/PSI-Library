@@ -1,4 +1,14 @@
 #' Draw cryptographically secure random variates from uniform distribution
+#'
+#' @param n Integer giving number of variates needed
+#' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+#'
+#' Draws secure random variates from the uniform distribution through \code{openssl}.
+#' If a seed is provided, the \code{runif} function is used to draw the random variates.
+#'
+#' @examples
+#' uniform_secure <- dpUnif(n=1000)
+#' uniform_repeatable <- dpUnif(n=1, seed=75436)
 
 dpUnif <- function(n, seed=NULL) {
     if (!is.null(seed)) {
@@ -10,17 +20,27 @@ dpUnif <- function(n, seed=NULL) {
 
 
 #' Draw cryptographically secure random variates
+#'
+#' @param n Integer giving number of variates needed
+#' @param scale Numeric scale for the distribution
+#' @param dist Character specifying the distribution from which to draw the noise
+#' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+#'
+#' laplace_noise <- dpNoise(n=1000, scale=1, dist='Laplace')
+#' gaussian_noise <- dpNoise(n=1000, scale=1, dist='Gaussian')
+#' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
 
-dpNoise <- function(n, scale, family, seed=NULL) {
+dpNoise <- function(n, scale, dist, seed=NULL) {
     u <- dpUnif(n, seed)
-    if (family == 'Laplace') {
+    if (dist == 'Laplace') {
         return(qlap(u, b=scale))
-    } else if (family == 'Gaussian') {
+    } else if (dist == 'Gaussian') {
         return(qnorm(u, sd=scale))
     } else {
-        stop(sprintf('family "%s" not understood', family))
+        stop(sprintf('Distribution "%s" not understood', dist))
     }
 }
+
 
 
 #' Random draw from Laplace distribution
