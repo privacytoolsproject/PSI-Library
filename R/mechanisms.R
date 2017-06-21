@@ -79,7 +79,8 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    out$release <- out$stat + dpNoise(n=length(out$stat), scale=(sensitivity * sqrt(2 * log(1.25 / delta))), dist='gaussian')
+    scale <- sens * sqrt(2 * log(1.25 / delta)) / epsilon
+    out$release <- out$stat + dpNoise(n=length(out$stat), scale=scale, dist='gaussian')
     out <- out[names(out) != 'stat']
 
     # post-processing
@@ -112,7 +113,6 @@ postprocess <- function(out, postlist, ...) {
     }
     return(out)
 }
-
 
 # ----------------------------------------------------------------------- #
 # ----------------------------------------------------------------------- #
@@ -179,7 +179,7 @@ mechanismLaplace$methods(
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens / .self$epsilon
-        release <- true.val + rlap(b=scale, size=length(true.val))
+        release <- true.val + dpNoise(n=length(out$stat), scale=scale, dist='laplace')
         out <- list('release' = release)
         out <- postFun(out, ...)
         return(out)
@@ -205,7 +205,7 @@ mechanismGaussian$methods(
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
-        release <- true.val + rnorm(length(true.val), sd=scale)
+        release <- true.val + dpNoise(n=length(out$stat), scale=scale, dist='gaussian')
         out <- list('release' = release)
         out <- postFun(out)
         return(out)
