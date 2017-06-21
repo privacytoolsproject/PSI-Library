@@ -187,6 +187,33 @@ mechanismLaplace$methods(
 
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
+# Exponential mechanism
+
+mechanismLaplace <- setRefClass(
+    Class = 'mechanismExponential',
+    contains = 'mechanism'
+)
+
+mechanismExponential$methods(
+    getFunArgs = function(fun) {
+        callSuper(fun)
+})
+
+mechanismExponential$methods(
+    evaluate = function(fun, x, sens, postFun, ...) {
+        xc <- censordata(x, .self$var.type, levels=.self$bins)
+        field.vals <- .self$getFunArgs(fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals))
+        quality <- true.val - max(true.val)
+        probs <- ifelse(true.value == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
+        release <- sample(names(true.value), .self$k, prob=probs)
+        out <- list('release' = release)
+        out <- postFun(out, ...)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
 #' Gaussian mechanism
 
 mechanismGaussian <- setRefClass(
