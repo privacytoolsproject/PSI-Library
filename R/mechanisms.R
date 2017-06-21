@@ -189,7 +189,7 @@ mechanismLaplace$methods(
 # --------------------------------------------------------- #
 # Exponential mechanism
 
-mechanismLaplace <- setRefClass(
+mechanismExponential <- setRefClass(
     Class = 'mechanismExponential',
     contains = 'mechanism'
 )

@@ -97,3 +97,50 @@ heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
 heavyhitters.postNoteFailure <- function(failed) {
     return(failed)
 }
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# dp heavyhitters class
+
+fun.heavy <- function(x, var.type) {
+    hist <- table(x, useNA='ifany')
+    hist <- sort(-hist) * -1
+    return(hist)
+}
+
+dpHeavyHitters <- setRefClass(
+    Class = 'dpHeavyHitters',
+    contains = 'mechanismExponential'
+)
+
+dpHeavyHitters$methods(
+    initialize = function(mechanism, var.type, n, epsilon, k, bins, alpha=0.05, delta=1e-7) {
+        .self$name <- 'Differentially private heavy hitters'
+        .self$mechanism <- mechanism
+        .self$var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$k <- k
+        .self$bins <- bins
+        .self$alpha <- alpha
+        .self$delta <- delta
+})
+
+dpHeavyHitters$methods(
+    release = function(x) {
+        heavy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+})
+
+dpHeavyHitters$methods(
+    postProcess = function(out) {
+        gap <- as.numeric(out$release[k] - out$release[k + 1])
+        if (gap < -2 / epsilon * log(delta)) {
+            out$release <- NULL
+            return(out)
+        }
+        out$accuracy <- heavyhitters.getAccuracy(gap, epsilon, delta)
+        out$epsilon <- heavyhitters.getParameters(gap, delta, alpha)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
