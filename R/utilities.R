@@ -26,15 +26,16 @@ dpUnif <- function(n, seed=NULL) {
 #' @param dist Character specifying the distribution from which to draw the noise
 #' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
 #'
-#' laplace_noise <- dpNoise(n=1000, scale=1, dist='Laplace')
-#' gaussian_noise <- dpNoise(n=1000, scale=1, dist='Gaussian')
+#' @examples
+#' laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
+#' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
 #' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
 
 dpNoise <- function(n, scale, dist, seed=NULL) {
     u <- dpUnif(n, seed)
-    if (dist == 'Laplace') {
+    if (dist == 'laplace') {
         return(qlap(u, b=scale))
-    } else if (dist == 'Gaussian') {
+    } else if (dist == 'gaussian') {
         return(qnorm(u, sd=scale))
     } else {
         stop(sprintf('Distribution "%s" not understood', dist))
