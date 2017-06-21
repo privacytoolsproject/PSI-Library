@@ -128,7 +128,7 @@ dpHeavyHitters$methods(
 
 dpHeavyHitters$methods(
     release = function(x) {
-        heavy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        .self$result <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
 })
 
 dpHeavyHitters$methods(
