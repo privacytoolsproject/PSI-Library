@@ -31,7 +31,7 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    out$release <- out$stat + rlap(mu=0, b=(sensitivity / epsilon), size=length(out$stat))
+    out$release <- out$stat + dpNoise(n=length(out$stat), scale=(sensitivity / epsilon), dist='laplace')
     out <- out[names(out) != 'stat']
 
     # post-processing
@@ -79,8 +79,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    noise <- rnorm(length(out$stat), mean=0, sd=(sensitivity * sqrt(2 * log(1.25 / delta)) / epsilon))
-    out$release <- out$stat + noise
+    out$release <- out$stat + dpNoise(n=length(out$stat), scale=(sensitivity * sqrt(2 * log(1.25 / delta))), dist='gaussian')
     out <- out[names(out) != 'stat']
 
     # post-processing
