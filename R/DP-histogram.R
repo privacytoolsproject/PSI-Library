@@ -223,3 +223,73 @@ histogram.getJSON <- function(output.json=TRUE) {
     }
     return(out)
 }
+
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# dp histogram class
+
+fun.hist <- function(x, var.type, bins=NULL) {
+    if (var.type %in% c('numeric', 'integer')) {
+        hist <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
+    } else {
+        hist <- table(x, useNA='ifany')
+    }
+    return(hist)
+}
+
+dpHistogram <- setRefClass(
+    Class = 'dpHistogram',
+    contains = 'mechanismLaplace'
+)
+
+dpHistogram$methods(
+    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9) {
+        .self$name <- 'Differentially private histogram'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$rng <- rng
+        .self$bins <- bins
+        .self$n.bins <- n.bins
+        .self$alpha <- alpha
+        .self$delta <- delta
+        .self$error <- error
+})
+
+dpHistogram$methods(
+    release = function(x) {
+        if (var.type %in% c('numeric', 'integer')) {
+            .self$n.bins <- check_histogram_bins(n.bins, n)
+            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+        } else {
+            .self$n.bins <- length(bins)
+        }
+        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=FALSE)
+        stable <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=TRUE)
+        stable.accurate <- stable$accuracy < noisy$accuracy
+        stable.check <- check_histogram_n(stable$accuracy, n, n.bins, epsilon, delta, alpha)
+        if (stable.accurate && stable.check) {
+            a <- stable$accuracy * n / 2
+            stable$release <- stable$release[stable$release >= a]
+            .self$result <- stable
+        } else {
+            noisy$release <- ifelse(noisy$release < 0, 0, round(stable$release))
+            .self$result <- noisy
+        }
+})
+
+dpHistogram$methods(
+    postProcess = function(out, stability) {
+        out$accuracy <- histogram.getAccuracy(n.bins, n, epsilon, stability, delta, alpha, error)
+        out$epsilon <- histogram.getParameters(n.bins, n, out$accuracy, stability, delta, alpha, error)
+        out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+        if (var.type %in% c('factor', 'character')) {
+            out$herfindahl <- sum((out$release / n)^2)
+        }
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #

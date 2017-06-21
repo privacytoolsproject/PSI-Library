@@ -42,7 +42,7 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
                      'interval' = 'getCI')
     if (var.type == 'logical') {
         rng <- c(0, 1)
-        postlist <- c(postlist, list('std' = 'postStandard_Deviation',
+        postlist <- c(postlist, list('std' = 'postStandardDeviation',
                                      'median' = 'postMedian'))
     }
     rng <- checkrange(rng)
@@ -58,8 +58,9 @@ mean.release <- function(x, var.type, n, epsilon, rng) {
 #'
 #' @param release Differentially private release of a mean for a logical variable
 
-mean.postStandard_Deviation <- function(release) {
-    return(sqrt(release * (1 - release)))
+mean.postStandardDeviation <- function(release) {
+    sd <- sqrt(release * (1 - release))
+    return(sd)
 }
 
 
@@ -68,11 +69,8 @@ mean.postStandard_Deviation <- function(release) {
 #' @param release Differentially private release of a mean for a logical variable
 
 mean.postMedian <- function(release) {
-    if (release < 0.5) {
-        return(0)
-    } else {
-        return(1)
-    }
+    m <- ifelse(release < 0.5, 0, 1)
+    return(m)
 }
 
 
@@ -111,7 +109,7 @@ mean.getParameters <- function(accuracy, n, alpha=0.05) {
 #' @param alpha something here
 #' @return Confidence bounds for differentially private release
 
-mean.getCI <- function(release, epsilon, sensitivity, n, rng, alpha=0.05) {
+mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
     z <- qlap((1 - (alpha / 2)), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
@@ -143,3 +141,46 @@ mean.getJSON <- function(output.json=TRUE) {
     }
     return(out)
 }
+
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+# Reference class implementation of mean
+
+dpMean <- setRefClass(
+    Class = 'dpMean',
+    contains = c('mechanismLaplace')
+)
+
+dpMean$methods(
+    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
+        .self$name <- 'Differentially private mean'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$epsilon <- epsilon
+        .self$rng <- rng
+        .self$alpha <- alpha
+})
+
+
+dpMean$methods(
+    release = function(x) {
+        sens <- diff(rng) / n
+        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess)
+})
+
+dpMean$methods(
+    postProcess = function(out) {
+        out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+        out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+        out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+        if (var.type == 'logical') {
+            out$std.dev <- mean.postStandardDeviation(out$release)
+            out$median <- mean.postMedian(out$release)
+        }
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #

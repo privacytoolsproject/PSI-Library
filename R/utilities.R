@@ -397,3 +397,35 @@ amsweep <- function(g, m, reverse=FALSE) {
         return(h)
     }
 }
+
+#' Function to obtain indices in data frame for dependent & independent variables from a formula
+#'
+#' @param formula Formula
+#' @param data Data frame, in this case being the data frame of a private covariance matrix
+#' @param intercept Logical indicating whether the intercept is included
+#' @return Named list with names corresponding to labels and locations (i.e., columns) for variables
+#'  in the specification.
+#'
+#' @examples
+#'
+#' y <- rnorm(100) * 2
+#' x <- (y + rnorm(100)) > 0
+#' data <- data.frame(cbind(y, x))
+#' f <- as.formula('y ~ x')
+#' extract.indices(f, data, FALSE)
+
+extract.indices <- function(formula, data, intercept) {
+    t <- terms(formula, data=data)
+    y.loc <- attr(t, 'response')
+    x.loc <- which(names(data) %in% attr(t, 'term.labels'))
+    x.label <- names(data)[x.loc]
+    if (intercept) {
+        intercept.loc <- which(names(data) == 'intercept')
+        x.loc <- c(intercept.loc, x.loc)
+        x.label <- append(x.label, 'Intercept', after=(intercept.loc - 1))
+        if (intercept.loc <= y.loc) { y.loc <- y.loc + 1 }
+    }
+    return(list('y.loc' = y.loc,
+                'x.loc' = x.loc,
+                'x.label' = x.label))
+}
