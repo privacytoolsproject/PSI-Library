@@ -4,11 +4,12 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
 
     universe.size <- floor(diff(rng) / gran + 1)
     depth <- ceiling(log2(universe.size))
-    tree <- binaryTree(x, n, universe.size, depth)
+    tree <- binaryTree(x, n, rng, gran, universe.size, depth)
 
     out <- (list('name' = 'tree',
                  'stat' = tree$count,
                  'tree.data' = tree[, which(names(tree) != 'count')],
+                 'n' = n,
                  'sensitivity' = sensitivity,
                  'gran' = gran,
                  'epsilon' = epsilon,
@@ -29,27 +30,37 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
 
 tree.release <- function(x, var.type, n, epsilon, rng, gran) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
-    postlist <- list('efficient' = 'postEfficientTree',
+    postlist <- list('release' = 'postFormatRelease',
+                     'efficient' = 'postEfficientTree',
                      'cdf' = 'postCDF')
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
-    variance = 2 * sensitivity / epsilon,
-    tree <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, rng=rng,
-                              sensitivity=sensitivity, epsilon=epsilon, gran=gran,
-                              cdf.step=cdf.step, variance=variance, postlist=postlist)
+    variance = 2 * sensitivity / epsilon
+    release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng,
+                                 sensitivity=sensitivity, epsilon=epsilon, gran=gran,
+                                 variance=variance, postlist=postlist)
     return(release)
 }
 
-## to do
-## [1] make sure no negative counts in noisy tree from mechanism output
+#' Function to truncate negative noisy node counts at zero
 
-tree.postEfficientTree <- function(release, tree.data, n.nodes, sigma, inv.sigma.sq, terminal.index) {
+tree.postFormatRelease <- function(release) {
+    release <- round(release)
+    release[release < 0] <- 0
+    return(release)
+}
+
+#' Function to efficiently estimate noisy node counts
+
+tree.postEfficientTree <- function(release, tree.data, n, n.nodes, sigma, inv.sigma.sq, terminal.index) {
     tree <- cbind(tree.data, release)
     names(tree)[ncol(tree)] <- 'noisy' 
     tree <- estBottomUp(tree, min(terminal.index), n.nodes, sigma, inv.sigma.sq)
-    tree <- estTopDown(tree, n.nodes, sigma, inv.sigma.sq)
-    tree <- estEfficiently(tree, n.nodes, sigma, inv.sigma.sq)
-    return(round(tree$efficient))
+    tree <- estTopDown(tree, n, n.nodes, sigma, inv.sigma.sq)
+    tree <- estEfficiently(tree, n, n.nodes, sigma, inv.sigma.sq)
+    return(round(tree$est.efficient))
 }
+
+#' Function to derive CDF from efficient node counts
 
 tree.postCDF <- function(efficient, rng, terminal.index) {
     terminal <- efficient[terminal.index]

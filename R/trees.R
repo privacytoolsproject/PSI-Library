@@ -49,8 +49,8 @@ estBottomUp <- function(tree, terminal.level.idx, n.nodes, st.dev, inv.sigma.sq)
     return(tree)
 }
 
-estTopDown <- function(tree, n.nodes, st.dev, inv.sigma.sq) {
-    tree$est.above <- c(tree$count[1], rep(NA, (n.nodes - 1)))
+estTopDown <- function(tree, n, n.nodes, st.dev, inv.sigma.sq) {
+    tree$est.above <- c(n, rep(NA, (n.nodes - 1)))
     tree$se.above <- c(0, rep(NA, (n.nodes - 1)))
     tree$w.above <- rep(NA, n.nodes)
     for (i in 2:n.nodes) {
@@ -62,8 +62,8 @@ estTopDown <- function(tree, n.nodes, st.dev, inv.sigma.sq) {
     return(tree)
 }
 
-estEfficiently <- function(tree, n.nodes, st.dev, inv.sigma.sq) {
-    tree$est.efficient <- c(tree$count[1], rep(NA, (n.nodes - 1)))
+estEfficiently <- function(tree, n, n.nodes, st.dev, inv.sigma.sq) {
+    tree$est.efficient <- c(n, rep(NA, (n.nodes - 1)))
     tree$se.efficient <- rep(NA, n.nodes)
     tree$w.efficient <- rep(NA, n.nodes)
     for (i in 2:n.nodes) {
@@ -75,7 +75,7 @@ estEfficiently <- function(tree, n.nodes, st.dev, inv.sigma.sq) {
     return(tree)
 }
 
-binaryTree <- function(x, n, universe.size, depth) {
+binaryTree <- function(x, n, rng, gran, universe.size, depth) {
     tree <- rep(0, times=(2^depth + universe.size))
     for (i in 1:n) {
         idx <- ((x[i] - rng[1]) / gran) + 2^depth
