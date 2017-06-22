@@ -29,7 +29,8 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
 
 tree.release <- function(x, var.type, n, epsilon, rng, gran) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
-    postlist <- list('efficient' = 'postEfficientTree')
+    postlist <- list('efficient' = 'postEfficientTree',
+                     'cdf' = 'postCDF')
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
     variance = 2 * sensitivity / epsilon,
     tree <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, rng=rng,
@@ -47,5 +48,14 @@ tree.postEfficientTree <- function(release, tree.data, n.nodes, sigma, inv.sigma
     tree <- estBottomUp(tree, min(terminal.index), n.nodes, sigma, inv.sigma.sq)
     tree <- estTopDown(tree, n.nodes, sigma, inv.sigma.sq)
     tree <- estEfficiently(tree, n.nodes, sigma, inv.sigma.sq)
-    return(tree)
+    return(round(tree$efficient))
+}
+
+tree.postCDF <- function(efficient, rng, terminal.index) {
+    terminal <- efficient[terminal.index]
+    step.size <- diff(rng) / length(terminal)
+    cdf.steps <- seq(rng[1], rng[2], step.size)
+    cdf <- c(0, cumsum(terminal) / sum(terminal))
+    cdf <- data.frame(list('val' = cdf.steps, 'cdf' = cdf))
+    return(cdf)
 }
