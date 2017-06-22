@@ -1,6 +1,6 @@
 #' Function to evaluate the CDF with a binary tree
 
-dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
+dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, quantiles) {
 
     universe.size <- floor(diff(rng) / gran + 1)
     depth <- ceiling(log2(universe.size))
@@ -18,7 +18,8 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
                  'depth' = depth,
                  'terminal.index' = seq(2^(depth - 1), 2^depth - 1),
                  'sigma' = sqrt(variance),
-                 'inv.sigma.sq' = 1 / variance))
+                 'inv.sigma.sq' = 1 / variance,
+                 'quantiles' = quantiles))
     return(out)
 }
 
@@ -28,16 +29,20 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance) {
 #' The perturbation takes place on the binary tree once constructed, then efficient estimation
 #' takes place. This is why the efficient estimation is considered a post-processing step.
 
-tree.release <- function(x, var.type, n, epsilon, rng, gran) {
+tree.release <- function(x, var.type, n, epsilon, rng, gran, quantiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     postlist <- list('release' = 'postFormatRelease',
-                     'efficient' = 'postEfficientTree',
-                     'cdf' = 'postCDF')
+                     'release' = 'postEfficientTree',
+                     'cdf' = 'postCDF',
+                     'median' = 'postMedian')
+    if (!is.null(quantiles)) {
+        postlist <- c(postlist, list('quantiles' = 'postQuantiles'))
+    }
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
     variance = 2 * sensitivity / epsilon
     release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, gran=gran,
-                                 variance=variance, postlist=postlist)
+                                 variance=variance, quantiles=quantiles, postlist=postlist)
     return(release)
 }
 
@@ -62,11 +67,32 @@ tree.postEfficientTree <- function(release, tree.data, n, n.nodes, sigma, inv.si
 
 #' Function to derive CDF from efficient node counts
 
-tree.postCDF <- function(efficient, rng, terminal.index) {
-    terminal <- efficient[terminal.index]
+tree.postCDF <- function(release, rng, terminal.index) {
+    terminal <- release[terminal.index]
     step.size <- diff(rng) / length(terminal)
     cdf.steps <- seq(rng[1], rng[2], step.size)
     cdf <- c(0, cumsum(terminal) / sum(terminal))
     cdf <- data.frame(list('val' = cdf.steps, 'cdf' = cdf))
     return(cdf)
+}
+
+#' Function to derive quantiles from DP CDF
+
+tree.postQuantiles <- function(cdf, quantiles) {
+    absArgMin <- function(q, cdf) {
+        target <- abs(q - cdf$cdf)
+        out <- cdf$val[which(target == min(target))]
+        return(c(q, mean(out)))
+    }
+    out.quantiles <- lapply(quantiles, absArgMin, cdf)
+    out.quantiles <- data.frame(do.call(rbind, out.quantiles))
+    names(out.quantiles) <- c('quantile', 'value')
+    return(out.quantiles)
+}
+
+#' Function to evaluate the median from DP CDF
+
+tree.postMedian <- function(cdf) {
+    out.median <- tree.postQuantiles(cdf, 0.5)$value
+    return(out.median)
 }
