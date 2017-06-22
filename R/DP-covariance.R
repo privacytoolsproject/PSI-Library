@@ -178,11 +178,11 @@ dpCovariance$methods(
         if (intercept) { columns <- c('intercept', columns) }
         sens <- covariance.sensitivity(rng, n, intercept)
         .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sensitivity=sens, postFun=.self$postProcess,
-                                                   columns=columns, formulae=formulae)
+                                                   columns=columns, formulae=formulae, intercept=intercept)
 })
 
 dpCovariance$methods(
-    postProcess = function(out, columns, formulae) {
+    postProcess = function(out, columns, formulae, intercept) {
         out$release <- covariance.formatRelease(out$release, columns)
         out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formulae)
 })
