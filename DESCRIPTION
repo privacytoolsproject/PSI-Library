@@ -10,7 +10,8 @@ Date: 2017-02-21
 Imports: jsonlite
 Description: This library allows researchers to access summary statistics of sensitive 		data that are generated using differential privacy.
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
+    'mechanisms.R'
     'DP-covariance.R'
     'DP-heavyhitters.R'
     'DP-histogram.R'
@@ -18,5 +19,4 @@ Collate:
     'DP-quantiles.R'
     'DP-variance.R'
     'createJSON.R'
-    'mechanisms.R'
     'utilities.R'

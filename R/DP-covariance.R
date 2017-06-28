@@ -158,6 +158,9 @@ fun.covar <- function(x, columns) {
     return(covariance)
 }
 
+#'
+#' @include mechanisms.R
+
 dpCovariance <- setRefClass(
     Class = 'dpCovariance',
     contains = c('mechanismLaplace')
