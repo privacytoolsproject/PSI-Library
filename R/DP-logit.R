@@ -33,6 +33,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' n <- 1000
 #' x1 <- rnorm(n)
 #' x2 <- rnorm(n)
+#' x3 <- sample(c('a', 'b', 'c', 'd', 'e'), replace=TRUE, size=n)
 #' z <- -0.3 - 1.6 * x1 + 0.3 * x2
 #' p <- 1 / (1 + exp(-z))
 #' y <- rbinom(n, 1, p)
@@ -40,6 +41,8 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' form <- as.formula('y ~ x1 + x2')
 #' logit.true <- glm(form, data=data, family='binomial')$coef
 #' logit.private <- logit.release(data, nrow(data), epsilon=0.5, formula=form)$release
+#' form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
+#' logit.private2 <- logit.releases(data, nrow(data), epsilon=0.5, formula=form2)$release
 
 logit.release <- function(x, n, epsilon, formula, intercept=TRUE) {
     release <- mechanism.objective(fun=dp.logit, x=x, n=n, epsilon=epsilon, formula=formula, intercept=intercept)
