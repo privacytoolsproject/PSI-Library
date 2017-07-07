@@ -110,6 +110,11 @@ mechanism.objective <- function(fun, x, n, epsilon, ...) {
         X.names <- c('intercept', X.names)
     }
 
+    # convert factors to dummies
+    X.expand <- makeDummies(X)
+    X <- X.expand$data
+    X.names <- X.expand$names
+
     # scale the inputs s.t. max Euclidean norm <= 1
     scaler <- mapMatrixUnit(X, p=2)
     X <- scaler$matrix
