@@ -90,6 +90,44 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     return(out)
 }
 
+
+#' Objective perturbation
+
+mechanism.objective <- function(fun, x, n, epsilon, ...) {
+
+    # start populating the object with the data we need
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+
+    # extract X and y from the input matrix and formula
+    intercept.loc <- ifelse(out$intercept, FALSE, TRUE)
+    xy.locs <- extract.indices(out$formula, x, intercept.loc)
+    X <- x[, xy.locs$x.loc]
+    X.names <- xy.locs$x.label
+    y <- as.numeric(x[, xy.locs$y.loc])
+    if (out$intercept) {
+        X <- cbind(1, X)
+        X.names <- c('intercept', X.names)
+    }
+
+    # scale the inputs s.t. max Euclidean norm <= 1
+    scaler <- mapMatrixUnit(X, p=2)
+    X <- scaler$matrix
+
+    # noise
+    b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
+    b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+
+    # fit and adjust back to original scale
+    start.params <- rep(0, ncol(X))
+    release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
+    names(release) <- 'estimate'
+    rownames(release) <- X.names
+    out$release <- release
+    return(out)
+}
+
+
 #' Cycle through available postprocessing functions for a released statistic
 #'
 #' @param out list containing differentially private released statistic, and mechanism and statistic names
