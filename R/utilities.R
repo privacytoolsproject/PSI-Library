@@ -31,12 +31,14 @@ dpUnif <- function(n, seed=NULL) {
 #' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
 #' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
 
-dpNoise <- function(n, scale, dist, seed=NULL) {
+dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
         return(qlap(u, b=scale))
     } else if (dist == 'gaussian') {
         return(qnorm(u, sd=scale))
+    } else if (dist == 'gamma') {
+        return(qgamma(u, scale=scale, shape=shape))
     } else {
         stop(sprintf('Distribution "%s" not understood', dist))
     }
