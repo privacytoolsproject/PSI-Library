@@ -4,7 +4,7 @@
 \alias{heavyhitters.release}
 \title{Release differentially private most common values}
 \usage{
-heavyhitters.release(x, var.type, epsilon, n, k, bins)
+heavyhitters.release(x, var.type, epsilon, delta, n, k, bins)
 }
 \arguments{
 \item{x}{Vector of categorical data (character, factor)}
@@ -21,6 +21,9 @@ heavyhitters.release(x, var.type, epsilon, n, k, bins)
 }
 \value{
 A vector whose values are \code{k} most common categories, or a failure message
+
+Contains functions for privately releasing the top-k heavy hitters, that is,
+ the k most common unique values.  For example, k=1 releases the mode.
 }
 \description{
 Release differentially private most common values
@@ -28,14 +31,9 @@ Release differentially private most common values
 \examples{
 N <- 1000
 epsilon <- 0.5
+delta <- 1e-7
 observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
 probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
 y <- sample(observed.levels, size=N, prob=probs, replace=TRUE)
-release <- heavyhitters.release(y, 'character', epsilon, N, k=3, bins=bins)
-}
-\author{
-Victor Balcer
-
-Contains functions for privately releasing the top-k heavy hitters, that is,
- the k most common unique values.  For example, k=1 releases the mode.
+release <- heavyhitters.release(y, 'character', epsilon, delta, N, k=3, bins=bins)
 }

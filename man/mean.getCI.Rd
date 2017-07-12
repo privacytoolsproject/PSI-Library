@@ -4,7 +4,7 @@
 \alias{mean.getCI}
 \title{Describe Here}
 \usage{
-\method{mean}{getCI}(release, epsilon, sensitivity, n, rng, alpha = 0.05)
+\method{mean}{getCI}(release, epsilon, sensitivity, alpha = 0.05)
 }
 \arguments{
 \item{release}{something here}
@@ -13,9 +13,9 @@
 
 \item{sensitivity}{something here}
 
-\item{n}{something here}
-
 \item{alpha}{something here}
+
+\item{n}{something here}
 
 \item{range}{something here}
 }

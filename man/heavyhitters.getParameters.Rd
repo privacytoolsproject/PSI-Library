@@ -4,10 +4,10 @@
 \alias{heavyhitters.getParameters}
 \title{Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release}
 \usage{
-heavyhitters.getParameters(release, delta = 1e-07, alpha = 0.05)
+heavyhitters.getParameters(gap, delta, alpha = 0.05)
 }
 \arguments{
-\item{release}{The noisy estimate}
+\item{gap}{Gap}
 
 \item{delta}{Delta value for differential privacy}
 

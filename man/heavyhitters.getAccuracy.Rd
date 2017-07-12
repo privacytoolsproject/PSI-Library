@@ -4,10 +4,10 @@
 \alias{heavyhitters.getAccuracy}
 \title{Get the accuracy of heavyhitters statistic for a given value of epsilon}
 \usage{
-heavyhitters.getAccuracy(release, epsilon, delta = 1e-07)
+heavyhitters.getAccuracy(gap, epsilon, delta)
 }
 \arguments{
-\item{release}{The noisy estimate}
+\item{gap}{Gap}
 
 \item{epsilon}{Epsilon value for differential privacy}
 

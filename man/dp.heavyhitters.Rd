@@ -4,7 +4,7 @@
 \alias{dp.heavyhitters}
 \title{Function to evaluate most common values and specify arguments to post-processing}
 \usage{
-dp.heavyhitters(x, var.type, epsilon, n, k, sensitivity)
+dp.heavyhitters(x, var.type, epsilon, delta, n, k, sensitivity)
 }
 \arguments{
 \item{x}{Vector of categorical data (character, factor)}

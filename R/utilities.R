@@ -341,7 +341,7 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) {
         #stop('number of rows insufficient to provide privacy or accuracy with given parameters')
     } 
     return(TRUE)
-} 
+}
 
 
 #' Utility function to match arguments of a function with list output of another function
@@ -360,6 +360,42 @@ getFuncArgs <- function(output, target.func) {
     return(spec)
 }
 
+#' Function to perform regression using the covariance matrix via the sweep operator
+#'
+#' @param formula Formula
+#' @param release Numeric private release of covariance matrix
+#' @param n Integer indicating number of observations
+#' @param intercept Logical indicating whether the intercept is included
+
+linear.reg <- function(formula, release, n, intercept) {
+  xy.locs <- extract.indices(formula, release, intercept)
+  x.loc <- xy.locs$x.loc
+  y.loc <- xy.locs$y.loc
+  loc.vec <- rep(TRUE, (length(x.loc) + 1))
+  loc.vec[y.loc] <- FALSE
+  sweep <- amsweep((as.matrix(release) / n), loc.vec)
+  coefs <- sweep[y.loc, x.loc]
+  se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+  coefs <- data.frame(cbind(coefs, se))
+  coefs <- format(round(coefs, 5), nsmall=5)
+  rownames(coefs) <- xy.locs$x.label
+  names(coefs) <- c('Estimate', 'Std. Error')
+  return(coefs)
+}
+
+#' Moore Penrose Inverse Function
+#' 
+#' Need to assign authorship to this and amsweep
+
+mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
+  ## Moore-Penrose Inverse function (aka Generalized Inverse)
+  ##   X:    symmetric matrix
+  ##   tol:  convergence requirement
+  s <- svd(X)
+  e <- s$d
+  e[e > tol] <- 1/e[e > tol]
+  s$v %*% diag(e,nrow=length(e)) %*% t(s$u)
+}
 
 #' Sweep operator (from Amelia)
 

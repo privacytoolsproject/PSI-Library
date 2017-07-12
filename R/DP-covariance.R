@@ -44,9 +44,11 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #' @param epsilon Numeric differential privacy parameter
 #' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
 #' @param columns Character vector indicating columns in \code{x}
+#' @param delta something here
 #' @param intercept Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE
+#' @export
 
-covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=FALSE, formulae=NULL) {
+covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
 
     sensitivity <- covariance.sensitivity(n, rng, intercept)
     if (is.null(formulae)) {
@@ -57,13 +59,19 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, intercept=
 
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
-    if (!is.null(formulae)) {
+    if (length(formulae)!=0) {
         postlist <- c(postlist, list('linear.regression' = 'postLinearRegression'))
     }
-    release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
-                                 rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
-                                 sensitivity=sensitivity, intercept=intercept, formulae=formulae,
-                                 postlist=postlist)
+    if (mechanism=='laplace') {
+      release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
+                                   rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
+                                   sensitivity=sensitivity, intercept=intercept, formulae=formulae,
+                                   postlist=postlist)
+    } else if (mechanism=='gaussian') {
+      release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n, rng=rng, sensitivity=sensitivity, 
+                                    epsilon=(epsilon / length(sensitivity)), columns=columns,
+                                    delta=delta, intercept=intercept, formulae=formulae, postlist=postlist)
+    } else {stop('no noise mechanism defined')}
     return(release)
 }
 
@@ -116,33 +124,9 @@ covariance.formatRelease <- function(release, columns) {
 covariance.postLinearRegression <- function(release, n, intercept, formulae) {
     out.summaries <- vector('list', length(formulae))
     for (f in 1:length(formulae)) {
-        out.summaries[[f]] <- regress(formulae[[f]], release, n, intercept)
+        out.summaries[[f]] <- linear.reg(formulae[[f]], release, n, intercept)
     }
     return(out.summaries)
-}
-
-
-#' Function to perform regression using the covariance matrix via the sweep operator
-#'
-#' @param formula Formula
-#' @param release Numeric private release of covariance matrix
-#' @param n Integer indicating number of observations
-#' @param intercept Logical indicating whether the intercept is included
-
-regress <- function(formula, release, n, intercept) {
-    xy.locs <- extract.indices(formula, release, intercept)
-    x.loc <- xy.locs$x.loc
-    y.loc <- xy.locs$y.loc
-    loc.vec <- rep(TRUE, (length(x.loc) + 1))
-    loc.vec[y.loc] <- FALSE
-    sweep <- amsweep((as.matrix(release) / n), loc.vec)
-    coefs <- sweep[y.loc, x.loc]
-    se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
-    coefs <- data.frame(cbind(coefs, se))
-    coefs <- format(round(coefs, 5), nsmall=5)
-    rownames(coefs) <- xy.locs$x.label
-    names(coefs) <- c('Estimate', 'Std. Error')
-    return(coefs)
 }
        
 # --------------------------------------------------------- #
@@ -157,6 +141,9 @@ fun.covar <- function(x, columns) {
     covariance <- covariance[lower]
     return(covariance)
 }
+
+#'
+#' @include mechanisms.R
 
 dpCovariance <- setRefClass(
     Class = 'dpCovariance',
