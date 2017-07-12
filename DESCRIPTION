@@ -19,4 +19,5 @@ Collate:
     'DP-quantiles.R'
     'DP-variance.R'
     'createJSON.R'
+    'dp-regression.R'
     'utilities.R'

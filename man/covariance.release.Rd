@@ -4,8 +4,8 @@
 \alias{covariance.release}
 \title{Function to release a differentially private inner product of input matrix}
 \usage{
-covariance.release(x, var.type, n, epsilon, rng, columns, intercept = FALSE,
-  formulae = NULL)
+covariance.release(x, var.type, n, epsilon, rng, columns, delta = 1e-06,
+  intercept = FALSE, formulae = NULL, mechanism = "laplace")
 }
 \arguments{
 \item{x}{Numeric data frame, dimensions NxP}
@@ -19,6 +19,8 @@ covariance.release(x, var.type, n, epsilon, rng, columns, intercept = FALSE,
 \item{rng}{Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2}
 
 \item{columns}{Character vector indicating columns in \code{x}}
+
+\item{delta}{something here}
 
 \item{intercept}{Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE}
 }
