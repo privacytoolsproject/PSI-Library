@@ -8,10 +8,10 @@
 #'    observations in \code{x}.
 #' @param sensitivity A numeric vector representing the probability of an arbitrary
 #'    leakage of information from \code{x}. Should be of length one 
-#'    and should be a very small value, such as 2^-30. 
+#'    and should be a very small value, such as 2^-30.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
-#' @return List with fields `name` specifying the statistic and `stat` with 
+#' @return A list with fields `name` specifying the statistic and `stat` with 
 #'    the value of the statistic.
 dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list('name' = 'mean',
