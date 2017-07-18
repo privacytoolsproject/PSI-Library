@@ -2,6 +2,8 @@
 #'
 #' @param n Integer giving number of variates needed
 #' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+#' @return Random numeric vector of length \code{n} containing values between
+#'    zero and one.
 #'
 #' Draws secure random variates from the uniform distribution through \code{openssl}.
 #' If a seed is provided, the \code{runif} function is used to draw the random variates.
@@ -368,19 +370,24 @@ getFuncArgs <- function(output, target.func) {
 #' @param intercept Logical indicating whether the intercept is included
 
 linear.reg <- function(formula, release, n, intercept) {
-  xy.locs <- extract.indices(formula, release, intercept)
-  x.loc <- xy.locs$x.loc
-  y.loc <- xy.locs$y.loc
-  loc.vec <- rep(TRUE, (length(x.loc) + 1))
-  loc.vec[y.loc] <- FALSE
-  sweep <- amsweep((as.matrix(release) / n), loc.vec)
-  coefs <- sweep[y.loc, x.loc]
-  se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
-  coefs <- data.frame(cbind(coefs, se))
-  coefs <- format(round(coefs, 5), nsmall=5)
-  rownames(coefs) <- xy.locs$x.label
-  names(coefs) <- c('Estimate', 'Std. Error')
-  return(coefs)
+  if (is.positive.definite(as.matrix(release))==F) {
+    coefs <- "The input matrix is not invertible"
+    return(coefs)
+  } else {
+    xy.locs <- extract.indices(formula, release, intercept)
+    x.loc <- xy.locs$x.loc
+    y.loc <- xy.locs$y.loc
+    loc.vec <- rep(TRUE, (length(x.loc) + 1))
+    loc.vec[y.loc] <- FALSE
+    sweep <- amsweep((as.matrix(release) / n), loc.vec)
+    coefs <- sweep[y.loc, x.loc]
+    se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+    coefs <- data.frame(cbind(coefs, se))
+    coefs <- format(round(coefs, 5), nsmall=5)
+    rownames(coefs) <- xy.locs$x.label
+    names(coefs) <- c('Estimate', 'Std. Error')
+    return(coefs)
+  }
 }
 
 #' Moore Penrose Inverse Function
