@@ -7,3 +7,7 @@ importFrom("utils", "head", "tail")
 export(covariance.release)
 export(mechanismLaplace)
 export(regression.release)
+
+exportClasses(
+     “mechanismLaplace”
+)
