@@ -1,12 +1,23 @@
-#' Function to evaluate the covariance matrix from input matrix and specify parameters for post-processing
+#' Function to evaluate the covariance matrix from input matrix and specify 
+#'    parameters for post-processing.
 #'
-#' @param x Numeric data frame
-#' @param n Integer indicating the number of observations
-#' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
-#' @param epsilon Numeric differential privacy parameter epsilon
-#' @param columns Character vector indicating columns in \code{x}
-#' @param intercept Logical indicating whether an intercept should be added prior to evaluating the inner product x'x
-
+#' @param x A numeric data frame with at least two columns.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
+#'    each of P variables in \code{x}, dimensions Px2. 
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param columns A character vector indicating columns in \code{x} to be 
+#'    included in the covariance matrix. Length should be equal to the number 
+#'    of columns the user wants to include.
+#' @param intercept A logical vector of length one indicating whether an 
+#'    intercept should be added prior to evaluating the inner product x'x.
+#' @param formulae The regression equations the user would like to perform on
+#'    the covariance matrix. The equations should be of class 'formula'. The 
+#'    user may specify as many equations as desired.
+#' @return A list with fields `name` specifying the statistic and `stat` with 
+#'    the lower triangle of the covariance matrix.
 dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 
     # subset and optionally append an intercept
@@ -36,18 +47,35 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 }
 
 
-#' Function to release a differentially private inner product of input matrix
+#' Function to release a differentially private inner product of input matrix.
 #'
-#' @param x Numeric data frame, dimensions NxP
-#' @param var.type Numeric variable types
-#' @param n Integer indicating the number of observations
-#' @param epsilon Numeric differential privacy parameter
-#' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
-#' @param columns Character vector indicating columns in \code{x}
-#' @param delta something here
-#' @param intercept Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE
+#' @param x A numeric data frame with at least two columns.
+#' @param var.type A character vector specifying variable type of \code{x}. 
+#'    Should be of length one and should contain either 'numeric', 
+#'    'logical', or 'integer'.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
+#'    each of P variables in \code{x}, dimensions Px2. 
+#' @param columns A character vector indicating columns in \code{x} to be 
+#'    included in the covariance matrix. Length should be equal to the number 
+#'    of columns the user wants to include.
+#' @param delta A numeric vector representing the probability of an arbitrary
+#'    leakage of information from \code{x}. Should be of length one 
+#'    and should be a very small value. Default to 10^-6.
+#' @param intercept A logical vector of length one indicating whether an 
+#'    intercept should be added prior to evaluating the inner product x'x.
+#'    Default to FALSE.
+#' @param formulae The regression equations the user would like to perform on
+#'    the covariance matrix. The equations should be of class 'formula'. The 
+#'    user may specify as many equations as desired. Default to FALSE.
+#' @param mechanism A character vector specifying the mechanism used to apply 
+#'    noise to the covariance matrix. Should be of length one and contain 
+#'    either 'laplace', 'gaussian', or 'wishart'. Default to 'laplace'.
+#' @return Differentially private covariance matrix of \code{x}.
 #' @export
-
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
 
     sensitivity <- covariance.sensitivity(n, rng, intercept)
@@ -78,10 +106,14 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
 
 #' Function to get the sensitivity of the covariance matrix
 #'
-#' @param n Integer indicating the number of observations
-#' @param rng Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2
-#' @param intercept Logical indicating whether an intercept should be included
-
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in the data frame.
+#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
+#'    each of P variables in the data frame, dimensions Px2.
+#' @param intercept A logical vector of length one indicating whether an 
+#'    intercept should be added prior to evaluating the inner product x'x.
+#' @return The sensitivity of the data frame for which the covariance matrix
+#'   is being calculated.
 covariance.sensitivity <- function(n, rng, intercept) {
     diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(1, diffs) }
@@ -98,11 +130,14 @@ covariance.sensitivity <- function(n, rng, intercept) {
 
 #' Function to convert unique private covariances into symmetric matrix
 #'
-#' @param release Numeric private release of elements in lower triangle of covariance matrix
-#' @param columns Character vector with column names
+#' @param release Differentially private release of elements in lower triangle 
+#'    of covariance matrix.
+#' @param columns A character vector indicating columns in the private 
+#'    covariance to be included in the output. Length should be equal to the 
+#'    number of columns the user wants to include.
+#' @return A symmetric differentially private covariance matrix.
 #'
 #' This function is used by the mechanism in post-processing and not intended for interactive post-processing
-
 covariance.formatRelease <- function(release, columns) {
     out.dim <- length(columns)
     out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
@@ -116,11 +151,16 @@ covariance.formatRelease <- function(release, columns) {
 
 #' Function to perform linear regression using private release of covariance matrix
 #'
-#' @param release Numeric private release of covariance matrix
-#' @param n Integer indicating number of observations
-#' @param intercept Logical indicating whether the intercept is included
-#' @param formulae List of R formulae
-
+#' @param release Differentially private release of elements in lower triangle 
+#'    of covariance matrix.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in the data frame.
+#' @param intercept Logical indicating whether the intercept is included in 
+#'    \code{release}.
+#' @param formulae A list of the regression equations to be performed on the 
+#'    covariance matrix.
+#' @return Linear regression coefficients and standard errors for all specified
+#'    \code{formulae}.
 covariance.postLinearRegression <- function(release, n, intercept, formulae) {
     out.summaries <- vector('list', length(formulae))
     for (f in 1:length(formulae)) {

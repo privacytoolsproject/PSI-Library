@@ -7,7 +7,10 @@ Authors@R: c(
     )
 Version: 0.1-1
 Date: 2017-02-21
-Imports: jsonlite
+Imports: jsonlite,
+	 matrixcalc,
+	 methods,
+	 openssl
 Description: This library allows researchers to access summary statistics of sensitive 		data that are generated using differential privacy.
 RoxygenNote: 6.0.1
 Collate: 
