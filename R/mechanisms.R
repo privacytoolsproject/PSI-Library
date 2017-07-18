@@ -164,6 +164,7 @@ mechanism$methods(
 #' Laplace mechanism
 #' 
 #' @export mechanismLaplace
+#' @exportClass mechanismLaplace
 
 mechanismLaplace <- setRefClass(
     Class = 'mechanismLaplace',
