@@ -29,6 +29,3 @@ Maintainer: \packageMaintainer{PSIlence}
 ~~ Optional links to other man pages, e.g. ~~
 ~~ \url{https://privacytools.seas.harvard.edu} ~~
 }
-\examples{
-~~ simple examples of the most important functions ~~
-}

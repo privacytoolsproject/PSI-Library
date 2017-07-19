@@ -198,13 +198,13 @@ checkepsilon = function(epsilon) {
 #' @param levels For categorical types, a vector containing the levels to be returned
 #' @return Original vector with values outside the bounds censored to the bounds
 #'
-#' For numeric types, checks if x is in range = (min, max) and censors values to either min
+#' For numeric types, checks if x is in rng = (min, max) and censors values to either min
 #' or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
 #'
 #' @examples
-#' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 #' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
-
+#' @export
 censordata = function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {

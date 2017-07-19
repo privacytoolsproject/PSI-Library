@@ -4,10 +4,9 @@ import(jsonlite, matrixcalc, methods, openssl)
 importFrom("stats", "qnorm", "rexp", "rnorm", "runif", "terms", "var")
 importFrom("utils", "head", "tail")
 
+export(censordata)
 export(covariance.release)
 export(mechanismLaplace)
 export(regression.release)
 
-exportClasses(
-     "mechanismLaplace"
-)
+exportClasses(mechanismLaplace)
