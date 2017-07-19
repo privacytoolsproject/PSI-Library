@@ -1,7 +1,7 @@
 #' Function to evaluate true variance & specify post-processing parameters
 #'
 #' @param x Numeric vector
-#' @param var.trpe Character string indicating variable type
+#' @param var.type Character string indicating variable type
 #' @param n Integer indicating number of observations in \code{x}
 #' @param sensitivity Numeric, the sensitivity of the estimate
 #' @param epsilon Numeric, epsilon parameter for differential privacy
@@ -23,7 +23,7 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 #' Function for differentially private release of variance
 #'
 #' @param x Numeric vector
-#' @param var.trpe Character string indicating variable type
+#' @param var.type Character string indicating variable type
 #' @param n Integer indicating number of observations in \code{x}
 #' @param epsilon Numeric, epsilon parameter for differential privacy
 #' @param rng Numeric 2-tuple indicating range of numeric variable
