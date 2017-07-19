@@ -56,13 +56,17 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' r_num <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
 #' r_num_na <- histogram.release(x_num_na, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
 #' r_int <- histogram.release(x_int, var.type='integer', range=c(-40, 40), n=100, epsilon=0.1)
-#' r_num_random <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='random')
+#' r_num_random <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1,
+#'    mechanism='random')
 #' # accuracy is returning inf, which filters the entire release for stability histogram
-#' r_num_stability <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='stability')
-#' r_num_noisy <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='noisy')
+#' r_num_stability <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, 
+#'    epsilon=0.1, mechanism='stability')
+#' r_num_noisy <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, 
+#'    mechanism='noisy')
 #'
 #' # categorical types
-#' x_char <- c(rep('a', 40), rep('b', 25), rep('c', 15), rep('d', 12), rep('e', 5), rep('f', 2), rep('g', 1))
+#' x_char <- c(rep('a', 40), rep('b', 25), rep('c', 15), rep('d', 12), rep('e', 5), rep('f', 2), 
+#'    rep('g', 1))
 #' x_fac <- factor(x_char)
 #' bins <- c('a', 'b', 'c', 'd', 'e')
 #' r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
