@@ -7,11 +7,18 @@
 covariance.sensitivity(n, rng, intercept)
 }
 \arguments{
-\item{n}{Integer indicating the number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in the data frame.}
 
-\item{rng}{Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2}
+\item{rng}{A numeric matrix of 2-tuples with the lower and upper bounds for
+each of P variables in the data frame, dimensions Px2.}
 
-\item{intercept}{Logical indicating whether an intercept should be included}
+\item{intercept}{A logical vector of length one indicating whether an 
+intercept should be added prior to evaluating the inner product x'x.}
+}
+\value{
+The sensitivity of the data frame for which the covariance matrix
+  is being calculated.
 }
 \description{
 Function to get the sensitivity of the covariance matrix

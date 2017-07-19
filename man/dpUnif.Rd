@@ -9,10 +9,14 @@ dpUnif(n, seed = NULL)
 \arguments{
 \item{n}{Integer giving number of variates needed}
 
-\item{seed}{Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+\item{seed}{Integer indicating a seed for R's PNRG, defaults to \code{NULL}}
+}
+\value{
+Random numeric vector of length \code{n} containing values between
+   zero and one.
 
 Draws secure random variates from the uniform distribution through \code{openssl}.
-If a seed is provided, the \code{runif} function is used to draw the random variates.}
+If a seed is provided, the \code{runif} function is used to draw the random variates.
 }
 \description{
 Draw cryptographically secure random variates from uniform distribution

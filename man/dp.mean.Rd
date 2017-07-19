@@ -7,10 +7,25 @@
 dp.mean(x, var.type, n, sensitivity, epsilon)
 }
 \arguments{
-\item{x}{Numeric vector}
+\item{x}{A numeric, logical, or integer vector.}
+
+\item{var.type}{A character vector specifying variable type of \code{x}. 
+Should be of length one and should contain either 'numeric', 
+'logical', or 'integer'.}
+
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
+
+\item{sensitivity}{A numeric vector representing the probability of an arbitrary
+leakage of information from \code{x}. Should be of length one 
+and should be a very small value, such as 2^-30.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 }
 \value{
-List with fields `name` specifying the statistic and `stat` with the value of the statistic
+A list with fields `name` specifying the statistic and `stat` with 
+   the value of the statistic.
 }
 \description{
 Function to evaluate the mean and specify parameters for mean functions

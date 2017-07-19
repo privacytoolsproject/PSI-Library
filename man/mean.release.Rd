@@ -7,28 +7,33 @@
 \method{mean}{release}(x, var.type, n, epsilon, rng)
 }
 \arguments{
-\item{x}{Numeric vector}
+\item{x}{A numeric, logical, or integer vector.}
 
-\item{n}{The number of samples}
+\item{var.type}{A character vector specifying variable type of \code{x}. 
+Should be of length one and should contain either 'numeric', 
+'logical', or 'integer'.}
 
-\item{epsilon}{Numeric}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{range}{An a priori estimate of the range}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+
+\item{rng}{A numeric vector specifying an a priori estimate of the range
+of \code{x}. Should be of length two.}
 }
 \value{
-Differentially private release of mean of vector x
+Differentially private mean of vector \code{x}.
 }
 \description{
 Function for differentially private release of mean
 }
 \examples{
-
 n <- 1000
 x_num <- runif(n)
 x_int <- as.integer(round(x_num * 100))
 x_bool <- x_num >= 0.5
 x_dich <- ifelse(x_bool, 3.483, -9.657)
-
 r_num <- mean.release(x=x_num, var.type='numeric', epsilon=0.5, n=n, range=c(0, 1))
 r_int <- mean.release(x=x_int, var.type='integer', epsilon=0.5, n=n, range=c(5, 95))
 r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, range=c(0, 1))
