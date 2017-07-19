@@ -90,6 +90,7 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
     if (length(formulae)!=0) {
         postlist <- c(postlist, list('linear.regression' = 'postLinearRegression'))
     }
+    # Note: shouldn't pass function by scopeing
     if (mechanism=='laplace') {
       release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
                                    rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
