@@ -173,7 +173,7 @@ covariance.postLinearRegression <- function(release, n, intercept, formulae) {
 # --------------------------------------------------------- #
 # Reference class for covariance with Laplace noise
 
-fun.covar <- function(x, columns) {
+fun.covar <- function(x, columns, intercept) {
     data <- x[, columns]
     if (intercept) { data <- cbind(1, data) }
     covariance <- t(as.matrix(data)) %*% as.matrix(data)
