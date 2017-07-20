@@ -150,6 +150,9 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
         hi <- 1
         eval <- n + 1
         while ((eval <= n * (1 - error)) || (eval > n)) {
+            if (is.infinite(accuracy)) {return("Accuracy is equal to infinity, cannot calculate parameters")}
+            ##need to fix histogram.getAccuracy so either it doesnt pass accuracy=Inf or make histogram.getParameters
+            ##be able to accept an infinite accuracy parameter
             eps <- (hi + lo) / 2
             eval <- 8 / accuracy * (0.5 - log(delta) / eps)
             ifelse(eval < n, (hi <- eps), (lo <- eps))
