@@ -53,15 +53,15 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' x_num_na <- x_num
 #' x_num_na[sample(1:length(x_num_na), size=10, replace=FALSE)] <- NA
 #' x_int <- as.integer(round(x_num * 20))
-#' r_num <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
-#' r_num_na <- histogram.release(x_num_na, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
-#' r_int <- histogram.release(x_int, var.type='integer', range=c(-40, 40), n=100, epsilon=0.1)
-#' r_num_random <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1,
+#' r_num <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
+#' r_num_na <- histogram.release(x_num_na, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
+#' r_int <- histogram.release(x_int, var.type='integer', rng=c(-40, 40), n=100, epsilon=0.1)
+#' r_num_random <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1,
 #'    mechanism='random')
 #' # accuracy is returning inf, which filters the entire release for stability histogram
-#' r_num_stability <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, 
+#' r_num_stability <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, 
 #'    epsilon=0.1, mechanism='stability')
-#' r_num_noisy <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, 
+#' r_num_noisy <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1, 
 #'    mechanism='noisy')
 #'
 #' # categorical types
@@ -71,7 +71,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' bins <- c('a', 'b', 'c', 'd', 'e')
 #' r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
 #' r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
-
+#' @export
 histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
     postlist <- list('accuracy' = 'getAccuracy',
