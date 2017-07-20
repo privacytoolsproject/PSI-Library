@@ -121,16 +121,16 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
         hi <- 1
         eval <- alpha + error
         while ((eval <= alpha - error) || (eval > alpha)) {
-            acc <- (hi + lo) / 2
-            eval <- min((4 / acc), n.bins) * exp(-acc * n * epsilon / 4)
-            ifelse(eval < alpha, (hi <- acc), (lo <- acc))
+            accuracy <- (hi + lo) / 2
+            eval <- min((4 / accuracy), n.bins) * exp(-accuracy * n * epsilon / 4)
+            ifelse(eval < alpha, (hi <- accuracy), (lo <- accuracy))
             if (hi - lo <= 0) { return(Inf) }
         }
-        acc <- max(acc, (8 / n) * (0.5 - log(delta) / epsilon))
+        accuracy <- max(accuracy, (8 / n) * (0.5 - log(delta) / epsilon))
     } else {
-        acc <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
+        accuracy <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
     }
-    return(acc)
+    return(accuracy)
 }
 
 
