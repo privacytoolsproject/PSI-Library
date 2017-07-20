@@ -21,5 +21,5 @@ Draw cryptographically secure random variates
 \examples{
 laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
-laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
+laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
 }

@@ -47,7 +47,7 @@ dp.heavyhitters <- function(x, var.type, epsilon, delta, n, k, sensitivity) {
 #' probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
 #' y <- sample(observed.levels, size=N, prob=probs, replace=TRUE)
 #' release <- heavyhitters.release(y, 'character', epsilon, delta, N, k=3, bins=bins)
-
+#' @export
 heavyhitters.release <- function(x, var.type, epsilon, delta, n, k, bins) {
     var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
     postlist <- list('accuracy' = 'getAccuracy',

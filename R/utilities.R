@@ -2,6 +2,8 @@
 #'
 #' @param n Integer giving number of variates needed
 #' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+#' @return Random numeric vector of length \code{n} containing values between
+#'    zero and one.
 #'
 #' Draws secure random variates from the uniform distribution through \code{openssl}.
 #' If a seed is provided, the \code{runif} function is used to draw the random variates.
@@ -9,7 +11,7 @@
 #' @examples
 #' uniform_secure <- dpUnif(n=1000)
 #' uniform_repeatable <- dpUnif(n=1, seed=75436)
-
+#' @export
 dpUnif <- function(n, seed=NULL) {
     if (!is.null(seed)) {
         set.seed(seed)
@@ -29,8 +31,8 @@ dpUnif <- function(n, seed=NULL) {
 #' @examples
 #' laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 #' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
-#' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
-
+#' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
+#' @export
 dpNoise <- function(n, scale, dist, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
@@ -52,7 +54,7 @@ dpNoise <- function(n, scale, dist, seed=NULL) {
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlaplace(sensitivity=1, epsilon=0.1)
-
+#' @export
 rlaplace = function(n=1, sensitivity, epsilon) {
     flip <- sample(c(-1, 1), size=n, replace=TRUE)
     expon <- rexp(n=n, rate=(epsilon / sensitivity))
@@ -68,7 +70,7 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 #' @return Random draws from Laplace distribution
 #' @examples
 #' rlap(size=1000)
-
+#' @export
 rlap = function(mu=0, b=1, size=1) {
     p <- runif(size) - 0.5
     draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
@@ -85,7 +87,7 @@ rlap = function(mu=0, b=1, size=1) {
 #' @examples
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
-
+#' @export
 dlap <- function(x, mu=0, b=1) {
     dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
@@ -101,7 +103,7 @@ dlap <- function(x, mu=0, b=1) {
 #' @examples
 #' x <- 0
 #' plap(x)
-
+#' @export
 plap <- function(x, mu=0, b=1) {
     cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
     return(cdf)
@@ -117,7 +119,7 @@ plap <- function(x, mu=0, b=1) {
 #' @examples
 #' probs <- c(0.05, 0.50, 0.95)
 #' qlap(probs)
-
+#' @export
 qlap <- function(p, mu=0, b=1) {
     q <- ifelse(p < 0.5, mu + b * log(2 * p), mu - b * log(2 - 2 * p))
     return(q)
@@ -129,8 +131,8 @@ qlap <- function(p, mu=0, b=1) {
 #' @param x numeric, value or vector or values
 #' @return The sign of passed values
 #' @examples
-#' sgn(rnrom(10))
-
+#' sgn(rnorm(10))
+#' @export
 sgn <- function(x) {
     return(ifelse(x < 0, -1, 1))
 }
@@ -147,7 +149,7 @@ sgn <- function(x) {
 #' @examples
 #' checkrange(1:3)
 #' \dontrun{checkrange(1)}
-
+#' @export
 checkrange <- function(rng) {
     if (NCOL(rng) > 1) {
         for (i in 1:nrow(rng)) {
@@ -176,7 +178,7 @@ checkrange <- function(rng) {
 #' checkepsilon(0.1)
 #' \dontrun{checkepsilon(-2)}
 #' \dontrun{checkepsilon(c(0.1,0.5))}
-
+#' @export
 checkepsilon = function(epsilon) {
 	if (epsilon <= 0) {
 		stop("Privacy parameter epsilon must be a value greater than zero.")
@@ -196,13 +198,13 @@ checkepsilon = function(epsilon) {
 #' @param levels For categorical types, a vector containing the levels to be returned
 #' @return Original vector with values outside the bounds censored to the bounds
 #'
-#' For numeric types, checks if x is in range = (min, max) and censors values to either min
+#' For numeric types, checks if x is in rng = (min, max) and censors values to either min
 #' or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
 #'
 #' @examples
-#' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 #' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
-
+#' @export
 censordata = function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
@@ -239,7 +241,7 @@ censordata = function(x, var_type, rng=NULL, levels=NULL) {
 #' 
 #' @examples 
 #' check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
-
+#' @export
 check_variable_type = function(type, in_types) { 
     if (!(type %in% in_types)) {
         stop(paste('Variable type', type, 'should be one of', paste(in_types, collapse = ', ')))
@@ -262,8 +264,8 @@ check_variable_type = function(type, in_types) {
 #' @examples
 #' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 #' make_logical(sample(c(0, 1), size=8, replace=TRUE))
-#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE)
-
+#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
+#' @export
 make_logical <- function(x) {
     if (!length(unique(x)) <= 2) { # how to handle if contains 1 value only?
         stop('Variable has more than two values')
@@ -288,7 +290,7 @@ make_logical <- function(x) {
 #' 
 #' @examples 
 #' check_histogram_mechanism('stability')
-
+#' @export
 check_histogram_mechanism <- function(mechanism) { 
     if (!(is.null(mechanism)) && !(mechanism %in% c('noisy', 'stability', 'random'))) { 
         stop('`mechanism` must be one of `noisy`, `stability`, `random`')
@@ -368,19 +370,24 @@ getFuncArgs <- function(output, target.func) {
 #' @param intercept Logical indicating whether the intercept is included
 
 linear.reg <- function(formula, release, n, intercept) {
-  xy.locs <- extract.indices(formula, release, intercept)
-  x.loc <- xy.locs$x.loc
-  y.loc <- xy.locs$y.loc
-  loc.vec <- rep(TRUE, (length(x.loc) + 1))
-  loc.vec[y.loc] <- FALSE
-  sweep <- amsweep((as.matrix(release) / n), loc.vec)
-  coefs <- sweep[y.loc, x.loc]
-  se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
-  coefs <- data.frame(cbind(coefs, se))
-  coefs <- format(round(coefs, 5), nsmall=5)
-  rownames(coefs) <- xy.locs$x.label
-  names(coefs) <- c('Estimate', 'Std. Error')
-  return(coefs)
+  if (!is.positive.definite(as.matrix(release))) {
+    coefs <- "The input matrix is not invertible"
+    return(coefs)
+  } else {
+    xy.locs <- extract.indices(formula, release, intercept)
+    x.loc <- xy.locs$x.loc
+    y.loc <- xy.locs$y.loc
+    loc.vec <- rep(TRUE, (length(x.loc) + 1))
+    loc.vec[y.loc] <- FALSE
+    sweep <- amsweep((as.matrix(release) / n), loc.vec)
+    coefs <- sweep[y.loc, x.loc]
+    se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+    coefs <- data.frame(cbind(coefs, se))
+    coefs <- format(round(coefs, 5), nsmall=5)
+    rownames(coefs) <- xy.locs$x.label
+    names(coefs) <- c('Estimate', 'Std. Error')
+    return(coefs)
+  }
 }
 
 #' Moore Penrose Inverse Function
@@ -449,7 +456,7 @@ amsweep <- function(g, m, reverse=FALSE) {
 #' data <- data.frame(cbind(y, x))
 #' f <- as.formula('y ~ x')
 #' extract.indices(f, data, FALSE)
-
+#' @export
 extract.indices <- function(formula, data, intercept) {
     t <- terms(formula, data=data)
     y.loc <- attr(t, 'response')

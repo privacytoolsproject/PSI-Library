@@ -16,5 +16,5 @@ The sign of passed values
 Sign function
 }
 \examples{
-sgn(rnrom(10))
+sgn(rnorm(10))
 }

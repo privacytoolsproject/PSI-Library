@@ -9,13 +9,13 @@ dp.variance(x, var.type, n, sensitivity, epsilon)
 \arguments{
 \item{x}{Numeric vector}
 
+\item{var.type}{Character string indicating variable type}
+
 \item{n}{Integer indicating number of observations in \code{x}}
 
 \item{sensitivity}{Numeric, the sensitivity of the estimate}
 
 \item{epsilon}{Numeric, epsilon parameter for differential privacy}
-
-\item{var.trpe}{Character string indicating variable type}
 }
 \value{
 List with fields providing values for the true statistic and post-processing

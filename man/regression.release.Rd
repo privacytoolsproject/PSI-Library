@@ -4,16 +4,16 @@
 \alias{regression.release}
 \title{Function to perform regression using the differentially private covariance matrix via the sweep operator}
 \usage{
-regression.release(formula, release, n)
+regression.release(formula, release, n, method = "linear")
 }
 \arguments{
-\item{formula}{Formula}
+\item{formula}{Formula, regression formula used on data}
 
-\item{release}{Numeric private release of covariance matrix}
+\item{release}{Numeric, private release of covariance matrix}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{Integer, indicating number of observations}
 
-\item{intercept}{Logical indicating whether the intercept is included}
+\item{method}{Character vector, the regression technique used}
 }
 \description{
 Function to perform regression using the differentially private covariance matrix via the sweep operator

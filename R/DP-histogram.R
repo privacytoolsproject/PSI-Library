@@ -53,21 +53,23 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' x_num_na <- x_num
 #' x_num_na[sample(1:length(x_num_na), size=10, replace=FALSE)] <- NA
 #' x_int <- as.integer(round(x_num * 20))
-#' r_num <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
-#' r_num_na <- histogram.release(x_num_na, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1)
-#' r_int <- histogram.release(x_int, var.type='integer', range=c(-40, 40), n=100, epsilon=0.1)
-#' r_num_random <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='random')
+#' r_num <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
+#' r_num_na <- histogram.release(x_num_na, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
+#' r_int <- histogram.release(x_int, var.type='integer', rng=c(-40, 40), n=100, epsilon=0.1)
+#' r_num_random <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
 #' # accuracy is returning inf, which filters the entire release for stability histogram
-#' r_num_stability <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='stability')
-#' r_num_noisy <- histogram.release(x_num, var.type='numeric', range=c(-2, 2), n=100, epsilon=0.1, mechanism='noisy')
+#' r_num_stability <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, 
+#'    epsilon=0.1)
+#' r_num_noisy <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
 #'
 #' # categorical types
-#' x_char <- c(rep('a', 40), rep('b', 25), rep('c', 15), rep('d', 12), rep('e', 5), rep('f', 2), rep('g', 1))
+#' x_char <- c(rep('a', 40), rep('b', 25), rep('c', 15), rep('d', 12), rep('e', 5), rep('f', 2), 
+#'    rep('g', 1))
 #' x_fac <- factor(x_char)
 #' bins <- c('a', 'b', 'c', 'd', 'e')
 #' r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
 #' r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
-
+#' @export
 histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
     postlist <- list('accuracy' = 'getAccuracy',
@@ -117,16 +119,16 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
         hi <- 1
         eval <- alpha + error
         while ((eval <= alpha - error) || (eval > alpha)) {
-            acc <- (hi + lo) / 2
-            eval <- min((4 / acc), n.bins) * exp(-acc * n * epsilon / 4)
-            ifelse(eval < alpha, (hi <- acc), (lo <- acc))
+            accuracy <- (hi + lo) / 2
+            eval <- min((4 / accuracy), n.bins) * exp(-accuracy * n * epsilon / 4)
+            ifelse(eval < alpha, (hi <- accuracy), (lo <- accuracy))
             if (hi - lo <= 0) { return(Inf) }
         }
-        acc <- max(acc, (8 / n) * (0.5 - log(delta) / epsilon))
+        accuracy <- max(accuracy, (8 / n) * (0.5 - log(delta) / epsilon))
     } else {
-        acc <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
+        accuracy <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
     }
-    return(acc)
+    return(accuracy)
 }
 
 
@@ -146,6 +148,9 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
         hi <- 1
         eval <- n + 1
         while ((eval <= n * (1 - error)) || (eval > n)) {
+            if (is.infinite(accuracy)) {return("Accuracy is equal to infinity, cannot calculate parameters")}
+            ##need to fix histogram.getAccuracy so either it doesnt pass accuracy=Inf or make histogram.getParameters
+            ##be able to accept an infinite accuracy parameter
             eps <- (hi + lo) / 2
             eval <- 8 / accuracy * (0.5 - log(delta) / eps)
             ifelse(eval < n, (hi <- eps), (lo <- eps))

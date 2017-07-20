@@ -7,7 +7,11 @@
 \method{mean}{postMedian}(release)
 }
 \arguments{
-\item{release}{Differentially private release of a mean for a logical variable}
+\item{release}{Differentially private release of a mean for a logical 
+variable.}
+}
+\value{
+Median of \code{release}.
 }
 \description{
 Postprocessed Median for Logical Variables
