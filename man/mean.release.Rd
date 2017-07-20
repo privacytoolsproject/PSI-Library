@@ -4,7 +4,7 @@
 \alias{mean.release}
 \title{Function for differentially private release of mean}
 \usage{
-\method{mean}{release}(x, var.type, n, epsilon, rng)
+\method{mean}{release}(x, var.type, n, epsilon, rng, ...)
 }
 \arguments{
 \item{x}{A numeric, logical, or integer vector.}
@@ -21,6 +21,7 @@ Should be of length one and should be between zero and one.}
 
 \item{rng}{A numeric vector specifying an a priori estimate of the range
 of \code{x}. Should be of length two.}
+\item{...}{idk}
 }
 \value{
 Differentially private mean of vector \code{x}.

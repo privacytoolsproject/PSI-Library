@@ -13,6 +13,7 @@
 #'    Should be of length one and should be between zero and one.
 #' @return A list with fields `name` specifying the statistic and `stat` with 
 #'    the value of the statistic.
+#' @export
 dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list('name' = 'mean',
                 'stat' = mean(x),
@@ -35,6 +36,7 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 #'    Should be of length one and should be between zero and one.
 #' @param rng A numeric vector specifying an a priori estimate of the range
 #'    of \code{x}. Should be of length two. 
+#' @param ... idk
 #' @return Differentially private mean of vector \code{x}.
 #' @examples
 #' n <- 1000
@@ -47,7 +49,7 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 #' r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, rng=c(0, 1))
 #' r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, rng=c(-9.657, 3.483))
 #' @export
-mean.release <- function(x, var.type, n, epsilon, rng) {
+mean.release <- function(x, var.type, n, epsilon, rng, ...) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
     postlist <- list('accuracy' = 'getAccuracy',
                      'epsilon' = 'getParameters',
