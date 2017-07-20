@@ -24,5 +24,5 @@ Utility function to verify that a variable is dichotomous
 \examples{
 make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 make_logical(sample(c(0, 1), size=8, replace=TRUE))
-make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE)
+make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
 }
