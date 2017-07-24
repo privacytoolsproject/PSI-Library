@@ -457,3 +457,23 @@ makeDummies <- function(df) {
     df <- df[, !(names(df) %in% factors)]
     return(list('data' = df, 'names' = names(df)))
 }
+
+
+vectorNorm <- function(X, p=1, margin=1) {
+    fun <- function(vec, p) {
+        vec.norm <- sum(abs(vec)^p)^(1 / p)
+        return(vec.norm)
+    }
+    if (!is.null(dim(X))) {
+        p.norm <- apply(X, margin, fun, p)
+    } else {
+        p.norm <- fun(X, p)
+    }
+    return(p.norm)
+}
+
+mapMatrixUnit <- function(X, p=1) {
+    max.norm <- max(vectorNorm(X, p=p))
+    normed.matrix <- X / max.norm
+    return(list('matrix' = normed.matrix, 'max.norm' = max.norm))
+}
