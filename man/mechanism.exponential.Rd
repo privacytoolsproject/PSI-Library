@@ -2,11 +2,40 @@
 % Please edit documentation in R/mechanisms.R
 \name{mechanism.exponential}
 \alias{mechanism.exponential}
-\title{Exponential mechanism}
+\title{Exponential Noise Mechanism for Differential Privacy}
 \usage{
 mechanism.exponential(fun, x, var.type, sensitivity, epsilon, k,
   postlist = NULL, ...)
 }
+\arguments{
+\item{fun}{A user supplied function or string vector of length one naming a 
+function.}
+
+\item{x}{A vector of data to run \code{fun} on.}
+
+\item{var.type}{Data type of vector \code{x}.}
+
+\item{sensitivity}{The sensitivity of \code{x}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+
+\item{k}{The number of desired releases.}
+
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
+
+\item{...}{Other arguments passed to \code{fun}.}
+}
+\value{
+Differentially private release of function \code{fun} on 
+   data \code{x}.
+}
 \description{
-Exponential mechanism
+Mechanism to add exponential noise for releasing differentially private 
+   queries.
+}
+\examples{
+
+
 }

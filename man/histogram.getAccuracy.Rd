@@ -5,7 +5,7 @@
 \title{Accuracy of release}
 \usage{
 histogram.getAccuracy(n.bins, n, epsilon, stability, delta = 2^-30,
-  alpha = 0.05, error = 0.000000001)
+  alpha = 0.05, error = 1e-09)
 }
 \arguments{
 \item{n.bins}{Integer indicating number of cells in which to tabulate values}

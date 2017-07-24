@@ -2,23 +2,25 @@
 % Please edit documentation in R/utilities.R
 \name{checkrange}
 \alias{checkrange}
-\title{Utility function for checking that range is ordered pair}
+\title{Range Parameter Check}
 \usage{
 checkrange(rng)
 }
 \arguments{
-\item{range}{A vector, that ought to be an ordered pair}
+\item{range}{A numeric vector of length two, that ought to be an 
+ordered pair.}
 }
 \value{
-An ordered pair
-
-Checks if a supplied range is an ordered pair.  Coerces any vector of length two
-  or greater into an ordered pair, and issues an error for shorter vectors.
+An ordered pair.
 }
 \description{
-Utility function for checking that range is ordered pair
+Checks if a supplied range is an ordered pair. Coerces any vector of length 
+   two or greater into an ordered pair, and issues an error for
+   shorter vectors.
 }
 \examples{
+
+checkrange(c(1,3))
 checkrange(1:3)
 \dontrun{checkrange(1)}
 }

@@ -2,24 +2,34 @@
 % Please edit documentation in R/utilities.R
 \name{dpNoise}
 \alias{dpNoise}
-\title{Draw cryptographically secure random variates}
+\title{Differentially Private Noise Generator}
 \usage{
 dpNoise(n, scale, dist, seed = NULL)
 }
 \arguments{
-\item{n}{Integer giving number of variates needed}
+\item{n}{An integer giving number of variates needed.}
 
-\item{scale}{Numeric scale for the distribution}
+\item{scale}{Numeric, the scale for the distribution.}
 
-\item{dist}{Character specifying the distribution from which to draw the noise}
+\item{dist}{A character specifying the distribution from which to draw the 
+noise.}
 
-\item{seed}{Integer indicating a seed for R's PNRG, defaults to \code{NULL}}
+\item{seed}{An integer indicating a seed for R's PNRG, defaults 
+to \code{NULL}.}
+}
+\value{
+Cryptographically secure noise vector or matrix.
 }
 \description{
-Draw cryptographically secure random variates
+Compile noise from a cryptographically secure random variates to achieve
+   differentially private statistics.
 }
 \examples{
+
 laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
 laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
+}
+\seealso{
+\code{\link{dpUnif}}
 }

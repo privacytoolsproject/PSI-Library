@@ -7,21 +7,15 @@
 postprocess(out, postlist, ...)
 }
 \arguments{
-\item{out}{list containing differentially private released statistic, and mechanism and statistic names}
+\item{out}{A list containing differentially private released statistic, and 
+mechanism and statistic names.}
 
-\item{postlist}{List with name, function pairs for post-processing statistics}
+\item{postlist}{A list with names, function pairs for post-processing statistics.}
 
-\item{...}{Other arguments passed to \code{fun}}
-
-\item{var.type}{Data type of vector x}
-
-\item{rng}{An a priori estimate of the range}
-
-\item{sensitivity}{numeric}
-
-\item{epsilon}{numeric}
-
-\item{Original}{list with released statistic, appended with available postprocessed releases}
+\item{...}{Other arguments.}
+}
+\value{
+Postprocessed statistics.
 }
 \description{
 Cycle through available postprocessing functions for a released statistic

@@ -331,7 +331,8 @@ make_logical <- function(x) {
 #' Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
 #' the mechanism if so, else throws an error 
 #' 
-#' @examples 
+#' @examples
+#' 
 #' check_histogram_mechanism('stability')
 #' @export
 check_histogram_mechanism <- function(mechanism) { 

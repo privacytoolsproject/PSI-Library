@@ -2,11 +2,52 @@
 % Please edit documentation in R/mechanisms.R
 \name{mechanism.gaussian}
 \alias{mechanism.gaussian}
-\title{Gaussian mechanism}
+\title{Gaussian Noise Mechanism for Differential Privacy}
 \usage{
 mechanism.gaussian(fun, x, var.type, rng, sensitivity, epsilon, delta,
   postlist = NULL, ...)
 }
+\arguments{
+\item{fun}{A user supplied function or string vector of length one naming a 
+function.}
+
+\item{x}{A vector of data to run \code{fun} on.}
+
+\item{var.type}{Data type of vector \code{x}.}
+
+\item{rng}{An a priori estimate of the range of \code{x}.}
+
+\item{sensitivity}{The difference of \code{rng} divided by \code{n}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+
+\item{delta}{The probability of an arbitrary leakage of information from 
+\code{x}. Should be of length one and should be a very small value. 
+Default to 10^-6.}
+
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
+
+\item{...}{Other arguments passed to \code{fun}.}
+}
+\value{
+Differentially private release of function \code{fun} on 
+   data \code{x}.
+}
 \description{
-Gaussian mechanism
+Mechanism to add noise from a Gaussian distribution for releasing 
+   differentially private queries.
+}
+\examples{
+
+n <- 1000
+rng <- c(0, 1)
+x <- runif(n, min=min(rng), max=max(rng))
+sensitivity <- diff(rng) / n
+mechanism.gaussian(fun=dp.mean, x=x, var.type='numeric', rng=rng, sensitivity=sensitivity, 
+   epsilon=0.5, delta=0.000001)
+}
+\seealso{
+\code{\link{mechanism.laplace}}
 }

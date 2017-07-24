@@ -4,7 +4,7 @@
 \alias{covariance.release}
 \title{Function to release a differentially private inner product of input matrix.}
 \usage{
-covariance.release(x, var.type, n, epsilon, rng, columns, delta = 0.000001,
+covariance.release(x, var.type, n, epsilon, rng, columns, delta = 1e-06,
   intercept = FALSE, formulae = NULL, mechanism = "laplace")
 }
 \arguments{

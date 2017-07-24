@@ -2,15 +2,15 @@
 % Please edit documentation in R/utilities.R
 \name{make_logical}
 \alias{make_logical}
-\title{Utility function to verify that a variable is dichotomous}
+\title{Logical variable check}
 \usage{
 make_logical(x)
 }
 \arguments{
-\item{x}{Vector of values}
+\item{x}{Vector containing two unique types of values.}
 }
 \value{
-Logical vector coded 0-1
+Logical form of \code{x} coded 0-1.
 
 This function effectively allows the user to ask for any variable containing
 at most two unique values to treat the variable as logical. If the variable
@@ -19,9 +19,10 @@ value is recoded 0. If the variable is categorical and contains only two unique
 values, the least frequently observed is recoded 1.
 }
 \description{
-Utility function to verify that a variable is dichotomous
+Utility function to verify that a variable is dichotomous.
 }
 \examples{
+
 make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 make_logical(sample(c(0, 1), size=8, replace=TRUE))
 make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
