@@ -93,7 +93,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
 
 #' Objective perturbation
 
-mechanism.objective <- function(fun, x, n, epsilon, ...) {
+mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
 
     # start populating the object with the data we need
     mechanism.args <- c(as.list(environment()), list(...))
@@ -120,14 +120,27 @@ mechanism.objective <- function(fun, x, n, epsilon, ...) {
     X <- scaler$matrix
 
     # noise
+    if (!is.null(n.boot)) { epsilon <- epsilon / n.boot }
     b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
     b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
 
     # fit and adjust back to original scale
     start.params <- rep(0, ncol(X))
-    release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
-    names(release) <- 'estimate'
-    rownames(release) <- X.names
+    if (is.null(n.boot)) {
+        release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
+        names(release) <- 'estimate'
+        rownames(release) <- X.names
+    } else {
+        boot.ests <- vector('list', n.boot)
+        for (i in 1:n.boot) {
+            index <- sample(1:n, n, replace=TRUE)
+            X.star <- X[index, ]
+            y.star <- y[index]
+            boot.ests[[i]] <- optim(par=start.params, fn=out$objective, X=X.star, y=y.star, b=b, n=n)$par / scaler$max.norm
+        }
+        release <- data.frame(do.call(rbind, boot.ests))
+        names(release) <- X.names
+    }
     out$release <- release
     return(out)
 }

@@ -44,7 +44,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
 #' logit.private2 <- logit.releases(data, nrow(data), epsilon=0.5, formula=form2)$release
 
-logit.release <- function(x, n, epsilon, formula, intercept=TRUE) {
-    release <- mechanism.objective(fun=dp.logit, x=x, n=n, epsilon=epsilon, formula=formula, intercept=intercept)
+logit.release <- function(x, n, epsilon, formula, n.boot=NULL, intercept=TRUE) {
+    release <- mechanism.objective(fun=dp.logit, x=x, n=n, epsilon=epsilon, formula=formula, n.boot=n.boot, intercept=intercept)
     return(release)
 }
