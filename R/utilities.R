@@ -413,7 +413,7 @@ getFuncArgs <- function(output, target.func) {
 #' @param intercept Logical indicating whether the intercept is included
 
 linear.reg <- function(formula, release, n, intercept) {
-  if (!all(eigen(release)$values > 0)) {
+  if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
     coefs <- "The input matrix is not invertible"
     return(coefs)
   } else {
