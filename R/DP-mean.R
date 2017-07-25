@@ -16,7 +16,6 @@
 #' @return A list with fields `name` specifying the statistic and `stat` with 
 #'    the value of the statistic.
 #' @rdname dp.mean
-#' @export
 dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list('name' = 'mean',
                 'stat' = mean(x),

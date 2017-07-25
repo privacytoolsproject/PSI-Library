@@ -1,12 +1,20 @@
-#' Function to evaluate true variance & specify post-processing parameters
+#' DP Covariance
+#' 
+#' Function to evaluate true variance & specify post-processing parameters.
 #'
-#' @param x Numeric vector
-#' @param var.type Character string indicating variable type
-#' @param n Integer indicating number of observations in \code{x}
-#' @param sensitivity Numeric, the sensitivity of the estimate
-#' @param epsilon Numeric, epsilon parameter for differential privacy
-#' @return List with fields providing values for the true statistic and post-processing
-
+#' @param x A numeric, logical, or integer vector.
+#' @param var.type A character vector specifying variable type of \code{x}. 
+#'    Should be of length one and should contain either 'numeric', 
+#'    'logical', or 'integer'.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param sensitivity The difference of the range of the data divided 
+#'    by \code{n}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#'    
+#' @return A list with fields providing values for the true statistic and post-processing.
+#' @rdname dp.variance
 dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list(
         'name' = 'variance',
@@ -20,15 +28,27 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 }
 
 
-#' Function for differentially private release of variance
+#' Release differentially private variance
+#' 
+#' Function to calculate a differentially private release of variance.
 #'
-#' @param x Numeric vector
-#' @param var.type Character string indicating variable type
-#' @param n Integer indicating number of observations in \code{x}
-#' @param epsilon Numeric, epsilon parameter for differential privacy
-#' @param rng Numeric 2-tuple indicating range of numeric variable
-#' @return List output containing noisy estimate and post-processing values from the Laplace mechanism
-
+#' @param x A numeric, logical, or integer vector.
+#' @param var.type A character vector specifying variable type of \code{x}. 
+#'    Should be of length one and should contain either 'numeric', 
+#'    'logical', or 'integer'.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param rng A numeric vector specifying an a priori estimate of the range
+#'    of \code{x}. Should be of length two.
+#'    
+#' @return A list output containing noisy estimate and post-processing values from the 
+#'    Laplace mechanism.
+#' @examples
+#' 
+#' @rdname variance.release
+#' @export
 variance.release <- function(x, var.type, n, epsilon, rng) {
     rng <- checkrange(rng)
     sensitivity <- (n - 1) / n^2 * diff(rng)^2
@@ -39,12 +59,15 @@ variance.release <- function(x, var.type, n, epsilon, rng) {
 }
 
 
-#' Function to extract standard deviation from noisy estimate of variance
+#' Postprocessed variance standard deviation
+#' 
+#' Function to extract standard deviation from noisy estimate of variance.
 #'
-#' @param release Numeric noisy estimate of variance
-#' @return Noisy estimate of standard deviation
-
-variance.post.std <- function(release) {
+#' @param release Differentially private release of variance.
+#' 
+#' @return Noisy estimate of the standard deviation of \code{release}.
+#' @rdname variance.postStandardDeviation
+variance.postStandardDeviation <- function(release) {
     std <- sqrt(release)
     return(std)
 }
