@@ -22,6 +22,12 @@ values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}}
 
 \item{n}{A numeric vector of length one specifying the number of
 observations in \code{x}.}
+
+\item{sensitivity}{The difference of the range of \code{x} divided 
+by \code{n}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 }
 \value{
 A list with the true value of the statistic and arguments to be 

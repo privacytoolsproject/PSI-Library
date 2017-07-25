@@ -6,6 +6,26 @@
 \usage{
 \method{quantile}{release}(x, var.type, n, epsilon, rng, gran, cdf.step)
 }
+\arguments{
+\item{x}{A numeric or integer vector.}
+
+\item{var.type}{A character vector specifying variable type of \code{x}.
+Should be of length one.}
+
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+
+\item{rng}{A numeric vector specifying an a priori estimate of the range
+of \code{x}. Should be of length two.}
+
+\item{cdf.step}{}
+}
 \description{
-Release differentially private quantiles
+Function to calculate a differentially private release of quantiles.
+}
+\examples{
+ 
 }

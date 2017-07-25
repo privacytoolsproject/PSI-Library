@@ -17,6 +17,9 @@ observations in in the data.}
 \item{accuracy}{A numeric vector representing the accuracy needed to 
 guarantee (percent).}
 
+\item{stability}{A logical vector indicating whether the stability 
+mechanism is used.}
+
 \item{delta}{The probability of an arbitrary leakage of information from 
 the data. Should be of length one and should be a very small value. 
 Default to 10^-6.}

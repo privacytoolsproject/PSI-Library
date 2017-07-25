@@ -14,6 +14,10 @@ dp.heavyhitters(x, var.type, epsilon, delta, n, k, sensitivity)
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
 
+\item{delta}{A numeric vector representing the probability of an arbitrary
+leakage of information from \code{x}. Should be of length one 
+and should be a very small value.}
+
 \item{n}{A numeric vector of length one specifying the number of
 observations in \code{x}.}
 

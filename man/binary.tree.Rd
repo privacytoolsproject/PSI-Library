@@ -2,10 +2,32 @@
 % Please edit documentation in R/DP-quantiles.R
 \name{binary.tree}
 \alias{binary.tree}
-\title{Binary tree in vector form}
+\title{Binary tree}
 \usage{
 binary.tree(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon)
 }
+\arguments{
+\item{x}{A numeric or integer vector.}
+
+\item{var.type}{A character vector specifying variable type of \code{x}.
+Should be of length one.}
+
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
+
+\item{rng}{A numeric vector specifying an a priori estimate of the range
+of \code{x}. Should be of length two.}
+
+\item{gran}{}
+
+\item{universe.size}{}
+
+\item{sensitivity}{The difference of the range of \code{x} divided 
+by \code{n}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+}
 \description{
-Binary tree in vector form
+Binary tree in vector form.
 }
