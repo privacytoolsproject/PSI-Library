@@ -6,6 +6,9 @@
 #' @param var.type A character vector specifying variable type of \code{x}.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
+#' @param delta A numeric vector representing the probability of an arbitrary
+#'    leakage of information from \code{x}. Should be of length one 
+#'    and should be a very small value.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in \code{x}.
 #' @param k An integer querying the most common \code{k} categories.
@@ -117,8 +120,15 @@ heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
 }
 
 
-#' Function to see failed
-
+#' Heavyhitters failure
+#' 
+#' Function to see if the heavyhitters mechanism failed.
+#' 
+#' @param failed A logical vector.
+#' 
+#' @return \code{failed}. If \code{TRUE}, the mechanism failed. If \code{FALSE},
+#'    the function succeeded.
+#' @rdname heavyhitters.postNoteFailure
 heavyhitters.postNoteFailure <- function(failed) {
     return(failed)
 }

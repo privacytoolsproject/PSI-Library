@@ -13,6 +13,10 @@
 #'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in \code{x}.
+#' @param sensitivity The difference of the range of \code{x} divided 
+#'    by \code{n}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
 #'    
 #' @return A list with the true value of the statistic and arguments to be 
 #'    passed to other functions.
@@ -168,6 +172,8 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 #'    observations in in the data.
 #' @param accuracy A numeric vector representing the accuracy needed to 
 #'    guarantee (percent).
+#' @param stability A logical vector indicating whether the stability 
+#'    mechanism is used.
 #' @param delta The probability of an arbitrary leakage of information from 
 #'    the data. Should be of length one and should be a very small value. 
 #'    Default to 10^-6.

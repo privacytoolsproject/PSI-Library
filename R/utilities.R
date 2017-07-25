@@ -163,7 +163,7 @@ sgn <- function(x) {
 #'    two or greater into an ordered pair, and issues an error for
 #'    shorter vectors.
 #'    
-#' @param range A numeric vector of length two, that ought to be an 
+#' @param rng A numeric vector of length two, that ought to be an 
 #'    ordered pair.
 #' 
 #' @return An ordered pair.
