@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.getParameters}
 \alias{histogram.getParameters}
-\title{Histogram Epsilon}
+\title{Histogram epsilon}
 \usage{
 histogram.getParameters(n.bins, n, accuracy, stability, delta = 2^-30,
   alpha = 0.05, error = 1e-09)
@@ -30,5 +30,6 @@ statistical significance level. Default to 0.05.}
 Differential privacy parameter epsilon
 }
 \description{
-Function to find the epsilon value necessary to meet a desired level of accuracy.
+Function to find the epsilon value necessary to meet a desired level of accuracy for the
+differentially private histogram release.
 }

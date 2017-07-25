@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.getCI}
 \alias{histogram.getCI}
-\title{Confidence interval}
+\title{Histogram confidence interval}
 \usage{
 histogram.getCI(release, n.bins, n, accuracy)
 }
@@ -22,6 +22,6 @@ guarantee (percent).}
 Confidence interval for the noisy counts in each bin.
 }
 \description{
-Return the confidence interval for the noisy histogram release given the
-   accuracy.
+Return the confidence interval for the differentially private histogram release given the
+accuracy.
 }

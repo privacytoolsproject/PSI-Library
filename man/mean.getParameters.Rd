@@ -2,8 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getParameters}
 \alias{mean.getParameters}
-\title{Function to find the epsilon value necessary to meet a desired level of 
-   accuracy.}
+\title{Mean epsilon}
 \usage{
 \method{mean}{getParameters}(accuracy, n, alpha = 0.05)
 }
@@ -21,5 +20,5 @@ The scalar epsilon necessary to guarantee the needed accuracy.
 }
 \description{
 Function to find the epsilon value necessary to meet a desired level of 
-   accuracy.
+accuracy.
 }

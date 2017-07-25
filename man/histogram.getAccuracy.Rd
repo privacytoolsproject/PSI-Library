@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.getAccuracy}
 \alias{histogram.getAccuracy}
-\title{Histogram Accuracy}
+\title{Histogram accuracy}
 \usage{
 histogram.getAccuracy(n.bins, n, epsilon, stability, delta = 2^-30,
   alpha = 0.05, error = 1e-09)
@@ -33,5 +33,6 @@ statistical significance level. Default to 0.05.}
 Accuracy guarantee for histogram release, given epsilon.
 }
 \description{
-Determine accuracy of histogram release, given epsilon and delta.
+Determine accuracy of histogram release, given epsilon and delta, for the differentially 
+private histogram release.
 }

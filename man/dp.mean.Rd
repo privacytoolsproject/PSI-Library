@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{dp.mean}
 \alias{dp.mean}
-\title{Function to evaluate the mean and specify parameters for mean functions}
+\title{DP Mean}
 \usage{
 dp.mean(x, var.type, n, sensitivity, epsilon)
 }
@@ -16,9 +16,8 @@ Should be of length one and should contain either 'numeric',
 \item{n}{A numeric vector of length one specifying the number of
 observations in \code{x}.}
 
-\item{sensitivity}{A numeric vector representing the probability of an arbitrary
-leakage of information from \code{x}. Should be of length one 
-and should be a very small value, such as 2^-30.}
+\item{sensitivity}{The difference of the range of the data divided 
+by \code{n}.}
 
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
@@ -28,5 +27,5 @@ A list with fields `name` specifying the statistic and `stat` with
    the value of the statistic.
 }
 \description{
-Function to evaluate the mean and specify parameters for mean functions
+Function to evaluate the mean and specify parameters for mean functions.
 }

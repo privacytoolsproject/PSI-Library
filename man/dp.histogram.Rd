@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-histogram.R
 \name{dp.histogram}
 \alias{dp.histogram}
-\title{Function to evaluate a histogram and specify arguments}
+\title{DP histogram}
 \usage{
 dp.histogram(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon)
 }
@@ -28,5 +28,6 @@ A list with the true value of the statistic and arguments to be
    passed to other functions.
 }
 \description{
-Function to evaluate a histogram and specify arguments
+Function to evaluate a true histogram and specify arguments for differentially private
+histogram release.
 }

@@ -14,5 +14,5 @@ to \code{TRUE}.}
 JSON doc for histogram function.
 }
 \description{
-JSON doc for histogram
+Produce a JSON doc for differentially private histograms.
 }

@@ -34,14 +34,10 @@ Differentially private histogram of vector \code{x}.
 If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 used to construct the table. The vector is pre-processed so that observed levels not specified in these
 bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
-in the output table.
-}
-\details{
-If the variable is numeric, the number of bins `n_bins` is set by the user optionally, else the Sturges
-method is used to select the number of bins given the number of observations `n`. The bins are then
-constructed to be equal intervals between the provided range.
-
-Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
+in the output table. If the variable is numeric, the number of bins `n_bins` is set by the user 
+optionally, else the Sturges method is used to select the number of bins given the number of observations
+`n`. The bins are then constructed to be equal intervals between the provided range. The function uses 
+the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
 }
 \examples{
 

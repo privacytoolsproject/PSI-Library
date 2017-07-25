@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.postHerfindahl}
 \alias{histogram.postHerfindahl}
-\title{Herfindahl Index}
+\title{Histogram Herfindahl Index}
 \usage{
 histogram.postHerfindahl(release, n)
 }
@@ -16,5 +16,5 @@ observations in in the data.}
 Herfindahl index.
 }
 \description{
-Produce Herfindahl index for categorical types of data.
+Produce differentially private Herfindahl index for categorical types of data.
 }
