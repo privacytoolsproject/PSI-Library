@@ -6,8 +6,12 @@
 \usage{
 histogram.getJSON(output.json = TRUE)
 }
+\arguments{
+\item{output.json}{Should the output be converted to JSON format. Default
+to \code{TRUE}.}
+}
 \value{
-JSON for histogram function
+JSON doc for histogram function.
 }
 \description{
 JSON doc for histogram

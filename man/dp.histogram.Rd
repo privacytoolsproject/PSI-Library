@@ -7,20 +7,25 @@
 dp.histogram(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon)
 }
 \arguments{
-\item{x}{Vector of categorical or numeric values}
+\item{x}{A vector of categorical or numeric values.}
 
-\item{var.type}{Character string indicating the variable type}
+\item{var.type}{A character vector specifying variable type of \code{x}.}
 
-\item{stability}{Logical indicating if the stability mechanism is to be used}
+\item{stability}{A logical indicating if the stability mechanism is to 
+be used.}
 
-\item{bins}{Vector of bins}
+\item{bins}{A vector of bins for which values are counted. Required for 
+categorical types.}
 
-\item{n.bins}{Integer indicating the number of bins}
+\item{n.bins}{An integer specifying the number of cells in which to tabulate 
+values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}}
 
-\item{n}{Integer indicating the number of observations in \code{x}}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 }
 \value{
-List with the true value of the statistic and arguments to be passed to other functions
+A list with the true value of the statistic and arguments to be 
+   passed to other functions.
 }
 \description{
 Function to evaluate a histogram and specify arguments

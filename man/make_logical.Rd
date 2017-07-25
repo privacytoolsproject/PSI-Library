@@ -11,15 +11,16 @@ make_logical(x)
 }
 \value{
 Logical form of \code{x} coded 0-1.
-
+}
+\description{
+Utility function to verify that a variable is dichotomous.
+}
+\details{
 This function effectively allows the user to ask for any variable containing
 at most two unique values to treat the variable as logical. If the variable
 contains numeric values, the highest value is recoded 1 and the the lower
 value is recoded 0. If the variable is categorical and contains only two unique
 values, the least frequently observed is recoded 1.
-}
-\description{
-Utility function to verify that a variable is dichotomous.
 }
 \examples{
 

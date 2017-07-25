@@ -2,27 +2,33 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.getParameters}
 \alias{histogram.getParameters}
-\title{Privacy parameters}
+\title{Histogram Epsilon}
 \usage{
 histogram.getParameters(n.bins, n, accuracy, stability, delta = 2^-30,
   alpha = 0.05, error = 1e-09)
 }
 \arguments{
-\item{n.bins}{Integer indicating number of cells in which to tabulate values}
+\item{n.bins}{A numeric vector of length one specifying the number of cells 
+in which to tabulate values.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in in the data.}
 
-\item{accuracy}{Numeric}
+\item{accuracy}{A numeric vector representing the accuracy needed to 
+guarantee (percent).}
 
-\item{delta}{Numeric delta value for differential privacy, fixed}
+\item{delta}{The probability of an arbitrary leakage of information from 
+the data. Should be of length one and should be a very small value. 
+Default to 10^-6.}
 
-\item{alpha}{Numeric statistical significance level, fixed}
+\item{alpha}{A numeric vector of length one specifying the numeric 
+statistical significance level. Default to 0.05.}
 
-\item{error}{Numeric, fixed}
+\item{error}{}
 }
 \value{
 Differential privacy parameter epsilon
 }
 \description{
-Privacy parameters
+Function to find the epsilon value necessary to meet a desired level of accuracy.
 }

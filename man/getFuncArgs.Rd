@@ -2,18 +2,19 @@
 % Please edit documentation in R/utilities.R
 \name{getFuncArgs}
 \alias{getFuncArgs}
-\title{Utility function to match arguments of a function with list output of another function}
+\title{Extract function arguments}
 \usage{
 getFuncArgs(output, target.func)
 }
 \arguments{
-\item{output}{List with output of a function}
+\item{output}{A list with the output of a function.}
 
-\item{target.func}{Character name of the function with arguments that need to be filled by output}
+\item{target.func}{A character vector containing the name of the function 
+with arguments that need to be filled by output.}
 }
 \value{
 List of arguments and values needed for specification of \code{target.func}
 }
 \description{
-Utility function to match arguments of a function with list output of another function
+Utility function to match arguments of a function with list output of another function.
 }

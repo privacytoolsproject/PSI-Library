@@ -2,23 +2,25 @@
 % Please edit documentation in R/utilities.R
 \name{extract.indices}
 \alias{extract.indices}
-\title{Function to obtain indices in data frame for dependent & independent variables from a formula}
+\title{Extract regression indices}
 \usage{
 extract.indices(formula, data, intercept)
 }
 \arguments{
-\item{formula}{Formula}
+\item{formula}{An object of class 'formula' containing the desired 
+regression formula.}
 
-\item{data}{Data frame, in this case being the data frame of a private covariance matrix}
+\item{data}{A numeric data frame with at least two columns.}
 
-\item{intercept}{Logical indicating whether the intercept is included}
+\item{intercept}{A logical vector indicating whether the intercept is 
+included in \code{formula}.}
 }
 \value{
-Named list with names corresponding to labels and locations (i.e., columns) for variables
- in the specification.
+A named list with names corresponding to labels and locations 
+   (i.e., columns) for variables in the specification.
 }
 \description{
-Function to obtain indices in data frame for dependent & independent variables from a formula
+Function to obtain indices in data frame for dependent & independent variables from a formula.
 }
 \examples{
 
