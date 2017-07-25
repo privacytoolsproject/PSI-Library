@@ -16,7 +16,7 @@ Should be of length one and should contain either 'numeric',
 \item{n}{A numeric vector of length one specifying the number of
 observations in \code{x}.}
 
-\item{sensitivity}{The difference of the range of the data divided 
+\item{sensitivity}{The difference of the range of \code{x} divided 
 by \code{n}.}
 
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.

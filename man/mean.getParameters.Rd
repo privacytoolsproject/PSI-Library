@@ -20,5 +20,5 @@ The scalar epsilon necessary to guarantee the needed accuracy.
 }
 \description{
 Function to find the epsilon value necessary to meet a desired level of 
-accuracy.
+accuracy for a mean release.
 }

@@ -2,22 +2,25 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{dp.heavyhitters}
 \alias{dp.heavyhitters}
-\title{Function to evaluate most common values and specify arguments to post-processing}
+\title{DP Heavyhitters}
 \usage{
 dp.heavyhitters(x, var.type, epsilon, delta, n, k, sensitivity)
 }
 \arguments{
-\item{x}{Vector of categorical data (character, factor)}
+\item{x}{A vector of categorical data (character, factor).}
 
-\item{var.type}{Character string indicating data type}
+\item{var.type}{A character vector specifying variable type of \code{x}.}
 
-\item{epsilon}{Epsilon value for differential privacy}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{k}{Integer querying the most common \code{k} categories}
+\item{k}{An integer querying the most common \code{k} categories.}
 
-\item{sensitivity}{Numeric the sensitivity of the statistic}
+\item{sensitivity}{The difference of the range of the \code{x} divided 
+by \code{n}.}
 }
 \value{
 List with true value of statistic and parameters to be passed to post-processing
