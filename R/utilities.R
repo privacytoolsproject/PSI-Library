@@ -495,11 +495,12 @@ mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
 #'    the number of observations in the data the covariance matrix was 
 #'    derived from.
 #' @param m A logical vector of length equal to the number of rows in \code{g}
-#'    in which the \code{TRUE} values correspond to the x values in the data
-#'    and the \code{FALSE} values correspond to the y value in the data.
-#' @param reverse Default to \code{FALSE}.
+#'    in which the \code{TRUE} values correspond to the x values in the matrix
+#'    and the \code{FALSE} values correspond to the y value in the matrix.
+#' @param reverse Logical vector specifying whether the sign of the matrix 
+#'    should be flipped. Default to \code{FALSE}.
 #' 
-#' @return 
+#' @return The coefficients from \code{g}.
 #' @rdname amsweep
 amsweep <- function(g, m, reverse=FALSE) {
     if (identical(m, vector(mode='logical', length=length(m)))) {
