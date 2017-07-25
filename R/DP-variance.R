@@ -8,7 +8,7 @@
 #'    'logical', or 'integer'.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in \code{x}.
-#' @param sensitivity The difference of the range of the data divided 
+#' @param sensitivity The difference of the range of \code{x} divided 
 #'    by \code{n}.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
@@ -52,7 +52,7 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 variance.release <- function(x, var.type, n, epsilon, rng) {
     rng <- checkrange(rng)
     sensitivity <- (n - 1) / n^2 * diff(rng)^2
-    postlist <- list('std' = 'post.std')
+    postlist <- list('std' = 'postStandardDeviation')
     release <- mechanism.laplace(fun=dp.variance, x=x, var.type=var.type, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, n=n, postlist=postlist)
     return(release)

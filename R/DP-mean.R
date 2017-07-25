@@ -8,7 +8,7 @@
 #'    'logical', or 'integer'.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in \code{x}.
-#' @param sensitivity The difference of the range of the data divided 
+#' @param sensitivity The difference of the range of \code{x} divided 
 #'    by \code{n}.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
@@ -129,7 +129,7 @@ mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
 #' Mean epsilon
 #' 
 #' Function to find the epsilon value necessary to meet a desired level of 
-#' accuracy.
+#' accuracy for a mean release.
 #'
 #' @param accuracy A numeric vector representing the accuracy needed to 
 #'    guarantee (percent).
