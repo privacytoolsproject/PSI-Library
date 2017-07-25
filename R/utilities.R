@@ -292,16 +292,15 @@ check_variable_type <- function(type, in_types) {
 #' 
 #' Utility function to verify that a variable is dichotomous.
 #'
-#' @param x Vector containing two unique types of values.
-#' 
-#' @return Logical form of \code{x} coded 0-1.
-#'
 #' This function effectively allows the user to ask for any variable containing
 #' at most two unique values to treat the variable as logical. If the variable
 #' contains numeric values, the highest value is recoded 1 and the the lower
 #' value is recoded 0. If the variable is categorical and contains only two unique
 #' values, the least frequently observed is recoded 1.
 #'
+#' @param x Vector containing two unique types of values.
+#' 
+#' @return Logical form of \code{x} coded 0-1.
 #' @examples
 #' 
 #' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
@@ -355,14 +354,17 @@ check_histogram_categorical <- function(x, bins) {
 }
 
 
-#' Utility function to check bins argument to histogram
+#' Check histogram bins argument
 #' 
-#' @param n_bins Number of cells in which to tabulate values
-#' @param n Number of observations
+#' Utility function to check bins argument to histogram. If number of bins 
+#'    is not provided, the Sturges method is used.
+#' 
+#' @param n_bins The number of cells in which to tabulate values.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#'
 #' @return Number of bins
-#' 
-#' If number of bins is not provided, use the Sturges method
-
+#' @rdname check_histogram_bins
 check_histogram_bins <- function(n_bins, n) {
     if (is.null(n_bins)) {
         n_bins <- ceiling(log2(n)) + 1
@@ -376,9 +378,27 @@ check_histogram_bins <- function(n_bins, n) {
 }
 
 
-#' Utility function to check sufficient n 
+#' Histogram N check
 #' 
-
+#' Utility function to check sufficient N in data.
+#' 
+#' @param accuracy A numeric vector of length one representing the accuracy of 
+#'    the noisy estimate
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param n_bins A numeric vector of length one specifying the number of cells 
+#'    in which to tabulate values.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param delta The probability of an arbitrary leakage of information from 
+#'    the data. Should be of length one and should be a very small value. 
+#' @param alpha A numeric vector of length one specifying the numeric 
+#'    statistical significance level.
+#'    
+#' @return A logical vector indicating whether the number of observations is 
+#'    sufficient to provide desired privacy and accuracy with the given
+#'    parameters.
+#' @rdname check_histogram_n
 check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) { 
     cond1 <- (8 / accuracy) * (0.5 - log(delta) / epsilon)
     cond2 <- 4 * log(min(n_bins, (4 / accuracy)) / alpha) / (accuracy * epsilon)
@@ -390,12 +410,16 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) {
 }
 
 
-#' Utility function to match arguments of a function with list output of another function
+#' Extract function arguments
+#' 
+#' Utility function to match arguments of a function with list output of another function.
 #'
-#' @param output List with output of a function
-#' @param target.func Character name of the function with arguments that need to be filled by output
+#' @param output A list with the output of a function.
+#' @param target.func A character vector containing the name of the function 
+#'    with arguments that need to be filled by output.
+#'    
 #' @return List of arguments and values needed for specification of \code{target.func}
-
+#' @rdname getFuncArgs
 getFuncArgs <- function(output, target.func) {
     spec <- list()
     for (element in names(output)) {
@@ -406,13 +430,23 @@ getFuncArgs <- function(output, target.func) {
     return(spec)
 }
 
-#' Function to perform regression using the covariance matrix via the sweep operator
-#'
-#' @param formula Formula
-#' @param release Numeric private release of covariance matrix
-#' @param n Integer indicating number of observations
-#' @param intercept Logical indicating whether the intercept is included
 
+#' Linear regression on covariance matrix
+#' 
+#' Function to extract regression coefficients from the covariance matrix via 
+#'    the sweep operator.
+#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param release A numeric private release of the covariance matrix.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#'    
+#' @return A numeric vector of regression coefficients corresponding 
+#'    to \code{formula}.
+#' @rdname linear.reg
 linear.reg <- function(formula, release, n, intercept) {
   if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
     coefs <- "The input matrix is not invertible"
@@ -434,9 +468,13 @@ linear.reg <- function(formula, release, n, intercept) {
   }
 }
 
-#' Moore Penrose Inverse Function
+
+#' Moore Penrose Inverse Function ###Must assign authorship to this###
 #' 
-#' Need to assign authorship to this and amsweep
+#' Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
+#' 
+#' @param X A numeric, symmetric covariance matrix.
+#' @param tol Convergence requirement. 
 
 mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
   ## Moore-Penrose Inverse function (aka Generalized Inverse)
@@ -448,8 +486,21 @@ mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
   s$v %*% diag(e,nrow=length(e)) %*% t(s$u)
 }
 
-#' Sweep operator (from Amelia)
 
+#' Sweep operator ###Check if we need to assign authorship to this###
+#' 
+#' Sweeps a covariance matrix to extract regression coefficients.
+#' 
+#' @param g Each unit of a numeric, symmetric covariance matrix divided by
+#'    the number of observations in the data the covariance matrix was 
+#'    derived from.
+#' @param m A logical vector of length equal to the number of rows in \code{g}
+#'    in which the \code{TRUE} values correspond to the x values in the data
+#'    and the \code{FALSE} values correspond to the y value in the data.
+#' @param reverse Default to \code{FALSE}.
+#' 
+#' @return 
+#' @rdname amsweep
 amsweep <- function(g, m, reverse=FALSE) {
     if (identical(m, vector(mode='logical', length=length(m)))) {
         return(g)
@@ -485,14 +536,19 @@ amsweep <- function(g, m, reverse=FALSE) {
     }
 }
 
-#' Function to obtain indices in data frame for dependent & independent variables from a formula
+
+#' Extract regression indices
+#' 
+#' Function to obtain indices in data frame for dependent & independent variables from a formula.
 #'
-#' @param formula Formula
-#' @param data Data frame, in this case being the data frame of a private covariance matrix
-#' @param intercept Logical indicating whether the intercept is included
-#' @return Named list with names corresponding to labels and locations (i.e., columns) for variables
-#'  in the specification.
-#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param data A numeric data frame with at least two columns.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#' 
+#' @return A named list with names corresponding to labels and locations 
+#'    (i.e., columns) for variables in the specification.
 #' @examples
 #'
 #' y <- rnorm(100) * 2
@@ -500,6 +556,7 @@ amsweep <- function(g, m, reverse=FALSE) {
 #' data <- data.frame(cbind(y, x))
 #' f <- as.formula('y ~ x')
 #' extract.indices(f, data, FALSE)
+#' @rdname extract.indices
 #' @export
 extract.indices <- function(formula, data, intercept) {
     t <- terms(formula, data=data)
