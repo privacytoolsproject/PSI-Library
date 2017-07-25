@@ -1,4 +1,7 @@
-#' Function to evaluate a histogram and specify arguments
+#' DP histogram
+#' 
+#' Function to evaluate a true histogram and specify arguments for differentially private
+#' histogram release.
 #'
 #' @param x A vector of categorical or numeric values.
 #' @param var.type A character vector specifying variable type of \code{x}. 
@@ -37,13 +40,10 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 #' used to construct the table. The vector is pre-processed so that observed levels not specified in these
 #' bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
-#' in the output table.
-#'
-#' If the variable is numeric, the number of bins `n_bins` is set by the user optionally, else the Sturges
-#' method is used to select the number of bins given the number of observations `n`. The bins are then
-#' constructed to be equal intervals between the provided range.
-#'
-#' Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
+#' in the output table. If the variable is numeric, the number of bins `n_bins` is set by the user 
+#' optionally, else the Sturges method is used to select the number of bins given the number of observations
+#' `n`. The bins are then constructed to be equal intervals between the provided range. The function uses 
+#' the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
 #'
 #' @param x A vector of categorical or numeric values.
 #' @param var.type A character vector specifying variable type of \code{x}.
@@ -116,9 +116,10 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
 }
 
 
-#' Histogram Accuracy
+#' Histogram accuracy
 #' 
-#' Determine accuracy of histogram release, given epsilon and delta.
+#' Determine accuracy of histogram release, given epsilon and delta, for the differentially 
+#' private histogram release.
 #'
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
@@ -156,9 +157,10 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 }
 
 
-#' Histogram Epsilon
+#' Histogram epsilon
 #' 
-#' Function to find the epsilon value necessary to meet a desired level of accuracy.
+#' Function to find the epsilon value necessary to meet a desired level of accuracy for the
+#' differentially private histogram release.
 #' 
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
@@ -197,10 +199,10 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 }
 
 
-#' Confidence interval
+#' Histogram confidence interval
 #' 
-#' Return the confidence interval for the noisy histogram release given the
-#'    accuracy.
+#' Return the confidence interval for the differentially private histogram release given the
+#' accuracy.
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -229,9 +231,9 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
 }
 
 
-#' Herfindahl Index
+#' Histogram Herfindahl Index
 #' 
-#' Produce Herfindahl index for categorical types of data.
+#' Produce differentially private Herfindahl index for categorical types of data.
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n A numeric vector of length one specifying the number of
@@ -247,9 +249,11 @@ histogram.postHerfindahl <- function(release, n) {
 
 
 #' JSON doc for histogram
+#' 
+#' Produce a JSON doc for differentially private histograms.
 #'
 #' @param output.json Should the output be converted to JSON format. Default
-#'    to \code{TRUE}.
+#' to \code{TRUE}.
 #'
 #' @return JSON doc for histogram function.
 #' @rdname histogram.getJSON
