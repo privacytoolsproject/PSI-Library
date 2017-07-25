@@ -1,5 +1,23 @@
-#' Binary tree in vector form
-
+#' Binary tree
+#' 
+#' Binary tree in vector form.
+#' 
+#' @param x A numeric or integer vector.
+#' @param var.type A character vector specifying variable type of \code{x}.
+#'    Should be of length one.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param rng A numeric vector specifying an a priori estimate of the range
+#'    of \code{x}. Should be of length two. 
+#' @param gran 
+#' @param universe.size 
+#' @param sensitivity The difference of the range of \code{x} divided 
+#'    by \code{n}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#'    
+#' @return
+#' @rdname binary.tree
 binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon) {
     depth <- ceiling(log2(universe.size))
     tree <- rep(0, times=(2^depth + universe.size))
@@ -29,7 +47,26 @@ binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, e
 
 
 #' Release differentially private quantiles
-
+#' 
+#' Function to calculate a differentially private release of quantiles.
+#' 
+#' @param x A numeric or integer vector.
+#' @param var.type A character vector specifying variable type of \code{x}.
+#'    Should be of length one.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param rng A numeric vector specifying an a priori estimate of the range
+#'    of \code{x}. Should be of length two. 
+#' @param gran
+#' @param cdf.step
+#' 
+#' @return 
+#' @examples
+#'  
+#' @rdname quantile.release
+#' @export
 quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     rng <- checkrange(rng)
@@ -54,34 +91,46 @@ quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
 }
 
 
-#' Get the accuracy of quantile statistic for a given value of epsilon
-#'
-#' @param epsilon Numeric, epsilon value for DP
-#' @param n Integer, number of observations
-#' @param universe.size Integer, the universe size
-#' @param alpha Numeric, statistical significance level
-#' @return The accuracy guaranteed by the given epsilon
-#' @author Nathan Manohar
-#'
+#' Quantiles accuracy
+#' 
+#' Get the accuracy of quantile statistic for a given value of epsilon.
+#' 
 #' The accuracy is interpreted as follows: The alpha value returned means that with 
 #'   probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's 
 #'   estimate of the count in [min, t] is within alpha of the true value.
-
+#'
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in the data.
+#' @param universe.size Integer, the universe size
+#' @param alpha A numeric vector specifying the statistical significance level.
+#'    Default to 0.05.
+#' 
+#' @return The accuracy guaranteed by the given epsilon.
+#' @author Nathan Manohar
+#' @rdname quantile.getAccuracy
 quantile.getAccuracy <- function(epsilon, n, universe.size, alpha=0.05) {
     accuracy <- ((4 / epsilon) * log(1 / alpha) * log2(universe.size)^1.5) / (n * 100)
     return(accuracy)
 }
 
 
-#' Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release
+#' Quantiles epsilon
+#' 
+#' Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release.
 #'
-#' @param Accuracy Numeric, the accuracy parameter
-#' @param n Integer, number of observations
+#' @param accuracy A numeric vector representing the accuracy needed to 
+#'    guarantee (percent).
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in the data.
 #' @param universe.size Integer, the universe size
-#' @param alpha Numeric, statistical significance level
-#' @return The epsilon value necessary to gaurantee the given accuracy
+#' @param alpha A numeric vector specifying the statistical significance level.
+#'    Default to 0.05.
+#'    
+#' @return The epsilon value necessary to gaurantee the given accuracy.
 #' @author Nathan Manohar
-
+#' @rdname quantile.getParameters
 quantile.getParameters <- function(accuracy, n, universe.size, alpha=0.05) {
     accuracy <- accuracy * 100  # added by JM on 8/5/14 for consistency among accuracies
     epsilon <- ((4 / accuracy) * log2(1 / alpha) * log2(universe.size)^1.5) / n
