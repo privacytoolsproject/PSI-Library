@@ -1,13 +1,19 @@
 #' Function to evaluate a histogram and specify arguments
 #'
-#' @param x Vector of categorical or numeric values
-#' @param var.type Character string indicating the variable type
-#' @param stability Logical indicating if the stability mechanism is to be used
-#' @param bins Vector of bins
-#' @param n.bins Integer indicating the number of bins
-#' @param n Integer indicating the number of observations in \code{x}
-#' @return List with the true value of the statistic and arguments to be passed to other functions
-
+#' @param x A vector of categorical or numeric values.
+#' @param var.type A character vector specifying variable type of \code{x}. 
+#' @param stability A logical indicating if the stability mechanism is to 
+#'    be used.
+#' @param bins A vector of bins for which values are counted. Required for 
+#'    categorical types.
+#' @param n.bins An integer specifying the number of cells in which to tabulate 
+#'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#'    
+#' @return A list with the true value of the statistic and arguments to be 
+#'    passed to other functions.
+#' @rdname dp.histogram
 dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon) {
     if (var.type %in% c('numeric', 'integer')) {
         values <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
@@ -27,15 +33,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 
 
 #' Release differentially private histogram
-#'
-#' @param x Vector, numeric or categorical
-#' @param var.type String, specifies the type of x
-#' @param n Integer, number of observations in x
-#' @param epsilon Float, Epsilon value for differential privacy
-#' @param rng Tuple, range of x, required for numeric types
-#' @param bins Vector of bins for which values are counted, required for categorical types
-#' @param n.bins Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}
-#'
+#' 
 #' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 #' used to construct the table. The vector is pre-processed so that observed levels not specified in these
 #' bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
@@ -47,7 +45,22 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #'
 #' Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
 #'
+#' @param x A vector of categorical or numeric values.
+#' @param var.type A character vector specifying variable type of \code{x}.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in \code{x}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param rng A numeric vector of length two specifying the lower and upper bounds 
+#'    of \code{x}.
+#' @param bins A vector of bins for which values are counted. Required for 
+#'    categorical types.
+#' @param n.bins An integer specifying the number of cells in which to tabulate 
+#'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
+#'    
+#' @return Differentially private histogram of vector \code{x}.
 #' @examples
+#' 
 #' # numeric types
 #' x_num <- rnorm(100)
 #' x_num_na <- x_num
@@ -69,6 +82,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' bins <- c('a', 'b', 'c', 'd', 'e')
 #' r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
 #' r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
+#' @rdname histogram.release
 #' @export
 histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
@@ -102,17 +116,27 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
 }
 
 
-#' Accuracy of release
+#' Histogram Accuracy
+#' 
+#' Determine accuracy of histogram release, given epsilon and delta.
 #'
-#' @param n.bins Integer indicating number of cells in which to tabulate values
-#' @param n Integer indicating number of observations
-#' @param epsilon Numeric epsilon value for differential privacy
-#' @param stability Logical indicating whether stability mechanism is used
-#' @param delta Numeric delta value for differential privacy, fixed
-#' @param alpha Numeric statistical significance level, fixed
-#' @param error Numeric, fixed
-#' @return Accuracy
-
+#' @param n.bins A numeric vector of length one specifying the number of cells 
+#'    in which to tabulate values.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param stability A logical vector indicating whether the stability 
+#'    mechanism is used.
+#' @param delta The probability of an arbitrary leakage of information from 
+#'    the data. Should be of length one and should be a very small value. 
+#'    Default to 10^-6.
+#' @param alpha A numeric vector of length one specifying the numeric 
+#'    statistical significance level. Default to 0.05.
+#' @param error
+#' 
+#' @return Accuracy guarantee for histogram release, given epsilon.
+#' @rdname histogram.getAccuracy
 histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alpha=0.05, error=1e-9) {
     if (stability) {
         lo <- 0
@@ -132,16 +156,25 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 }
 
 
-#' Privacy parameters
-#'
-#' @param n.bins Integer indicating number of cells in which to tabulate values
-#' @param n Integer indicating number of observations
-#' @param accuracy Numeric
-#' @param delta Numeric delta value for differential privacy, fixed
-#' @param alpha Numeric statistical significance level, fixed
-#' @param error Numeric, fixed
+#' Histogram Epsilon
+#' 
+#' Function to find the epsilon value necessary to meet a desired level of accuracy.
+#' 
+#' @param n.bins A numeric vector of length one specifying the number of cells 
+#'    in which to tabulate values.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param accuracy A numeric vector representing the accuracy needed to 
+#'    guarantee (percent).
+#' @param delta The probability of an arbitrary leakage of information from 
+#'    the data. Should be of length one and should be a very small value. 
+#'    Default to 10^-6.
+#' @param alpha A numeric vector of length one specifying the numeric 
+#'    statistical significance level. Default to 0.05.
+#' @param error 
+#' 
 #' @return Differential privacy parameter epsilon
-
+#' @rdname histogram.getParameters
 histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30, alpha=0.05, error=1e-9) {
     if (stability) {
         lo <- 0
@@ -165,13 +198,20 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 
 
 #' Confidence interval
+#' 
+#' Return the confidence interval for the noisy histogram release given the
+#'    accuracy.
 #'
-#' @param release Numeric vector with noisy estimate of bin counts
-#' @param n.bins Integer indicating the number of bines
-#' @param n Integer indicating the number of observations
-#' @param accuracy Numeric the accuracy of the noisy estimate
-#' @return Confidence interval for the noisy counts in each bin
-
+#' @param release A numeric vector with a noisy estimate of bin counts.
+#' @param n.bins A numeric vector of length one specifying the number of cells 
+#'    in which to tabulate values.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param accuracy A numeric vector representing the accuracy needed to 
+#'    guarantee (percent).
+#'    
+#' @return Confidence interval for the noisy counts in each bin.
+#' @rdname histogram.getCI
 histogram.getCI <- function(release, n.bins, n, accuracy) {
     accxn <- accuracy * n
     out <- list()
@@ -189,12 +229,16 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
 }
 
 
-#' Herfindahl index for categorical types
+#' Herfindahl Index
+#' 
+#' Produce Herfindahl index for categorical types of data.
 #'
-#' @param release Numeric vector with noisy counts for each level
-#' @param n Integer indicating number of observations
-#' @return Herfindahl index
-
+#' @param release A numeric vector with a noisy estimate of bin counts.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#'    
+#' @return Herfindahl index.
+#' @rdname histogram.postHerfindahl
 histogram.postHerfindahl <- function(release, n) {
     share <- release / n
     herfindahl <- sum(share^2)
@@ -204,8 +248,11 @@ histogram.postHerfindahl <- function(release, n) {
 
 #' JSON doc for histogram
 #'
-#' @return JSON for histogram function
-
+#' @param output.json Should the output be converted to JSON format. Default
+#'    to \code{TRUE}.
+#'
+#' @return JSON doc for histogram function.
+#' @rdname histogram.getJSON
 histogram.getJSON <- function(output.json=TRUE) {
     out <- list()
     out$statistic <- 'Histogram'
