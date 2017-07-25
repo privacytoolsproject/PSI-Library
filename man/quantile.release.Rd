@@ -4,7 +4,7 @@
 \alias{quantile.release}
 \title{Release differentially private quantiles}
 \usage{
-\method{quantile}{release}(x, var.type, n, epsilon, rng, gran, cdf.step)
+\method{quantile}{release}(x, var.type, n, epsilon, rng, gran, cdf.step, ...)
 }
 \arguments{
 \item{x}{A numeric or integer vector.}
@@ -22,6 +22,8 @@ Should be of length one and should be between zero and one.}
 of \code{x}. Should be of length two.}
 
 \item{cdf.step}{}
+
+\item{...}{additional arguments passed to \code{quantile.release}.}
 }
 \description{
 Function to calculate a differentially private release of quantiles.

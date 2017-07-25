@@ -62,13 +62,14 @@ binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, e
 #'    of \code{x}. Should be of length two. 
 #' @param gran
 #' @param cdf.step
+#' @param ... additional arguments passed to \code{quantile.release}.
 #' 
 #' @return 
 #' @examples
 #'  
 #' @rdname quantile.release
 #' @export
-quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step) {
+quantile.release <- function(x, var.type, n, epsilon, rng, gran, cdf.step, ...) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     rng <- checkrange(rng)
     postlist <- list('accuracy' = 'getAccuracy',
