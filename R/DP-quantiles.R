@@ -18,6 +18,7 @@
 #'    
 #' @return
 #' @rdname binary.tree
+#' @export
 binary.tree <- function(x, var.type, n, rng, gran, universe.size, sensitivity, epsilon) {
     depth <- ceiling(log2(universe.size))
     tree <- rep(0, times=(2^depth + universe.size))

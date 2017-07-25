@@ -21,6 +21,7 @@
 #' @return A list with the true value of the statistic and arguments to be 
 #'    passed to other functions.
 #' @rdname dp.histogram
+#' @export
 dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon) {
     if (var.type %in% c('numeric', 'integer')) {
         values <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))

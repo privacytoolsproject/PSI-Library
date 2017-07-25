@@ -15,6 +15,7 @@
 #'    
 #' @return A list with fields providing values for the true statistic and post-processing.
 #' @rdname dp.variance
+#' @export
 dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
     out <- list(
         'name' = 'variance',

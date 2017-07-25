@@ -17,6 +17,7 @@
 #'    
 #' @return List with true value of statistic and parameters to be passed to post-processing
 #' @rdname dp.heavyhitters
+#' @export
 dp.heavyhitters <- function(x, var.type, epsilon, delta, n, k, sensitivity) {
     hist <- table(x, useNA='ifany')
     if (k > length(hist) - 1) { stop('failure: k too large') }

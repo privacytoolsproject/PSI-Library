@@ -16,8 +16,10 @@
 #' @param formulae The regression equations the user would like to perform on
 #'    the covariance matrix. The equations should be of class 'formula'. The 
 #'    user may specify as many equations as desired.
+#'    
 #' @return A list with fields `name` specifying the statistic and `stat` with 
 #'    the lower triangle of the covariance matrix.
+#' @export
 dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 
     # subset and optionally append an intercept
