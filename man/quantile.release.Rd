@@ -21,8 +21,6 @@ Should be of length one and should be between zero and one.}
 \item{rng}{A numeric vector specifying an a priori estimate of the range
 of \code{x}. Should be of length two.}
 
-\item{cdf.step}{}
-
 \item{...}{additional arguments passed to \code{quantile.release}.}
 }
 \description{

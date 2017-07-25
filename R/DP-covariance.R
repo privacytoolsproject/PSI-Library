@@ -77,6 +77,7 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #'    noise to the covariance matrix. Should be of length one and contain 
 #'    either 'laplace', 'gaussian', or 'wishart'. Default to 'laplace'.
 #' @return Differentially private covariance matrix of \code{x}.
+#' @examples 
 #' @export
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
 

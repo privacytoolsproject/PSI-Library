@@ -121,7 +121,7 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
 #' x <- runif(n, min=min(rng), max=max(rng))
 #' sensitivity <- diff(rng) / n
 #' mechanism.gaussian(fun=dp.mean, x=x, var.type='numeric', rng=rng, sensitivity=sensitivity, 
-#'    epsilon=0.5, delta=0.000001)
+#'    epsilon=0.5, delta=0.000001, n=n)
 #' @seealso \code{\link{mechanism.laplace}}
 #' @rdname mechanism.gaussian
 #' @export
