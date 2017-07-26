@@ -73,7 +73,8 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 #'    data \code{x}.
 #' @examples
 #' 
-#' 
+#' @rdname mechanism.exponential
+#' @export
 mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
 
     epsilon <- checkepsilon(epsilon)

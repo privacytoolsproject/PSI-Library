@@ -80,8 +80,10 @@ rlaplace = function(n=1, sensitivity, epsilon) {
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
 #' @param n integer, number of draws
+#' 
 #' @return Random draws from Laplace distribution
 #' @examples
+#' 
 #' rlap(size=1000)
 #' @export
 rlap = function(mu=0, b=1, size=1) {
@@ -96,8 +98,10 @@ rlap = function(mu=0, b=1, size=1) {
 #' @param x numeric, value
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
+#' 
 #' @return Density for elements of x
 #' @examples
+#' 
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
 #' @export
@@ -146,6 +150,8 @@ qlap <- function(p, mu=0, b=1) {
 
 
 #' Sign function
+#' 
+#' Function to determine what the sign of the passed values should be.
 #'
 #' @param x numeric, value or vector or values
 #' @return The sign of passed values
