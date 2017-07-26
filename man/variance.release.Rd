@@ -31,4 +31,9 @@ Function to calculate a differentially private release of variance.
 }
 \examples{
 
+n <- 1000
+x_num <- runif(n)
+x_bool <- x_num >= 0.5
+r_num <- variance.release(x=x_num, var.type = 'numeric', n=n, epsilon = 0.1, rng = c(0,1))
+r_bool <- variance.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, rng=c(0, 1))
 }
