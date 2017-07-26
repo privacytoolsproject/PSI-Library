@@ -73,6 +73,14 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
 #'    data \code{x}.
 #' @examples
 #' 
+#' n <- 1000
+#' epsilon <- 0.5
+#' delta <- 1e-7
+#' observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+#' probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
+#' x <- sample(observed.levels, size=n, prob=probs, replace=TRUE)
+#' mechanism.exponential(fun=dp.heavyhitters, x=x, var.type = 'character', sensitivity = 2,
+#'                      epsilon = epsilon, k=3, bins=bins, n=n, delta=delta)
 #' @rdname mechanism.exponential
 #' @export
 mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
