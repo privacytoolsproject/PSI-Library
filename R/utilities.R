@@ -61,22 +61,6 @@ dpNoise <- function(n, scale, dist, seed=NULL) {
 
 #' Random draw from Laplace distribution
 #'
-#' @param sensitivity numeric
-#' @param epsilon numeric
-#' @param n integer, number of draws
-#' @return Random draws from Laplace distribution
-#' @examples
-#' rlaplace(sensitivity=1, epsilon=0.1)
-#' @export
-rlaplace = function(n=1, sensitivity, epsilon) {
-    flip <- sample(c(-1, 1), size=n, replace=TRUE)
-    expon <- rexp(n=n, rate=(epsilon / sensitivity))
-    return(flip * expon)
-}
-
-
-#' Random draw from Laplace distribution
-#'
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
 #' @param n integer, number of draws
