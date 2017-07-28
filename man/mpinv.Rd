@@ -2,10 +2,15 @@
 % Please edit documentation in R/utilities.R
 \name{mpinv}
 \alias{mpinv}
-\title{Moore Penrose Inverse Function}
+\title{Moore Penrose Inverse Function ###Must assign authorship to this###}
 \usage{
 mpinv(X, tol = sqrt(.Machine$double.eps))
 }
+\arguments{
+\item{X}{A numeric, symmetric covariance matrix.}
+
+\item{tol}{Convergence requirement.}
+}
 \description{
-Need to assign authorship to this and amsweep
+Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 }

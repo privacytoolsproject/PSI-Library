@@ -8,12 +8,11 @@ Authors@R: c(
 Version: 0.1-1
 Date: 2017-02-21
 Imports: jsonlite,
-	 matrixcalc,
 	 methods,
 	 openssl
 Description: This library allows researchers to access summary statistics of sensitive 		data that are generated using differential privacy.
 RoxygenNote: 6.0.1
-Collate: 
+Collate:
     'mechanisms.R'
     'DP-covariance.R'
     'DP-heavyhitters.R'
@@ -24,3 +23,7 @@ Collate:
     'createJSON.R'
     'dp-regression.R'
     'utilities.R'
+Suggests: knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr

@@ -2,20 +2,20 @@
 % Please edit documentation in R/utilities.R
 \name{check_histogram_bins}
 \alias{check_histogram_bins}
-\title{Utility function to check bins argument to histogram}
+\title{Check histogram bins argument}
 \usage{
 check_histogram_bins(n_bins, n)
 }
 \arguments{
-\item{n_bins}{Number of cells in which to tabulate values}
+\item{n_bins}{The number of cells in which to tabulate values.}
 
-\item{n}{Number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in in the data.}
 }
 \value{
 Number of bins
-
-If number of bins is not provided, use the Sturges method
 }
 \description{
-Utility function to check bins argument to histogram
+Utility function to check bins argument to histogram. If number of bins 
+   is not provided, the Sturges method is used.
 }

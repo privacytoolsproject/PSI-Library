@@ -2,19 +2,27 @@
 % Please edit documentation in R/utilities.R
 \name{linear.reg}
 \alias{linear.reg}
-\title{Function to perform regression using the covariance matrix via the sweep operator}
+\title{Linear regression on covariance matrix}
 \usage{
 linear.reg(formula, release, n, intercept)
 }
 \arguments{
-\item{formula}{Formula}
+\item{formula}{An object of class 'formula' containing the desired 
+regression formula.}
 
-\item{release}{Numeric private release of covariance matrix}
+\item{release}{A numeric private release of the covariance matrix.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in in the data.}
 
-\item{intercept}{Logical indicating whether the intercept is included}
+\item{intercept}{A logical vector indicating whether the intercept is 
+included in \code{formula}.}
+}
+\value{
+A numeric vector of regression coefficients corresponding 
+   to \code{formula}.
 }
 \description{
-Function to perform regression using the covariance matrix via the sweep operator
+Function to extract regression coefficients from the covariance matrix via 
+   the sweep operator.
 }

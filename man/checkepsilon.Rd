@@ -2,20 +2,22 @@
 % Please edit documentation in R/utilities.R
 \name{checkepsilon}
 \alias{checkepsilon}
-\title{Utility function for checking that epsilon is acceptably defined}
+\title{Epsilon Parameter Check}
 \usage{
 checkepsilon(epsilon)
 }
 \arguments{
-\item{epsilon}{A vector, that ought to be positive and length of 1}
+\item{epsilon}{A vector, that ought to be positive and of length one.}
 }
 \value{
-The supplied epsilon if acceptable, otherwise an error message interupts
+The supplied epsilon if acceptable, otherwise an error 
+   message interupts.
 }
 \description{
-Utility function for checking that epsilon is acceptably defined
+Utility function for checking that epsilon is acceptably defined.
 }
 \examples{
+
 checkepsilon(0.1)
 \dontrun{checkepsilon(-2)}
 \dontrun{checkepsilon(c(0.1,0.5))}

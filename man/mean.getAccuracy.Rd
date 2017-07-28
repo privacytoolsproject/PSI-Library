@@ -2,8 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getAccuracy}
 \alias{mean.getAccuracy}
-\title{Function to find the accuracy guarantee of a mean release at a given epsilon 
-   value.}
+\title{Mean accuracy}
 \usage{
 \method{mean}{getAccuracy}(epsilon, n, alpha = 0.05)
 }
@@ -21,5 +20,5 @@ Accuracy guarantee for mean release given epsilon.
 }
 \description{
 Function to find the accuracy guarantee of a mean release at a given epsilon 
-   value.
+value.
 }

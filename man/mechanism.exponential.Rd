@@ -2,11 +2,47 @@
 % Please edit documentation in R/mechanisms.R
 \name{mechanism.exponential}
 \alias{mechanism.exponential}
-\title{Exponential mechanism}
+\title{Exponential Noise Mechanism for Differential Privacy}
 \usage{
 mechanism.exponential(fun, x, var.type, sensitivity, epsilon, k,
   postlist = NULL, ...)
 }
+\arguments{
+\item{fun}{A user supplied function or string vector of length one naming a 
+function.}
+
+\item{x}{A vector of data to run \code{fun} on.}
+
+\item{var.type}{Data type of vector \code{x}.}
+
+\item{sensitivity}{The sensitivity of \code{x}.}
+
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
+
+\item{k}{The number of desired releases.}
+
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
+
+\item{...}{Other arguments passed to \code{fun}.}
+}
+\value{
+Differentially private release of function \code{fun} on 
+   data \code{x}.
+}
 \description{
-Exponential mechanism
+Mechanism to add exponential noise for releasing differentially private 
+   queries.
+}
+\examples{
+
+n <- 1000
+epsilon <- 0.5
+delta <- 1e-7
+observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
+x <- sample(observed.levels, size=n, prob=probs, replace=TRUE)
+mechanism.exponential(fun=dp.heavyhitters, x=x, var.type = 'character', sensitivity = 2,
+                     epsilon = epsilon, k=3, bins=bins, n=n, delta=delta)
 }

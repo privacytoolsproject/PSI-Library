@@ -2,29 +2,33 @@
 % Please edit documentation in R/DP-quantiles.R
 \name{quantile.getAccuracy}
 \alias{quantile.getAccuracy}
-\title{Get the accuracy of quantile statistic for a given value of epsilon}
+\title{Quantiles accuracy}
 \usage{
 \method{quantile}{getAccuracy}(epsilon, n, universe.size, alpha = 0.05)
 }
 \arguments{
-\item{epsilon}{Numeric, epsilon value for DP}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{n}{Integer, number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in the data.}
 
 \item{universe.size}{Integer, the universe size}
 
-\item{alpha}{Numeric, statistical significance level}
+\item{alpha}{A numeric vector specifying the statistical significance level.
+Default to 0.05.}
 }
 \value{
-The accuracy guaranteed by the given epsilon
+The accuracy guaranteed by the given epsilon.
 }
 \description{
-Get the accuracy of quantile statistic for a given value of epsilon
+Get the accuracy of quantile statistic for a given value of epsilon.
 }
-\author{
-Nathan Manohar
-
+\details{
 The accuracy is interpreted as follows: The alpha value returned means that with 
   probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's 
   estimate of the count in [min, t] is within alpha of the true value.
+}
+\author{
+Nathan Manohar
 }

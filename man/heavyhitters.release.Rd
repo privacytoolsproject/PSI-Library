@@ -2,33 +2,40 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{heavyhitters.release}
 \alias{heavyhitters.release}
-\title{Release differentially private most common values}
+\title{Release differentially private heavyhitters}
 \usage{
-heavyhitters.release(x, var.type, epsilon, delta, n, k, bins)
+heavyhitters.release(x, var.type, epsilon, n, k, bins, delta = 1e-06)
 }
 \arguments{
-\item{x}{Vector of categorical data (character, factor)}
+\item{x}{A vector of categorical data (character, factor).}
 
-\item{var.type}{Character string indicating data type}
+\item{var.type}{A character vector specifying variable type of \code{x}.}
 
-\item{epsilon}{Epsilon value for differential privacy}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{k}{Integer querying the most common \code{k} categories}
+\item{k}{An integer querying the most common \code{k} categories.}
 
-\item{bins}{Vector of categories from which the top \code{k} categories are evaluated}
+\item{bins}{A vector of categories from which the top \code{k} categories 
+are evaluated.}
+
+\item{delta}{A numeric vector representing the probability of an arbitrary
+leakage of information from \code{x}. Should be of length one 
+and should be a very small value. Default to 10^-6.}
 }
 \value{
-A vector whose values are \code{k} most common categories, or a failure message
-
-Contains functions for privately releasing the top-k heavy hitters, that is,
- the k most common unique values.  For example, k=1 releases the mode.
+A vector whose values are \code{k} most common categories, or a 
+   failure message.
 }
 \description{
-Release differentially private most common values
+A function for privately releasing the top-k heavy hitters, that is,
+ the k most common unique values.  For example, k=1 releases the mode.
 }
 \examples{
+
 N <- 1000
 epsilon <- 0.5
 delta <- 1e-7

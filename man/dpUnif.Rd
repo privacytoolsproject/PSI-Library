@@ -2,14 +2,14 @@
 % Please edit documentation in R/utilities.R
 \name{dpUnif}
 \alias{dpUnif}
-\title{Draw cryptographically secure random variates from uniform distribution}
+\title{Differentially Private Uniform Draw}
 \usage{
 dpUnif(n, seed = NULL)
 }
 \arguments{
-\item{n}{Integer giving number of variates needed}
+\item{n}{An integer giving number of variates needed.}
 
-\item{seed}{Integer indicating a seed for R's PNRG, defaults to \code{NULL}}
+\item{seed}{An integer indicating a seed for R's PNRG, defaults to \code{NULL}.}
 }
 \value{
 Random numeric vector of length \code{n} containing values between
@@ -19,9 +19,13 @@ Draws secure random variates from the uniform distribution through \code{openssl
 If a seed is provided, the \code{runif} function is used to draw the random variates.
 }
 \description{
-Draw cryptographically secure random variates from uniform distribution
+Draw cryptographically secure random variates from a uniform distribution.
 }
 \examples{
+
 uniform_secure <- dpUnif(n=1000)
 uniform_repeatable <- dpUnif(n=1, seed=75436)
+}
+\seealso{
+\code{\link{dpNoise}}
 }

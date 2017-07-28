@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.release}
 \alias{mean.release}
-\title{Function for differentially private release of mean}
+\title{Release differentially private mean}
 \usage{
 \method{mean}{release}(x, var.type, n, epsilon, rng, ...)
 }
@@ -13,23 +13,24 @@
 Should be of length one and should contain either 'numeric', 
 'logical', or 'integer'.}
 
-\item{n}{A numeric vector of length one specifying the number of
-observations in \code{x}.}
+\item{n}{The difference of \code{rng} divided by \code{n}.}
 
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
 
 \item{rng}{A numeric vector specifying an a priori estimate of the range
 of \code{x}. Should be of length two.}
-\item{...}{idk}
+
+\item{...}{additional arguments passed to \code{mean.release}.}
 }
 \value{
 Differentially private mean of vector \code{x}.
 }
 \description{
-Function for differentially private release of mean
+Function to calculate a differentially private release of mean.
 }
 \examples{
+
 n <- 1000
 x_num <- runif(n)
 x_int <- as.integer(round(x_num * 100))

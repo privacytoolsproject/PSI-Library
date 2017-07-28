@@ -2,23 +2,22 @@
 % Please edit documentation in R/utilities.R
 \name{check_variable_type}
 \alias{check_variable_type}
-\title{Utility function to check type of variable is within set of acceptable types}
+\title{Checking variable types}
 \usage{
 check_variable_type(type, in_types)
 }
 \arguments{
-\item{type}{Character specifying the type of the variable}
+\item{type}{A character specifying the type of the variable.}
 
-\item{in_types}{Vector of acceptable types}
+\item{in_types}{A vector of acceptable types of variables.}
 }
 \value{
-The original character string indicating the variable type
-
-Verifies that the variable is an element in the set of acceptable types
+The original character string indicating the variable type.
 }
 \description{
-Utility function to check type of variable is within set of acceptable types
+Verifies that the variable is an element in the set of acceptable types.
 }
 \examples{
+
 check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
 }
