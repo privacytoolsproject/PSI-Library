@@ -2,10 +2,17 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{heavyhitters.postNoteFailure}
 \alias{heavyhitters.postNoteFailure}
-\title{Function to see failed}
+\title{Heavyhitters failure}
 \usage{
 heavyhitters.postNoteFailure(failed)
 }
+\arguments{
+\item{failed}{A logical vector.}
+}
+\value{
+\code{failed}. If \code{TRUE}, the mechanism failed. If \code{FALSE},
+   the function succeeded.
+}
 \description{
-Function to see failed
+Function to see if the heavyhitters mechanism failed.
 }

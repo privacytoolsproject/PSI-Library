@@ -2,18 +2,19 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.postHerfindahl}
 \alias{histogram.postHerfindahl}
-\title{Herfindahl index for categorical types}
+\title{Histogram Herfindahl Index}
 \usage{
 histogram.postHerfindahl(release, n)
 }
 \arguments{
-\item{release}{Numeric vector with noisy counts for each level}
+\item{release}{A numeric vector with a noisy estimate of bin counts.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in in the data.}
 }
 \value{
-Herfindahl index
+Herfindahl index.
 }
 \description{
-Herfindahl index for categorical types
+Produce differentially private Herfindahl index for categorical types of data.
 }

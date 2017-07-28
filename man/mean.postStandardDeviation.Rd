@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.postStandardDeviation}
 \alias{mean.postStandardDeviation}
-\title{Postprocessed Standard Deviation for Logical Variables}
+\title{Postprocessed standard deviation for logical variables}
 \usage{
 \method{mean}{postStandardDeviation}(release)
 }
@@ -14,5 +14,6 @@ variable.}
 Standard deviation of \code{release}.
 }
 \description{
-Postprocessed Standard Deviation for Logical Variables
+Calculates the standard deviation of the differentially private mean from a 
+logical variable.
 }

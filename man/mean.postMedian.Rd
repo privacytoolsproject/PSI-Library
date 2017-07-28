@@ -2,7 +2,7 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.postMedian}
 \alias{mean.postMedian}
-\title{Postprocessed Median for Logical Variables}
+\title{Postprocessed median for logical variables}
 \usage{
 \method{mean}{postMedian}(release)
 }
@@ -14,5 +14,6 @@ variable.}
 Median of \code{release}.
 }
 \description{
-Postprocessed Median for Logical Variables
+Calculates the median of the differentially private mean from a 
+logical variable.
 }

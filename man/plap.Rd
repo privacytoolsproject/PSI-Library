@@ -2,24 +2,26 @@
 % Please edit documentation in R/utilities.R
 \name{plap}
 \alias{plap}
-\title{Cumulative distribution function for Laplace distribution}
+\title{LaPlace Cumulative Distribution Function}
 \usage{
 plap(x, mu = 0, b = 1)
 }
 \arguments{
-\item{x}{numeric, value}
+\item{x}{Numeric, the value(s) at which the user wants to know the CDF height.}
 
-\item{mu}{numeric, center of the distribution}
+\item{mu}{Numeric, the center of the LaPlace distribution, defaults to 0.}
 
-\item{b}{numeric, spread}
+\item{b}{Numeric, the spread of the LaPlace distribution, defaults to 1.}
 }
 \value{
-Probability less than or equal to x
+Probability the LaPlace draw is less than or equal to \code{x}.
 }
 \description{
-Cumulative distribution function for Laplace distribution
+Determines the probability a draw from a LaPlace distribution is less than 
+   or equal to the specified value.
 }
 \examples{
+
 x <- 0
 plap(x)
 }

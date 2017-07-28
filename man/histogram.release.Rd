@@ -8,35 +8,39 @@ histogram.release(x, var.type, n, epsilon, rng = NULL, bins = NULL,
   n.bins = NULL)
 }
 \arguments{
-\item{x}{Vector, numeric or categorical}
+\item{x}{A vector of categorical or numeric values.}
 
-\item{var.type}{String, specifies the type of x}
+\item{var.type}{A character vector specifying variable type of \code{x}.}
 
-\item{n}{Integer, number of observations in x}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{epsilon}{Float, Epsilon value for differential privacy}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{rng}{Tuple, range of x, required for numeric types}
+\item{rng}{A numeric vector of length two specifying the lower and upper bounds 
+of \code{x}.}
 
-\item{bins}{Vector of bins for which values are counted, required for categorical types}
+\item{bins}{A vector of bins for which values are counted. Required for 
+categorical types.}
 
-\item{n.bins}{Integer, Number of cells in which to tabulate values in x, ignored if \code{var.type \%in\% c('factor', 'categorical')}
-
+\item{n.bins}{An integer specifying the number of cells in which to tabulate 
+values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}}
+}
+\value{
+Differentially private histogram of vector \code{x}.
+}
+\description{
 If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
 used to construct the table. The vector is pre-processed so that observed levels not specified in these
 bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
-in the output table.
-
-If the variable is numeric, the number of bins `n_bins` is set by the user optionally, else the Sturges
-method is used to select the number of bins given the number of observations `n`. The bins are then
-constructed to be equal intervals between the provided range.
-
-Uses the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.}
-}
-\description{
-Release differentially private histogram
+in the output table. If the variable is numeric, the number of bins `n_bins` is set by the user 
+optionally, else the Sturges method is used to select the number of bins given the number of observations
+`n`. The bins are then constructed to be equal intervals between the provided range. The function uses 
+the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
 }
 \examples{
+
 # numeric types
 x_num <- rnorm(100)
 x_num_na <- x_num

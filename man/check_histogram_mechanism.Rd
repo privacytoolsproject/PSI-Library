@@ -16,5 +16,6 @@ the mechanism if so, else throws an error}
 Utility function to verify the type of histogram mechanism
 }
 \examples{
+
 check_histogram_mechanism('stability')
 }

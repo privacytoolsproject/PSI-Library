@@ -2,24 +2,27 @@
 % Please edit documentation in R/DP-quantiles.R
 \name{quantile.getParameters}
 \alias{quantile.getParameters}
-\title{Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release}
+\title{Quantiles epsilon}
 \usage{
 \method{quantile}{getParameters}(accuracy, n, universe.size, alpha = 0.05)
 }
 \arguments{
-\item{n}{Integer, number of observations}
+\item{accuracy}{A numeric vector representing the accuracy needed to 
+guarantee (percent).}
+
+\item{n}{A numeric vector of length one specifying the number of
+observations in the data.}
 
 \item{universe.size}{Integer, the universe size}
 
-\item{alpha}{Numeric, statistical significance level}
-
-\item{Accuracy}{Numeric, the accuracy parameter}
+\item{alpha}{A numeric vector specifying the statistical significance level.
+Default to 0.05.}
 }
 \value{
-The epsilon value necessary to gaurantee the given accuracy
+The epsilon value necessary to gaurantee the given accuracy.
 }
 \description{
-Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release
+Get the epsilon value necessary to guarantee a desired level of accuracy of a quantile release.
 }
 \author{
 Nathan Manohar

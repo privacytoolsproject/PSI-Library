@@ -2,13 +2,17 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getJSON}
 \alias{mean.getJSON}
-\title{JSON doc for histogram}
+\title{JSON doc for mean}
 \usage{
 \method{mean}{getJSON}(output.json = TRUE)
 }
+\arguments{
+\item{output.json}{Should the output be converted to JSON format. Default
+to \code{TRUE}.}
+}
 \value{
-JSON for histogram function
+JSON for mean function
 }
 \description{
-JSON doc for histogram
+Produce a JSON doc for differentially private means.
 }
