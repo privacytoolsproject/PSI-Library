@@ -77,7 +77,15 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #'    noise to the covariance matrix. Should be of length one and contain 
 #'    either 'laplace', 'gaussian', or 'wishart'. Default to 'laplace'.
 #' @return Differentially private covariance matrix of \code{x}.
-#' @examples 
+#' @examples
+#' 
+#' data(PUMS5extract10000, package = "PSIlence")
+#' data <- data.frame(income = PUMS5extract10000$income, education = PUMS5extract10000$educ)
+#' range.income <- c(-10000, 713000)
+#' range.education <- c(1, 16)
+#' range <- rbind(range.income, range.education)
+#' covariance.release(x = data, var.type = 'numeric', n = 10000, epsilon = 0.2, rng = range, 
+#'                    columns = c("income", "education"), formulae = income ~ education)
 #' @export
 covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
 
