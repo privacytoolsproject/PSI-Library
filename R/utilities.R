@@ -47,12 +47,14 @@ dpUnif <- function(n, seed=NULL) {
 #' @seealso \code{\link{dpUnif}}
 #' @rdname dpNoise
 #' @export
-dpNoise <- function(n, scale, dist, seed=NULL) {
+dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
         return(qlap(u, b=scale))
     } else if (dist == 'gaussian') {
         return(qnorm(u, sd=scale))
+    } else if (dist == 'gamma') {
+        return(qgamma(u, scale=scale, shape=shape))
     } else {
         stop(sprintf('Distribution "%s" not understood', dist))
     }
@@ -563,4 +565,50 @@ extract.indices <- function(formula, data, intercept) {
     return(list('y.loc' = y.loc,
                 'x.loc' = x.loc,
                 'x.label' = x.label))
+}
+
+
+#' Function to convert factor variables to binary indicators
+#'
+#' @param df Data frame
+#' @return List with data frame with factor columns converted to dummy indicators and the names of
+#'      the columns of the transformed data frame.
+#'
+#' For each factor variable in the data frame, a binary indicator is generated for (k - 1) of its
+#' k levels. The first level is dropped. The original factor variable is dropped. The names of the
+#' binary indicators are the result of combining the name of the original factor variable and the
+#' level represented by the indicator.
+
+makeDummies <- function(df) {
+    factors <- sapply(df, class) == 'factor'
+    factors <- names(df)[factors]
+    for (col in factors) {
+        col.levels <- levels(df[, col])
+        dummy.list <- lapply(col.levels, function(x) as.numeric(df[, col] == x))
+        dummy.df <- data.frame(dummy.list)
+        names(dummy.df) <- sapply(col.levels, function(x) paste(col, x, sep='_'))
+        df <- cbind(df, dummy.df[, 2:length(col.levels)])  # drop first level
+    }
+    df <- df[, !(names(df) %in% factors)]
+    return(list('data' = df, 'names' = names(df)))
+}
+
+
+vectorNorm <- function(X, p=1, margin=1) {
+    fun <- function(vec, p) {
+        vec.norm <- sum(abs(vec)^p)^(1 / p)
+        return(vec.norm)
+    }
+    if (!is.null(dim(X))) {
+        p.norm <- apply(X, margin, fun, p)
+    } else {
+        p.norm <- fun(X, p)
+    }
+    return(p.norm)
+}
+
+mapMatrixUnit <- function(X, p=1) {
+    max.norm <- max(vectorNorm(X, p=p))
+    normed.matrix <- X / max.norm
+    return(list('matrix' = normed.matrix, 'max.norm' = max.norm))
 }
