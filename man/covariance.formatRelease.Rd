@@ -4,16 +4,20 @@
 \alias{covariance.formatRelease}
 \title{Function to convert unique private covariances into symmetric matrix}
 \usage{
-covariance.formatRelease(release, intercept, columns)
+covariance.formatRelease(release, columns)
 }
 \arguments{
-\item{release}{Numeric private release of elements in lower triangle of covariance matrix}
+\item{release}{Differentially private release of elements in lower triangle 
+of covariance matrix.}
 
-\item{intercept}{Logical indicating whether the intercept is included}
+\item{columns}{A character vector indicating columns in the private 
+covariance to be included in the output. Length should be equal to the 
+number of columns the user wants to include.}
+}
+\value{
+A symmetric differentially private covariance matrix.
 
-\item{columns}{Character vector with column names
-
-This function is used by the mechanism in post-processing and not intended for interactive post-processing}
+This function is used by the mechanism in post-processing and not intended for interactive post-processing
 }
 \description{
 Function to convert unique private covariances into symmetric matrix

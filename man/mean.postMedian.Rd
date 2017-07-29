@@ -2,13 +2,18 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.postMedian}
 \alias{mean.postMedian}
-\title{Postprocessed Median for Logical Variables}
+\title{Postprocessed median for logical variables}
 \usage{
 \method{mean}{postMedian}(release)
 }
 \arguments{
-\item{release}{Differentially private release of a mean for a logical variable}
+\item{release}{Differentially private release of a mean for a logical 
+variable.}
+}
+\value{
+Median of \code{release}.
 }
 \description{
-Postprocessed Median for Logical Variables
+Calculates the median of the differentially private mean from a 
+logical variable.
 }

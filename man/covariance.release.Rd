@@ -2,26 +2,50 @@
 % Please edit documentation in R/DP-covariance.R
 \name{covariance.release}
 \alias{covariance.release}
-\title{Function to release a differentially private inner product of input matrix}
+\title{Function to release a differentially private inner product of input matrix.}
 \usage{
-covariance.release(x, var.type, n, epsilon, rng, columns, intercept = FALSE,
-  formulae = NULL)
+covariance.release(x, var.type, n, epsilon, rng, columns, delta = 1e-06,
+  intercept = FALSE, formulae = NULL, mechanism = "laplace")
 }
 \arguments{
-\item{x}{Numeric data frame, dimensions NxP}
+\item{x}{A numeric data frame with at least two columns.}
 
-\item{var.type}{Numeric variable types}
+\item{var.type}{A character vector specifying variable type of \code{x}. 
+Should be of length one and should contain either 'numeric', 
+'logical', or 'integer'.}
 
-\item{n}{Integer indicating the number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{epsilon}{Numeric differential privacy parameter}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{rng}{Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2}
+\item{rng}{A numeric matrix of 2-tuples with the lower and upper bounds for
+each of P variables in \code{x}, dimensions Px2.}
 
-\item{columns}{Character vector indicating columns in \code{x}}
+\item{columns}{A character vector indicating columns in \code{x} to be 
+included in the covariance matrix. Length should be equal to the number 
+of columns the user wants to include.}
 
-\item{intercept}{Logical indicating whether an intercept should be added prior to evaluating the inner product x'x, default to FALSE}
+\item{delta}{A numeric vector representing the probability of an arbitrary
+leakage of information from \code{x}. Should be of length one 
+and should be a very small value. Default to 10^-6.}
+
+\item{intercept}{A logical vector of length one indicating whether an 
+intercept should be added prior to evaluating the inner product x'x.
+Default to FALSE.}
+
+\item{formulae}{The regression equations the user would like to perform on
+the covariance matrix. The equations should be of class 'formula'. The 
+user may specify as many equations as desired. Default to FALSE.}
+
+\item{mechanism}{A character vector specifying the mechanism used to apply 
+noise to the covariance matrix. Should be of length one and contain 
+either 'laplace', 'gaussian', or 'wishart'. Default to 'laplace'.}
+}
+\value{
+Differentially private covariance matrix of \code{x}.
 }
 \description{
-Function to release a differentially private inner product of input matrix
+Function to release a differentially private inner product of input matrix.
 }

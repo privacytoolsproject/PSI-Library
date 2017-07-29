@@ -2,24 +2,29 @@
 % Please edit documentation in R/DP-variance.R
 \name{dp.variance}
 \alias{dp.variance}
-\title{Function to evaluate true variance & specify post-processing parameters}
+\title{DP Covariance}
 \usage{
 dp.variance(x, var.type, n, sensitivity, epsilon)
 }
 \arguments{
-\item{x}{Numeric vector}
+\item{x}{A numeric, logical, or integer vector.}
 
-\item{n}{Integer indicating number of observations in \code{x}}
+\item{var.type}{A character vector specifying variable type of \code{x}. 
+Should be of length one and should contain either 'numeric', 
+'logical', or 'integer'.}
 
-\item{sensitivity}{Numeric, the sensitivity of the estimate}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+\item{sensitivity}{The difference of the range of \code{x} divided 
+by \code{n}.}
 
-\item{var.trpe}{Character string indicating variable type}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 }
 \value{
-List with fields providing values for the true statistic and post-processing
+A list with fields providing values for the true statistic and post-processing.
 }
 \description{
-Function to evaluate true variance & specify post-processing parameters
+Function to evaluate true variance & specify post-processing parameters.
 }

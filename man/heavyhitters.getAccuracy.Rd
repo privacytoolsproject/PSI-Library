@@ -2,27 +2,29 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{heavyhitters.getAccuracy}
 \alias{heavyhitters.getAccuracy}
-\title{Get the accuracy of heavyhitters statistic for a given value of epsilon}
+\title{Heavyhitters accuracy}
 \usage{
-heavyhitters.getAccuracy(release, epsilon, delta = 1e-07)
+heavyhitters.getAccuracy(gap, epsilon, delta)
 }
 \arguments{
-\item{release}{The noisy estimate}
+\item{gap}{}
 
-\item{epsilon}{Epsilon value for differential privacy}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{delta}{Delta value for differential privacy}
+\item{delta}{A numeric vector representing the probability of an arbitrary
+leakage of information from the data. Should be of length one 
+and should be a very small value.}
 }
 \value{
-The accuracy guaranteed by the given epsilon
+Accuracy guarantee for heavyhitters release given epsilon.
 }
 \description{
-Get the accuracy of heavyhitters statistic for a given value of epsilon
+Get the accuracy of heavyhitters statistic for a given value of epsilon.
+The accuracy is interpreted as follows: The alpha value returned means that with
+probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's
+estimate of the count in [min, t] is within alpha of the true value.
 }
 \author{
 Victor Balcer
-
-The accuracy is interpreted as follows: The alpha value returned means that with
-  probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's
-  estimate of the count in [min, t] is within alpha of the true value.
 }

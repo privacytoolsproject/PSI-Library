@@ -2,38 +2,47 @@
 % Please edit documentation in R/mechanisms.R
 \name{mechanism.laplace}
 \alias{mechanism.laplace}
-\title{LaPlace mechanism for releasing differentially private queries}
+\title{LaPlace Noise Mechanism for Differential Privacy}
 \usage{
 mechanism.laplace(fun, x, var.type, rng, sensitivity, epsilon,
   postlist = NULL, ...)
 }
 \arguments{
-\item{fun}{A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.}
+\item{fun}{A user supplied function or string vector of length one naming a 
+function.}
 
-\item{x}{A vector of data to run the function on.}
+\item{x}{A vector of data to run \code{fun} on.}
 
-\item{var.type}{Data type of vector x}
+\item{var.type}{Data type of vector \code{x}.}
 
-\item{rng}{An a priori estimate of the range}
+\item{rng}{An a priori estimate of the range of \code{x}.}
 
-\item{sensitivity}{numeric}
+\item{sensitivity}{The difference of \code{rng} divided by \code{n}.}
 
-\item{epsilon}{numeric}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{...}{Other arguments passed to \code{fun}}
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
 
-\item{n}{The number of samples}
+\item{...}{Other arguments passed to \code{fun}.}
 }
 \value{
-Differentially private release of function \code{fun} on data \code{x}
+Differentially private release of function \code{fun} on 
+   data \code{x}.
 }
 \description{
-LaPlace mechanism for releasing differentially private queries
+Mechanism to add noise from a LaPlace distribution for releasing 
+   differentially private queries.
 }
 \examples{
+
 n <- 1000
 rng <- c(0,1)
 x <- runif(n, min=min(rng), max=max(rng))
 sensitivity <- diff(rng) / n
-mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
+mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n=n)
+}
+\seealso{
+\code{\link{mechanism.gaussian}}
 }

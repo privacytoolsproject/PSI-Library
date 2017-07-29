@@ -20,6 +20,7 @@ Density for elements of x
 Probability density for Laplace distribution
 }
 \examples{
+
 x <- seq(-3, 3, length.out=61)
 dlap(x)
 }

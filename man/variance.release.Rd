@@ -2,24 +2,38 @@
 % Please edit documentation in R/DP-variance.R
 \name{variance.release}
 \alias{variance.release}
-\title{Function for differentially private release of variance}
+\title{Release differentially private variance}
 \usage{
 variance.release(x, var.type, n, epsilon, rng)
 }
 \arguments{
-\item{x}{Numeric vector}
+\item{x}{A numeric, logical, or integer vector.}
 
-\item{n}{Integer indicating number of observations in \code{x}}
+\item{var.type}{A character vector specifying variable type of \code{x}. 
+Should be of length one and should contain either 'numeric', 
+'logical', or 'integer'.}
 
-\item{epsilon}{Numeric, epsilon parameter for differential privacy}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{rng}{Numeric 2-tuple indicating range of numeric variable}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{var.trpe}{Character string indicating variable type}
+\item{rng}{A numeric vector specifying an a priori estimate of the range
+of \code{x}. Should be of length two.}
 }
 \value{
-List output containing noisy estimate and post-processing values from the Laplace mechanism
+A list output containing noisy estimate and post-processing values from the 
+   Laplace mechanism.
 }
 \description{
-Function for differentially private release of variance
+Function to calculate a differentially private release of variance.
+}
+\examples{
+
+n <- 1000
+x_num <- runif(n)
+x_bool <- x_num >= 0.5
+r_num <- variance.release(x=x_num, var.type = 'numeric', n=n, epsilon = 0.1, rng = c(0,1))
+r_bool <- variance.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, rng=c(0, 1))
 }

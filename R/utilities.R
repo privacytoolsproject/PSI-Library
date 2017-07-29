@@ -1,15 +1,22 @@
-#' Draw cryptographically secure random variates from uniform distribution
+#' Differentially Private Uniform Draw 
+#' 
+#' Draw cryptographically secure random variates from a uniform distribution.
 #'
-#' @param n Integer giving number of variates needed
-#' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
+#' @param n An integer giving number of variates needed.
+#' @param seed An integer indicating a seed for R's PNRG, defaults to \code{NULL}.
+#' 
+#' @return Random numeric vector of length \code{n} containing values between
+#'    zero and one.
 #'
 #' Draws secure random variates from the uniform distribution through \code{openssl}.
 #' If a seed is provided, the \code{runif} function is used to draw the random variates.
-#'
 #' @examples
+#' 
 #' uniform_secure <- dpUnif(n=1000)
 #' uniform_repeatable <- dpUnif(n=1, seed=75436)
-
+#' @seealso \code{\link{dpNoise}}
+#' @rdname dpUnif
+#' @export
 dpUnif <- function(n, seed=NULL) {
     if (!is.null(seed)) {
         set.seed(seed)
@@ -19,18 +26,27 @@ dpUnif <- function(n, seed=NULL) {
 }
 
 
-#' Draw cryptographically secure random variates
+#' Differentially Private Noise Generator
+#' 
+#' Compile noise from a cryptographically secure random variates to achieve
+#'    differentially private statistics.
 #'
-#' @param n Integer giving number of variates needed
-#' @param scale Numeric scale for the distribution
-#' @param dist Character specifying the distribution from which to draw the noise
-#' @param seed Integer indicating a seed for R's PNRG, defaults to \code{NULL}
-#'
+#' @param n An integer giving number of variates needed.
+#' @param scale Numeric, the scale for the distribution.
+#' @param dist A character specifying the distribution from which to draw the 
+#'    noise.
+#' @param seed An integer indicating a seed for R's PNRG, defaults 
+#'    to \code{NULL}.
+#'    
+#' @return Cryptographically secure noise vector or matrix.
 #' @examples
+#' 
 #' laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 #' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
-#' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='Laplace', seed=96845)
-
+#' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
+#' @seealso \code{\link{dpUnif}}
+#' @rdname dpNoise
+#' @export
 dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
@@ -45,32 +61,17 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 }
 
 
-
-#' Random draw from Laplace distribution
-#'
-#' @param sensitivity numeric
-#' @param epsilon numeric
-#' @param n integer, number of draws
-#' @return Random draws from Laplace distribution
-#' @examples
-#' rlaplace(sensitivity=1, epsilon=0.1)
-
-rlaplace = function(n=1, sensitivity, epsilon) {
-    flip <- sample(c(-1, 1), size=n, replace=TRUE)
-    expon <- rexp(n=n, rate=(epsilon / sensitivity))
-    return(flip * expon)
-}
-
-
 #' Random draw from Laplace distribution
 #'
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
 #' @param n integer, number of draws
+#' 
 #' @return Random draws from Laplace distribution
 #' @examples
+#' 
 #' rlap(size=1000)
-
+#' @export
 rlap = function(mu=0, b=1, size=1) {
     p <- runif(size) - 0.5
     draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
@@ -83,27 +84,35 @@ rlap = function(mu=0, b=1, size=1) {
 #' @param x numeric, value
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
+#' 
 #' @return Density for elements of x
 #' @examples
+#' 
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
-
+#' @export
 dlap <- function(x, mu=0, b=1) {
     dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
 }
 
 
-#' Cumulative distribution function for Laplace distribution
+#' LaPlace Cumulative Distribution Function
+#' 
+#' Determines the probability a draw from a LaPlace distribution is less than 
+#'    or equal to the specified value.
 #'
-#' @param x numeric, value
-#' @param mu numeric, center of the distribution
-#' @param b numeric, spread
-#' @return Probability less than or equal to x
+#' @param x Numeric, the value(s) at which the user wants to know the CDF height.
+#' @param mu Numeric, the center of the LaPlace distribution, defaults to 0.
+#' @param b Numeric, the spread of the LaPlace distribution, defaults to 1.
+#' 
+#' @return Probability the LaPlace draw is less than or equal to \code{x}.
 #' @examples
+#' 
 #' x <- 0
 #' plap(x)
-
+#' @rdname plap
+#' @export
 plap <- function(x, mu=0, b=1) {
     cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
     return(cdf)
@@ -119,7 +128,7 @@ plap <- function(x, mu=0, b=1) {
 #' @examples
 #' probs <- c(0.05, 0.50, 0.95)
 #' qlap(probs)
-
+#' @export
 qlap <- function(p, mu=0, b=1) {
     q <- ifelse(p < 0.5, mu + b * log(2 * p), mu - b * log(2 - 2 * p))
     return(q)
@@ -127,29 +136,36 @@ qlap <- function(p, mu=0, b=1) {
 
 
 #' Sign function
+#' 
+#' Function to determine what the sign of the passed values should be.
 #'
 #' @param x numeric, value or vector or values
 #' @return The sign of passed values
 #' @examples
-#' sgn(rnrom(10))
-
+#' sgn(rnorm(10))
+#' @export
 sgn <- function(x) {
     return(ifelse(x < 0, -1, 1))
 }
 
 
-#' Utility function for checking that range is ordered pair
-#'
-#' @param range A vector, that ought to be an ordered pair
-#' @return An ordered pair
-#'
-#' Checks if a supplied range is an ordered pair.  Coerces any vector of length two
-#'   or greater into an ordered pair, and issues an error for shorter vectors.
-#'
+#' Range Parameter Check
+#' 
+#' Checks if a supplied range is an ordered pair. Coerces any vector of length 
+#'    two or greater into an ordered pair, and issues an error for
+#'    shorter vectors.
+#'    
+#' @param rng A numeric vector of length two, that ought to be an 
+#'    ordered pair.
+#' 
+#' @return An ordered pair.
 #' @examples
+#'
+#' checkrange(c(1,3))
 #' checkrange(1:3)
 #' \dontrun{checkrange(1)}
-
+#' @rdname checkrange
+#' @export
 checkrange <- function(rng) {
     if (NCOL(rng) > 1) {
         for (i in 1:nrow(rng)) {
@@ -169,17 +185,23 @@ checkrange <- function(rng) {
 }
 
 
-#' Utility function for checking that epsilon is acceptably defined
+#' Epsilon Parameter Check
+#' 
+#' Utility function for checking that epsilon is acceptably defined.
 #'
-#' @param epsilon A vector, that ought to be positive and length of 1
-#' @return The supplied epsilon if acceptable, otherwise an error message interupts
+#' @param epsilon A vector, that ought to be positive and of length one.
+#' 
+#' @return The supplied epsilon if acceptable, otherwise an error 
+#'    message interupts.
 #'
 #' @examples
+#' 
 #' checkepsilon(0.1)
 #' \dontrun{checkepsilon(-2)}
 #' \dontrun{checkepsilon(c(0.1,0.5))}
-
-checkepsilon = function(epsilon) {
+#' @rdname checkepsilon
+#' @export
+checkepsilon <- function(epsilon) {
 	if (epsilon <= 0) {
 		stop("Privacy parameter epsilon must be a value greater than zero.")
 	}
@@ -190,22 +212,28 @@ checkepsilon = function(epsilon) {
 }
 
 
-#' Utility function for censoring data
+#' Censoring data
+#' 
+#' For numeric types, checks if x is in rng = (min, max) and censors values to 
+#'    either min or max if it is out of the range. For categorical types, 
+#'    values not in `levels` are coded NA.
 #'
-#' @param x A vector of numeric or categorial values to censor
-#' @param var_type Character indicating the variable type
-#' @param rng For numeric vectors, a vector (min, max) of the bounds of the range. For numeric matrices with nrow N and ncol P, a Px2 matrix of (min, max) bounds.
-#' @param levels For categorical types, a vector containing the levels to be returned
-#' @return Original vector with values outside the bounds censored to the bounds
-#'
-#' For numeric types, checks if x is in range = (min, max) and censors values to either min
-#' or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
-#'
+#' @param x A vector of numeric or categorial values to censor.
+#' @param var_type Character indicating the variable type of \code{x}.
+#' @param rng For numeric vectors, a vector (min, max) of the bounds of the 
+#'    range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 
+#'    (min, max) bounds.
+#' @param levels For categorical types, a vector containing the levels to 
+#'    be returned.
+#' 
+#' @return Original vector with values outside the bounds censored to the bounds.
 #' @examples
-#' censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+#' 
+#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 #' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
-
-censordata = function(x, var_type, rng=NULL, levels=NULL) {
+#' @rdname censordata
+#' @export
+censordata <- function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
             stop('`levels` are required for categorical types')
@@ -231,18 +259,20 @@ censordata = function(x, var_type, rng=NULL, levels=NULL) {
 }
 
 
-#' Utility function to check type of variable is within set of acceptable types 
-#'
-#' @param type Character specifying the type of the variable
-#' @param in_types Vector of acceptable types 
-#' @return The original character string indicating the variable type
+#' Checking variable types
 #' 
-#' Verifies that the variable is an element in the set of acceptable types
+#' Verifies that the variable is an element in the set of acceptable types.
 #' 
+#' @param type A character specifying the type of the variable.
+#' @param in_types A vector of acceptable types of variables.
+#' 
+#' @return The original character string indicating the variable type.
 #' @examples 
+#' 
 #' check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
-
-check_variable_type = function(type, in_types) { 
+#' @rdname check_variable_type
+#' @export
+check_variable_type <- function(type, in_types) { 
     if (!(type %in% in_types)) {
         stop(paste('Variable type', type, 'should be one of', paste(in_types, collapse = ', ')))
     } 
@@ -250,10 +280,9 @@ check_variable_type = function(type, in_types) {
 } 
 
 
-#' Utility function to verify that a variable is dichotomous
-#'
-#' @param x Vector of values
-#' @return Logical vector coded 0-1
+#' Logical variable check
+#' 
+#' Utility function to verify that a variable is dichotomous.
 #'
 #' This function effectively allows the user to ask for any variable containing
 #' at most two unique values to treat the variable as logical. If the variable
@@ -261,11 +290,16 @@ check_variable_type = function(type, in_types) {
 #' value is recoded 0. If the variable is categorical and contains only two unique
 #' values, the least frequently observed is recoded 1.
 #'
+#' @param x Vector containing two unique types of values.
+#' 
+#' @return Logical form of \code{x} coded 0-1.
 #' @examples
+#' 
 #' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 #' make_logical(sample(c(0, 1), size=8, replace=TRUE))
-#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE)
-
+#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
+#' @rdname make_logical
+#' @export
 make_logical <- function(x) {
     if (!length(unique(x)) <= 2) { # how to handle if contains 1 value only?
         stop('Variable has more than two values')
@@ -288,9 +322,10 @@ make_logical <- function(x) {
 #' Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
 #' the mechanism if so, else throws an error 
 #' 
-#' @examples 
+#' @examples
+#' 
 #' check_histogram_mechanism('stability')
-
+#' @export
 check_histogram_mechanism <- function(mechanism) { 
     if (!(is.null(mechanism)) && !(mechanism %in% c('noisy', 'stability', 'random'))) { 
         stop('`mechanism` must be one of `noisy`, `stability`, `random`')
@@ -311,14 +346,17 @@ check_histogram_categorical <- function(x, bins) {
 }
 
 
-#' Utility function to check bins argument to histogram
+#' Check histogram bins argument
 #' 
-#' @param n_bins Number of cells in which to tabulate values
-#' @param n Number of observations
+#' Utility function to check bins argument to histogram. If number of bins 
+#'    is not provided, the Sturges method is used.
+#' 
+#' @param n_bins The number of cells in which to tabulate values.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#'
 #' @return Number of bins
-#' 
-#' If number of bins is not provided, use the Sturges method
-
+#' @rdname check_histogram_bins
 check_histogram_bins <- function(n_bins, n) {
     if (is.null(n_bins)) {
         n_bins <- ceiling(log2(n)) + 1
@@ -332,9 +370,27 @@ check_histogram_bins <- function(n_bins, n) {
 }
 
 
-#' Utility function to check sufficient n 
+#' Histogram N check
 #' 
-
+#' Utility function to check sufficient N in data.
+#' 
+#' @param accuracy A numeric vector of length one representing the accuracy of 
+#'    the noisy estimate
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param n_bins A numeric vector of length one specifying the number of cells 
+#'    in which to tabulate values.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param delta The probability of an arbitrary leakage of information from 
+#'    the data. Should be of length one and should be a very small value. 
+#' @param alpha A numeric vector of length one specifying the numeric 
+#'    statistical significance level.
+#'    
+#' @return A logical vector indicating whether the number of observations is 
+#'    sufficient to provide desired privacy and accuracy with the given
+#'    parameters.
+#' @rdname check_histogram_n
 check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) { 
     cond1 <- (8 / accuracy) * (0.5 - log(delta) / epsilon)
     cond2 <- 4 * log(min(n_bins, (4 / accuracy)) / alpha) / (accuracy * epsilon)
@@ -343,15 +399,19 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) {
         #stop('number of rows insufficient to provide privacy or accuracy with given parameters')
     } 
     return(TRUE)
-} 
+}
 
 
-#' Utility function to match arguments of a function with list output of another function
+#' Extract function arguments
+#' 
+#' Utility function to match arguments of a function with list output of another function.
 #'
-#' @param output List with output of a function
-#' @param target.func Character name of the function with arguments that need to be filled by output
+#' @param output A list with the output of a function.
+#' @param target.func A character vector containing the name of the function 
+#'    with arguments that need to be filled by output.
+#'    
 #' @return List of arguments and values needed for specification of \code{target.func}
-
+#' @rdname getFuncArgs
 getFuncArgs <- function(output, target.func) {
     spec <- list()
     for (element in names(output)) {
@@ -363,8 +423,77 @@ getFuncArgs <- function(output, target.func) {
 }
 
 
-#' Sweep operator (from Amelia)
+#' Linear regression on covariance matrix
+#' 
+#' Function to extract regression coefficients from the covariance matrix via 
+#'    the sweep operator.
+#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param release A numeric private release of the covariance matrix.
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in in the data.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#'    
+#' @return A numeric vector of regression coefficients corresponding 
+#'    to \code{formula}.
+#' @rdname linear.reg
+linear.reg <- function(formula, release, n, intercept) {
+  if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
+    coefs <- "The input matrix is not invertible"
+    return(coefs)
+  } else {
+    xy.locs <- extract.indices(formula, release, intercept)
+    x.loc <- xy.locs$x.loc
+    y.loc <- xy.locs$y.loc
+    loc.vec <- rep(TRUE, (length(x.loc) + 1))
+    loc.vec[y.loc] <- FALSE
+    sweep <- amsweep((as.matrix(release) / n), loc.vec)
+    coefs <- sweep[y.loc, x.loc]
+    se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+    coefs <- data.frame(cbind(coefs, se))
+    coefs <- format(round(coefs, 5), nsmall=5)
+    rownames(coefs) <- xy.locs$x.label
+    names(coefs) <- c('Estimate', 'Std. Error')
+    return(coefs)
+  }
+}
 
+
+#' Moore Penrose Inverse Function ###Must assign authorship to this###
+#' 
+#' Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
+#' 
+#' @param X A numeric, symmetric covariance matrix.
+#' @param tol Convergence requirement. 
+
+mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
+  ## Moore-Penrose Inverse function (aka Generalized Inverse)
+  ##   X:    symmetric matrix
+  ##   tol:  convergence requirement
+  s <- svd(X)
+  e <- s$d
+  e[e > tol] <- 1/e[e > tol]
+  s$v %*% diag(e,nrow=length(e)) %*% t(s$u)
+}
+
+
+#' Sweep operator ###Check if we need to assign authorship to this###
+#' 
+#' Sweeps a covariance matrix to extract regression coefficients.
+#' 
+#' @param g Each unit of a numeric, symmetric covariance matrix divided by
+#'    the number of observations in the data the covariance matrix was 
+#'    derived from.
+#' @param m A logical vector of length equal to the number of rows in \code{g}
+#'    in which the \code{TRUE} values correspond to the x values in the matrix
+#'    and the \code{FALSE} values correspond to the y value in the matrix.
+#' @param reverse Logical vector specifying whether the sign of the matrix 
+#'    should be flipped. Default to \code{FALSE}.
+#' 
+#' @return The coefficients from \code{g}.
+#' @rdname amsweep
 amsweep <- function(g, m, reverse=FALSE) {
     if (identical(m, vector(mode='logical', length=length(m)))) {
         return(g)
@@ -400,14 +529,19 @@ amsweep <- function(g, m, reverse=FALSE) {
     }
 }
 
-#' Function to obtain indices in data frame for dependent & independent variables from a formula
+
+#' Extract regression indices
+#' 
+#' Function to obtain indices in data frame for dependent & independent variables from a formula.
 #'
-#' @param formula Formula
-#' @param data Data frame, in this case being the data frame of a private covariance matrix
-#' @param intercept Logical indicating whether the intercept is included
-#' @return Named list with names corresponding to labels and locations (i.e., columns) for variables
-#'  in the specification.
-#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param data A numeric data frame with at least two columns.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#' 
+#' @return A named list with names corresponding to labels and locations 
+#'    (i.e., columns) for variables in the specification.
 #' @examples
 #'
 #' y <- rnorm(100) * 2
@@ -415,7 +549,8 @@ amsweep <- function(g, m, reverse=FALSE) {
 #' data <- data.frame(cbind(y, x))
 #' f <- as.formula('y ~ x')
 #' extract.indices(f, data, FALSE)
-
+#' @rdname extract.indices
+#' @export
 extract.indices <- function(formula, data, intercept) {
     t <- terms(formula, data=data)
     y.loc <- attr(t, 'response')

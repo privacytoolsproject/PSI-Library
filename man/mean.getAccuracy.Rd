@@ -2,20 +2,23 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getAccuracy}
 \alias{mean.getAccuracy}
-\title{Describe Here}
+\title{Mean accuracy}
 \usage{
 \method{mean}{getAccuracy}(epsilon, n, alpha = 0.05)
 }
 \arguments{
-\item{epsilon}{Privacy parameter epsilon}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{n}{Number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in the vector calculating the mean for.}
 
-\item{alpha}{The statistical significance level}
+\item{alpha}{A numeric vector specifying the statistical significance level.}
 }
 \value{
-Accuracy guarantee for mean release given epsilon
+Accuracy guarantee for mean release given epsilon.
 }
 \description{
-Describe Here
+Function to find the accuracy guarantee of a mean release at a given epsilon 
+value.
 }
