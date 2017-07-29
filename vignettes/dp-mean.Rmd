@@ -57,95 +57,30 @@ Examples
 
 ### Basic Example
 
-
-
-
-
-
-
 Attaching the sample dataset:
 
 ```{r, eval = TRUE}
-data(tobin)
+data(PUMS5extract10000, package = "PSIlence")
+data <- PUMS5extract10000
 ```
 
-Estimating linear regression using `tobit`:
+Calculating the differentially private mean of a numeric vector using `mean.release`:
 
 ```{r, eval = TRUE}
-z.out <- zelig(durable ~ age + quant, model = "tobit", data = tobin)
+private.numeric <- mean.release(x = data$income, var.type = "numeric", n = 10000, 
+                             epsilon = 0.01, rng = c(-10000, 713000))
+private.numeric$release
 ```
 
-Summarize estimated paramters:
+To calculate the mean of a logical vector instead, input a logical vector into `x` and update `var.type` and `rng`:
 
 ```{r, eval = TRUE}
-summary(z.out)
+private.logical <- mean.release(x = data$married, var.type = "logical", n = 10000, 
+                             epsilon = 0.01, rng = c(0, 1))
+private.logical$release
 ```
 
-Setting values for the explanatory variables to their sample averages:
+Output Values
+------
 
-```{r, eval = TRUE}
-x.out <- setx(z.out)
-```
-
-Simulating quantities of interest from the posterior distribution given `x.out`.
-
-```{r, eval = TRUE}
-s.out1 <- sim(z.out, x = x.out)
-```
-
-```{r, eval = TRUE}
-summary(s.out1)
-```
-
-
-
-
-
-
-
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+The output of the `mean.release` function stores fields containing the name of the statistic, variable type, number of observations, the sensitivity of the data, the selected epsilon value, the differentially private release of the mean, the accuracy guarantee of the mean release, and the bounds of the confidence interval for the mean release. 
