@@ -49,3 +49,13 @@ Differentially private covariance matrix of \code{x}.
 \description{
 Function to release a differentially private inner product of input matrix.
 }
+\examples{
+
+data(PUMS5extract10000, package = "PSIlence")
+data <- data.frame(income = PUMS5extract10000$income, education = PUMS5extract10000$educ)
+range.income <- c(-10000, 713000)
+range.education <- c(1, 16)
+range <- rbind(range.income, range.education)
+covariance.release(x = data, var.type = 'numeric', n = 10000, epsilon = 0.2, rng = range, 
+                   columns = c("income", "education"), formulae = income ~ education)
+}
