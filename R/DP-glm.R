@@ -1,4 +1,4 @@
-#' Differentially private objective function for logistic regression
+#' Differentially private objective function for Logistic regression
 #' 
 #' @param n Integer indicating number of observations
 #' @param epsilon Numeric epsilon parameter for differential privacy
@@ -13,6 +13,28 @@ dp.logit <- function(n, epsilon, formula, intercept) {
     }
     return(list('name' = 'logit',
                 'objective' = objective.logit,
+                'n' = n,
+                'epsilon' = epsilon,
+                'formula' = formula,
+                'intercept' = intercept))
+}
+
+
+#' Differentially private objective function for Poisson regression
+#' 
+#' @param n Integer indicating number of observations
+#' @param epsilon Numeric epsilon parameter for differential privacy
+#' @param formula Formula for the logistic regression model
+#' @param intercept Logical indicating whether the intercept should be added to the model
+
+dp.poisson <- function(n, epsilon, formula, intercept) {
+    objective.poisson <- function(theta, X, y, b, n) {
+        lp <- X %*% as.matrix(theta)
+        llik <- ((b %*% as.matrix(theta)) / n) + (sum((y * lp) - exp(lp)))
+        return(-llik)
+    }
+    return(list('name' = 'logit',
+                'objective' = objective.poisson,
                 'n' = n,
                 'epsilon' = epsilon,
                 'formula' = formula,
@@ -40,11 +62,11 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' data <- data.frame(cbind(y, x1, x2))
 #' form <- as.formula('y ~ x1 + x2')
 #' logit.true <- glm(form, data=data, family='binomial')$coef
-#' logit.private <- logit.release(data, nrow(data), epsilon=0.5, formula=form)$release
+#' logit.private <- glm.release(data, nrow(data), epsilon=0.5, formula=form, objective=dp.logit)$release
 #' form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
-#' logit.private2 <- logit.releases(data, nrow(data), epsilon=0.5, formula=form2)$release
+#' logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, formula=form2, objective=dp.logit)$release
 
-logit.release <- function(x, n, epsilon, formula, n.boot=NULL, intercept=TRUE) {
-    release <- mechanism.objective(fun=dp.logit, x=x, n=n, epsilon=epsilon, formula=formula, n.boot=n.boot, intercept=intercept)
+glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercept=TRUE) {
+    release <- mechanism.objective(fun=objective, x=x, n=n, epsilon=epsilon, formula=formula, n.boot=n.boot, intercept=intercept)
     return(release)
 }
