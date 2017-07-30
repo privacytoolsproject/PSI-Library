@@ -1,4 +1,16 @@
-#' Function to evaluate the CDF with a binary tree
+#' Evaluate a differentially private binary tree
+#'
+#' @param x Vector of numeric observations
+#' @param var.type Character vector specifying the variable type, should be
+#'      one of \code{c('numeric', 'integer')}
+#' @param n Number of observations
+#' @param rng An a priori estimate of the range of \code{x}
+#' @param epsilon Privacy parameter epsilon, should be between zero and one
+#' @param sensitivity The sensitivity of the statistic
+#' @param gran The granularity at which \code{x} is represented in the tree
+#' @param variance The variance of the noise used to perturb tree nodes
+#' @param quantiles Vector of percentiles used in the post-processing
+#'      quantile function
 
 dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, quantiles) {
 
@@ -24,10 +36,23 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, q
 }
 
 
-#' Function to release a differentially private tree
+#' Function to release a differentially private tree and post-processing
 #'
-#' The perturbation takes place on the binary tree once constructed, then efficient estimation
-#' takes place. This is why the efficient estimation is considered a post-processing step.
+#' @param x Vector of numeric observations
+#' @param var.type Character vector specifying the variable type, should be
+#'      one of \code{c('numeric', 'integer')}
+#' @param n Number of observations
+#' @param epsilon Privacy parameter epsilon, should be between zero and one
+#' @param rng An a priori estimate of the range of \code{x}
+#' @param gran The granularity at which \code{x} is represented in the tree
+#' @param quantiles Vector of percentiles used in the post-processing
+#'      quantile function. The default is \code{NULL}, in which case the
+#'      quantile function is not executed.
+#'
+#' @return List of values including the differentially private tree, the
+#'      cumulative distribution function, the median, and optionally a
+#'      vector of percentiles. Other attributes of the binary tree are
+#'      also included.
 
 tree.release <- function(x, var.type, n, epsilon, rng, gran, quantiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
@@ -39,14 +64,18 @@ tree.release <- function(x, var.type, n, epsilon, rng, gran, quantiles=NULL) {
         postlist <- c(postlist, list('quantiles' = 'postQuantiles'))
     }
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
-    variance = 2 * sensitivity / epsilon
+    variance <- 2 * sensitivity / epsilon
     release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, gran=gran,
                                  variance=variance, quantiles=quantiles, postlist=postlist)
     return(release)
 }
 
+
 #' Function to truncate negative noisy node counts at zero
+#'
+#' @param release The differentially private noisy binary tree
+#' @return Noisy binary tree truncated at zero
 
 tree.postFormatRelease <- function(release) {
     release <- round(release)
@@ -54,7 +83,21 @@ tree.postFormatRelease <- function(release) {
     return(release)
 }
 
+
 #' Function to efficiently estimate noisy node counts
+#'
+#' @param release The truncated differentially private noisy binary tree
+#'      in vector form
+#' @param tree.data Data frame with binary tree attributes, including depth
+#'      and indicators of parent and adjacent nodes. Note that
+#'      \code{nrow(tree.data) == length(release)}
+#' @param n Number of observations
+#' @param n.nodes Number of nodes in the binary tree, also \code{length(release)}
+#' @param sigma The standard deviation of the noise used in perturbing nodes
+#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param terminal.index Vector of indices corresponding to the terminal
+#'      leaf nodes of the binary tree
+#' @return Efficient differentially private binary tree
 
 tree.postEfficientTree <- function(release, tree.data, n, n.nodes, sigma, inv.sigma.sq, terminal.index) {
     tree <- cbind(tree.data, release)
@@ -65,7 +108,16 @@ tree.postEfficientTree <- function(release, tree.data, n, n.nodes, sigma, inv.si
     return(round(tree$est.efficient))
 }
 
-#' Function to derive CDF from efficient node counts
+
+#' Function to derive CDF from efficient terminal node counts
+#'
+#' @param release Efficient differentially private binary tree
+#' @param rng An a priori estimate of the range of the vector
+#'      being represented as a binary tree
+#' @param terminal.index Vector of indices corresponding to the terminal
+#'      leaf nodes of the binary tree
+#' @return Differentially private estimate of the empirical cumulative
+#'      distribution function
 
 tree.postCDF <- function(release, rng, terminal.index) {
     terminal <- release[terminal.index]
@@ -76,23 +128,35 @@ tree.postCDF <- function(release, rng, terminal.index) {
     return(cdf)
 }
 
-#' Function to derive quantiles from DP CDF
 
-tree.postQuantiles <- function(cdf, quantiles) {
+#' Function to evaluate the median using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @return Differentially private estimate of the median
+
+tree.postMedian <- function(cdf) {
+    out.median <- tree.postQuantiles(cdf, 0.5)$value
+    return(out.median)
+}
+
+
+#' Quantile function using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @param percentiles Vector of probabilities given to the quantile function
+#' @return Differnetially private estimate of the values corresponding to
+#'      the provided probabilities
+
+tree.postQuantile <- function(cdf, percentiles) {
     absArgMin <- function(q, cdf) {
         target <- abs(q - cdf$cdf)
         out <- cdf$val[which(target == min(target))]
         return(c(q, mean(out)))
     }
-    out.quantiles <- lapply(quantiles, absArgMin, cdf)
-    out.quantiles <- data.frame(do.call(rbind, out.quantiles))
-    names(out.quantiles) <- c('quantile', 'value')
-    return(out.quantiles)
-}
-
-#' Function to evaluate the median from DP CDF
-
-tree.postMedian <- function(cdf) {
-    out.median <- tree.postQuantiles(cdf, 0.5)$value
-    return(out.median)
+    out.values <- lapply(percentiles, absArgMin, cdf)
+    out.values <- data.frame(do.call(rbind, out.values))
+    names(out.values) <- c('percentile', 'value')
+    return(out.values)
 }
