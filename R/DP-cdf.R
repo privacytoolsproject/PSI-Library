@@ -9,10 +9,12 @@
 #' @param sensitivity The sensitivity of the statistic
 #' @param gran The granularity at which \code{x} is represented in the tree
 #' @param variance The variance of the noise used to perturb tree nodes
-#' @param quantiles Vector of percentiles used in the post-processing
+#' @param percentiles Vector of percentiles used in the post-processing
 #'      quantile function
+#' @return List of values including the true value of the binary tree and the associated data
+#'      needed for the noisy release and post-processing
 
-dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, quantiles) {
+dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, percentiles) {
 
     universe.size <- floor(diff(rng) / gran + 1)
     depth <- ceiling(log2(universe.size))
@@ -31,7 +33,7 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, q
                  'terminal.index' = seq(2^(depth - 1), 2^depth - 1),
                  'sigma' = sqrt(variance),
                  'inv.sigma.sq' = 1 / variance,
-                 'quantiles' = quantiles))
+                 'percentiles' = percentiles))
     return(out)
 }
 
@@ -45,29 +47,28 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, q
 #' @param epsilon Privacy parameter epsilon, should be between zero and one
 #' @param rng An a priori estimate of the range of \code{x}
 #' @param gran The granularity at which \code{x} is represented in the tree
-#' @param quantiles Vector of percentiles used in the post-processing
+#' @param percentiles Vector of percentiles used in the post-processing
 #'      quantile function. The default is \code{NULL}, in which case the
 #'      quantile function is not executed.
-#'
 #' @return List of values including the differentially private tree, the
 #'      cumulative distribution function, the median, and optionally a
 #'      vector of percentiles. Other attributes of the binary tree are
 #'      also included.
 
-tree.release <- function(x, var.type, n, epsilon, rng, gran, quantiles=NULL) {
+tree.release <- function(x, var.type, n, epsilon, rng, gran, percentiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     postlist <- list('release' = 'postFormatRelease',
                      'release' = 'postEfficientTree',
                      'cdf' = 'postCDF',
                      'median' = 'postMedian')
-    if (!is.null(quantiles)) {
-        postlist <- c(postlist, list('quantiles' = 'postQuantiles'))
+    if (!is.null(percentiles)) {
+        postlist <- c(postlist, list('percentiles' = 'postPercentiles'))
     }
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
     variance <- 2 * sensitivity / epsilon
     release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, gran=gran,
-                                 variance=variance, quantiles=quantiles, postlist=postlist)
+                                 variance=variance, percentiles=percentiles, postlist=postlist)
     return(release)
 }
 
@@ -136,7 +137,7 @@ tree.postCDF <- function(release, rng, terminal.index) {
 #' @return Differentially private estimate of the median
 
 tree.postMedian <- function(cdf) {
-    out.median <- tree.postQuantiles(cdf, 0.5)$value
+    out.median <- tree.postPercentiles(cdf, 0.5)$value
     return(out.median)
 }
 
@@ -149,7 +150,7 @@ tree.postMedian <- function(cdf) {
 #' @return Differnetially private estimate of the values corresponding to
 #'      the provided probabilities
 
-tree.postQuantile <- function(cdf, percentiles) {
+tree.postPercentiles <- function(cdf, percentiles) {
     absArgMin <- function(q, cdf) {
         target <- abs(q - cdf$cdf)
         out <- cdf$val[which(target == min(target))]
