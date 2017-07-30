@@ -2,23 +2,39 @@
 % Please edit documentation in R/DP-covariance.R
 \name{dp.covariance}
 \alias{dp.covariance}
-\title{Function to evaluate the covariance matrix from input matrix and specify parameters for post-processing}
+\title{Function to evaluate the covariance matrix from input matrix and specify 
+   parameters for post-processing.}
 \usage{
 dp.covariance(x, n, rng, epsilon, columns, intercept, formulae)
 }
 \arguments{
-\item{x}{Numeric data frame}
+\item{x}{A numeric data frame with at least two columns.}
 
-\item{n}{Integer indicating the number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in \code{x}.}
 
-\item{rng}{Numeric matrix of 2-tuples with the lower and upper bounds for each of P variables, dimensions Px2}
+\item{rng}{A numeric matrix of 2-tuples with the lower and upper bounds for
+each of P variables in \code{x}, dimensions Px2.}
 
-\item{epsilon}{Numeric differential privacy parameter epsilon}
+\item{epsilon}{A numeric vector representing the epsilon privacy parameter.
+Should be of length one and should be between zero and one.}
 
-\item{columns}{Character vector indicating columns in \code{x}}
+\item{columns}{A character vector indicating columns in \code{x} to be 
+included in the covariance matrix. Length should be equal to the number 
+of columns the user wants to include.}
 
-\item{intercept}{Logical indicating whether an intercept should be added prior to evaluating the inner product x'x}
+\item{intercept}{A logical vector of length one indicating whether an 
+intercept should be added prior to evaluating the inner product x'x.}
+
+\item{formulae}{The regression equations the user would like to perform on
+the covariance matrix. The equations should be of class 'formula'. The 
+user may specify as many equations as desired.}
+}
+\value{
+A list with fields `name` specifying the statistic and `stat` with 
+   the lower triangle of the covariance matrix.
 }
 \description{
-Function to evaluate the covariance matrix from input matrix and specify parameters for post-processing
+Function to evaluate the covariance matrix from input matrix and specify 
+   parameters for post-processing.
 }

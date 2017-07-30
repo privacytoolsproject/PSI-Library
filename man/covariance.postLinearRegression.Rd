@@ -7,13 +7,21 @@
 covariance.postLinearRegression(release, n, intercept, formulae)
 }
 \arguments{
-\item{release}{Numeric private release of covariance matrix}
+\item{release}{Differentially private release of elements in lower triangle 
+of covariance matrix.}
 
-\item{n}{Integer indicating number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in the data frame.}
 
-\item{intercept}{Logical indicating whether the intercept is included}
+\item{intercept}{Logical indicating whether the intercept is included in 
+\code{release}.}
 
-\item{formulae}{List of R formulae}
+\item{formulae}{A list of the regression equations to be performed on the 
+covariance matrix.}
+}
+\value{
+Linear regression coefficients and standard errors for all specified
+   \code{formulae}.
 }
 \description{
 Function to perform linear regression using private release of covariance matrix

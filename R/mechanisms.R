@@ -1,21 +1,32 @@
-#' LaPlace mechanism for releasing differentially private queries
+#' LaPlace Noise Mechanism for Differential Privacy
+#' 
+#' Mechanism to add noise from a LaPlace distribution for releasing 
+#'    differentially private queries.
 #'
-#' @param fun A user supplied function, or string naming a function.  Must accept only one argument, named \code{x}.
-#' @param x A vector of data to run the function on.
-#' @param var.type Data type of vector x
-#' @param n The number of samples
-#' @param rng An a priori estimate of the range
-#' @param sensitivity numeric
-#' @param epsilon numeric
-#' @param ... Other arguments passed to \code{fun}
-#' @return Differentially private release of function \code{fun} on data \code{x}
+#' @param fun A user supplied function or string vector of length one naming a 
+#'    function.
+#' @param x A vector of data to run \code{fun} on.
+#' @param var.type Data type of vector \code{x}.
+#' @param rng An a priori estimate of the range of \code{x}.
+#' @param sensitivity The difference of \code{rng} divided by \code{n}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param postlist A list with names, function pairs for post-processing 
+#'    statistics.
+#' @param ... Other arguments passed to \code{fun}.
+#' 
+#' @return Differentially private release of function \code{fun} on 
+#'    data \code{x}.
 #' @examples
+#' 
 #' n <- 1000
 #' rng <- c(0,1)
 #' x <- runif(n, min=min(rng), max=max(rng))
 #' sensitivity <- diff(rng) / n
-#' mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n)
-
+#' mechanism.laplace(dp.mean, x, 'numeric', rng, sensitivity, 0.5, n=n)
+#' @seealso \code{\link{mechanism.gaussian}}
+#' @rdname mechanism.laplace
+#' @export
 mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
 
     # checks & transformations
@@ -41,13 +52,41 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postl
     return(out)
 }
 
-
-#' Exponential mechanism
-
+#' Exponential Noise Mechanism for Differential Privacy
+#' 
+#' Mechanism to add exponential noise for releasing differentially private 
+#'    queries.
+#' 
+#' @param fun A user supplied function or string vector of length one naming a 
+#'    function.
+#' @param x A vector of data to run \code{fun} on.
+#' @param var.type Data type of vector \code{x}.
+#' @param sensitivity The sensitivity of \code{x}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param k The number of desired releases.
+#' @param postlist A list with names, function pairs for post-processing 
+#'    statistics.
+#' @param ... Other arguments passed to \code{fun}.
+#' 
+#' @return Differentially private release of function \code{fun} on 
+#'    data \code{x}.
+#' @examples
+#' 
+#' n <- 1000
+#' epsilon <- 0.5
+#' delta <- 1e-7
+#' observed.levels <- bins <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')
+#' probs <- c(0.40, 0.25, 0.15, 0.10, 0.04, 0.03, 0.02, 0.01)
+#' x <- sample(observed.levels, size=n, prob=probs, replace=TRUE)
+#' mechanism.exponential(fun=dp.heavyhitters, x=x, var.type = 'character', sensitivity = 2,
+#'                      epsilon = epsilon, k=3, bins=bins, n=n, delta=delta)
+#' @rdname mechanism.exponential
+#' @export
 mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, postlist=NULL, ...) {
 
     epsilon <- checkepsilon(epsilon)
-    x <- censordata(x, var.type, levels=list(...)$bins)
+    x <- censordata(x, var.type, rng, levels=list(...)$bins)
 
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
@@ -62,9 +101,39 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
     return(out)
 }
 
-
-#' Gaussian mechanism
-
+#' Gaussian Noise Mechanism for Differential Privacy
+#' 
+#' Mechanism to add noise from a Gaussian distribution for releasing 
+#'    differentially private queries.
+#'
+#' @param fun A user supplied function or string vector of length one naming a 
+#'    function.
+#' @param x A vector of data to run \code{fun} on.
+#' @param var.type Data type of vector \code{x}.
+#' @param rng An a priori estimate of the range of \code{x}.
+#' @param sensitivity The difference of \code{rng} divided by \code{n}.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param delta The probability of an arbitrary leakage of information from 
+#'    \code{x}. Should be of length one and should be a very small value. 
+#'    Default to 10^-6.
+#' @param postlist A list with names, function pairs for post-processing 
+#'    statistics.
+#' @param ... Other arguments passed to \code{fun}.
+#' 
+#' @return Differentially private release of function \code{fun} on 
+#'    data \code{x}.
+#' @examples
+#' 
+#' n <- 1000
+#' rng <- c(0, 1)
+#' x <- runif(n, min=min(rng), max=max(rng))
+#' sensitivity <- diff(rng) / n
+#' mechanism.gaussian(fun=dp.mean, x=x, var.type='numeric', rng=rng, sensitivity=sensitivity, 
+#'    epsilon=0.5, delta=0.000001, n=n)
+#' @seealso \code{\link{mechanism.laplace}}
+#' @rdname mechanism.gaussian
+#' @export
 mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
 
     # checks
@@ -79,7 +148,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     # evaluate the noisy statistic
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
-    scale <- sens * sqrt(2 * log(1.25 / delta)) / epsilon
+    scale <- sensitivity * sqrt(2 * log(1.25 / delta)) / epsilon
     out$release <- out$stat + dpNoise(n=length(out$stat), scale=scale, dist='gaussian')
     out <- out[names(out) != 'stat']
 
@@ -90,17 +159,71 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     return(out)
 }
 
+
+#' Objective perturbation
+
+mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
+
+    # start populating the object with the data we need
+    mechanism.args <- c(as.list(environment()), list(...))
+    out <- do.call(fun, getFuncArgs(mechanism.args, fun))
+
+    # extract X and y from the input matrix and formula
+    intercept.loc <- ifelse(out$intercept, FALSE, TRUE)
+    xy.locs <- extract.indices(out$formula, x, intercept.loc)
+    X <- x[, xy.locs$x.loc]
+    X.names <- xy.locs$x.label
+    y <- as.numeric(x[, xy.locs$y.loc])
+    if (out$intercept) {
+        X <- cbind(1, X)
+        X.names <- c('intercept', X.names)
+    }
+
+    # convert factors to dummies
+    X.expand <- makeDummies(X)
+    X <- X.expand$data
+    X.names <- X.expand$names
+
+    # scale the inputs s.t. max Euclidean norm <= 1
+    scaler <- mapMatrixUnit(X, p=2)
+    X <- scaler$matrix
+
+    # fit and adjust back to original scale
+    start.params <- rep(0, ncol(X))
+    if (is.null(n.boot)) {
+        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
+        b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+        release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
+        names(release) <- 'estimate'
+        rownames(release) <- X.names
+    } else {
+        epsilon <- epsilon / n.boot
+        boot.ests <- vector('list', n.boot)
+        for (i in 1:n.boot) {
+            index <- sample(1:n, n, replace=TRUE)
+            X.star <- X[index, ]
+            y.star <- y[index]
+            b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
+            b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+            boot.ests[[i]] <- optim(par=start.params, fn=out$objective, X=X.star, y=y.star, b=b, n=n)$par / scaler$max.norm
+        }
+        release <- data.frame(do.call(rbind, boot.ests))
+        names(release) <- X.names
+    }
+    out$release <- release
+    return(out)
+}
+
+
 #' Cycle through available postprocessing functions for a released statistic
 #'
-#' @param out list containing differentially private released statistic, and mechanism and statistic names
-#' @param var.type Data type of vector x
-#' @param rng An a priori estimate of the range
-#' @param sensitivity numeric
-#' @param epsilon numeric
-#' @param postlist List with name, function pairs for post-processing statistics
-#' @param ... Other arguments passed to \code{fun}
-#' @param Original list with released statistic, appended with available postprocessed releases
-
+#' @param out A list containing differentially private released statistic, and 
+#'    mechanism and statistic names.
+#' @param postlist A list with names, function pairs for post-processing statistics.
+#' @param ... Other arguments.
+#' 
+#' @return Postprocessed statistics.
+#' @rdname postprocess
 postprocess <- function(out, postlist, ...) {
     available.attrs <- c(out, list(...))
     for (process in names(postlist)) {
@@ -161,7 +284,10 @@ mechanism$methods(
 
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
-# Laplace mechanism
+#' Laplace mechanism
+#' 
+#' @export mechanismLaplace
+#' @exportClass mechanismLaplace
 
 mechanismLaplace <- setRefClass(
     Class = 'mechanismLaplace',

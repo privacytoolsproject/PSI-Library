@@ -2,22 +2,26 @@
 % Please edit documentation in R/DP-histogram.R
 \name{histogram.getCI}
 \alias{histogram.getCI}
-\title{Confidence interval}
+\title{Histogram confidence interval}
 \usage{
 histogram.getCI(release, n.bins, n, accuracy)
 }
 \arguments{
-\item{release}{Numeric vector with noisy estimate of bin counts}
+\item{release}{A numeric vector with a noisy estimate of bin counts.}
 
-\item{n.bins}{Integer indicating the number of bines}
+\item{n.bins}{A numeric vector of length one specifying the number of cells 
+in which to tabulate values.}
 
-\item{n}{Integer indicating the number of observations}
+\item{n}{A numeric vector of length one specifying the number of
+observations in in the data.}
 
-\item{accuracy}{Numeric the accuracy of the noisy estimate}
+\item{accuracy}{A numeric vector representing the accuracy needed to 
+guarantee (percent).}
 }
 \value{
-Confidence interval for the noisy counts in each bin
+Confidence interval for the noisy counts in each bin.
 }
 \description{
-Confidence interval
+Return the confidence interval for the differentially private histogram release given the
+accuracy.
 }

@@ -13,8 +13,8 @@ sgn(x)
 The sign of passed values
 }
 \description{
-Sign function
+Function to determine what the sign of the passed values should be.
 }
 \examples{
-sgn(rnrom(10))
+sgn(rnorm(10))
 }

@@ -2,29 +2,32 @@
 % Please edit documentation in R/utilities.R
 \name{censordata}
 \alias{censordata}
-\title{Utility function for censoring data}
+\title{Censoring data}
 \usage{
 censordata(x, var_type, rng = NULL, levels = NULL)
 }
 \arguments{
-\item{x}{A vector of numeric or categorial values to censor}
+\item{x}{A vector of numeric or categorial values to censor.}
 
-\item{var_type}{Character indicating the variable type}
+\item{var_type}{Character indicating the variable type of \code{x}.}
 
-\item{rng}{For numeric vectors, a vector (min, max) of the bounds of the range. For numeric matrices with nrow N and ncol P, a Px2 matrix of (min, max) bounds.}
+\item{rng}{For numeric vectors, a vector (min, max) of the bounds of the 
+range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 
+(min, max) bounds.}
 
-\item{levels}{For categorical types, a vector containing the levels to be returned}
+\item{levels}{For categorical types, a vector containing the levels to 
+be returned.}
 }
 \value{
-Original vector with values outside the bounds censored to the bounds
-
-For numeric types, checks if x is in range = (min, max) and censors values to either min
-or max if it is out of the range. For categorical types, values not in `levels` are coded NA.
+Original vector with values outside the bounds censored to the bounds.
 }
 \description{
-Utility function for censoring data
+For numeric types, checks if x is in rng = (min, max) and censors values to 
+   either min or max if it is out of the range. For categorical types, 
+   values not in `levels` are coded NA.
 }
 \examples{
-censordata(x=1:10, var_type='integer', range=c(2.5, 7))
+
+censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 }

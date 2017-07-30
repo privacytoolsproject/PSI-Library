@@ -2,19 +2,21 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \name{heavyhitters.getParameters}
 \alias{heavyhitters.getParameters}
-\title{Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release}
+\title{Heavyhitters epsilon}
 \usage{
-heavyhitters.getParameters(release, delta = 1e-07, alpha = 0.05)
+heavyhitters.getParameters(gap, delta, alpha = 0.05)
 }
 \arguments{
-\item{release}{The noisy estimate}
+\item{gap}{}
 
-\item{delta}{Delta value for differential privacy}
+\item{delta}{A numeric vector representing the probability of an arbitrary
+leakage of information from the data. Should be of length one 
+and should be a very small value.}
 
-\item{alpha}{The true value is within the accuracy range with probability 1 - \code{alpha}}
+\item{alpha}{A numeric vector specifying the statistical significance level.}
 }
 \value{
-The epsilon value necessary to gaurantee the given accuracy
+The epsilon value necessary to gaurantee the given accuracy.
 }
 \description{
 Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release

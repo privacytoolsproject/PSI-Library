@@ -2,20 +2,23 @@
 % Please edit documentation in R/DP-mean.R
 \name{mean.getParameters}
 \alias{mean.getParameters}
-\title{Describe Here}
+\title{Mean epsilon}
 \usage{
 \method{mean}{getParameters}(accuracy, n, alpha = 0.05)
 }
 \arguments{
-\item{accuracy}{The accuracy we need to guarantee (percent)}
+\item{accuracy}{A numeric vector representing the accuracy needed to 
+guarantee (percent).}
 
-\item{n}{The number of samples}
+\item{n}{A numeric vector of length one specifying the number of
+observations in the vector calculating the mean for.}
 
-\item{alpha}{The statistical signifcance level}
+\item{alpha}{A numeric vector specifying the statistical significance level.}
 }
 \value{
-The scalar epsilon necessary to guarantee the accuracy needed
+The scalar epsilon necessary to guarantee the needed accuracy.
 }
 \description{
-Describe Here
+Function to find the epsilon value necessary to meet a desired level of 
+accuracy for a mean release.
 }
