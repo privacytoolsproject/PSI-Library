@@ -187,15 +187,19 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     # scale the inputs s.t. max Euclidean norm <= 1
     scaler <- mapMatrixUnit(X, p=2)
     X <- scaler$matrix
-
     # fit and adjust back to original scale
-    start.params <- rep(0, ncol(X))
+    if (out$name == 'ols') {
+      start.params <- rep(0, ncol(X)+1)
+    } else {start.params <- rep(0, ncol(X))}
+    
     if (is.null(n.boot)) {
         b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
         b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
         release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
         names(release) <- 'estimate'
-        rownames(release) <- X.names
+        if (out$name=='ols') {
+          rownames(release) <- c(X.names, 'var')
+        } else {rownames(release) <- X.names}
     } else {
         epsilon <- epsilon / n.boot
         boot.ests <- vector('list', n.boot)
