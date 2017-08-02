@@ -189,12 +189,20 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     X <- scaler$matrix
     # fit and adjust back to original scale
     if (out$name == 'ols') {
-      start.params <- rep(0, ncol(X)+1)
+      start.params <-runif(ncol(X)+1, min=-0.2, max=0.2)
+      #start.params <- rep(0, ncol(X)+1)
     } else {start.params <- rep(0, ncol(X))}
     
     if (is.null(n.boot)) {
-        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
+      if (out$name == 'ols') {
+        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X)+1)
         b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+      } else {
+        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X)+1)
+        b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+      }
+      
+        
         release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
         names(release) <- 'estimate'
         if (out$name=='ols') {
