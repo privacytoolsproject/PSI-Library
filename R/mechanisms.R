@@ -189,7 +189,7 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     X <- scaler$matrix
     # fit and adjust back to original scale
     if (out$name == 'ols') {
-      start.params <-runif(ncol(X)+1, min=-0.2, max=0.2)
+      start.params <-runif(ncol(X)+1, min=0, max=0)
       #start.params <- rep(0, ncol(X)+1)
     } else {start.params <- rep(0, ncol(X))}
     
