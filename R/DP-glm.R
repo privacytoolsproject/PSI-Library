@@ -42,6 +42,30 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
 }
 
 
+#' Differentially private objective function for ordinary least squares regression
+#' 
+#' @param n Integer indicating number of observations
+#' @param epsilon Numeric epsilon parameter for differential privacy
+#' @param formula Formula for the logistic regression model
+#' @param intercept Logical indicating whether the intercept should be added to the model
+
+dp.ols <- function(n, epsilon, formula, intercept) {
+  objective.ols <- function(theta, X, y, b, n) {
+    s <- exp( theta[length(theta)] )  # Constrain variance to be positive
+    beta <- theta[1:(length(theta)-1)]      # Separate coefficients on covariates from variance
+    xb <- as.matrix(X) %*% as.matrix(beta) 
+    llik <- ((b %*% as.matrix(theta)) / n) + (((-n/2)*log(2*pi)-n*log(s)-(0.5/s^2)*sum((y-xb)^2))/n)
+    return(-llik)
+  }
+  return(list('name' = 'ols',
+              'objective' = objective.ols,
+              'n' = n,
+              'epsilon' = epsilon,
+              'formula' = formula,
+              'intercept' = intercept))
+}
+
+
 #' Release a differentially private vector of parameter estimates for a logistic regression model
 #'
 #' @param x Dataframe with data needed to estimate the model
