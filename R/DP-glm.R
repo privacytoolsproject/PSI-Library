@@ -54,7 +54,7 @@ dp.ols <- function(n, epsilon, formula, intercept) {
     s <- exp( theta[length(theta)] )  # Constrain variance to be positive
     beta <- theta[1:(length(theta)-1)]      # Separate coefficients on covariates from variance
     xb <- as.matrix(X) %*% as.matrix(beta) 
-    llik <- ((b %*% as.matrix(theta)) / n) + ((-n/2)*log(2*pi)-n*log(s)-(0.5/s^2)*sum((y-xb)^2))
+    llik <- ((b %*% as.matrix(theta)) / n) + (((-n/2)*log(2*pi)-n*log(s)-(0.5/s^2)*sum((y-xb)^2))/n)
     return(-llik)
   }
   return(list('name' = 'ols',

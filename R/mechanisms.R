@@ -196,9 +196,9 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     if (is.null(n.boot)) {
       if (out$name == 'ols') {
         b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X)+1)
-        b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+        b <- dpNoise(n=ncol(X)+1, scale=(-epsilon * b.norm), dist='laplace')
       } else {
-        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X)+1)
+        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
         b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
       }
       
