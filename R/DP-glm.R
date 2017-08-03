@@ -22,6 +22,30 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 }
 
 
+#' Differentially private objective function for Probit regression
+#' 
+#' @param n Integer indicating number of observations
+#' @param epsilon Numeric epsilon parameter for differential privacy
+#' @param formula Formula for the Logistic regression model
+#' @param intercept Logical indicating whether the intercept should be added to the model
+
+dp.probit <- function(n, epsilon, formula, intercept) {
+  objective.probit <- function(theta, X, y, b, n) {
+    p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
+    noise <- (b %*% as.matrix(theta)) / n
+    llik <- sum(y * pnorm(p) + ((1 - y) * pnorm(1 - p))) / n
+    llik.noisy <- noise + llik
+    return(-llik.noisy)
+  }
+  return(list('name' = 'probit',
+              'objective' = objective.probit,
+              'n' = n,
+              'epsilon' = epsilon,
+              'formula' = formula,
+              'intercept' = intercept))
+}
+
+
 #' Differentially private objective function for Poisson regression
 #' 
 #' @param n Integer indicating number of observations
