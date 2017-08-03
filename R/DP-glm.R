@@ -2,14 +2,16 @@
 #' 
 #' @param n Integer indicating number of observations
 #' @param epsilon Numeric epsilon parameter for differential privacy
-#' @param formula Formula for the logistic regression model
+#' @param formula Formula for the Logistic regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
 
 dp.logit <- function(n, epsilon, formula, intercept) {
     objective.logit <- function(theta, X, y, b, n) {
         p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
-        llik <- ((b %*% as.matrix(theta)) / n) + (sum(y * log(p) + ((1 - y) * log(1 - p))) / n)
-        return(-llik)
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
     }
     return(list('name' = 'logit',
                 'objective' = objective.logit,
@@ -24,14 +26,16 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' 
 #' @param n Integer indicating number of observations
 #' @param epsilon Numeric epsilon parameter for differential privacy
-#' @param formula Formula for the logistic regression model
+#' @param formula Formula for the Poisson regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
 
 dp.poisson <- function(n, epsilon, formula, intercept) {
     objective.poisson <- function(theta, X, y, b, n) {
         lp <- X %*% as.matrix(theta)
-        llik <- ((b %*% as.matrix(theta)) / n) + (sum((y * lp) - exp(lp)))
-        return(-llik)
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum((y * lp) - exp(lp)) / n
+        noisy.llik <- noise + llik
+        return(-llik.noisy)
     }
     return(list('name' = 'logit',
                 'objective' = objective.poisson,
@@ -46,16 +50,18 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
 #' 
 #' @param n Integer indicating number of observations
 #' @param epsilon Numeric epsilon parameter for differential privacy
-#' @param formula Formula for the logistic regression model
+#' @param formula Formula for the linear regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
 
 dp.ols <- function(n, epsilon, formula, intercept) {
   objective.ols <- function(theta, X, y, b, n) {
-    s <- exp( theta[length(theta)] )  # Constrain variance to be positive
-    beta <- theta[1:(length(theta)-1)]      # Separate coefficients on covariates from variance
+    s <- exp(theta[length(theta)])          # Constrain variance to be positive
+    beta <- theta[1:(length(theta) - 1)]    # Separate coefficients on covariates from variance
     xb <- as.matrix(X) %*% as.matrix(beta) 
-    llik <- ((b %*% as.matrix(theta)) / n) + (((-n/2)*log(2*pi)-n*log(s)-(0.5/s^2)*sum((y-xb)^2))/n)
-    return(-llik)
+    noise <- (b %*% as.matrix(theta)) / n
+    llik <- ((-n / 2) * log(2 * pi) - n * log(s) - (0.5 / s^2) * sum((y - xb)^2)) / n
+    llik.noisy <- noise + llik
+    return(-llik.noisy)
   }
   return(list('name' = 'ols',
               'objective' = objective.ols,
@@ -66,12 +72,15 @@ dp.ols <- function(n, epsilon, formula, intercept) {
 }
 
 
-#' Release a differentially private vector of parameter estimates for a logistic regression model
+#' Release a differentially private vector of parameter estimates for a generalized linear model
 #'
 #' @param x Dataframe with data needed to estimate the model
 #' @param n Integer indicating number of observations
 #' @param epsilon Numeric epsilon parameter for differential privacy
-#' @param formula Formula for the logistic regression model
+#' @param formula Model formula
+#' @param objective Perturbed objective function
+#' @param n.boot Number of bootstrap samples on which to evaluate the 
+#'    private parameter estimates, each at \code{epsilon / n.boot} privacy cost
 #' @param intercept Logical indicating whether the intercept should be added to the model, default TRUE
 #' 
 #' @examples
