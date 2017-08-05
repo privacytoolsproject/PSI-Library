@@ -7,7 +7,8 @@
 
 dp.logit <- function(n, epsilon, formula, intercept) {
     objective.logit <- function(theta, X, y, b, n) {
-        p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
+        xb <- as.matrix(X) %*% as.matrix(theta)
+        p <- as.numeric(1 / (1 + exp(-1 * xb)))
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
         llik.noisy <- noise + llik
@@ -31,9 +32,15 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 
 dp.probit <- function(n, epsilon, formula, intercept) {
   objective.probit <- function(theta, X, y, b, n) {
-    p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
+    xb <- as.matrix(X) %*% as.matrix(theta)
+    p <- pnorm(xb)
+    #p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
+    #cdf <<- ecdf(p)
     noise <- (b %*% as.matrix(theta)) / n
-    llik <- sum(y * pnorm(p) + ((1 - y) * pnorm(1 - p))) / n
+    #p <- pnorm(p)
+    llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+    
+    #llik <- sum(y * cdf(p) + ((1 - y) * cdf(1 - p))) / n
     llik.noisy <- noise + llik
     return(-llik.noisy)
   }
