@@ -7,7 +7,8 @@
 heavyhitters.getParameters(gap, delta, alpha = 0.05)
 }
 \arguments{
-\item{gap}{}
+\item{gap}{The difference between the \code{k} category and the 
+\code{k+1} category.}
 
 \item{delta}{A numeric vector representing the probability of an arbitrary
 leakage of information from the data. Should be of length one 

@@ -9,13 +9,13 @@ estBottomUp(tree, terminal.level.idx, n.nodes, sigma, inv.sigma.sq)
 \arguments{
 \item{tree}{Data frame with binary tree attributes and node values}
 
+\item{terminal.level.idx}{Index of the first terminal leaf node}
+
 \item{n.nodes}{Number of nodes in the binary tree}
 
 \item{sigma}{Standard deviation of the noise used to perturb the estimates}
 
 \item{inv.sigma.sq}{Inverse variance of the noise used in perturbing nodes}
-
-\item{terminal.level.index}{Index of the first terminal leaf node}
 }
 \value{
 Bottom-up estimate of noisy binary tree in vector form

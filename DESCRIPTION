@@ -6,7 +6,7 @@ Authors@R: c(
     person("James", "Honaker", email = "jameshonaker2@gmail.com", role = c("aut", "cre"))
     )
 Version: 0.1-1
-Date: 2017-02-21
+Date: 2017-08-05
 Imports: jsonlite,
 	 methods,
 	 openssl

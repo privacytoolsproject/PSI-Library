@@ -14,6 +14,9 @@ dpNoise(n, scale, dist, shape = NULL, seed = NULL)
 \item{dist}{A character specifying the distribution from which to draw the 
 noise.}
 
+\item{shape}{An integer giving the shape parameter for the gamma
+distribution. Default to \code{NULL}.}
+
 \item{seed}{An integer indicating a seed for R's PNRG, defaults 
 to \code{NULL}.}
 }

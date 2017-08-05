@@ -161,6 +161,19 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
 
 
 #' Objective perturbation
+#' 
+#' Mechanism to add noise from a LaPlace distribution to the objective function of the 
+#'    specified regression model for differentially private regression.
+#'    
+#' @param fun A user supplied function or string vector of length one naming a 
+#'    function.
+#' @param x A data frame of variables to run \code{fun} on.
+#' @param n Integer indicating number of observations.
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param n.boot An integer indicating the number of bootstrap estimations
+#'    the user would like to perform.
+#' @param ... Other arguments.
 
 mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
 

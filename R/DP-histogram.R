@@ -139,7 +139,8 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
 #'    Default to 10^-6.
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
-#' @param error
+#' @param error The error term of the statistical significance level. Default
+#'    to 1e-9. 
 #' 
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
@@ -180,7 +181,8 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 #'    Default to 10^-6.
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
-#' @param error 
+#' @param error The error term of the statistical significance level. Default
+#'    to 1e-9. 
 #' 
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters

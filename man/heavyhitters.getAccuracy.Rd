@@ -7,7 +7,8 @@
 heavyhitters.getAccuracy(gap, epsilon, delta)
 }
 \arguments{
-\item{gap}{}
+\item{gap}{The difference between the \code{k} category and the 
+\code{k+1} category.}
 
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
