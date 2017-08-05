@@ -18,10 +18,11 @@ Suggests: knitr,
 Collate: 
     'mechanisms.R'
     'DP-covariance.R'
+    'DP-glm.R'
     'DP-heavyhitters.R'
     'DP-histogram.R'
     'DP-mean.R'
-    'DP-quantiles.R'
+    'DP-tree.R'
     'DP-variance.R'
     'createJSON.R'
     'datasets.R'

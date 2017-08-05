@@ -4,7 +4,7 @@
 \alias{dpNoise}
 \title{Differentially Private Noise Generator}
 \usage{
-dpNoise(n, scale, dist, seed = NULL)
+dpNoise(n, scale, dist, shape = NULL, seed = NULL)
 }
 \arguments{
 \item{n}{An integer giving number of variates needed.}

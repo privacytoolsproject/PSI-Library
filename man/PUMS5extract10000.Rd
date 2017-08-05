@@ -3,14 +3,13 @@
 \docType{data}
 \name{PUMS5extract10000}
 \alias{PUMS5extract10000}
-\title{Cigarette Consumption Panel Data}
-\format{A data set with 96 observations and 9 variables}
+\title{Census California Public Use Micro Sample (PUMS) Dataset}
+\format{A data set with 10000 observations and 11 variables}
 \source{
-From Christian Kleiber and Achim Zeileis (2008). Applied
-Econometrics with R. New York: Springer-Verlag. ISBN 978-0-387-77316-2. URL
-\url{https://CRAN.R-project.org/package=AER}
+From Honaker, James, 2015, "PUMS California Subsample",
+doi:10.5072/FK2/PXQ0KE, Beta Dataverse, V2
 }
 \description{
-Cigarette Consumption Panel Data
+Census California Public Use Micro Sample (PUMS) Dataset
 }
 \keyword{datasets}
