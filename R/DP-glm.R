@@ -4,7 +4,7 @@
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Logistic regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.logit <- function(n, epsilon, formula, intercept) {
     objective.logit <- function(theta, X, y, b, n) {
         xb <- as.matrix(X) %*% as.matrix(theta)
@@ -29,7 +29,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Logistic regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.probit <- function(n, epsilon, formula, intercept) {
   objective.probit <- function(theta, X, y, b, n) {
     xb <- as.matrix(X) %*% as.matrix(theta)
@@ -59,7 +59,7 @@ dp.probit <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Poisson regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.poisson <- function(n, epsilon, formula, intercept) {
     objective.poisson <- function(theta, X, y, b, n) {
         lp <- X %*% as.matrix(theta)
@@ -83,7 +83,7 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the linear regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.ols <- function(n, epsilon, formula, intercept) {
   objective.ols <- function(theta, X, y, b, n) {
     s <- exp(theta[length(theta)])          # Constrain variance to be positive

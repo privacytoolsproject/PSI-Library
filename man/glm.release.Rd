@@ -38,7 +38,9 @@ y <- rbinom(n, 1, p)
 data <- data.frame(cbind(y, x1, x2))
 form <- as.formula('y ~ x1 + x2')
 logit.true <- glm(form, data=data, family='binomial')$coef
-logit.private <- glm.release(data, nrow(data), epsilon=0.5, formula=form, objective=dp.logit)$release
+logit.private <- glm.release(data, nrow(data), epsilon=0.5, 
+   formula=form, objective=dp.logit)$release
 form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
-logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, formula=form2, objective=dp.logit)$release
+logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, 
+   formula=form2, objective=dp.logit)$release
 }
