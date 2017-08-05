@@ -54,7 +54,7 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, p
 #'      cumulative distribution function, the median, and optionally a
 #'      vector of percentiles. Other attributes of the binary tree are
 #'      also included.
-
+#' @export
 tree.release <- function(x, var.type, n, epsilon, rng, gran, percentiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     postlist <- list('release' = 'postFormatRelease',

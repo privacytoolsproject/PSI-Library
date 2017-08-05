@@ -65,7 +65,7 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
         lp <- X %*% as.matrix(theta)
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum((y * lp) - exp(lp)) / n
-        noisy.llik <- noise + llik
+        llik.noisy <- noise + llik
         return(-llik.noisy)
     }
     return(list('name' = 'logit',
@@ -126,10 +126,12 @@ dp.ols <- function(n, epsilon, formula, intercept) {
 #' data <- data.frame(cbind(y, x1, x2))
 #' form <- as.formula('y ~ x1 + x2')
 #' logit.true <- glm(form, data=data, family='binomial')$coef
-#' logit.private <- glm.release(data, nrow(data), epsilon=0.5, formula=form, objective=dp.logit)$release
+#' logit.private <- glm.release(data, nrow(data), epsilon=0.5, 
+#'    formula=form, objective=dp.logit)$release
 #' form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
-#' logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, formula=form2, objective=dp.logit)$release
-
+#' logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, 
+#'    formula=form2, objective=dp.logit)$release
+#' @export
 glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercept=TRUE) {
     release <- mechanism.objective(fun=objective, x=x, n=n, epsilon=epsilon, formula=formula, n.boot=n.boot, intercept=intercept)
     return(release)
