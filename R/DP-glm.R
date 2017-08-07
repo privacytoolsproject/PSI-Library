@@ -147,13 +147,20 @@ glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercep
 #'      least and greatest \code{alpha / 2} are trimmed
 #' @return Data frame summary statistics, including estimates and standard errors
 
-glm.postSummary <- function(release, alpha=0.10) {
+glm.postSummary <- function(release, n, model, alpha=0.10) {
     trimmed.release <- apply(release, 2, trimVector, alpha=alpha)
     estimate <- apply(trimmed.release, 2, mean)
     std.error <- apply(trimmed.release, 2, sd)
-    dp.summary <- data.frame(estimate, std.error)
-    names(dp.summary) <- c('Estimate', 'Std. Error')
+    t.values <- estimate / std.error
+    p.values <- 2 * pt(abs(t.values), df=(n - length(t.values)), lower.tail=FALSE)
+    dp.summary <- data.frame(estimate, std.error, t.values, p.values)
+    names(dp.summary) <- c('Estimate', 'Std. Error', 'Statistic', 'p-value')
     rownames(dp.summary) <- names(release)
-    return(dp.summary)
+    out.summary <- list('coefficients' = dp.summary)
+    if (model == 'ols') {
+        variance <- as.numeric(dp.summary[nrow(dp.summary), 'Estimate'])
+        out.summary$coefficients <- dp.summary[1:(nrow(dp.summary) - 1), ]
+        out.summary$variance <- variance
+    }
+    return(out.summary)
 }
-
