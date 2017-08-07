@@ -107,6 +107,26 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
     return(release)
 }
 
+#' Release additional model coefficients from DP covariance matrix
+#' 
+#' Function to extract regression coefficients using the differentially private covariance matrix 
+#'    via the sweep operator. This is the function to obtain coefficients for additional models
+#'    after the \code{covariance.release()} function has already been called. 
+#' 
+#' @param formula Formula, regression formula used on data
+#' @param release Numeric, private release of covariance matrix
+#' @param n Integer, indicating number of observations
+#' @export
+coefficient.release <- function(formula, release, n) {
+  intercept <- ifelse('intercept' %in% names(release), T, F)
+  coefficients <- linear.reg(formula, release, n, intercept)
+  release <- list(name='Linear regression', 
+                  n=n, 
+                  formula=formula, 
+                  coefficients=coefficients)
+  return(release)
+}
+
 
 #' Function to get the sensitivity of the covariance matrix
 #'
