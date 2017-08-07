@@ -6,24 +6,26 @@ Authors@R: c(
     person("James", "Honaker", email = "jameshonaker2@gmail.com", role = c("aut", "cre"))
     )
 Version: 0.1-1
-Date: 2017-02-21
+Date: 2017-08-05
 Imports: jsonlite,
 	 methods,
 	 openssl
 Description: This library allows researchers to access summary statistics of sensitive 		data that are generated using differential privacy.
 RoxygenNote: 6.0.1
-Collate:
-    'mechanisms.R'
-    'DP-covariance.R'
-    'DP-heavyhitters.R'
-    'DP-histogram.R'
-    'DP-mean.R'
-    'DP-quantiles.R'
-    'DP-variance.R'
-    'createJSON.R'
-    'dp-regression.R'
-    'utilities.R'
 Suggests: knitr,
     rmarkdown,
     testthat
+Collate: 
+    'mechanisms.R'
+    'DP-covariance.R'
+    'DP-glm.R'
+    'DP-heavyhitters.R'
+    'DP-histogram.R'
+    'DP-mean.R'
+    'DP-tree.R'
+    'DP-variance.R'
+    'createJSON.R'
+    'datasets.R'
+    'dp-regression.R'
+    'utilities.R'
 VignetteBuilder: knitr

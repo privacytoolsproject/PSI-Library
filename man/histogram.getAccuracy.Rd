@@ -27,7 +27,8 @@ Default to 10^-6.}
 \item{alpha}{A numeric vector of length one specifying the numeric 
 statistical significance level. Default to 0.05.}
 
-\item{error}{}
+\item{error}{The error term of the statistical significance level. Default
+to 1e-9.}
 }
 \value{
 Accuracy guarantee for histogram release, given epsilon.

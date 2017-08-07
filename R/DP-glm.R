@@ -4,7 +4,7 @@
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Logistic regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.logit <- function(n, epsilon, formula, intercept) {
     objective.logit <- function(theta, X, y, b, n) {
         xb <- as.matrix(X) %*% as.matrix(theta)
@@ -30,7 +30,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Logistic regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.probit <- function(n, epsilon, formula, intercept) {
     objective.probit <- function(theta, X, y, b, n) {
         xb <- as.matrix(X) %*% as.matrix(theta)
@@ -56,13 +56,13 @@ dp.probit <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the Poisson regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.poisson <- function(n, epsilon, formula, intercept) {
     objective.poisson <- function(theta, X, y, b, n) {
         lp <- X %*% as.matrix(theta)
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum((y * lp) - exp(lp)) / n
-        noisy.llik <- noise + llik
+        llik.noisy <- noise + llik
         return(-llik.noisy)
     }
     return(list('name' = 'ols',
@@ -81,7 +81,7 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
 #' @param epsilon Numeric epsilon parameter for differential privacy
 #' @param formula Formula for the linear regression model
 #' @param intercept Logical indicating whether the intercept should be added to the model
-
+#' @export
 dp.ols <- function(n, epsilon, formula, intercept) {
     objective.ols <- function(theta, X, y, b, n) {
         s <- exp(theta[length(theta)])
@@ -125,10 +125,12 @@ dp.ols <- function(n, epsilon, formula, intercept) {
 #' data <- data.frame(cbind(y, x1, x2))
 #' form <- as.formula('y ~ x1 + x2')
 #' logit.true <- glm(form, data=data, family='binomial')$coef
-#' logit.private <- glm.release(data, nrow(data), epsilon=0.5, formula=form, objective=dp.logit)$release
+#' logit.private <- glm.release(data, nrow(data), epsilon=0.5, 
+#'    formula=form, objective=dp.logit)$release
 #' form2 <- as.formula('y ~ x1 + x2 + x3')  # add a factor variable
-#' logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, formula=form2, objective=dp.logit)$release
-
+#' logit.private2 <- glm.release(data, nrow(data), epsilon=0.5, 
+#'    formula=form2, objective=dp.logit)$release
+#' @export
 glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercept=TRUE) {
     postlist <- NULL
     if (!is.null(n.boot)) {

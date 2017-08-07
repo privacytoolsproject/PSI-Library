@@ -2,8 +2,7 @@
 % Please edit documentation in R/DP-covariance.R
 \name{dp.covariance}
 \alias{dp.covariance}
-\title{Function to evaluate the covariance matrix from input matrix and specify 
-   parameters for post-processing.}
+\title{Differentially Private Covariance Matrix}
 \usage{
 dp.covariance(x, n, rng, epsilon, columns, intercept, formulae)
 }
@@ -35,6 +34,5 @@ A list with fields `name` specifying the statistic and `stat` with
    the lower triangle of the covariance matrix.
 }
 \description{
-Function to evaluate the covariance matrix from input matrix and specify 
-   parameters for post-processing.
+Function to evaluate the covariance matrix and specify parameters for covariance functions.
 }

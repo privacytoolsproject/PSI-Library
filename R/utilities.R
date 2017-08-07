@@ -35,6 +35,8 @@ dpUnif <- function(n, seed=NULL) {
 #' @param scale Numeric, the scale for the distribution.
 #' @param dist A character specifying the distribution from which to draw the 
 #'    noise.
+#' @param shape An integer giving the shape parameter for the gamma
+#'    distribution. Default to \code{NULL}.
 #' @param seed An integer indicating a seed for R's PNRG, defaults 
 #'    to \code{NULL}.
 #'    
@@ -65,7 +67,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #'
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
-#' @param n integer, number of draws
+#' @param size integer, number of draws
 #' 
 #' @return Random draws from Laplace distribution
 #' @examples
@@ -752,7 +754,7 @@ stErr <- function(w, sigma) {
 #' Function to estimate a noisy binary tree from the terminal nodes
 #'
 #' @param tree Data frame with binary tree attributes and node values
-#' @param terminal.level.index Index of the first terminal leaf node
+#' @param terminal.level.idx Index of the first terminal leaf node
 #' @param n.nodes Number of nodes in the binary tree
 #' @param sigma Standard deviation of the noise used to perturb the estimates
 #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes

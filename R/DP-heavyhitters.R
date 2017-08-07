@@ -86,7 +86,8 @@ heavyhitters.release <- function(x, var.type, epsilon, n, k, bins, delta=0.00000
 #' probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's
 #' estimate of the count in [min, t] is within alpha of the true value.
 #'
-#' @param gap 
+#' @param gap The difference between the \code{k} category and the 
+#'    \code{k+1} category.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
 #' @param delta A numeric vector representing the probability of an arbitrary
@@ -106,7 +107,8 @@ heavyhitters.getAccuracy <- function(gap, epsilon, delta) {
 #' 
 #' Get the epsilon value necessary to guarantee a desired level of accuracy of a heavyhitters release
 #'
-#' @param gap 
+#' @param gap The difference between the \code{k} category and the 
+#'    \code{k+1} category.
 #' @param delta A numeric vector representing the probability of an arbitrary
 #'    leakage of information from the data. Should be of length one 
 #'    and should be a very small value.
