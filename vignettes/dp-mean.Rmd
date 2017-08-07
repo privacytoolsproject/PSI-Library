@@ -41,7 +41,7 @@ level of privacy and characteristics of the variable of interest.
    'logical'.
    
 -  `epsilon`: A numeric vector of length one specifying the epsilon privacy 
-   parameter. This should be between zero and one.
+   parameter. Typically, this is between zero and one.
    
 -  `n`: A numeric vector of length one identifying the number of observations
    in `x`. It is important the user specify the number of observations so
