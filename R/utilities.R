@@ -631,6 +631,21 @@ mapMatrixUnit <- function(X, p=1) {
 }
 
 
+#' Function to trim lower and upper regions of a vector of values
+#'
+#' @param vec Numeric vector
+#' @param alpha Numeric proportion of vector to be trimmed, specifically the 
+#'      least and greatest \code{alpha / 2} are trimmed
+#' @return Trimmed vector
+
+trimVector <- function(vec, alpha) {
+    alpha <- alpha / 2
+    lower <- quantile(vec, probs=alpha)
+    upper <- quantile(vec, probs=(1 - alpha))
+    trimmed <- vec[vec >= lower & vec <= upper]
+    return(trimmed)
+}
+
 #' Function to evaluate weights from the noise variance and standard errors in child nodes for the 
 #'  node of a differentially private binary tree
 #'
