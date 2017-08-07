@@ -145,6 +145,8 @@ glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercep
 #' Summary statistics for differentially private GLM via the bootstrap
 #'
 #' @param release Numeric matrix with differentially private estimates for each bootstrap sample
+#' @param n Integer indicating number of observations
+#' @param model Character indicating model form
 #' @param alpha Numeric proportion of vector to be trimmed, specifically the 
 #'      least and greatest \code{alpha / 2} are trimmed
 #' @return Data frame summary statistics, including estimates and standard errors

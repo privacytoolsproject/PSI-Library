@@ -9,6 +9,10 @@ glm.postSummary(release, n, model, alpha = 0.1)
 \arguments{
 \item{release}{Numeric matrix with differentially private estimates for each bootstrap sample}
 
+\item{n}{Integer indicating number of observations}
+
+\item{model}{Character indicating model form}
+
 \item{alpha}{Numeric proportion of vector to be trimmed, specifically the 
 least and greatest \code{alpha / 2} are trimmed}
 }

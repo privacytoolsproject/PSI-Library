@@ -20,6 +20,9 @@ Should be of length one and should be between zero and one.}
 \item{n.boot}{An integer indicating the number of bootstrap estimations
 the user would like to perform.}
 
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
+
 \item{...}{Other arguments.}
 }
 \description{
