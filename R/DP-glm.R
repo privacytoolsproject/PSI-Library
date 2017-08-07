@@ -31,25 +31,20 @@ dp.logit <- function(n, epsilon, formula, intercept) {
 #' @param intercept Logical indicating whether the intercept should be added to the model
 
 dp.probit <- function(n, epsilon, formula, intercept) {
-  objective.probit <- function(theta, X, y, b, n) {
-    xb <- as.matrix(X) %*% as.matrix(theta)
-    p <- pnorm(xb)
-    #p <- as.numeric(1 / (1 + exp(-1 * as.matrix(X) %*% as.matrix(theta))))
-    #cdf <<- ecdf(p)
-    noise <- (b %*% as.matrix(theta)) / n
-    #p <- pnorm(p)
-    llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-    
-    #llik <- sum(y * cdf(p) + ((1 - y) * cdf(1 - p))) / n
-    llik.noisy <- noise + llik
-    return(-llik.noisy)
-  }
-  return(list('name' = 'probit',
-              'objective' = objective.probit,
-              'n' = n,
-              'epsilon' = epsilon,
-              'formula' = formula,
-              'intercept' = intercept))
+    objective.probit <- function(theta, X, y, b, n) {
+        xb <- as.matrix(X) %*% as.matrix(theta)
+        p <- pnorm(xb)
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'probit',
+                'objective' = objective.probit,
+                'n' = n,
+                'epsilon' = epsilon,
+                'formula' = formula,
+                'intercept' = intercept))
 }
 
 
@@ -85,21 +80,22 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
 #' @param intercept Logical indicating whether the intercept should be added to the model
 
 dp.ols <- function(n, epsilon, formula, intercept) {
-  objective.ols <- function(theta, X, y, b, n) {
-    s <- exp(theta[length(theta)])          # Constrain variance to be positive
-    beta <- theta[1:(length(theta) - 1)]    # Separate coefficients on covariates from variance
-    xb <- as.matrix(X) %*% as.matrix(beta) 
-    noise <- (b %*% as.matrix(theta)) / n
-    llik <- ((-n / 2) * log(2 * pi) - n * log(s) - (0.5 / s^2) * sum((y - xb)^2)) / n
-    llik.noisy <- noise + llik
-    return(-llik.noisy)
-  }
-  return(list('name' = 'ols',
-              'objective' = objective.ols,
-              'n' = n,
-              'epsilon' = epsilon,
-              'formula' = formula,
-              'intercept' = intercept))
+    objective.ols <- function(theta, X, y, b, n) {
+        s <- exp(theta[length(theta)])
+        beta <- theta[1:(length(theta) - 1)]
+        xb <- as.matrix(X) %*% as.matrix(beta) 
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- ((-n / 2) * log(2 * pi) - n * log(s) - (0.5 / s^2) * sum((y - xb)^2)) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'glm',
+                'model' = 'ols',
+                'objective' = objective.ols,
+                'n' = n,
+                'epsilon' = epsilon,
+                'formula' = formula,
+                'intercept' = intercept))
 }
 
 
@@ -131,6 +127,30 @@ dp.ols <- function(n, epsilon, formula, intercept) {
 #' logit.private2 <- glm.releases(data, nrow(data), epsilon=0.5, formula=form2, objective=dp.logit)$release
 
 glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercept=TRUE) {
-    release <- mechanism.objective(fun=objective, x=x, n=n, epsilon=epsilon, formula=formula, n.boot=n.boot, intercept=intercept)
+    postlist <- NULL
+    if (!is.null(n.boot)) {
+        postlist <- list('summary' = 'postSummary')
+    }
+    release <- mechanism.objective(fun=objective, x=x, n=n, epsilon=epsilon, formula=formula, 
+                                   n.boot=n.boot, intercept=intercept, postlist=postlist)
     return(release)
 }
+
+
+#' Summary statistics for differentially private GLM via the bootstrap
+#'
+#' @param release Numeric matrix with differentially private estimates for each bootstrap sample
+#' @param alpha Numeric proportion of vector to be trimmed, specifically the 
+#'      least and greatest \code{alpha / 2} are trimmed
+#' @return Data frame summary statistics, including estimates and standard errors
+
+glm.postSummary <- function(release, alpha=0.10) {
+    trimmed.release <- apply(release, 2, trimVector, alpha=alpha)
+    estimate <- apply(trimmed.release, 2, mean)
+    std.error <- apply(trimmed.release, 2, sd)
+    dp.summary <- data.frame(estimate, std.error)
+    names(dp.summary) <- c('Estimate', 'Std. Error')
+    rownames(dp.summary) <- names(release)
+    return(dp.summary)
+}
+

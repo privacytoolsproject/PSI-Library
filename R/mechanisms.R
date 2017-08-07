@@ -162,7 +162,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
 
 #' Objective perturbation
 
-mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
+mechanism.objective <- function(fun, x, n, epsilon, n.boot, postlist, ...) {
 
     # start populating the object with the data we need
     mechanism.args <- c(as.list(environment()), list(...))
@@ -189,7 +189,7 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     X <- scaler$matrix
 
     # set start params, adjust for ols objective
-    if (out$name == 'ols') {
+    if (out$model == 'ols') {
         start.params <- rep(0, ncol(X) + 1)
         X.names <- c(X.names, 'var')
     } else {
@@ -218,6 +218,11 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
         names(release) <- X.names
     }
     out$release <- release
+
+    # post-processing
+    if (!is.null(postlist)) {
+        out <- postprocess(out, postlist, ...)
+    }
     return(out)
 }
 
