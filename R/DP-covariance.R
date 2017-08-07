@@ -1,6 +1,7 @@
-#' Function to evaluate the covariance matrix from input matrix and specify 
-#'    parameters for post-processing.
-#'
+#' Differentially Private Covariance Matrix
+#' 
+#' Function to evaluate the covariance matrix and specify parameters for covariance functions.
+#' 
 #' @param x A numeric data frame with at least two columns.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in \code{x}.
@@ -16,7 +17,6 @@
 #' @param formulae The regression equations the user would like to perform on
 #'    the covariance matrix. The equations should be of class 'formula'. The 
 #'    user may specify as many equations as desired.
-#'    
 #' @return A list with fields `name` specifying the statistic and `stat` with 
 #'    the lower triangle of the covariance matrix.
 #' @export
