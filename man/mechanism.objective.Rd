@@ -4,7 +4,7 @@
 \alias{mechanism.objective}
 \title{Objective perturbation}
 \usage{
-mechanism.objective(fun, x, n, epsilon, n.boot, ...)
+mechanism.objective(fun, x, n, epsilon, n.boot, postlist, ...)
 }
 \arguments{
 \item{fun}{A user supplied function or string vector of length one naming a 

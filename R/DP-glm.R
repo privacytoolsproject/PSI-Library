@@ -15,7 +15,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
         return(-llik.noisy)
     }
     return(list('name' = 'glm',
-                'name' = 'logit',
+                'model' = 'logit',
                 'objective' = objective.logit,
                 'n' = n,
                 'epsilon' = epsilon,
@@ -65,7 +65,7 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
         llik.noisy <- noise + llik
         return(-llik.noisy)
     }
-    return(list('name' = 'ols',
+    return(list('name' = 'glm',
                 'model' = 'poisson',
                 'objective' = objective.poisson,
                 'n' = n,
