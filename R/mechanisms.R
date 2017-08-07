@@ -187,26 +187,22 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
     # scale the inputs s.t. max Euclidean norm <= 1
     scaler <- mapMatrixUnit(X, p=2)
     X <- scaler$matrix
-    # fit and adjust back to original scale
+
+    # set start params, adjust for ols objective
     if (out$name == 'ols') {
-      start.params <- rep(0, ncol(X)+1)
-    } else {start.params <- rep(0, ncol(X))}
-    
+        start.params <- rep(0, ncol(X) + 1)
+        X.names <- c(X.names, 'var')
+    } else {
+        start.params <- rep(0, ncol(X))
+    }
+
+    # fit
     if (is.null(n.boot)) {
-      if (out$name == 'ols') {
-        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X)+1)
-        b <- dpNoise(n=ncol(X)+1, scale=(-epsilon * b.norm), dist='laplace')
-      } else {
-        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
-        b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
-      }
-      
-        
+        b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=length(start.params))
+        b <- dpNoise(n=length(start.params), scale=(-epsilon * b.norm), dist='laplace')
         release <- data.frame(optim(par=start.params, fn=out$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
         names(release) <- 'estimate'
-        if (out$name=='ols') {
-          rownames(release) <- c(X.names, 'var')
-        } else {rownames(release) <- X.names}
+        rownames(release) <- X.names
     } else {
         epsilon <- epsilon / n.boot
         boot.ests <- vector('list', n.boot)
@@ -214,8 +210,8 @@ mechanism.objective <- function(fun, x, n, epsilon, n.boot, ...) {
             index <- sample(1:n, n, replace=TRUE)
             X.star <- X[index, ]
             y.star <- y[index]
-            b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=ncol(X))
-            b <- dpNoise(n=ncol(X), scale=(-epsilon * b.norm), dist='laplace')
+            b.norm <- dpNoise(n=1, scale=(2 / epsilon), dist='gamma', shape=length(start.params))
+            b <- dpNoise(n=length(start.params), scale=(-epsilon * b.norm), dist='laplace')
             boot.ests[[i]] <- optim(par=start.params, fn=out$objective, X=X.star, y=y.star, b=b, n=n)$par / scaler$max.norm
         }
         release <- data.frame(do.call(rbind, boot.ests))
