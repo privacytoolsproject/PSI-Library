@@ -15,7 +15,7 @@ dp.logit <- function(n, epsilon, formula, intercept) {
         return(-llik.noisy)
     }
     return(list('name' = 'glm',
-                'name' = 'logit',
+                'model' = 'logit',
                 'objective' = objective.logit,
                 'n' = n,
                 'epsilon' = epsilon,
@@ -65,7 +65,7 @@ dp.poisson <- function(n, epsilon, formula, intercept) {
         llik.noisy <- noise + llik
         return(-llik.noisy)
     }
-    return(list('name' = 'ols',
+    return(list('name' = 'glm',
                 'model' = 'poisson',
                 'objective' = objective.poisson,
                 'n' = n,
@@ -145,6 +145,8 @@ glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercep
 #' Summary statistics for differentially private GLM via the bootstrap
 #'
 #' @param release Numeric matrix with differentially private estimates for each bootstrap sample
+#' @param n Integer indicating number of observations
+#' @param model Character indicating model form
 #' @param alpha Numeric proportion of vector to be trimmed, specifically the 
 #'      least and greatest \code{alpha / 2} are trimmed
 #' @return Data frame summary statistics, including estimates and standard errors

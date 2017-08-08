@@ -4,7 +4,7 @@
 \alias{mechanism.objective}
 \title{Objective perturbation}
 \usage{
-mechanism.objective(fun, x, n, epsilon, n.boot, ...)
+mechanism.objective(fun, x, n, epsilon, n.boot, postlist, ...)
 }
 \arguments{
 \item{fun}{A user supplied function or string vector of length one naming a 
@@ -19,6 +19,9 @@ Should be of length one and should be between zero and one.}
 
 \item{n.boot}{An integer indicating the number of bootstrap estimations
 the user would like to perform.}
+
+\item{postlist}{A list with names, function pairs for post-processing 
+statistics.}
 
 \item{...}{Other arguments.}
 }

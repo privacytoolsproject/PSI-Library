@@ -26,6 +26,5 @@ Collate:
     'DP-variance.R'
     'createJSON.R'
     'datasets.R'
-    'dp-regression.R'
     'utilities.R'
 VignetteBuilder: knitr

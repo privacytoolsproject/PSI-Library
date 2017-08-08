@@ -174,6 +174,8 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
 #' @param n.boot An integer indicating the number of bootstrap estimations
 #'    the user would like to perform.
 #' @param ... Other arguments.
+#' @param postlist A list with names, function pairs for post-processing 
+#'    statistics.
 
 mechanism.objective <- function(fun, x, n, epsilon, n.boot, postlist, ...) {
 
