@@ -155,10 +155,10 @@ glm.postSummary <- function(release, n, model, alpha=0.10) {
     trimmed.release <- apply(release, 2, trimVector, alpha=alpha)
     estimate <- apply(trimmed.release, 2, mean)
     std.error <- apply(trimmed.release, 2, sd)
-    t.values <- estimate / std.error
-    p.values <- 2 * pt(abs(t.values), df=(n - length(t.values)), lower.tail=FALSE)
-    dp.summary <- data.frame(estimate, std.error, t.values, p.values)
-    names(dp.summary) <- c('Estimate', 'Std. Error', 'Statistic', 'p-value')
+    lower <- apply(trimmed.release, 2, quantile, 0.025)
+    upper <- apply(trimmed.release, 2, quantile, 0.975)
+    dp.summary <- data.frame(estimate, std.error, upper, lower)
+    names(dp.summary) <- c('Estimate', 'Std. Error', 'CI95 Lower', 'CI95 Upper')
     rownames(dp.summary) <- names(release)
     out.summary <- list('coefficients' = dp.summary)
     if (model == 'ols') {
