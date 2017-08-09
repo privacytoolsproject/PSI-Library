@@ -59,7 +59,7 @@ dp.probit <- function(n, epsilon, formula, intercept) {
 #' @export
 dp.poisson <- function(n, epsilon, formula, intercept) {
     objective.poisson <- function(theta, X, y, b, n) {
-        lp <- X %*% as.matrix(theta)
+        lp <- as.matrix(X) %*% as.matrix(theta)
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum((y * lp) - exp(lp)) / n
         llik.noisy <- noise + llik
