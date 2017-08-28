@@ -202,13 +202,17 @@ mean.getJSON <- function(output.json=TRUE) {
 # --------------------------------------------------------- #
 # Reference class implementation of mean
 
+boot.mean <- function(M, n) {
+    return(M / n)
+}
+
 dpMean <- setRefClass(
     Class = 'dpMean',
     contains = c('mechanismLaplace', 'mechanismBootstrap')
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
+    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05, boot.fun=boot.mean) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -216,13 +220,14 @@ dpMean$methods(
         .self$epsilon <- epsilon
         .self$rng <- rng
         .self$alpha <- alpha
+        .self$boot.fun <- boot.fun
 })
 
 
 dpMean$methods(
-    release = function(x) {
+    release = function(x, ...) {
         sens <- diff(rng) / n
-        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess)
+        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
 })
 
 dpMean$methods(
