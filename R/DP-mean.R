@@ -233,7 +233,10 @@ dpMean$methods(
 dpMean$methods(
     postProcess = function(out) {
         if (mechanism == 'mechanismBootstrap') {
-            out$check <- 'success'
+            out$se <- sd(out$release)
+            c.alpha <- qchisq(0.01, df=(out$n.boot - 1))
+            out$se.conservative <- sqrt(max(c(out$se^2 - (c.alpha * out$sens^2 * out$n.boot) / (2 * epsilon * (out$n.boot - 1)), 0)))
+            out$se.naive <- sqrt(max(c(out$se^2 - (out$sens^2 * out$n.boot) / (2 * epsilon), 0)))
         } else if (mechanism == 'mechanismLaplace') {
             out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
             out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
