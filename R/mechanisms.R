@@ -283,9 +283,9 @@ mechanism <- setRefClass(
         accuracy = 'numeric',
         bins = 'ANY',
         n.bins = 'ANY',
-        error = 'numeric'
-    )
-)
+        error = 'numeric',
+        boot.fun = 'function'
+))
 
 mechanism$methods(
     getFields = function() {
@@ -395,14 +395,14 @@ mechanismGaussian$methods(
 # --------------------------------------------------------- #
 #' Bootstrap mechanism
 
-bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, ...) {
+bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
     max.appearances <- max(partition)
     probs <- sapply(1:max.appearances, dbinom, size=n, prob=(1 / n))
     stat.partitions <- vector('list', max.appearances)
     for (i in 1:max.appearances) {
-        variance.i <- (i * p * (sensitivity^2)) / (2 * epsilon)
-        stat.i <- fun(sum(x[partition == i]), ...)
+        variance.i <- (i * probs[i] * (sensitivity^2)) / (2 * epsilon)
+        stat.i <- fun(sum(x[partition == i]), n)
         noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
         stat.partitions[[i]] <- i * stat.i + noise.i
     }
@@ -421,13 +421,19 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
-    evaluate = function(fun, x, sens, n.boot, postFun, ...) {
+    bootStatEval = function(M, ...) {
+        field.vals <- .self$getFunArgs(boot.fun)
+        stat <- do.call(boot.fun, c(list(M=M), field.vals))
+        return(stat)
+})
+
+mechanismBootstrap$methods(
+    evaluate = function(fun, x, sens, postFun, n.boot) {
         xc <- censordata(x, .self$var.type, .self$rng)
-        field.vals <- .self$getFunArgs(fun)
         epsilon.part <- epsilon / n.boot
-        release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun))
+        release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))
         out <- list('release' = release)
-        out <- postFun(out, ...)
+        out <- postFun(out)
         return(out)
 })
 
