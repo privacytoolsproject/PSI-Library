@@ -202,6 +202,17 @@ mean.getJSON <- function(output.json=TRUE) {
 # --------------------------------------------------------- #
 # Reference class implementation of mean
 
+#' Reference class implementation of differentially private mean
+#'
+#' just a quick to demonstrate usage...
+#'
+#' x <- rnorm(1000)
+#' eps <- 0.5
+#' rng <- c(-3, 3)
+#' reps <- 25
+#' pmean <- dpMean$new('mechanismBootstrap', 'numeric', n=length(x), epsilon=eps, rng=rng, boot.fun=boot.mean)
+#' pmean$release(x, n.boot=reps)
+
 boot.mean <- function(M, n) {
     return(M / n)
 }
