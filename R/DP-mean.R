@@ -204,7 +204,7 @@ mean.getJSON <- function(output.json=TRUE) {
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace')
+    contains = c('mechanismLaplace', 'mechanismBoostrap')
 )
 
 dpMean$methods(
@@ -227,12 +227,18 @@ dpMean$methods(
 
 dpMean$methods(
     postProcess = function(out) {
-        out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
-        out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
-        out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
-        if (var.type == 'logical') {
-            out$std.dev <- mean.postStandardDeviation(out$release)
-            out$median <- mean.postMedian(out$release)
+        if (mechanism == 'mechanismBootstrap') {
+            out$check <- 'success'
+        } else if (mechanism == 'mechanismLaplace') {
+            out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+            out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+            out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+            if (var.type == 'logical') {
+                out$std.dev <- mean.postStandardDeviation(out$release)
+                out$median <- mean.postMedian(out$release)
+            }
+        } else {
+            stop('mechanism not recognized')
         }
         return(out)
 })
