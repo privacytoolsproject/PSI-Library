@@ -393,3 +393,43 @@ mechanismGaussian$methods(
 
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
+#' Bootstrap mechanism
+
+bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, ...) {
+    partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
+    max.appearances <- max(partition)
+    probs <- sapply(1:max.appearances, dbinom, size=n, prob=(1 / n))
+    stat.partitions <- vector('list', max.appearances)
+    for (i in 1:max.appearances) {
+        variance.i <- (i * p * (sensitivity^2)) / (2 * epsilon)
+        stat.i <- fun(sum(x[partition == i]), ...)
+        noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
+        stat.partitions[[i]] <- i * stat.i + noise.i
+    }
+    stat.out <- do.call(rbind, stat.partitions)
+    return(sum(stat.out))
+}
+
+mechanismBootstrap <- setRefClass(
+    Class = 'mechanismBootstrap',
+    contains = 'mechanism'
+)
+
+mechanismBootstrap$methods(
+    getFunArgs = function(fun) {
+        callSuper(fun)
+})
+
+mechanismBootstrap$methods(
+    evaluate = function(fun, x, sens, n.boot, postFun, ...) {
+        xc <- censordata(x, .self$var.type, .self$rng)
+        field.vals <- .self$getFunArgs(fun)
+        epsilon.part <- epsilon / n.boot
+        release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun))
+        out <- list('release' = release)
+        out <- postFun(out, ...)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
