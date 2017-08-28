@@ -204,7 +204,7 @@ mean.getJSON <- function(output.json=TRUE) {
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace', 'mechanismBoostrap')
+    contains = c('mechanismLaplace', 'mechanismBootstrap')
 )
 
 dpMean$methods(
