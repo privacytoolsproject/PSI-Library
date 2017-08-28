@@ -432,7 +432,9 @@ mechanismBootstrap$methods(
         xc <- censordata(x, .self$var.type, .self$rng)
         epsilon.part <- epsilon / n.boot
         release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))
-        out <- list('release' = release)
+        out <- list('release' = release,
+                    'n.boot' = n.boot,
+                    'sens' = sens)
         out <- postFun(out)
         return(out)
 })
