@@ -243,21 +243,20 @@ dpMean$methods(
 
 dpMean$methods(
     postProcess = function(out) {
-        if (mechanism == 'mechanismBootstrap') {
-            out$se <- sd(out$release)
-            c.alpha <- qchisq(0.01, df=(out$n.boot - 1))
-            out$se.conservative <- sqrt(max(c(out$se^2 - (c.alpha * out$sens^2 * out$n.boot) / (2 * epsilon * (out$n.boot - 1)), 0)))
-            out$se.naive <- sqrt(max(c(out$se^2 - (out$sens^2 * out$n.boot) / (2 * epsilon), 0)))
-        } else if (mechanism == 'mechanismLaplace') {
+        if (mechanism == 'mechanismLaplace') {
             out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
             out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
             out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
-            if (var.type == 'logical') {
+        } 
+        if (var.type == 'logical') {
+            if (mechanism == 'mechanismBootstrap') {
+                bagged.estimate <- mean(out$release)
+                out$std.dev <- mean.postStandardDeviation(bagged.estimate)
+                out$median <- mean.postMedian(bagged.estimate)
+            } else {
                 out$std.dev <- mean.postStandardDeviation(out$release)
                 out$median <- mean.postMedian(out$release)
             }
-        } else {
-            stop('mechanism not recognized')
         }
         return(out)
 })
