@@ -430,7 +430,7 @@ mechanismBootstrap$methods(
 mechanismBootstrap$methods(
     bootSE = function(release, n.boot, sens) {
         se <- sd(release)
-        c.alpha <- qchisq(0.01, df=(out$n.boot - 1))
+        c.alpha <- qchisq(0.01, df=(n.boot - 1))
         conservative <- sqrt(max(c(se^2 - (c.alpha * sens^2 * n.boot) / (2 * epsilon * (n.boot - 1)), 0)))
         naive <- sqrt(max(c(se^2 - (sens^2 * n.boot) / (2 * epsilon), 0)))
         return(list('sd' = se,
