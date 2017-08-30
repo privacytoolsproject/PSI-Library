@@ -407,7 +407,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
         stat.partitions[[i]] <- i * stat.i + noise.i
     }
     stat.out <- do.call(rbind, stat.partitions)
-    return(sum(stat.out))
+    return(apply(stat.out, 2, sum))
 }
 
 mechanismBootstrap <- setRefClass(
