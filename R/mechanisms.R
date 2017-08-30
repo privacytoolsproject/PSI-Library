@@ -428,13 +428,23 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
+    bootSE = function(release, n.boot, sens) {
+        se <- sd(release)
+        c.alpha <- qchisq(0.01, df=(out$n.boot - 1))
+        conservative <- sqrt(max(c(se^2 - (c.alpha * sens^2 * n.boot) / (2 * epsilon * (n.boot - 1)), 0)))
+        naive <- sqrt(max(c(se^2 - (sens^2 * n.boot) / (2 * epsilon), 0)))
+        return(list('sd' = se,
+                    'conservative' = conservative,
+                    'naive' = naive))
+})
+
+mechanismBootstrap$methods(
     evaluate = function(fun, x, sens, postFun, n.boot) {
         xc <- censordata(x, .self$var.type, .self$rng)
         epsilon.part <- epsilon / n.boot
         release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))
-        out <- list('release' = release,
-                    'n.boot' = n.boot,
-                    'sens' = sens)
+        std.error <- .self$bootSE(release, n.boot, sens)
+        out <- list('release' = release, 'std.error' = std.error)
         out <- postFun(out)
         return(out)
 })
