@@ -402,7 +402,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
     stat.partitions <- vector('list', max.appearances)
     for (i in 1:max.appearances) {
         variance.i <- (i * probs[i] * (sensitivity^2)) / (2 * epsilon)
-        stat.i <- fun(sum(x[partition == i]), n)
+        stat.i <- fun(x[partition == i])
         noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
         stat.partitions[[i]] <- i * stat.i + noise.i
     }
@@ -421,9 +421,9 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
-    bootStatEval = function(M, ...) {
+    bootStatEval = function(xi) {
         field.vals <- .self$getFunArgs(boot.fun)
-        stat <- do.call(boot.fun, c(list(M=M), field.vals))
+        stat <- do.call(boot.fun, c(list(xi=xi), field.vals))
         return(stat)
 })
 

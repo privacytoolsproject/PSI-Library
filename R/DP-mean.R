@@ -213,8 +213,8 @@ mean.getJSON <- function(output.json=TRUE) {
 #' pmean <- dpMean$new('mechanismBootstrap', 'numeric', n=length(x), epsilon=eps, rng=rng, boot.fun=boot.mean)
 #' pmean$release(x, n.boot=reps)
 
-boot.mean <- function(M, n) {
-    return(M / n)
+boot.mean <- function(xi, n) {
+    return(sum(xi) / n)
 }
 
 dpMean <- setRefClass(
