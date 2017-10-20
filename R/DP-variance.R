@@ -43,6 +43,8 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 #'    Should be of length one and should be between zero and one.
 #' @param rng A numeric vector specifying an a priori estimate of the range
 #'    of \code{x}. Should be of length two.
+#' @param impute.rng Numeric range within which missing values of \code{x} are 
+#'    imputed. Defaults to \code{rng} if \code{NULL}
 #'    
 #' @return A list output containing noisy estimate and post-processing values from the 
 #'    Laplace mechanism.
@@ -55,8 +57,9 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 #' r_bool <- variance.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, rng=c(0, 1))
 #' @rdname variance.release
 #' @export
-variance.release <- function(x, var.type, n, epsilon, rng) {
+variance.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL) {
     rng <- checkrange(rng)
+    impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
     sensitivity <- (n - 1) / n^2 * diff(rng)^2
     postlist <- list('std' = 'postStandardDeviation')
     release <- mechanism.laplace(fun=dp.variance, x=x, var.type=var.type, rng=rng,
