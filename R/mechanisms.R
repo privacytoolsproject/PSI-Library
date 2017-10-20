@@ -283,9 +283,9 @@ mechanism <- setRefClass(
         accuracy = 'numeric',
         bins = 'ANY',
         n.bins = 'ANY',
-        error = 'numeric'
-    )
-)
+        error = 'numeric',
+        boot.fun = 'function'
+))
 
 mechanism$methods(
     getFields = function() {
@@ -387,6 +387,64 @@ mechanismGaussian$methods(
         scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='gaussian')
         out <- list('release' = release)
+        out <- postFun(out)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+#' Bootstrap mechanism
+
+bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
+    partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
+    max.appearances <- max(partition)
+    probs <- sapply(1:max.appearances, dbinom, size=n, prob=(1 / n))
+    stat.partitions <- vector('list', max.appearances)
+    for (i in 1:max.appearances) {
+        variance.i <- (i * probs[i] * (sensitivity^2)) / (2 * epsilon)
+        stat.i <- fun(x[partition == i])
+        noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
+        stat.partitions[[i]] <- i * stat.i + noise.i
+    }
+    stat.out <- do.call(rbind, stat.partitions)
+    return(apply(stat.out, 2, sum))
+}
+
+mechanismBootstrap <- setRefClass(
+    Class = 'mechanismBootstrap',
+    contains = 'mechanism'
+)
+
+mechanismBootstrap$methods(
+    getFunArgs = function(fun) {
+        callSuper(fun)
+})
+
+mechanismBootstrap$methods(
+    bootStatEval = function(xi) {
+        field.vals <- .self$getFunArgs(boot.fun)
+        stat <- do.call(boot.fun, c(list(xi=xi), field.vals))
+        return(stat)
+})
+
+mechanismBootstrap$methods(
+    bootSE = function(release, n.boot, sens) {
+        se <- sd(release)
+        c.alpha <- qchisq(0.01, df=(n.boot - 1))
+        conservative <- sqrt(max(c(se^2 - (c.alpha * sens^2 * n.boot) / (2 * epsilon * (n.boot - 1)), 0)))
+        naive <- sqrt(max(c(se^2 - (sens^2 * n.boot) / (2 * epsilon), 0)))
+        return(list('sd' = se,
+                    'conservative' = conservative,
+                    'naive' = naive))
+})
+
+mechanismBootstrap$methods(
+    evaluate = function(fun, x, sens, postFun, n.boot) {
+        xc <- censordata(x, .self$var.type, .self$rng)
+        epsilon.part <- epsilon / n.boot
+        release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))
+        std.error <- .self$bootSE(release, n.boot, sens)
+        out <- list('release' = release, 'std.error' = std.error)
         out <- postFun(out)
         return(out)
 })

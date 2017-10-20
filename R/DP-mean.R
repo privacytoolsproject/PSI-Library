@@ -202,13 +202,28 @@ mean.getJSON <- function(output.json=TRUE) {
 # --------------------------------------------------------- #
 # Reference class implementation of mean
 
+#' Reference class implementation of differentially private mean
+#'
+#' just a quick to demonstrate usage...
+#'
+#' x <- rnorm(1000)
+#' eps <- 0.5
+#' rng <- c(-3, 3)
+#' reps <- 25
+#' pmean <- dpMean$new('mechanismBootstrap', 'numeric', n=length(x), epsilon=eps, rng=rng, boot.fun=boot.mean)
+#' pmean$release(x, n.boot=reps)
+
+boot.mean <- function(xi, n) {
+    return(sum(xi) / n)
+}
+
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace')
+    contains = c('mechanismLaplace', 'mechanismBootstrap')
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
+    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05, boot.fun=boot.mean) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -216,23 +231,32 @@ dpMean$methods(
         .self$epsilon <- epsilon
         .self$rng <- rng
         .self$alpha <- alpha
+        .self$boot.fun <- boot.fun
 })
 
 
 dpMean$methods(
-    release = function(x) {
+    release = function(x, ...) {
         sens <- diff(rng) / n
-        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess)
+        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
 })
 
 dpMean$methods(
     postProcess = function(out) {
-        out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
-        out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
-        out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+        if (mechanism == 'mechanismLaplace') {
+            out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+            out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+            out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+        } 
         if (var.type == 'logical') {
-            out$std.dev <- mean.postStandardDeviation(out$release)
-            out$median <- mean.postMedian(out$release)
+            if (mechanism == 'mechanismBootstrap') {
+                bagged.estimate <- mean(out$release)
+                out$std.dev <- mean.postStandardDeviation(bagged.estimate)
+                out$median <- mean.postMedian(bagged.estimate)
+            } else {
+                out$std.dev <- mean.postStandardDeviation(out$release)
+                out$median <- mean.postMedian(out$release)
+            }
         }
         return(out)
 })
