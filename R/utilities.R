@@ -39,10 +39,10 @@ dpUnif <- function(n, seed=NULL) {
 #'    distribution. Default to \code{NULL}.
 #' @param seed An integer indicating a seed for R's PNRG, defaults 
 #'    to \code{NULL}.
-#'    
+#'
 #' @return Cryptographically secure noise vector or matrix.
 #' @examples
-#' 
+#'
 #' laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 #' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
 #' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
@@ -65,7 +65,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 
 #' Fill missing values
 #'
-#' Impute uniformly in the range between provided lower and upper bounds
+#' Impute uniformly in the range of the provided variable
 #'
 #' @param x Vector with missing values to impute
 #' @param var.type Character specifying the variable type
@@ -73,8 +73,24 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @param upper Numeric upper bound, default NULL
 #' @param categories Set of possible categories from which to choose,
 #'      default NULL
-#' @param seed Integer indicating a seed for R's PNG, default NULL
-
+#' @param seed Integer indicating a seed for R's PRNG, default NULL
+#' @return Vector \code{x} with missing values imputed
+#' @examples
+#'
+#' # numeric example
+#' y <- rnorm(100)
+#' y[sample(1:100, size=10)] <- NA
+#' y_imputed <- fillMissing(x=y, var.type='numeric', lower=-1, upper=1)
+#'
+#' # categorical example
+#' cats <- as.factor(c('dog', 'zebra', 'bird', 'hippo'))
+#' s <- sample(cats, size=100, replace=TRUE)
+#' s[sample(1:100, size=10)] <- NA
+#' s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
+#'
+#' @seealso \code{\link{dpUnif}}
+#' @rdname dpNoise
+#' @export
 fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL, seed=NULL) {
     miss_idx <- is.na(x)
     if (sum(miss_idx) == 0) { return(x) }
