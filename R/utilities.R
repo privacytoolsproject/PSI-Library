@@ -63,6 +63,33 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 }
 
 
+#' Fill missing values
+#'
+#' Impute uniformly in the range between provided lower and upper bounds
+#'
+#' @param var.type Character specifying the variable type
+#' @param lower Numeric lower bound, default NULL
+#' @param upper Numeric upper bound, default NULL
+#' @param categories Set of possible categories from which to choose,
+#'      default NULL
+#' @param seed Integer indicating a seed for R's PNG, default NULL
+
+fillMissing <- function(var.type, lower=NULL, upper=NULL, categories=NULL, seed=NULL) {
+    u <- dpUnif(1, seed)
+    if (var.type %in% c('character', 'factor')) {
+        lower <- 1
+        upper <- length(categories)
+    }
+    out <- u * (upper - lower) + lower
+    if (var.type %in% c('logical', 'integer')) {
+        out <- as.integer(out)
+    } else if (var.type %in% c('character', 'factor')) {
+        out <- categories[as.integer(out)]
+    }
+    return(out)
+}
+
+
 #' Random draw from Laplace distribution
 #'
 #' @param mu numeric, center of the distribution
