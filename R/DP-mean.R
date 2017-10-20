@@ -70,11 +70,11 @@ mean.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL, ...) {
                                      'median' = 'postMedian'))
     }
     rng <- checkrange(rng)
-    impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
+    if (is.null(impute.rng)) { impute.rng <- rng }
     sensitivity <- diff(rng) / n
     release <- mechanism.laplace(fun=dp.mean, x=x, var.type=var.type, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, n=n,
-                                 postlist=postlist)
+                                 impute.rng=impute.rng, postlist=postlist)
     return(release)
 }
 
@@ -233,7 +233,11 @@ dpMean$methods(
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
-        .self$impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
         .self$alpha <- alpha
         .self$boot.fun <- boot.fun
 })

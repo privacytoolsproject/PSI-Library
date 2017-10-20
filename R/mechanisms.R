@@ -37,7 +37,7 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, imput
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, rng=rng)
-        x <- fillMissing(x, var.type, lower=rng[1], upper=rng[2])
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
         x <- fillMissing(x, var.type, categories=list(...)$bins)
@@ -149,7 +149,7 @@ mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delt
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, rng=rng)
-        x <- fillMissing(x, var.type, lower=rng[1], upper=rng[2])
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
         x <- fillMissing(x, var.type, categories=list(...)$bins)
@@ -341,7 +341,7 @@ mechanismLaplace$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         x <- censordata(x, .self$var.type, .self$rng, .self$bins)
         if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-            x <- fillMissing(x, .self$var.type, .self$impute.rng[0], .self$impute.rng[1])
+            x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
         } else {
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
@@ -400,7 +400,7 @@ mechanismGaussian$methods(
     evaluate = function(fun, x, sens, postFun) {
         x <- censordata(x, .self$var.type, .self$rng)
         if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-            x <- fillMissing(x, .self$var.type, .self$impute.rng[0], .self$impute.rng[1])
+            x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
         } else {
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
