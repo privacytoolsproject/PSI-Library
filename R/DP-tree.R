@@ -46,6 +46,7 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, p
 #' @param n Number of observations
 #' @param epsilon Privacy parameter epsilon, should be between zero and one
 #' @param rng An a priori estimate of the range of \code{x}
+#' @param impute.rng Numeric range within which to impute missing values in \code{x}
 #' @param gran The granularity at which \code{x} is represented in the tree
 #' @param percentiles Vector of percentiles used in the post-processing
 #'      quantile function. The default is \code{NULL}, in which case the
@@ -55,8 +56,10 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, p
 #'      vector of percentiles. Other attributes of the binary tree are
 #'      also included.
 #' @export
-tree.release <- function(x, var.type, n, epsilon, rng, gran, percentiles=NULL) {
+tree.release <- function(x, var.type, n, epsilon, rng, impute.rng, gran, percentiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
+    rng <- checkrange(rng)
+    impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
     postlist <- list('release' = 'postFormatRelease',
                      'release' = 'postEfficientTree',
                      'cdf' = 'postCDF',
