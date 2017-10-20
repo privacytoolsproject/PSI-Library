@@ -67,6 +67,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #'
 #' Impute uniformly in the range between provided lower and upper bounds
 #'
+#' @param x Vector with missing values to impute
 #' @param var.type Character specifying the variable type
 #' @param lower Numeric lower bound, default NULL
 #' @param upper Numeric upper bound, default NULL
@@ -74,8 +75,10 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #'      default NULL
 #' @param seed Integer indicating a seed for R's PNG, default NULL
 
-fillMissing <- function(var.type, lower=NULL, upper=NULL, categories=NULL, seed=NULL) {
-    u <- dpUnif(1, seed)
+fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL, seed=NULL) {
+    miss_idx <- is.na(x)
+    if (sum(miss_idx) == 0) { return(x) }
+    u <- dpUnif(sum(miss_idx), seed)
     if (var.type %in% c('character', 'factor')) {
         lower <- 1
         upper <- length(categories)
@@ -86,7 +89,8 @@ fillMissing <- function(var.type, lower=NULL, upper=NULL, categories=NULL, seed=
     } else if (var.type %in% c('character', 'factor')) {
         out <- categories[as.integer(out)]
     }
-    return(out)
+    x[miss_idx] <- out
+    return(x)
 }
 
 
