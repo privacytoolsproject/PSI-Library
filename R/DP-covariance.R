@@ -98,20 +98,22 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
 
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
-    if (length(formulae)!=0) {
+    if (length(formulae) != 0) {
         postlist <- c(postlist, list('linear.regression' = 'postLinearRegression'))
     }
     # Note: shouldn't pass function by scopeing
-    if (mechanism=='laplace') {
-      release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
-                                   rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
-                                   sensitivity=sensitivity, intercept=intercept, formulae=formulae,
-                                   postlist=postlist)
-    } else if (mechanism=='gaussian') {
-      release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n, rng=rng, sensitivity=sensitivity, 
-                                    epsilon=(epsilon / length(sensitivity)), columns=columns,
-                                    delta=delta, intercept=intercept, formulae=formulae, postlist=postlist)
-    } else {stop('no noise mechanism defined')}
+    if (mechanism == 'laplace') {
+        release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
+                                     rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
+                                     sensitivity=sensitivity, intercept=intercept, formulae=formulae,
+                                     postlist=postlist)
+    } else if (mechanism == 'gaussian') {
+        release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n, rng=rng, sensitivity=sensitivity, 
+                                      epsilon=(epsilon / length(sensitivity)), columns=columns,
+                                      delta=delta, intercept=intercept, formulae=formulae, postlist=postlist)
+    } else {
+        stop('no noise mechanism defined')
+    }
     return(release)
 }
 
