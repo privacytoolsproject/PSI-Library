@@ -64,6 +64,8 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #' @param columns A character vector indicating columns in \code{x} to be 
 #'    included in the covariance matrix. Length should be equal to the number 
 #'    of columns the user wants to include.
+#' @param impute.rng Numeric matrix of ranges for each column within which 
+#'    missing values are imputed. If \code{NULL}, defaults to \code{rng}.
 #' @param delta A numeric vector representing the probability of an arbitrary
 #'    leakage of information from \code{x}. Should be of length one 
 #'    and should be a very small value. Default to 10^-6.
@@ -87,7 +89,8 @@ dp.covariance <- function(x, n, rng, epsilon, columns, intercept, formulae) {
 #' covariance.release(x = data, var.type = 'numeric', n = 10000, epsilon = 0.2, rng = range, 
 #'                    columns = c("income", "education"), formulae = income ~ education)
 #' @export
-covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
+covariance.release <- function(x, var.type, n, epsilon, rng, columns, impute.rng=NULL, 
+                               delta=0.000001, intercept=FALSE, formulae=NULL, mechanism='laplace') {
 
     sensitivity <- covariance.sensitivity(n, rng, intercept)
     if (is.null(formulae)) {
@@ -95,6 +98,7 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
     } else {
         if (inherits(formulae, 'formula')) { formulae <- list(formulae) }
     }
+    if (is.null(impute.rng)) { impute.rng <- rng }
 
     # pass to mechanism
     postlist <- list('release' = 'formatRelease')
@@ -106,11 +110,12 @@ covariance.release <- function(x, var.type, n, epsilon, rng, columns, delta=0.00
         release <- mechanism.laplace(fun=dp.covariance, x=x, var.type='numeric', n=n,
                                      rng=rng, epsilon=(epsilon / length(sensitivity)), columns=columns,
                                      sensitivity=sensitivity, intercept=intercept, formulae=formulae,
-                                     postlist=postlist)
+                                     impute.rng=impute.rng, postlist=postlist)
     } else if (mechanism == 'gaussian') {
-        release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n, rng=rng, sensitivity=sensitivity, 
-                                      epsilon=(epsilon / length(sensitivity)), columns=columns,
-                                      delta=delta, intercept=intercept, formulae=formulae, postlist=postlist)
+        release <- mechanism.gaussian(fun=dp.covariance, x=x, var.type='numeric', n=n, rng=rng, 
+                                      sensitivity=sensitivity, epsilon=(epsilon / length(sensitivity)), 
+                                      columns=columns, delta=delta, intercept=intercept, formulae=formulae, 
+                                      impute.rng=impute.rng, postlist=postlist)
     } else {
         stop('no noise mechanism defined')
     }
@@ -225,13 +230,18 @@ dpCovariance <- setRefClass(
 )
 
 dpCovariance$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng) {
+    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng) {
         .self$name <- 'Differentially private covariance matrix'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
 })
 
 dpCovariance$methods(
@@ -239,7 +249,7 @@ dpCovariance$methods(
         if (intercept) { columns <- c('intercept', columns) }
         sens <- covariance.sensitivity(rng, n, intercept)
         .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sensitivity=sens, postFun=.self$postProcess,
-                                                   columns=columns, formulae=formulae, intercept=intercept)
+                                                   columns=columns, formulae=formulae, intercept=intercept, impute.rng=impute.rng)
 })
 
 dpCovariance$methods(
