@@ -33,11 +33,13 @@ mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, imput
 
     # checks & transformations
     epsilon <- checkepsilon(epsilon)
-    if (var.type == 'logical') { x <- make_logical(x) }
-    if (var.type %in% c('numeric', 'integer', 'logical')) {
+    if (var.type %in% c('numeric', 'integer')) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, rng=rng)
         x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
+    } else if (var.type == 'logical') {
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
+        x <- make_logical(x)
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
         x <- fillMissing(x, var.type, categories=list(...)$bins)

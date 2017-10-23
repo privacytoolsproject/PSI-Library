@@ -59,10 +59,10 @@ dp.variance <- function(x, var.type, n, sensitivity, epsilon) {
 #' @export
 variance.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL) {
     rng <- checkrange(rng)
-    impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
+    if (is.null(impute.rng)) { impute.rng <- rng }
     sensitivity <- (n - 1) / n^2 * diff(rng)^2
     postlist <- list('std' = 'postStandardDeviation')
-    release <- mechanism.laplace(fun=dp.variance, x=x, var.type=var.type, rng=rng,
+    release <- mechanism.laplace(fun=dp.variance, x=x, var.type=var.type, rng=rng, impute.rng=impute.rng,
                                  sensitivity=sensitivity, epsilon=epsilon, n=n, postlist=postlist)
     return(release)
 }
