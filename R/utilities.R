@@ -73,7 +73,6 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @param upper Numeric upper bound, default NULL
 #' @param categories Set of possible categories from which to choose,
 #'      default NULL
-#' @param seed Integer indicating a seed for R's PRNG, default NULL
 #' @return Vector \code{x} with missing values imputed
 #' @examples
 #'
@@ -89,12 +88,12 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
 #'
 #' @seealso \code{\link{dpUnif}}
-#' @rdname dpNoise
+#' @rdname fillMissing
 #' @export
-fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL, seed=NULL) {
+fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) {
     miss_idx <- is.na(x)
     if (sum(miss_idx) == 0) { return(x) }
-    u <- dpUnif(sum(miss_idx), seed)
+    u <- dpUnif(sum(miss_idx))
     if (var.type %in% c('character', 'factor')) {
         lower <- 1
         upper <- length(categories)
@@ -109,6 +108,37 @@ fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL, se
     return(x)
 }
 
+
+#' Fill missing values column-wise for matrix
+#'
+#' Impute uniformly in the range of the provided variable
+#'
+#' @param x Numeric matrix with missing values
+#' @param var.type Character specifying the variable type
+#' @param impute.rng Px2 matrix where the pth row contains the range
+#'      within which the pth variable in x is imputed.
+#' @return Matrix \code{x} with missing values imputed
+#' @examples
+#'
+#' # numeric example
+#' N <- 100
+#' x1 <- x2 <- rnorm(N)
+#' x1[sample(1:N, size=10)] <- NA
+#' x2[sample(1:N, size=10)] <- NA
+#' imp.rng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
+#' df <- data.frame(x1, x2)
+#' df_imputed <- fillMissing2d(x=df, var.type='numeric', impute.rng=imp.rng)
+#'
+#' @seealso \code{\link{fillMissing}}
+#' @rdname fillMissing2d
+#' @export
+fillMissing2d <- function(x, var.type, impute.rng=NULL) {
+    for (j in 1:ncol(x)) {
+        x[, j] <- fillMissing(x[, j], var.type, lower=impute.rng[j, 1], upper=impute.rng[j, 2])
+    }
+    return(x)
+}
+            
 
 #' Random draw from Laplace distribution
 #'

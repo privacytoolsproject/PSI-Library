@@ -230,32 +230,43 @@ dpCovariance <- setRefClass(
 )
 
 dpCovariance$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng) {
+    initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL, 
+                          intercept=FALSE, formulae=NULL, delta=1e-5) {
         .self$name <- 'Differentially private covariance matrix'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
-        .self$rng
+        .self$delta <- delta
+        .self$rng <- rng
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
+        .self$formulae <- formulae
+        .self$intercept <- intercept
+        if (.self$intercept) { 
+            .self$columns <- c('intercept', columns)
+        } else {
+            .self$columns <- columns
+        }
 })
 
 dpCovariance$methods(
-    release = function(x, columns, formulae=NULL, intercept=FALSE) {
-        if (intercept) { columns <- c('intercept', columns) }
-        sens <- covariance.sensitivity(rng, n, intercept)
-        .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sensitivity=sens, postFun=.self$postProcess,
-                                                   columns=columns, formulae=formulae, intercept=intercept, impute.rng=impute.rng)
+    release = function(x) {
+        sens <- covariance.sensitivity(n, rng, intercept)
+        .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess, 
+                                                   columns=columns, formulae=formulae, intercept=intercept)
 })
 
 dpCovariance$methods(
     postProcess = function(out, columns, formulae, intercept) {
         out$release <- covariance.formatRelease(out$release, columns)
-        out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formulae)
+        if (!is.null(formulae)) {
+            out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formulae)
+        }
+        return(out)
 })
 
 # --------------------------------------------------------- #

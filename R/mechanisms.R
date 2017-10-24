@@ -1,4 +1,4 @@
-#' LaPlace Noise Mechanism for Differential Privacy
+#' Laplace Noise Mechanism for Differential Privacy
 #' 
 #' Mechanism to add noise from a LaPlace distribution for releasing 
 #'    differentially private queries.
@@ -298,7 +298,10 @@ mechanism <- setRefClass(
         k = 'numeric',
         error = 'numeric',
         boot.fun = 'function',
-        impute.rng = 'ANY'
+        impute.rng = 'ANY',
+        formulae = 'ANY',
+        columns = 'ANY',
+        intercept = 'logical'
 ))
 
 mechanism$methods(
@@ -344,7 +347,11 @@ mechanismLaplace$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         x <- censordata(x, .self$var.type, .self$rng, .self$bins)
         if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-            x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            if (NCOL(x) > 1) {
+                x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+            } else {
+                x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            }
         } else {
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
@@ -408,7 +415,11 @@ mechanismGaussian$methods(
     evaluate = function(fun, x, sens, postFun) {
         x <- censordata(x, .self$var.type, .self$rng)
         if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-            x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            if (NCOL(x) > 1) {
+                x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+            } else {
+                x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            }
         } else {
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
