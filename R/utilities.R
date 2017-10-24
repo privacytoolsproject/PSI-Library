@@ -39,10 +39,10 @@ dpUnif <- function(n, seed=NULL) {
 #'    distribution. Default to \code{NULL}.
 #' @param seed An integer indicating a seed for R's PNRG, defaults 
 #'    to \code{NULL}.
-#'    
+#'
 #' @return Cryptographically secure noise vector or matrix.
 #' @examples
-#' 
+#'
 #' laplace_noise <- dpNoise(n=1000, scale=1, dist='laplace')
 #' gaussian_noise <- dpNoise(n=1000, scale=1, dist='gaussian')
 #' laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
@@ -62,6 +62,83 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     }
 }
 
+
+#' Fill missing values
+#'
+#' Impute uniformly in the range of the provided variable
+#'
+#' @param x Vector with missing values to impute
+#' @param var.type Character specifying the variable type
+#' @param lower Numeric lower bound, default NULL
+#' @param upper Numeric upper bound, default NULL
+#' @param categories Set of possible categories from which to choose,
+#'      default NULL
+#' @return Vector \code{x} with missing values imputed
+#' @examples
+#'
+#' # numeric example
+#' y <- rnorm(100)
+#' y[sample(1:100, size=10)] <- NA
+#' y_imputed <- fillMissing(x=y, var.type='numeric', lower=-1, upper=1)
+#'
+#' # categorical example
+#' cats <- as.factor(c('dog', 'zebra', 'bird', 'hippo'))
+#' s <- sample(cats, size=100, replace=TRUE)
+#' s[sample(1:100, size=10)] <- NA
+#' s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
+#'
+#' @seealso \code{\link{dpUnif}}
+#' @rdname fillMissing
+#' @export
+fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) {
+    miss_idx <- is.na(x)
+    if (sum(miss_idx) == 0) { return(x) }
+    u <- dpUnif(sum(miss_idx))
+    if (var.type %in% c('character', 'factor')) {
+        lower <- 1
+        upper <- length(categories)
+    }
+    out <- u * (upper - lower) + lower
+    if (var.type %in% c('logical', 'integer')) {
+        out <- as.integer(out)
+    } else if (var.type %in% c('character', 'factor')) {
+        out <- categories[as.integer(out)]
+    }
+    x[miss_idx] <- out
+    return(x)
+}
+
+
+#' Fill missing values column-wise for matrix
+#'
+#' Impute uniformly in the range of the provided variable
+#'
+#' @param x Numeric matrix with missing values
+#' @param var.type Character specifying the variable type
+#' @param impute.rng Px2 matrix where the pth row contains the range
+#'      within which the pth variable in x is imputed.
+#' @return Matrix \code{x} with missing values imputed
+#' @examples
+#'
+#' # numeric example
+#' N <- 100
+#' x1 <- x2 <- rnorm(N)
+#' x1[sample(1:N, size=10)] <- NA
+#' x2[sample(1:N, size=10)] <- NA
+#' imp.rng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
+#' df <- data.frame(x1, x2)
+#' df_imputed <- fillMissing2d(x=df, var.type='numeric', impute.rng=imp.rng)
+#'
+#' @seealso \code{\link{fillMissing}}
+#' @rdname fillMissing2d
+#' @export
+fillMissing2d <- function(x, var.type, impute.rng=NULL) {
+    for (j in 1:ncol(x)) {
+        x[, j] <- fillMissing(x[, j], var.type, lower=impute.rng[j, 1], upper=impute.rng[j, 2])
+    }
+    return(x)
+}
+            
 
 #' Random draw from Laplace distribution
 #'

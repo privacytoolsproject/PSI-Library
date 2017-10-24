@@ -41,6 +41,8 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 #'    Should be of length one and should be between zero and one.
 #' @param rng A numeric vector specifying an a priori estimate of the range
 #'    of \code{x}. Should be of length two. 
+#' @param impute.rng Numeric range within which missing values are imputed. 
+#'    Defaults to \code{rng} if \code{NULL}
 #' @param ... additional arguments passed to \code{mean.release}.
 #' 
 #' @return Differentially private mean of vector \code{x}.
@@ -57,7 +59,7 @@ dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
 #' r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, rng=c(-9.657, 3.483))
 #' @rdname mean.release
 #' @export
-mean.release <- function(x, var.type, n, epsilon, rng, ...) {
+mean.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL, ...) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
     postlist <- list('accuracy' = 'getAccuracy',
                      'epsilon' = 'getParameters',
@@ -68,10 +70,11 @@ mean.release <- function(x, var.type, n, epsilon, rng, ...) {
                                      'median' = 'postMedian'))
     }
     rng <- checkrange(rng)
+    if (is.null(impute.rng)) { impute.rng <- rng }
     sensitivity <- diff(rng) / n
     release <- mechanism.laplace(fun=dp.mean, x=x, var.type=var.type, rng=rng,
                                  sensitivity=sensitivity, epsilon=epsilon, n=n,
-                                 postlist=postlist)
+                                 impute.rng=impute.rng, postlist=postlist)
     return(release)
 }
 
@@ -223,13 +226,18 @@ dpMean <- setRefClass(
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05, boot.fun=boot.mean) {
+    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng=NULL, alpha=0.05, boot.fun=boot.mean) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
         .self$alpha <- alpha
         .self$boot.fun <- boot.fun
 })

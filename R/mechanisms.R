@@ -1,4 +1,4 @@
-#' LaPlace Noise Mechanism for Differential Privacy
+#' Laplace Noise Mechanism for Differential Privacy
 #' 
 #' Mechanism to add noise from a LaPlace distribution for releasing 
 #'    differentially private queries.
@@ -11,6 +11,8 @@
 #' @param sensitivity The difference of \code{rng} divided by \code{n}.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
+#' @param impute.rng Range within which missing values are imputed for numeric
+#'    types
 #' @param postlist A list with names, function pairs for post-processing 
 #'    statistics.
 #' @param ... Other arguments passed to \code{fun}.
@@ -27,16 +29,20 @@
 #' @seealso \code{\link{mechanism.gaussian}}
 #' @rdname mechanism.laplace
 #' @export
-mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, postlist=NULL, ...) {
+mechanism.laplace <- function(fun, x, var.type, rng, sensitivity, epsilon, impute.rng=NULL, postlist=NULL, ...) {
 
     # checks & transformations
     epsilon <- checkepsilon(epsilon)
-    if (var.type == 'logical') { x <- make_logical(x) }
-    if (var.type %in% c('numeric', 'integer', 'logical')) {
+    if (var.type %in% c('numeric', 'integer')) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, rng=rng)
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
+    } else if (var.type == 'logical') {
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
+        x <- make_logical(x)
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
+        x <- fillMissing(x, var.type, categories=list(...)$bins)
     }
 
     # evaluate the noisy statistic
@@ -87,6 +93,7 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
 
     epsilon <- checkepsilon(epsilon)
     x <- censordata(x, var.type, rng, levels=list(...)$bins)
+    x <- fillMissing(x, var.type, categories=list(...)$bins)
 
     mechanism.args <- c(as.list(environment()), list(...))
     out <- do.call(fun, getFuncArgs(mechanism.args, fun))
@@ -117,6 +124,8 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
 #' @param delta The probability of an arbitrary leakage of information from 
 #'    \code{x}. Should be of length one and should be a very small value. 
 #'    Default to 10^-6.
+#' @param impute.rng Range within which missing values are imputed for numeric
+#'    types
 #' @param postlist A list with names, function pairs for post-processing 
 #'    statistics.
 #' @param ... Other arguments passed to \code{fun}.
@@ -134,15 +143,18 @@ mechanism.exponential <- function(fun, x, var.type, sensitivity, epsilon, k, pos
 #' @seealso \code{\link{mechanism.laplace}}
 #' @rdname mechanism.gaussian
 #' @export
-mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, postlist=NULL, ...) {
+mechanism.gaussian <- function(fun, x, var.type, rng, sensitivity, epsilon, delta, 
+                               impute.rng=NULL, postlist=NULL, ...) {
 
     # checks
     epsilon <- checkepsilon(epsilon)
     if (var.type %in% c('numeric', 'integer', 'logical')) {
         rng <- checkrange(rng)
         x <- censordata(x, var.type, rng=rng)
+        x <- fillMissing(x, var.type, lower=impute.rng[1], upper=impute.rng[2])
     } else {
         x <- censordata(x, var.type, levels=list(...)$bins)
+        x <- fillMissing(x, var.type, categories=list(...)$bins)
     }
 
     # evaluate the noisy statistic
@@ -283,8 +295,13 @@ mechanism <- setRefClass(
         accuracy = 'numeric',
         bins = 'ANY',
         n.bins = 'ANY',
+        k = 'numeric',
         error = 'numeric',
-        boot.fun = 'function'
+        boot.fun = 'function',
+        impute.rng = 'ANY',
+        formulae = 'ANY',
+        columns = 'ANY',
+        intercept = 'logical'
 ))
 
 mechanism$methods(
@@ -328,7 +345,16 @@ mechanismLaplace$methods(
 
 mechanismLaplace$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        xc <- censordata(x, .self$var.type, .self$rng)
+        x <- censordata(x, .self$var.type, .self$rng, .self$bins)
+        if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
+            if (NCOL(x) > 1) {
+                x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+            } else {
+                x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            }
+        } else {
+            x <- fillMissing(x, .self$var.type, categories=.self$bins)
+        }
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens / .self$epsilon
@@ -354,14 +380,20 @@ mechanismExponential$methods(
 
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        xc <- censordata(x, .self$var.type, levels=.self$bins)
+        x <- censordata(x, .self$var.type, levels=.self$bins)
+        x <- fillMissing(x, .self$var.type, categories=.self$bins)
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         quality <- true.val - max(true.val)
-        probs <- ifelse(true.value == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
-        release <- sample(names(true.value), .self$k, prob=probs)
-        out <- list('release' = release)
-        out <- postFun(out, ...)
+        probs <- ifelse(true.val == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
+        gap <- as.numeric(true.val[.self$k] - true.val[.self$k + 1])
+        if (gap < (-2 / epsilon * log(delta))) {
+            out <- list('release' = NULL)
+        } else {
+            release <- sample(names(true.val), size=.self$k, prob=probs)
+            out <- list('release' = release)
+            out <- postFun(out, gap)
+        }
         return(out)
 })
 
@@ -381,7 +413,16 @@ mechanismGaussian$methods(
 
 mechanismGaussian$methods(
     evaluate = function(fun, x, sens, postFun) {
-        xc <- censordata(x, .self$var.type, .self$rng)
+        x <- censordata(x, .self$var.type, .self$rng)
+        if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
+            if (NCOL(x) > 1) {
+                x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+            } else {
+                x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+            }
+        } else {
+            x <- fillMissing(x, .self$var.type, categories=.self$bins)
+        }
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
@@ -440,7 +481,8 @@ mechanismBootstrap$methods(
 
 mechanismBootstrap$methods(
     evaluate = function(fun, x, sens, postFun, n.boot) {
-        xc <- censordata(x, .self$var.type, .self$rng)
+        x <- censordata(x, .self$var.type, .self$rng)
+        x <- fillMissing(x, .self$var.type, .self$impute.rng[0], .self$impute.rng[1])
         epsilon.part <- epsilon / n.boot
         release <- replicate(n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))
         std.error <- .self$bootSE(release, n.boot, sens)

@@ -58,8 +58,11 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #'    Should be of length one and should be between zero and one.
 #' @param rng A numeric vector of length two specifying the lower and upper bounds 
 #'    of \code{x}.
+#' @param impute.rng Numeric range within which missing values in \code{x} are imputed 
+#'    for numeric types. Defaults to \code{rng} if \code{NULL}.
 #' @param bins A vector of bins for which values are counted. Required for 
-#'    categorical types.
+#'    categorical types. Bins also serve as the set of values used to 
+#'    fill missing values for categorical types.
 #' @param n.bins An integer specifying the number of cells in which to tabulate 
 #'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
 #'    
@@ -89,7 +92,7 @@ dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, e
 #' r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
 #' @rdname histogram.release
 #' @export
-histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL) {
+histogram.release <- function(x, var.type, n, epsilon, rng=NULL, impute.rng=NULL, bins=NULL, n.bins=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
     postlist <- list('accuracy' = 'getAccuracy',
                      'epsilon' = 'getParameters',
@@ -97,16 +100,17 @@ histogram.release <- function(x, var.type, n, epsilon, rng=NULL, bins=NULL, n.bi
     if (var.type %in% c('numeric', 'integer')) {
         n.bins <- check_histogram_bins(n.bins, n)
         bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+        impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
     } else {
         n.bins <- length(bins)
         postlist <- c(postlist, list('herfindahl' = 'postHerfindahl'))
     }
     release.noisy <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
                                        sensitivity=1, epsilon=epsilon, stability=FALSE, bins=bins,
-                                       n.bins=n.bins, n=n, postlist=postlist)
+                                       n.bins=n.bins, n=n, impute.rng=impute.rng, postlist=postlist)
     release.stability <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
                                            sensitivity=1, epsilon=epsilon, stability=TRUE, bins=bins,
-                                           n.bins=n.bins, n=n, postlist=postlist)
+                                           n.bins=n.bins, n=n, impute.rng=impute.rng, postlist=postlist)
     stability.accurate <- release.stability$accuracy < release.noisy$accuracy
     stability.check <- check_histogram_n(release.stability$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)
     if (stability.accurate && stability.check) {
@@ -309,15 +313,25 @@ dpHistogram <- setRefClass(
 )
 
 dpHistogram$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9) {
+    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, impute.rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
-        .self$bins <- bins
-        .self$n.bins <- n.bins
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
+        if (var.type %in% c('numeric', 'integer')) {
+            .self$n.bins <- check_histogram_bins(n.bins, n)
+            .self$bins <- seq(rng[1], rng[2], length.out=(.self$n.bins + 1))
+        } else {
+            .self$bins <- bins
+            .self$n.bins <- length(bins)
+        }
         .self$alpha <- alpha
         .self$delta <- delta
         .self$error <- error
@@ -325,12 +339,6 @@ dpHistogram$methods(
 
 dpHistogram$methods(
     release = function(x) {
-        if (var.type %in% c('numeric', 'integer')) {
-            .self$n.bins <- check_histogram_bins(n.bins, n)
-            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
-        } else {
-            .self$n.bins <- length(bins)
-        }
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=FALSE)
         stable <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=TRUE)
         stable.accurate <- stable$accuracy < noisy$accuracy
