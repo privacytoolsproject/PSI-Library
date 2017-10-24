@@ -320,8 +320,18 @@ dpHistogram$methods(
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
-        .self$bins <- bins
-        .self$n.bins <- n.bins
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
+        if (var.type %in% c('numeric', 'integer')) {
+            .self$n.bins <- check_histogram_bins(n.bins, n)
+            .self$bins <- seq(rng[1], rng[2], length.out=(.self$n.bins + 1))
+        } else {
+            .self$bins <- bins
+            .self$n.bins <- length(bins)
+        }
         .self$alpha <- alpha
         .self$delta <- delta
         .self$error <- error
@@ -329,13 +339,6 @@ dpHistogram$methods(
 
 dpHistogram$methods(
     release = function(x) {
-        if (var.type %in% c('numeric', 'integer')) {
-            .self$n.bins <- check_histogram_bins(n.bins, n)
-            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
-            .self$impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
-        } else {
-            .self$n.bins <- length(bins)
-        }
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=FALSE)
         stable <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=TRUE)
         stable.accurate <- stable$accuracy < noisy$accuracy

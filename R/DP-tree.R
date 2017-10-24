@@ -46,8 +46,9 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, p
 #' @param n Number of observations
 #' @param epsilon Privacy parameter epsilon, should be between zero and one
 #' @param rng An a priori estimate of the range of \code{x}
-#' @param impute.rng Numeric range within which to impute missing values in \code{x}
 #' @param gran The granularity at which \code{x} is represented in the tree
+#' @param impute.rng Numeric range within which to impute missing values in \code{x},
+#'      defaults to \code{rng} if \code{NULL}.
 #' @param percentiles Vector of percentiles used in the post-processing
 #'      quantile function. The default is \code{NULL}, in which case the
 #'      quantile function is not executed.
@@ -56,10 +57,12 @@ dp.tree <- function(x, var.type, n, rng, epsilon, sensitivity, gran, variance, p
 #'      vector of percentiles. Other attributes of the binary tree are
 #'      also included.
 #' @export
-tree.release <- function(x, var.type, n, epsilon, rng, impute.rng, gran, percentiles=NULL) {
+tree.release <- function(x, var.type, n, epsilon, rng, gran, impute.rng=NULL, percentiles=NULL) {
     var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer'))
     rng <- checkrange(rng)
-    impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
+    if (is.null(impute.rng)) {
+        impute.rng <- rng
+    }
     postlist <- list('release' = 'postFormatRelease',
                      'release' = 'postEfficientTree',
                      'cdf' = 'postCDF',
@@ -69,7 +72,7 @@ tree.release <- function(x, var.type, n, epsilon, rng, impute.rng, gran, percent
     }
     sensitivity <- 2 * log2(diff(rng) / gran + 1)
     variance <- 2 * sensitivity / epsilon
-    release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng,
+    release <- mechanism.laplace(fun=dp.tree, x=x, var.type=var.type, n=n, rng=rng, impute.rng=impute.rng,
                                  sensitivity=sensitivity, epsilon=epsilon, gran=gran,
                                  variance=variance, percentiles=percentiles, postlist=postlist)
     return(release)

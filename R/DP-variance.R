@@ -92,13 +92,18 @@ dpVariance <- setRefClass(
 )
 
 dpVariance$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, alpha=0.05) {
+    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
         .self$alpha <- alpha
 })
 

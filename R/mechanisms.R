@@ -295,6 +295,7 @@ mechanism <- setRefClass(
         accuracy = 'numeric',
         bins = 'ANY',
         n.bins = 'ANY',
+        k = 'numeric',
         error = 'numeric',
         boot.fun = 'function',
         impute.rng = 'ANY'
@@ -377,10 +378,15 @@ mechanismExponential$methods(
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         quality <- true.val - max(true.val)
-        probs <- ifelse(true.value == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
-        release <- sample(names(true.value), .self$k, prob=probs)
-        out <- list('release' = release)
-        out <- postFun(out, ...)
+        probs <- ifelse(true.val == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
+        gap <- as.numeric(true.val[.self$k] - true.val[.self$k + 1])
+        if (gap < (-2 / epsilon * log(delta))) {
+            out <- list('release' = NULL)
+        } else {
+            release <- sample(names(true.val), size=.self$k, prob=probs)
+            out <- list('release' = release)
+            out <- postFun(out, gap)
+        }
         return(out)
 })
 
