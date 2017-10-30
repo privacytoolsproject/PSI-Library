@@ -226,19 +226,26 @@ dpMean <- setRefClass(
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng=NULL, alpha=0.05, boot.fun=boot.mean) {
+    initialize = function(mechanism, var.type, n, rng, epsilon=NULL, accuracy=NULL, 
+                          impute.rng=NULL, alpha=0.05, boot.fun=boot.mean) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
-        .self$epsilon <- epsilon
+        .self$alpha <- alpha
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- mean.getParameters(accuracy, n, alpha)
+        } else {
+            .self$epsilon <- epsilon
+            .self$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+        }
         .self$rng <- rng
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
-        .self$alpha <- alpha
         .self$boot.fun <- boot.fun
 })
 
@@ -252,8 +259,8 @@ dpMean$methods(
 dpMean$methods(
     postProcess = function(out) {
         if (mechanism == 'mechanismLaplace') {
-            out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
-            out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+            out$accuracy <- accuracy
+            out$epsilon <- epsilon
             out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
         } 
         if (var.type == 'logical') {
