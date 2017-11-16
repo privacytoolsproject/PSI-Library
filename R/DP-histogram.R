@@ -315,7 +315,7 @@ dpHistogram <- setRefClass(
 dpHistogram$methods(
     initialize = function(mechanism, var.type, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
                           bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
-                          impute.rng=NULL, impute=FALSE) {
+                          impute.rng=NULL, impute=FALSE, ...) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
