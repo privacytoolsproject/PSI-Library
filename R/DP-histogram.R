@@ -240,6 +240,9 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
     }
     out <- data.frame(do.call(rbind, out))
     names(out) <- c('lower', 'upper')
+    bin.names <- names(release)
+    if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+    rownames(out) <- bin.names
     return(out)
 }
 
@@ -333,6 +336,15 @@ dpHistogram$methods(
             .self$n.bins <- n.bins
             .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
             .self$stability <- FALSE
+        } else if (var.type == 'logical') {
+            .self$n.bins = ifelse(impute, 2, 3)
+            if (!impute) {
+                .self$bins = c(0, 1, NA)
+                .self$var.type = 'factor'
+            } else {
+                .self$bins = c(0, 1)
+            }
+            .self$stability = FALSE
         } else {
             .self$bins <- bins
             .self$n.bins <- length(bins)
@@ -344,7 +356,7 @@ dpHistogram$methods(
             .self$epsilon <- histogram.getParameters(n.bins, n, accuracy, stability, delta, alpha, error)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- histogram.getAccuracy(n.bins, n, epsilon, stability, delta, alpha, error)
+            .self$accuracy <- histogram.getAccuracy(.self$n.bins, n, epsilon, stability, delta, alpha, error)
         }
 
         if (is.null(impute.rng)) {
@@ -356,7 +368,7 @@ dpHistogram$methods(
 
 dpHistogram$methods(
     release = function(x) {
-        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=stability)
+        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
         if (stability) {
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
                 a <- accuracy * n / 2
@@ -364,7 +376,7 @@ dpHistogram$methods(
                 .self$result <- noisy
             }
         } else {
-            noisy$release <- ifelse(noisy$release < 0, 0, round(stable$release))
+            noisy$release <- ifelse(noisy$release < 0, 0, round(noisy$release))
             .self$result <- noisy
         }
 })

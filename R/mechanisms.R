@@ -299,9 +299,11 @@ mechanism <- setRefClass(
         error = 'numeric',
         boot.fun = 'function',
         impute.rng = 'ANY',
+        impute = 'logical',
         formulae = 'ANY',
         columns = 'ANY',
-        intercept = 'logical'
+        intercept = 'logical', 
+        stability = 'logical'
 ))
 
 mechanism$methods(
