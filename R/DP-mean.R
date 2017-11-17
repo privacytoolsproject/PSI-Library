@@ -87,7 +87,7 @@ mean.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL, ...) {
 #' @param release Differentially private release of a mean for a logical 
 #'    variable.
 #'    
-#' @return Standard deviation of \code{release}.
+#' @return Standard deviation of the logical variable
 #' @rdname mean.postStandardDeviation
 mean.postStandardDeviation <- function(release) {
     sd <- sqrt(release * (1 - release))
@@ -96,18 +96,35 @@ mean.postStandardDeviation <- function(release) {
 
 
 #' Postprocessed median for logical variables
-#' 
+#'
 #' Calculates the median of the differentially private mean from a 
 #' logical variable.
 #'
 #' @param release Differentially private release of a mean for a logical 
 #'    variable.
-#'    
-#' @return Median of \code{release}.
+#'
+#' @return Median of the logical variable
 #' @rdname mean.postMedian
 mean.postMedian <- function(release) {
     m <- ifelse(release < 0.5, 0, 1)
     return(m)
+}
+
+
+#' Postprocessed histogram for logical variables
+#'
+#' Generate counts for levels of a logical variable based on the release
+#'
+#' @param release Numeric private mean
+#' @param n Integer indicating number of observations
+#'
+#' @return Data frame, histogram of the logical variable
+#' @rdname mean.postHistogram
+mean.postHistogram <- function(release, n) {
+    ones <- round(release * n)
+    histogram <- data.frame(matrix(c(n - ones, ones), ncol=2))
+    names(histogram) <- c(0, 1)
+    return(histogram)
 }
 
 
@@ -268,9 +285,11 @@ dpMean$methods(
                 bagged.estimate <- mean(out$release)
                 out$std.dev <- mean.postStandardDeviation(bagged.estimate)
                 out$median <- mean.postMedian(bagged.estimate)
+                out$histogram <- mean.postHistgram(bagged.estimate)
             } else {
                 out$std.dev <- mean.postStandardDeviation(out$release)
                 out$median <- mean.postMedian(out$release)
+                out$histogram <- mean.postHistogram(out$release, n)
             }
         }
         return(out)
