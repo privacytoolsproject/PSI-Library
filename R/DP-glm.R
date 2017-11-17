@@ -160,11 +160,114 @@ glm.postSummary <- function(release, n, model, alpha=0.10) {
     dp.summary <- data.frame(estimate, std.error, upper, lower)
     names(dp.summary) <- c('Estimate', 'Std. Error', 'CI95 Lower', 'CI95 Upper')
     rownames(dp.summary) <- names(release)
-    out.summary <- list('coefficients' = dp.summary)
+    #out.summary <- list('coefficients' = dp.summary)
     if (model == 'ols') {
         variance <- as.numeric(dp.summary[nrow(dp.summary), 'Estimate'])
-        out.summary$coefficients <- dp.summary[1:(nrow(dp.summary) - 1), ]
-        out.summary$variance <- variance
+        coefficients <- dp.summary[1:(nrow(dp.summary) - 1), ]
+        variance <- variance
+        return(list('coefficients' = coefficients, 'variance' = variance))
+    } else {
+        return(dp.summary)
     }
-    return(out.summary)
 }
+
+
+
+
+dpLogit <- function() {
+    objective.logit <- function(theta, X, y, b, n) {
+        xb <- as.matrix(X) %*% as.matrix(theta)
+        p <- as.numeric(1 / (1 + exp(-1 * xb)))
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'logit', 'objective' = objective.logit))
+}
+
+dpProbit <- function() {
+    objective.probit <- function(theta, X, y, b, n) {
+        xb <- as.matrix(X) %*% as.matrix(theta)
+        p <- pnorm(xb)
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'probit', 'objective' = objective.probit))
+}
+
+dpPoisson <- function() {
+    objective.poisson <- function(theta, X, y, b, n) {
+        lp <- as.matrix(X) %*% as.matrix(theta)
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- sum((y * lp) - exp(lp)) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'poisson', 'objective' = objective.poisson))
+}
+
+dpOLS <- function() {
+    objective.ols <- function(theta, X, y, b, n) {
+        s <- exp(theta[length(theta)])
+        beta <- theta[1:(length(theta) - 1)]
+        xb <- as.matrix(X) %*% as.matrix(beta) 
+        noise <- (b %*% as.matrix(theta)) / n
+        llik <- ((-n / 2) * log(2 * pi) - n * log(s) - (0.5 / s^2) * sum((y - xb)^2)) / n
+        llik.noisy <- noise + llik
+        return(-llik.noisy)
+    }
+    return(list('name' = 'ols', 'objective' = objective.ols))
+}
+
+
+glmObjectives = list(
+    'logit' = dpLogit,
+    'probit' = dpProbit,
+    'poisson' = dpPoisson,
+    'ols' = dpOLS
+)
+
+dpGLM <- setRefClass(
+    Class = 'dpGLM',
+    contains = 'mechanismObjective'
+)
+
+dpGLM$methods(
+    initialize = function(mechanism, var.type, n, rng, formula, objective, epsilon, impute.rng=NULL, 
+                          n.boot=NULL, intercept=TRUE, alpha=0.10) {
+        fn <- glmObjectives[[objective]]()
+        .self$name <- fn$name
+        .self$objective <- fn$objective
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$rng <- rng
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
+        .self$formula <- formula
+        .self$epsilon <- epsilon
+        .self$n.boot <- n.boot
+        .self$intercept <- intercept
+        .self$alpha <- alpha
+})
+
+dpGLM$methods(
+    release = function(x, ...) {
+        .self$result <- export(mechanism)$evaluate(x, .self$postProcess, ...)
+})
+
+
+dpGLM$methods(
+    postProcess = function(out) {
+        if (!is.null(n.boot)) {
+            out$summary <- glm.postSummary(out$release, n, name, alpha)
+        }
+        return(out)
+})
+
