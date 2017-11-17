@@ -196,14 +196,14 @@ covariance.formatRelease <- function(release, columns) {
 #'    observations in the data frame.
 #' @param intercept Logical indicating whether the intercept is included in 
 #'    \code{release}.
-#' @param formulae A list of the regression equations to be performed on the 
+#' @param formula A list of the regression equations to be performed on the 
 #'    covariance matrix.
 #' @return Linear regression coefficients and standard errors for all specified
-#'    \code{formulae}.
-covariance.postLinearRegression <- function(release, n, intercept, formulae) {
-    out.summaries <- vector('list', length(formulae))
-    for (f in 1:length(formulae)) {
-        out.summaries[[f]] <- linear.reg(formulae[[f]], release, n, intercept)
+#'    \code{formula}.
+covariance.postLinearRegression <- function(release, n, intercept, formula) {
+    out.summaries <- vector('list', length(formula))
+    for (f in 1:length(formula)) {
+        out.summaries[[f]] <- linear.reg(formula[[f]], release, n, intercept)
     }
     return(out.summaries)
 }
@@ -231,7 +231,7 @@ dpCovariance <- setRefClass(
 
 dpCovariance$methods(
     initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL, 
-                          intercept=FALSE, formulae=NULL, delta=1e-5) {
+                          intercept=FALSE, formula=NULL, delta=1e-5) {
         .self$name <- 'Differentially private covariance matrix'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -244,7 +244,7 @@ dpCovariance$methods(
         } else {
             .self$impute.rng <- impute.rng
         }
-        .self$formulae <- formulae
+        .self$formula <- formula
         .self$intercept <- intercept
         if (.self$intercept) { 
             .self$columns <- c('intercept', columns)
@@ -257,14 +257,14 @@ dpCovariance$methods(
     release = function(x) {
         sens <- covariance.sensitivity(n, rng, intercept)
         .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess, 
-                                                   columns=columns, formulae=formulae, intercept=intercept)
+                                                   columns=columns, formula=formula, intercept=intercept)
 })
 
 dpCovariance$methods(
-    postProcess = function(out, columns, formulae, intercept) {
+    postProcess = function(out, columns, formula, intercept) {
         out$release <- covariance.formatRelease(out$release, columns)
-        if (!is.null(formulae)) {
-            out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formulae)
+        if (!is.null(formula)) {
+            out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)
         }
         return(out)
 })
