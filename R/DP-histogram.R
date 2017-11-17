@@ -228,6 +228,7 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
 histogram.getCI <- function(release, n.bins, n, accuracy) {
+    release <- as.numeric(release)
     accxn <- accuracy * n
     out <- list()
     for (k in 1:n.bins) {
@@ -240,10 +241,24 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
     }
     out <- data.frame(do.call(rbind, out))
     names(out) <- c('lower', 'upper')
+    rownames(out) <- names(release)
+    return(out)
+}
+
+
+#' Format the release of private histogram
+#'
+#' Convert the release from a table to a data frame
+#'
+#' @param release Table, the result of \code{fun.hist}
+#' @return Data frame
+
+histogram.formatRelease <- function(release) {
     bin.names <- names(release)
     if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
-    rownames(out) <- bin.names
-    return(out)
+    release <- data.frame(matrix(release, ncol=length(release)))
+    names(release) <- bin.names
+    return(release)
 }
 
 
@@ -376,13 +391,15 @@ dpHistogram$methods(
                 .self$result <- noisy
             }
         } else {
-            noisy$release <- ifelse(noisy$release < 0, 0, round(noisy$release))
+            noisy$release <- round(noisy$release)
+            noisy$release[noisy$release < 0] <- 0
             .self$result <- noisy
         }
 })
 
 dpHistogram$methods(
     postProcess = function(out) {
+        out$release <- histogram.formatRelease(out$release)
         out$accuracy <- accuracy
         out$epsilon <- epsilon
         out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
