@@ -286,6 +286,7 @@ mechanism <- setRefClass(
         mechanism = 'character',
         name = 'character',
         var.type = 'character',
+        var.type.orig = 'character',
         n = 'numeric',
         epsilon = 'numeric',
         delta = 'numeric',

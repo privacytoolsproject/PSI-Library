@@ -321,7 +321,7 @@ dpHistogram$methods(
                           impute.rng=NULL, impute=FALSE, ...) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
-        .self$var.type <- var.type
+        .self$var.type.orig <- .self$var.type <- var.type
         .self$n <- n
         .self$rng <- rng
         .self$alpha <- alpha
@@ -388,6 +388,13 @@ dpHistogram$methods(
         out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
+        }
+        if (var.type.orig == 'logical') {
+            temp.release <- out$release[na.omit(names(out$release))]
+            out$mean <- as.numeric(temp.release[2] / sum(temp.release))
+            out$median <- ifelse(out$mean < 0.5, 0, 1)
+            out$variance <- out$mean * (1 - out$mean)
+            out$std.dev <- sqrt(out$variance)
         }
         return(out)
 })
