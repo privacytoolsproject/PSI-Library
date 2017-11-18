@@ -306,7 +306,10 @@ mechanism <- setRefClass(
         columns = 'ANY',
         intercept = 'logical', 
         stability = 'logical',
-        objective = 'function'
+        objective = 'function',
+        gran = 'numeric',
+        percentiles = 'ANY',
+        tree.data = 'ANY'
 ))
 
 mechanism$methods(
@@ -361,7 +364,8 @@ mechanismLaplace$methods(
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
         field.vals <- .self$getFunArgs(fun)
-        true.val <- do.call(fun, c(list(x=x), field.vals))
+        ellipsis.vals <- getFuncArgs(list(...), fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals, ellipsis.vals))
         scale <- sens / .self$epsilon
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
         out <- list('release' = release)
