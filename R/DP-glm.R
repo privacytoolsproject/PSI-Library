@@ -142,6 +142,40 @@ glm.release <- function(x, n, epsilon, formula, objective, n.boot=NULL, intercep
 }
 
 
+
+#' Accuracy of the differentially private GLM
+#'
+#' Function to fin dthe accuracy guarantee of a GLM release at a given epsilon
+#'
+#' @param epsilon Numeric representing the epsilon privacy parameter. Should be 
+#'    of length one and should be between zero and one.
+#' @param n Integer specifying the number of observations.
+#' @param alpha Numeric specifying the statistical significance level.
+#'
+#' @return Accuracy guarantee for GLM release
+#' @rdname glm.getAccuracy
+glm.getAccuracy <- function(epsilon, n, alpha) {
+    accuracy <- log(1 / alpha) / (n * epsilon)
+    return(accuracy)
+}
+
+
+#' Privacy parameters for GLM
+#'
+#' Function to find the epsilon value necessary to meet a desired level of 
+#' accuracy for a GLM release.
+#'
+#' @param accuracy Numeric giving the accuracy needed to guarantee.
+#' @param n Integer specifying the number of observations.
+#' @param alpha Numeric specifying the statistical significance level.
+#' 
+#' @return The scalar epsilon necessary to guarantee the needed accuracy.
+#' @rdname glm.getParameters
+glm.getParameters <- function(accuracy, n, alpha) {
+    epsilon <- log(1 / alpha) / (n * accuracy)
+    return(epsilon)
+}
+
 #' Summary statistics for differentially private GLM via the bootstrap
 #'
 #' @param release Numeric matrix with differentially private estimates for each bootstrap sample
@@ -160,7 +194,6 @@ glm.postSummary <- function(release, n, model, alpha=0.10) {
     dp.summary <- data.frame(estimate, std.error, upper, lower)
     names(dp.summary) <- c('Estimate', 'Std. Error', 'CI95 Lower', 'CI95 Upper')
     rownames(dp.summary) <- names(release)
-    #out.summary <- list('coefficients' = dp.summary)
     if (model == 'ols') {
         variance <- as.numeric(dp.summary[nrow(dp.summary), 'Estimate'])
         coefficients <- dp.summary[1:(nrow(dp.summary) - 1), ]
@@ -172,7 +205,9 @@ glm.postSummary <- function(release, n, model, alpha=0.10) {
 }
 
 
-
+#' Differentially private objective function for Logistic regression
+#'
+#' @return List with the name and objective function
 
 dpLogit <- function() {
     objective.logit <- function(theta, X, y, b, n) {
@@ -186,6 +221,10 @@ dpLogit <- function() {
     return(list('name' = 'logit', 'objective' = objective.logit))
 }
 
+#' Differentially private objective function for Probit regression
+#'
+#' @return List with the name and objective function
+
 dpProbit <- function() {
     objective.probit <- function(theta, X, y, b, n) {
         xb <- as.matrix(X) %*% as.matrix(theta)
@@ -198,6 +237,10 @@ dpProbit <- function() {
     return(list('name' = 'probit', 'objective' = objective.probit))
 }
 
+#' Differentially private objective function for Poisson regression
+#'
+#' @return List with the name and objective function
+
 dpPoisson <- function() {
     objective.poisson <- function(theta, X, y, b, n) {
         lp <- as.matrix(X) %*% as.matrix(theta)
@@ -208,6 +251,10 @@ dpPoisson <- function() {
     }
     return(list('name' = 'poisson', 'objective' = objective.poisson))
 }
+
+#' Differentially private objective function for linear regression
+#'
+#' @return List with the name and objective function
 
 dpOLS <- function() {
     objective.ols <- function(theta, X, y, b, n) {
@@ -222,6 +269,9 @@ dpOLS <- function() {
     return(list('name' = 'ols', 'objective' = objective.ols))
 }
 
+#' Objective functions
+#'
+#' List of objective functions support by \code{dpGLM}
 
 glmObjectives = list(
     'logit' = dpLogit,
@@ -236,8 +286,9 @@ dpGLM <- setRefClass(
 )
 
 dpGLM$methods(
-    initialize = function(mechanism, var.type, n, rng, formula, objective, epsilon, impute.rng=NULL, 
-                          n.boot=NULL, intercept=TRUE, alpha=0.10) {
+    initialize = function(mechanism, var.type, n, rng, formula, objective, epsilon=NULL,
+                          accuracy=NULL, impute.rng=NULL, n.boot=NULL, intercept=TRUE, 
+                          alpha=0.05) {
         fn <- glmObjectives[[objective]]()
         .self$name <- fn$name
         .self$objective <- fn$objective
@@ -245,13 +296,19 @@ dpGLM$methods(
         .self$var.type <- var.type
         .self$n <- n
         .self$rng <- rng
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- glm.getParameters(accuracy, n, alpha)
+        } else {
+            .self$epsilon <- epsilon
+            .self$accuracy <- glm.getAccuracy(epsilon, n, alpha)
+        }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
         .self$formula <- formula
-        .self$epsilon <- epsilon
         .self$n.boot <- n.boot
         .self$intercept <- intercept
         .self$alpha <- alpha
@@ -262,9 +319,10 @@ dpGLM$methods(
         .self$result <- export(mechanism)$evaluate(x, .self$postProcess, ...)
 })
 
-
 dpGLM$methods(
     postProcess = function(out) {
+        out$accuracy <- accuracy
+        out$epsilon <- epsilon
         if (!is.null(n.boot)) {
             out$summary <- glm.postSummary(out$release, n, name, alpha)
         }
