@@ -315,9 +315,10 @@ checkepsilon <- function(epsilon) {
 censordata <- function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
-            stop('`levels` are required for categorical types')
+            x <- factor(x, exclude=NULL)
+        } else {
+            x <- factor(x, levels=levels, exclude=NULL)
         }
-        x <- factor(x, levels=levels, exclude=NULL)
     } else {
         if (is.null(rng)) {
             stop('range `rng` is required for numeric types')

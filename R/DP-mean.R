@@ -87,7 +87,7 @@ mean.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL, ...) {
 #' @param release Differentially private release of a mean for a logical 
 #'    variable.
 #'    
-#' @return Standard deviation of \code{release}.
+#' @return Standard deviation of the logical variable
 #' @rdname mean.postStandardDeviation
 mean.postStandardDeviation <- function(release) {
     sd <- sqrt(release * (1 - release))
@@ -96,18 +96,35 @@ mean.postStandardDeviation <- function(release) {
 
 
 #' Postprocessed median for logical variables
-#' 
+#'
 #' Calculates the median of the differentially private mean from a 
 #' logical variable.
 #'
 #' @param release Differentially private release of a mean for a logical 
 #'    variable.
-#'    
-#' @return Median of \code{release}.
+#'
+#' @return Median of the logical variable
 #' @rdname mean.postMedian
 mean.postMedian <- function(release) {
     m <- ifelse(release < 0.5, 0, 1)
     return(m)
+}
+
+
+#' Postprocessed histogram for logical variables
+#'
+#' Generate counts for levels of a logical variable based on the release
+#'
+#' @param release Numeric private mean
+#' @param n Integer indicating number of observations
+#'
+#' @return Data frame, histogram of the logical variable
+#' @rdname mean.postHistogram
+mean.postHistogram <- function(release, n) {
+    ones <- round(release * n)
+    histogram <- data.frame(matrix(c(n - ones, ones), ncol=2))
+    names(histogram) <- c(0, 1)
+    return(histogram)
 }
 
 
@@ -226,19 +243,26 @@ dpMean <- setRefClass(
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng=NULL, alpha=0.05, boot.fun=boot.mean) {
+    initialize = function(mechanism, var.type, n, rng, epsilon=NULL, accuracy=NULL, 
+                          impute.rng=NULL, alpha=0.05, boot.fun=boot.mean, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
-        .self$epsilon <- epsilon
+        .self$alpha <- alpha
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- mean.getParameters(accuracy, n, alpha)
+        } else {
+            .self$epsilon <- epsilon
+            .self$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+        }
         .self$rng <- rng
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
-        .self$alpha <- alpha
         .self$boot.fun <- boot.fun
 })
 
@@ -252,8 +276,8 @@ dpMean$methods(
 dpMean$methods(
     postProcess = function(out) {
         if (mechanism == 'mechanismLaplace') {
-            out$accuracy <- mean.getAccuracy(epsilon, n, alpha)
-            out$epsilon <- mean.getParameters(out$accuracy, n, alpha)
+            out$accuracy <- accuracy
+            out$epsilon <- epsilon
             out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
         } 
         if (var.type == 'logical') {
@@ -261,9 +285,11 @@ dpMean$methods(
                 bagged.estimate <- mean(out$release)
                 out$std.dev <- mean.postStandardDeviation(bagged.estimate)
                 out$median <- mean.postMedian(bagged.estimate)
+                out$histogram <- mean.postHistgram(bagged.estimate)
             } else {
                 out$std.dev <- mean.postStandardDeviation(out$release)
                 out$median <- mean.postMedian(out$release)
+                out$histogram <- mean.postHistogram(out$release, n)
             }
         }
         return(out)

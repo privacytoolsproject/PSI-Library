@@ -167,3 +167,73 @@ tree.postPercentiles <- function(cdf, percentiles) {
     names(out.values) <- c('percentile', 'value')
     return(out.values)
 }
+
+
+
+
+tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) {
+    n.nodes <- length(release)
+    sigma <- sqrt(variance)
+    inv.sigma.sq <- 1 / variance
+    tree <- cbind(tree.data, release)
+    names(tree)[ncol(tree)] <- 'noisy'
+    tree <- estBottomUp(tree, min(terminal.index), n.nodes, sigma, inv.sigma.sq)
+    tree <- estTopDown(tree, n, n.nodes, sigma, inv.sigma.sq)
+    tree <- estEfficiently(tree, n, n.nodes, sigma, inv.sigma.sq)
+    return(round(tree$est.efficient))
+}
+
+dpTree <- setRefClass(
+    Class = 'dpTree',
+    contains = 'mechanismLaplace'
+)
+
+dpTree$methods(
+    initialize = function(mechanism, var.type, n, rng, gran, epsilon, impute.rng=NULL, percentiles=NULL) {
+        .self$name <- 'Differentially private binary tree'
+        .self$mechanism <- mechanism
+        .self$var.type <- var.type
+        .self$n <- n
+        .self$gran <- gran
+        .self$epsilon <- epsilon
+        .self$rng <- rng
+        if (is.null(impute.rng)) {
+            .self$impute.rng <- rng
+        } else {
+            .self$impute.rng <- impute.rng
+        }
+        .self$percentiles <- percentiles
+})
+
+dpTree$methods(
+    release = function(x) {
+        sens <- 2 * log2(diff(rng) / gran + 1)
+        variance <- 2 * sens / epsilon
+        universe.size <- floor(diff(rng) / gran + 1)
+        depth <- ceiling(log2(universe.size))
+        terminal.index <- seq(2^(depth - 1), 2^depth - 1)
+        .self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
+                                                   variance=variance, universe.size=universe.size, 
+                                                   depth=depth, terminal.index=terminal.index, self=.self)
+})
+
+dpTree$methods(
+    treeFun = function(x, universe.size, depth) {
+        tree <- binaryTree(x, n, rng, gran, universe.size, depth)
+        .self$tree.data <- tree[, which(names(tree) != 'count')]
+        return(tree$count)
+})
+
+dpTree$methods(
+    postProcess = function(out, ...) {
+        out$release <- tree.postFormatRelease(out$release)
+        ellipsis.vals <- getFuncArgs(list(...), tree.postEfficient)
+        out$release <- do.call(tree.postEfficient, c(list(release=out$release, tree.data=tree.data, n=n), ellipsis.vals))
+        ellipsis.vals <- getFuncArgs(list(...), tree.postCDF)
+        out$cdf <- do.call(tree.postCDF, c(list(release=out$release, rng=rng), ellipsis.vals))
+        out$median <- tree.postMedian(out$cdf)
+        if (!is.null(percentiles)) {
+            out$percentiles <- tree.postPercentiles(out$cdf, percentiles)
+        }
+        return(out)
+})

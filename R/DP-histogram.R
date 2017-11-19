@@ -228,6 +228,7 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30,
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
 histogram.getCI <- function(release, n.bins, n, accuracy) {
+    release <- as.numeric(release)
     accxn <- accuracy * n
     out <- list()
     for (k in 1:n.bins) {
@@ -240,7 +241,24 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
     }
     out <- data.frame(do.call(rbind, out))
     names(out) <- c('lower', 'upper')
+    rownames(out) <- names(release)
     return(out)
+}
+
+
+#' Format the release of private histogram
+#'
+#' Convert the release from a table to a data frame
+#'
+#' @param release Table, the result of \code{fun.hist}
+#' @return Data frame
+
+histogram.formatRelease <- function(release) {
+    bin.names <- names(release)
+    if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+    release <- data.frame(matrix(release, ncol=length(release)))
+    names(release) <- bin.names
+    return(release)
 }
 
 
@@ -313,53 +331,87 @@ dpHistogram <- setRefClass(
 )
 
 dpHistogram$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng=NULL, impute.rng=NULL, bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9) {
+    initialize = function(mechanism, var.type, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
+                          bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
+                          impute.rng=NULL, impute=FALSE, ...) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
-        .self$var.type <- var.type
+        .self$var.type.orig <- .self$var.type <- var.type
         .self$n <- n
-        .self$epsilon <- epsilon
         .self$rng <- rng
+        .self$alpha <- alpha
+        .self$delta <- delta
+        .self$error <- error
+        .self$impute <- impute
+
+        if (var.type %in% c('numeric', 'integer')) {
+            if (is.null(n.bins)) {
+                stop('number of bins must be specified')
+            }
+            .self$n.bins <- n.bins
+            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
+            .self$stability <- FALSE
+        } else if (var.type == 'logical') {
+            .self$n.bins = ifelse(impute, 2, 3)
+            if (!impute) {
+                .self$bins = c(0, 1, NA)
+                .self$var.type = 'factor'
+            } else {
+                .self$bins = c(0, 1)
+            }
+            .self$stability = FALSE
+        } else {
+            .self$bins <- bins
+            .self$n.bins <- length(bins)
+            .self$stability <- ifelse(is.null(bins), TRUE, FALSE)
+        }
+
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- histogram.getParameters(n.bins, n, accuracy, stability, delta, alpha, error)
+        } else {
+            .self$epsilon <- epsilon
+            .self$accuracy <- histogram.getAccuracy(.self$n.bins, n, epsilon, stability, delta, alpha, error)
+        }
+
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
-        if (var.type %in% c('numeric', 'integer')) {
-            .self$n.bins <- check_histogram_bins(n.bins, n)
-            .self$bins <- seq(rng[1], rng[2], length.out=(.self$n.bins + 1))
-        } else {
-            .self$bins <- bins
-            .self$n.bins <- length(bins)
-        }
-        .self$alpha <- alpha
-        .self$delta <- delta
-        .self$error <- error
 })
 
 dpHistogram$methods(
     release = function(x) {
-        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=FALSE)
-        stable <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability=TRUE)
-        stable.accurate <- stable$accuracy < noisy$accuracy
-        stable.check <- check_histogram_n(stable$accuracy, n, n.bins, epsilon, delta, alpha)
-        if (stable.accurate && stable.check) {
-            a <- stable$accuracy * n / 2
-            stable$release <- stable$release[stable$release >= a]
-            .self$result <- stable
+        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        if (stability) {
+            if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
+                a <- accuracy * n / 2
+                noisy$release <- noisy$release[noisy$release >= a]
+                .self$result <- noisy
+            }
         } else {
-            noisy$release <- ifelse(noisy$release < 0, 0, round(stable$release))
+            noisy$release <- round(noisy$release)
+            noisy$release[noisy$release < 0] <- 0
             .self$result <- noisy
         }
 })
 
 dpHistogram$methods(
-    postProcess = function(out, stability) {
-        out$accuracy <- histogram.getAccuracy(n.bins, n, epsilon, stability, delta, alpha, error)
-        out$epsilon <- histogram.getParameters(n.bins, n, out$accuracy, stability, delta, alpha, error)
+    postProcess = function(out) {
+        out$release <- histogram.formatRelease(out$release)
+        out$accuracy <- accuracy
+        out$epsilon <- epsilon
         out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
+        }
+        if (var.type.orig == 'logical') {
+            temp.release <- out$release[na.omit(names(out$release))]
+            out$mean <- as.numeric(temp.release[2] / sum(temp.release))
+            out$median <- ifelse(out$mean < 0.5, 0, 1)
+            out$variance <- out$mean * (1 - out$mean)
+            out$std.dev <- sqrt(out$variance)
         }
         return(out)
 })

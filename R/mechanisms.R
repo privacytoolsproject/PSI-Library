@@ -286,6 +286,7 @@ mechanism <- setRefClass(
         mechanism = 'character',
         name = 'character',
         var.type = 'character',
+        var.type.orig = 'character',
         n = 'numeric',
         epsilon = 'numeric',
         delta = 'numeric',
@@ -297,11 +298,18 @@ mechanism <- setRefClass(
         n.bins = 'ANY',
         k = 'numeric',
         error = 'numeric',
+        n.boot = 'ANY',
         boot.fun = 'function',
         impute.rng = 'ANY',
-        formulae = 'ANY',
+        impute = 'logical',
+        formula = 'formula',
         columns = 'ANY',
-        intercept = 'logical'
+        intercept = 'logical', 
+        stability = 'logical',
+        objective = 'function',
+        gran = 'numeric',
+        percentiles = 'ANY',
+        tree.data = 'ANY'
 ))
 
 mechanism$methods(
@@ -356,7 +364,8 @@ mechanismLaplace$methods(
             x <- fillMissing(x, .self$var.type, categories=.self$bins)
         }
         field.vals <- .self$getFunArgs(fun)
-        true.val <- do.call(fun, c(list(x=x), field.vals))
+        ellipsis.vals <- getFuncArgs(list(...), fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals, ellipsis.vals))
         scale <- sens / .self$epsilon
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
         out <- list('release' = release)
@@ -493,3 +502,81 @@ mechanismBootstrap$methods(
 
 # --------------------------------------------------------- #
 # --------------------------------------------------------- #
+
+mechanismObjective <- setRefClass(
+    Class = 'mechanismObjective',
+    contains = 'mechanism'
+)
+
+mechanismObjective$methods(
+    getFunArgs = function(fun) {
+        callSuper(fun)
+})
+
+mechanismObjective$methods(
+    evaluate = function(x, postFun, ...) {
+
+        # extract X, y from input matrix and formula
+        intercept.loc <- !(.self$intercept)
+        xy.locs <- extract.indices(.self$formula, x, intercept.loc)
+        X.names <- xy.locs$x.label
+        X <- x[, xy.locs$x.loc]
+        y <- as.numeric(x[, xy.locs$y.loc])
+        
+        # censor input matrix and impute missing values
+        X <- censordata(X, .self$var.type, .self$rng, .self$bins)
+        if (NCOL(X) > 1) {
+            X <- fillMissing2d(X, .self$var.type, .self$impute.rng)
+        } else {
+            X <- fillMissing(X, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
+        }
+
+        # add intercept if needed
+        if (.self$intercept) {
+            X <- cbind(1, X)
+            X.names <- c('intercept', X.names)
+        }
+
+        # scale inputs s.t. max Euclidean norm <= 1
+        scaler <- mapMatrixUnit(X, p=2)
+        X <- scaler$matrix
+
+        # set start params, adjust for ols objective
+        if (.self$name == 'ols') {
+            start.params <- rep(0, ncol(X) + 1)
+            X.names <- c(X.names, 'var')
+        } else {
+            start.params <- rep(0, ncol(X))
+        }
+
+        # fit
+        if (is.null(.self$n.boot)) {
+            b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
+            b <- dpNoise(n=length(start.params), scale=(-.self$epsilon * b.norm), dist='laplace')
+            release <- data.frame(optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n)$par / scaler$max.norm)
+            names(release) <- 'estimate'
+            rownames(release) <- X.names
+        } else {
+            local.epsilon <- .self$epsilon / .self$n.boot
+            boot.ests <- vector('list', .self$n.boot)
+            for (i in 1:.self$n.boot) {
+                index <- sample(1:.self$n, .self$n, replace=TRUE)
+                X.star <- X[index, ]
+                y.star <- y[index]
+                b.norm <- dpNoise(n=1, scale=(2 / local.epsilon), dist='gamma', shape=length(start.params))
+                b <- dpNoise(n=length(start.params), scale=(-local.epsilon * b.norm), dist='laplace')
+                boot.ests[[i]] <- optim(par=start.params, fn=.self$objective, X=X.star, y=y.star, b=b, n=n)$par / scaler$max.norm
+            }
+            release <- data.frame(do.call(rbind, boot.ests))
+            names(release) <- X.names
+        }
+
+        # format output
+        out <- list('release' = release)
+        out <- postFun(out, ...)
+        return(out)
+})
+
+# --------------------------------------------------------- #
+# --------------------------------------------------------- #
+
