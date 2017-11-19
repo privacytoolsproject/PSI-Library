@@ -1,84 +1,3 @@
-#' DP Mean
-#' 
-#' Function to evaluate the mean and specify parameters for mean functions.
-#'
-#' @param x A numeric, logical, or integer vector.
-#' @param var.type A character vector specifying variable type of \code{x}. 
-#'    Should be of length one and should contain either 'numeric', 
-#'    'logical', or 'integer'.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in \code{x}.
-#' @param sensitivity The difference of the range of \code{x} divided 
-#'    by \code{n}.
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#'    
-#' @return A list with fields `name` specifying the statistic and `stat` with 
-#'    the value of the statistic.
-#' @rdname dp.mean
-#' @export
-dp.mean <- function(x, var.type, n, sensitivity, epsilon) {
-    out <- list('name' = 'mean',
-                'stat' = mean(x),
-                'var.type' = var.type,
-                'n' = n,
-                'sensitivity' = sensitivity,
-                'epsilon' = epsilon)
-    return(out)
-}
-
-
-#' Release differentially private mean
-#' 
-#' Function to calculate a differentially private release of mean.
-#'
-#' @param x A numeric, logical, or integer vector.
-#' @param var.type A character vector specifying variable type of \code{x}. 
-#'    Should be of length one and should contain either 'numeric', 
-#'    'logical', or 'integer'.
-#' @param n The difference of \code{rng} divided by \code{n}.
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#' @param rng A numeric vector specifying an a priori estimate of the range
-#'    of \code{x}. Should be of length two. 
-#' @param impute.rng Numeric range within which missing values are imputed. 
-#'    Defaults to \code{rng} if \code{NULL}
-#' @param ... additional arguments passed to \code{mean.release}.
-#' 
-#' @return Differentially private mean of vector \code{x}.
-#' @examples
-#' 
-#' n <- 1000
-#' x_num <- runif(n)
-#' x_int <- as.integer(round(x_num * 100))
-#' x_bool <- x_num >= 0.5
-#' x_dich <- ifelse(x_bool, 3.483, -9.657)
-#' r_num <- mean.release(x=x_num, var.type='numeric', epsilon=0.5, n=n, rng=c(0, 1))
-#' r_int <- mean.release(x=x_int, var.type='integer', epsilon=0.5, n=n, rng=c(5, 95))
-#' r_bool <- mean.release(x=x_bool, var.type='logical', epsilon=0.5, n=n, rng=c(0, 1))
-#' r_dich <- mean.release(x=x_dich, var.type='logical', epsilon=0.5, n=n, rng=c(-9.657, 3.483))
-#' @rdname mean.release
-#' @export
-mean.release <- function(x, var.type, n, epsilon, rng, impute.rng=NULL, ...) {
-    var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'logical'))
-    postlist <- list('accuracy' = 'getAccuracy',
-                     'epsilon' = 'getParameters',
-                     'interval' = 'getCI')
-    if (var.type == 'logical') {
-        rng <- c(0, 1)
-        postlist <- c(postlist, list('std' = 'postStandardDeviation',
-                                     'median' = 'postMedian'))
-    }
-    rng <- checkrange(rng)
-    if (is.null(impute.rng)) { impute.rng <- rng }
-    sensitivity <- diff(rng) / n
-    release <- mechanism.laplace(fun=dp.mean, x=x, var.type=var.type, rng=rng,
-                                 sensitivity=sensitivity, epsilon=epsilon, n=n,
-                                 impute.rng=impute.rng, postlist=postlist)
-    return(release)
-}
-
-
 #' Postprocessed standard deviation for logical variables 
 #' 
 #' Calculates the standard deviation of the differentially private mean from a 
@@ -218,21 +137,6 @@ mean.getJSON <- function(output.json=TRUE) {
 }
 
 
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
-# Reference class implementation of mean
-
-#' Reference class implementation of differentially private mean
-#'
-#' just a quick to demonstrate usage...
-#'
-#' x <- rnorm(1000)
-#' eps <- 0.5
-#' rng <- c(-3, 3)
-#' reps <- 25
-#' pmean <- dpMean$new('mechanismBootstrap', 'numeric', n=length(x), epsilon=eps, rng=rng, boot.fun=boot.mean)
-#' pmean$release(x, n.boot=reps)
-
 boot.mean <- function(xi, n) {
     return(sum(xi) / n)
 }
@@ -294,6 +198,3 @@ dpMean$methods(
         }
         return(out)
 })
-
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
