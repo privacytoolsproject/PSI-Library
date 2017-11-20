@@ -222,7 +222,6 @@ dpHistogram$methods(
         .self$delta <- delta
         .self$error <- error
         .self$impute <- impute
-
         if (var.type %in% c('numeric', 'integer')) {
             if (is.null(n.bins)) {
                 stop('number of bins must be specified')
@@ -244,7 +243,6 @@ dpHistogram$methods(
             .self$n.bins <- length(bins)
             .self$stability <- ifelse(is.null(bins), TRUE, FALSE)
         }
-
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- histogram.getParameters(n.bins, n, accuracy, stability, delta, alpha, error)
@@ -252,7 +250,6 @@ dpHistogram$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- histogram.getAccuracy(.self$n.bins, n, epsilon, stability, delta, alpha, error)
         }
-
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
@@ -267,13 +264,12 @@ dpHistogram$methods(
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
                 a <- accuracy * n / 2
                 noisy$release <- noisy$release[noisy$release >= a]
-                .self$result <- noisy
             }
         } else {
             noisy$release <- round(noisy$release)
             noisy$release[noisy$release < 0] <- 0
-            .self$result <- noisy
         }
+        .self$result <- noisy
 })
 
 dpHistogram$methods(
