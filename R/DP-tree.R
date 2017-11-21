@@ -189,7 +189,7 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
-    initialize = function(mechanism, var.type, n, rng, gran, epsilon, impute.rng=NULL, percentiles=NULL) {
+    initialize = function(mechanism, var.type, n, rng, gran, epsilon, impute.rng=NULL, percentiles=NULL, ...) {
         .self$name <- 'Differentially private binary tree'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
