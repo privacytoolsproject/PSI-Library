@@ -1,130 +1,3 @@
-#' DP histogram
-#' 
-#' Function to evaluate a true histogram and specify arguments for differentially private
-#' histogram release.
-#'
-#' @param x A vector of categorical or numeric values.
-#' @param var.type A character vector specifying variable type of \code{x}. 
-#' @param stability A logical indicating if the stability mechanism is to 
-#'    be used.
-#' @param bins A vector of bins for which values are counted. Required for 
-#'    categorical types.
-#' @param n.bins An integer specifying the number of cells in which to tabulate 
-#'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in \code{x}.
-#' @param sensitivity The difference of the range of \code{x} divided 
-#'    by \code{n}.
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#'    
-#' @return A list with the true value of the statistic and arguments to be 
-#'    passed to other functions.
-#' @rdname dp.histogram
-#' @export
-dp.histogram <- function(x, var.type, stability, bins, n.bins, n, sensitivity, epsilon) {
-    if (var.type %in% c('numeric', 'integer')) {
-        values <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
-    } else {
-        values <- table(x, useNA='ifany')
-    }
-    out <- list('name' = 'histogram',
-                'stat' = values,
-                'stability' = stability,
-                'n.bins' = n.bins,
-                'n' = n,
-                'bins' = bins,
-                'sensitivity' = sensitivity,
-                'epsilon' = epsilon)
-    return(out)
-}
-
-
-#' Release differentially private histogram
-#' 
-#' If the variable is categorical, bins are assumed to be provided by the depositor, and these bin values
-#' used to construct the table. The vector is pre-processed so that observed levels not specified in these
-#' bins are recoded to `NA`. Thus, any observed levels not specified in the `bins` argument show up as `NA`
-#' in the output table. If the variable is numeric, the number of bins `n_bins` is set by the user 
-#' optionally, else the Sturges method is used to select the number of bins given the number of observations
-#' `n`. The bins are then constructed to be equal intervals between the provided range. The function uses 
-#' the Laplace mechanism. If the stability mechanism improves accuracy, its value is used.
-#'
-#' @param x A vector of categorical or numeric values.
-#' @param var.type A character vector specifying variable type of \code{x}.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in \code{x}.
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#' @param rng A numeric vector of length two specifying the lower and upper bounds 
-#'    of \code{x}.
-#' @param impute.rng Numeric range within which missing values in \code{x} are imputed 
-#'    for numeric types. Defaults to \code{rng} if \code{NULL}.
-#' @param bins A vector of bins for which values are counted. Required for 
-#'    categorical types. Bins also serve as the set of values used to 
-#'    fill missing values for categorical types.
-#' @param n.bins An integer specifying the number of cells in which to tabulate 
-#'    values in x. Ignored if \code{var.type \%in\% c('factor', 'categorical')}
-#'    
-#' @return Differentially private histogram of vector \code{x}.
-#' @examples
-#' 
-#' # numeric types
-#' x_num <- rnorm(100)
-#' x_num_na <- x_num
-#' x_num_na[sample(1:length(x_num_na), size=10, replace=FALSE)] <- NA
-#' x_int <- as.integer(round(x_num * 20))
-#' r_num <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
-#' r_num_na <- histogram.release(x_num_na, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
-#' r_int <- histogram.release(x_int, var.type='integer', rng=c(-40, 40), n=100, epsilon=0.1)
-#' r_num_random <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
-#' # accuracy is returning inf, which filters the entire release for stability histogram
-#' r_num_stability <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, 
-#'    epsilon=0.1)
-#' r_num_noisy <- histogram.release(x_num, var.type='numeric', rng=c(-2, 2), n=100, epsilon=0.1)
-#'
-#' # categorical types
-#' x_char <- c(rep('a', 40), rep('b', 25), rep('c', 15), rep('d', 12), rep('e', 5), rep('f', 2), 
-#'    rep('g', 1))
-#' x_fac <- factor(x_char)
-#' bins <- c('a', 'b', 'c', 'd', 'e')
-#' r_char <- histogram.release(x_char, var.type='character', n=100, epsilon=0.1, bins=bins)
-#' r_fac <- histogram.release(x_fac, var.type='factor', n=100, epsilon=0.1, bins=bins)
-#' @rdname histogram.release
-#' @export
-histogram.release <- function(x, var.type, n, epsilon, rng=NULL, impute.rng=NULL, bins=NULL, n.bins=NULL) {
-    var.type <- check_variable_type(var.type, in_types=c('numeric', 'integer', 'factor', 'character'))
-    postlist <- list('accuracy' = 'getAccuracy',
-                     'epsilon' = 'getParameters',
-                     'interval' = 'getCI')
-    if (var.type %in% c('numeric', 'integer')) {
-        n.bins <- check_histogram_bins(n.bins, n)
-        bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
-        impute.rng <- ifelse(is.null(impute.rng), rng, impute.rng)
-    } else {
-        n.bins <- length(bins)
-        postlist <- c(postlist, list('herfindahl' = 'postHerfindahl'))
-    }
-    release.noisy <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
-                                       sensitivity=1, epsilon=epsilon, stability=FALSE, bins=bins,
-                                       n.bins=n.bins, n=n, impute.rng=impute.rng, postlist=postlist)
-    release.stability <- mechanism.laplace(fun=dp.histogram, x=x, var.type=var.type, rng=rng,
-                                           sensitivity=1, epsilon=epsilon, stability=TRUE, bins=bins,
-                                           n.bins=n.bins, n=n, impute.rng=impute.rng, postlist=postlist)
-    stability.accurate <- release.stability$accuracy < release.noisy$accuracy
-    stability.check <- check_histogram_n(release.stability$accuracy, n, n.bins, epsilon, delta=2^-30, alpha=0.05)
-    if (stability.accurate && stability.check) {
-        release <- release.stability
-        a <- release$accuracy * n / 2
-        release$release <- release$release[release$release >= a]
-    } else {
-        release <- release.noisy
-        release$release <- ifelse(release$release < 0, 0, round(release$release))
-    }
-    return(release)
-}
-
-
 #' Histogram accuracy
 #' 
 #' Determine accuracy of histogram release, given epsilon and delta, for the differentially 
@@ -312,17 +185,23 @@ histogram.getJSON <- function(output.json=TRUE) {
 }
 
 
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
-# dp histogram class
-
+#' Histogram
+#'
+#' Function to evaluate a histogram for numeric and categorical types. This function
+#' is used internally by \code{dpHistogram} to evaluate the true histogram prior to 
+#' perturbation.
+#'
+#' @param x Vector of numeric or categorical type.
+#' @param var.type Character indicating the variable type.
+#' @param bins Vector indicating the bins into which \code{x} is partitioned.
+#' @return Histogram with counts for each level of \code{x}.
 fun.hist <- function(x, var.type, bins=NULL) {
     if (var.type %in% c('numeric', 'integer')) {
-        hist <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
+        histogram <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
     } else {
-        hist <- table(x, useNA='ifany')
+        histogram <- table(x, useNA='ifany')
     }
-    return(hist)
+    return(histogram)
 }
 
 dpHistogram <- setRefClass(
@@ -343,7 +222,6 @@ dpHistogram$methods(
         .self$delta <- delta
         .self$error <- error
         .self$impute <- impute
-
         if (var.type %in% c('numeric', 'integer')) {
             if (is.null(n.bins)) {
                 stop('number of bins must be specified')
@@ -365,7 +243,6 @@ dpHistogram$methods(
             .self$n.bins <- length(bins)
             .self$stability <- ifelse(is.null(bins), TRUE, FALSE)
         }
-
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- histogram.getParameters(n.bins, n, accuracy, stability, delta, alpha, error)
@@ -373,7 +250,6 @@ dpHistogram$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- histogram.getAccuracy(.self$n.bins, n, epsilon, stability, delta, alpha, error)
         }
-
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
@@ -388,13 +264,12 @@ dpHistogram$methods(
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
                 a <- accuracy * n / 2
                 noisy$release <- noisy$release[noisy$release >= a]
-                .self$result <- noisy
             }
         } else {
             noisy$release <- round(noisy$release)
             noisy$release[noisy$release < 0] <- 0
-            .self$result <- noisy
         }
+        .self$result <- noisy
 })
 
 dpHistogram$methods(
@@ -415,6 +290,3 @@ dpHistogram$methods(
         }
         return(out)
 })
-
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #
