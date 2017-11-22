@@ -6,7 +6,7 @@
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
 #' @param n A numeric vector of length one specifying the number of
-#'    observations in in the data.
+#'    observations in the data.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
 #' @param stability A logical vector indicating whether the stability 
@@ -21,7 +21,7 @@
 #' 
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
-histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, alpha=0.05, error=1e-9) {
+histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, alpha=0.05, error=1e-9) {
     if (stability) {
         lo <- 0
         hi <- 1
@@ -48,7 +48,7 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
 #' @param n A numeric vector of length one specifying the number of
-#'    observations in in the data.
+#'    observations in the data.
 #' @param accuracy A numeric vector representing the accuracy needed to 
 #'    guarantee (percent).
 #' @param stability A logical vector indicating whether the stability 
@@ -63,7 +63,7 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=2^-30, al
 #' 
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters
-histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=2^-30, alpha=0.05, error=1e-9) {
+histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6, alpha=0.05, error=1e-9) {
     if (stability) {
         lo <- 0
         hi <- 1
