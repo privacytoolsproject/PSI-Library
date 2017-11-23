@@ -4,7 +4,7 @@
 \alias{covariance.postLinearRegression}
 \title{Function to perform linear regression using private release of covariance matrix}
 \usage{
-covariance.postLinearRegression(release, n, intercept, formulae)
+covariance.postLinearRegression(release, n, intercept, formula)
 }
 \arguments{
 \item{release}{Differentially private release of elements in lower triangle 
@@ -16,12 +16,12 @@ observations in the data frame.}
 \item{intercept}{Logical indicating whether the intercept is included in 
 \code{release}.}
 
-\item{formulae}{A list of the regression equations to be performed on the 
+\item{formula}{A list of the regression equations to be performed on the 
 covariance matrix.}
 }
 \value{
 Linear regression coefficients and standard errors for all specified
-   \code{formulae}.
+   \code{formula}.
 }
 \description{
 Function to perform linear regression using private release of covariance matrix

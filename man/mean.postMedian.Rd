@@ -11,7 +11,7 @@
 variable.}
 }
 \value{
-Median of \code{release}.
+Median of the logical variable
 }
 \description{
 Calculates the median of the differentially private mean from a 

@@ -11,7 +11,7 @@
 variable.}
 }
 \value{
-Standard deviation of \code{release}.
+Standard deviation of the logical variable
 }
 \description{
 Calculates the standard deviation of the differentially private mean from a 
