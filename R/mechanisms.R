@@ -54,7 +54,7 @@ mechanism <- setRefClass(
         boot.fun = 'function',
         impute.rng = 'ANY',
         impute = 'logical',
-        formula = 'formula',
+        formula = 'ANY',
         columns = 'ANY',
         intercept = 'logical', 
         stability = 'logical',
