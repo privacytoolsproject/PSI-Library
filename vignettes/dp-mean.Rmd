@@ -72,7 +72,7 @@ Calculating the differentially private mean of a numeric vector with `dpMean`:
 
 ```{r, eval = TRUE}
 library(PSIlence)
-numeric_mean <- dpMean$new(mechanims='mechanismLaplace', var.type='numeric', 
+numeric_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
                            n=10000, epsilon=0.01, rng=c(0, 750000))
 numeric_mean$release(data$income)
 print(numeric_mean$result)
@@ -82,7 +82,7 @@ To calculate the mean of a logical vector instead, input a logical vector into `
 
 ```{r, eval = TRUE}
 library(PSIlence)
-logical_mean <- dpMean$new(mechanims='mechanismLaplace', var.type='logical', 
+logical_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
                            n=10000, epsilon=0.01, rng=c(0, 1))
 logical_mean$release(data$married)
 print(logical_mean$result)
