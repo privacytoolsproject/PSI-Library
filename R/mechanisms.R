@@ -1,7 +1,36 @@
 #' Base mechanism class
 #'
+#' @import methods
 #' @export mechanism
 #' @exportClass mechanism
+#'
+#' @field mechanism Name of the mechanism
+#' @field name Name of the statistic
+#' @field var.type Variable type
+#' @field var.type.orig Variable type at instantiation
+#' @field n Number of observations
+#' @field epsilon Differential privacy parameter
+#' @field delta Differential privacy parameter
+#' @field rng A priori estimate of the variable range
+#' @field result List with statistical output
+#' @field alpha Level of statistical signficance
+#' @field accuracy Accuracy guarantee of the estimate
+#' @field bins Bins
+#' @field n.bins Number of bins
+#' @field k Number of bins desired for the release
+#' @field error Error
+#' @field n.boot Number of bootstrap replications
+#' @field boot.fun Function passed to the bootstrap mechanism
+#' @field impute.rng The range from which to impute missing values
+#' @field impute Logical, impute categorical types?
+#' @field formula R formula for regression models
+#' @field columns Vector of column names
+#' @field intercept Logical, is the intercept included?
+#' @field stability Logical, use stability histogram
+#' @field objective Objective function for regression models
+#' @field gran Granularity
+#' @field percentiles Percentiles evaluated by binary tree
+#' @field tree.data Binary tree attributes needed for efficient estimation
 
 mechanism <- setRefClass(
     Class = 'mechanism',
@@ -59,7 +88,8 @@ mechanism$methods(
 
 
 #' Laplace mechanism
-#' 
+#'
+#' @import methods
 #' @export mechanismLaplace
 #' @exportClass mechanismLaplace
 
@@ -96,8 +126,9 @@ mechanismLaplace$methods(
 })
 
 
-#' Laplace mechanism
-#' 
+#' Exponential mechanism
+#'
+#' @import methods
 #' @export mechanismExponential
 #' @exportClass mechanismExponential
 
@@ -132,7 +163,8 @@ mechanismExponential$methods(
 
 
 #' Gaussian mechanism
-#' 
+#'
+#' @import methods
 #' @export mechanismGaussian
 #' @exportClass mechanismGaussian
 
@@ -195,7 +227,8 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
 
 
 #' Bootstrap mechanism
-#' 
+#'
+#' @import methods
 #' @export mechanismBootstrap
 #' @exportClass mechanismBootstrap
 
@@ -241,7 +274,8 @@ mechanismBootstrap$methods(
 
 
 #' Objective perturbation mechanism
-#' 
+#'
+#' @import methods
 #' @export mechanismObjective
 #' @exportClass mechanismObjective
 
