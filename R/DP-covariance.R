@@ -83,7 +83,16 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
     }
     return(out.summaries)
 }
-       
+
+
+#' Lower triangle of ovariance matrix
+#'
+#' This function is called by \code{dpCovariance} and
+#' produces the true value to be perturbed.
+#'
+#' @param x Data frame
+#' @param columns Columns to include in output
+#' @param intercept Logical, should the intercept be included?
 
 fun.covar <- function(x, columns, intercept) {
     data <- x[, columns]
@@ -94,9 +103,18 @@ fun.covar <- function(x, columns, intercept) {
     return(covariance)
 }
 
+
+#' Differentially private covariance matrix
+#'
+#' @import methods
+#' @export dpCovariance
+#' @exportClass dpCovariance
+#'
+#' @include mechanisms.R
+
 dpCovariance <- setRefClass(
     Class = 'dpCovariance',
-    contains = c('mechanismLaplace')
+    contains = 'mechanismLaplace'
 )
 
 dpCovariance$methods(
