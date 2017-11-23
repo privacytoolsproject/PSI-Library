@@ -137,9 +137,27 @@ mean.getJSON <- function(output.json=TRUE) {
 }
 
 
+
+#' Mean function
+#'
+#' This function is used when the bootstrap mechanism is used
+#'
+#' @param xi Vector of values
+#' @param n Number of observations
+#' @return Mean
+
 boot.mean <- function(xi, n) {
     return(sum(xi) / n)
 }
+
+
+#' Differentially private mean
+#'
+#' @import methods
+#' @export dpMean
+#' @exportClass dpMean
+#'
+#' @include mechanisms.R
 
 dpMean <- setRefClass(
     Class = 'dpMean',

@@ -48,11 +48,21 @@ heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
 #' 
 #' @param x Vector of categorical values
 #' @return Sorted histogram with counts for each level
+
 fun.heavy <- function(x) {
     histogram <- table(x, useNA='ifany')
     histogram <- sort(-histogram) * -1
     return(histogram)
 }
+
+
+#' Differentially private heavy hitters
+#'
+#' @import methods
+#' @export dpHeavyHitters
+#' @exportClass dpHeavyHitters
+#'
+#' @include mechanisms.R
 
 dpHeavyHitters <- setRefClass(
     Class = 'dpHeavyHitters',
@@ -82,6 +92,3 @@ dpHeavyHitters$methods(
         out$accuracy <- heavyhitters.getAccuracy(gap, epsilon, delta)
         out$epsilon <- heavyhitters.getParameters(gap, delta, alpha)
 })
-
-# --------------------------------------------------------- #
-# --------------------------------------------------------- #

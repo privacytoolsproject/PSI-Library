@@ -89,6 +89,14 @@ tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) 
 }
 
 
+#' Differentially private binary tree
+#'
+#' @import methods
+#' @export dpTree
+#' @exportClass dpTree
+#'
+#' @include mechanisms.R
+
 dpTree <- setRefClass(
     Class = 'dpTree',
     contains = 'mechanismLaplace'

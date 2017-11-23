@@ -6,11 +6,20 @@
 #' 
 #' @return Noisy estimate of the standard deviation of \code{release}.
 #' @rdname variance.postStandardDeviation
+
 variance.postStandardDeviation <- function(release) {
     std <- sqrt(release)
     return(std)
 }
 
+
+#' Differentially private variance
+#'
+#' @import methods
+#' @export dpVariance
+#' @exportClass dpVariance
+#'
+#' @include mechanisms.R
 
 dpVariance <- setRefClass(
     Class = 'dpVariance',

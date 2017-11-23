@@ -195,6 +195,7 @@ histogram.getJSON <- function(output.json=TRUE) {
 #' @param var.type Character indicating the variable type.
 #' @param bins Vector indicating the bins into which \code{x} is partitioned.
 #' @return Histogram with counts for each level of \code{x}.
+
 fun.hist <- function(x, var.type, bins=NULL) {
     if (var.type %in% c('numeric', 'integer')) {
         histogram <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
@@ -203,6 +204,15 @@ fun.hist <- function(x, var.type, bins=NULL) {
     }
     return(histogram)
 }
+
+
+#' Differentially private histogram
+#'
+#' @import methods
+#' @export dpHistogram
+#' @exportClass dpHistogram
+#'
+#' @include mechanisms.R
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',
