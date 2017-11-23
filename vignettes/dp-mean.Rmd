@@ -22,16 +22,18 @@ Syntax
 
 ```{r, eval = FALSE}
 mydata <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-private.mean <- mean.release(x = mydata, var.type = "numeric", epsilon = 0.1, n = 10, rng = c(0, 70))
+dp_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', epsilon=0.1, n=10, rng=c(0, 70))
+dp_mean$release(mydata)
 
 mydata2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
-private.mean2 <- mean.release(x = mydata2, var.type = "logical", epsilon = 0.5, n = 8, rng = c(0, 1))
+dp_mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', epsilon=0.5, n=10, rng=c(0, 1))
+dp_mean2$release(mydata2)
 ```
 
 Inputs
 ------
 
-`mean.release()` accepts the following arguments to specify the the desired 
+`dpMean` accepts the following arguments to specify the the desired 
 level of privacy and characteristics of the variable of interest.
 
 -  `x`: The vector of data for which the differentially private mean will
@@ -66,25 +68,27 @@ data(PUMS5extract10000, package = "PSIlence")
 data <- PUMS5extract10000
 ```
 
-Calculating the differentially private mean of a numeric vector using `mean.release`:
+Calculating the differentially private mean of a numeric vector with `dpMean`:
 
 ```{r, eval = TRUE}
 library(PSIlence)
-private.numeric <- mean.release(x = data$income, var.type = "numeric", n = 10000, 
-                             epsilon = 0.01, rng = c(0, 750000))
-private.numeric$release
+numeric_mean <- dpMean$new(mechanims='mechanismLaplace', var.type='numeric', 
+                           n=10000, epsilon=0.01, rng=c(0, 750000))
+numeric_mean$release(data$income)
+print(numeric_mean$result)
 ```
 
 To calculate the mean of a logical vector instead, input a logical vector into `x` and update `var.type` and `rng`:
 
 ```{r, eval = TRUE}
 library(PSIlence)
-private.logical <- mean.release(x = data$married, var.type = "logical", n = 10000, 
-                             epsilon = 0.01, rng = c(0, 1))
-private.logical$release
+logical_mean <- dpMean$new(mechanims='mechanismLaplace', var.type='logical', 
+                           n=10000, epsilon=0.01, rng=c(0, 1))
+logical_mean$release(data$married)
+print(logical_mean$result)
 ```
 
 Output Values
 ------
 
-The output of the `mean.release` function stores fields containing the name of the statistic, variable type, number of observations, the sensitivity of the data, the selected epsilon value, the differentially private release of the mean, the accuracy guarantee of the mean release, and the bounds of the confidence interval for the mean release. 
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries on the `result` field.

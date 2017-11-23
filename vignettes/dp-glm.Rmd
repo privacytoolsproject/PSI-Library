@@ -19,15 +19,12 @@ Syntax
 ------
 
 ```{r, eval = FALSE}
-private.logit <- glm.release(x = mydata, n = 1000, epsilon = 0.5, formula = y ~ x1 + x2, objective = dp.logit)
-
-private.ols <- glm.release(x = mydata, n = 1000, epsilon = 0.5, formula = y ~ x1 + x2, objective = dp.ols)
 ```
 
 Inputs
 ------
 
-`glm.release()` accepts the following arguments to specify the the desired 
+`dpGLM` accepts the following arguments to specify the the desired 
 level of privacy and characteristics of the variables of interest.
 
 -  `x`: A data frame containing all variables of the model for which the differentially private           coefficient estimates will be calculated.
@@ -64,16 +61,12 @@ Calculating differentially private coefficient estimates for a binary dependent 
 
 ```{r, eval = TRUE}
 library(PSIlence)
-private.logit <- glm.release(x = data, n = 10000, epsilon = 0.5, formula = married ~ income + age, objective = dp.logit)
-private.logit$release
 ```
 
 To estimate coefficients with a continuous dependent variable instead, use odrinary least squares:
 
 ```{r, eval = TRUE}
 library(PSIlence)
-private.ols <- glm.release(x = data, n = 10000, epsilon = 0.5, formula = income ~ educ + age, objective = dp.ols)
-private.ols$release
 ```
 
 Output Values
