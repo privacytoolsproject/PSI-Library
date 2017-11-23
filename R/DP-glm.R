@@ -135,6 +135,15 @@ glmObjectives = list(
     'ols' = dpOLS
 )
 
+
+#' Differentially private generalized linear models
+#'
+#' @import methods
+#' @export dpGLM
+#' @exportClass dpGLM
+#'
+#' @include mechanisms.R
+
 dpGLM <- setRefClass(
     Class = 'dpGLM',
     contains = 'mechanismObjective'
