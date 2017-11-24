@@ -58,6 +58,7 @@ mean.postHistogram <- function(release, n) {
 #'    observations in the vector calculating the mean for.
 #' @param alpha A numeric vector specifying the statistical significance level.
 #' 
+#' @export mean.getAccuracy
 #' @return Accuracy guarantee for mean release given epsilon.
 #' @rdname mean.getAccuracy
 mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
@@ -77,6 +78,7 @@ mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
 #'    observations in the vector calculating the mean for.
 #' @param alpha A numeric vector specifying the statistical significance level.
 #' 
+#' @export mean.getParameters
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 #' @rdname mean.getParameters
 mean.getParameters <- function(accuracy, n, alpha=0.05) {

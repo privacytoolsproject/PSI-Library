@@ -19,6 +19,7 @@
 #' @param error The error term of the statistical significance level. Default
 #'    to 1e-9. 
 #' 
+#' @export histogram.getAccuracy
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
 histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, alpha=0.05, error=1e-9) {
@@ -61,6 +62,7 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, al
 #' @param error The error term of the statistical significance level. Default
 #'    to 1e-9. 
 #' 
+#' @export histogram.getParameters
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters
 histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6, alpha=0.05, error=1e-9) {
