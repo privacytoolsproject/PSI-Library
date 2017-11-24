@@ -4,7 +4,7 @@
 \alias{histogram.getParameters}
 \title{Histogram epsilon}
 \usage{
-histogram.getParameters(n.bins, n, accuracy, stability, delta = 2^-30,
+histogram.getParameters(n.bins, n, accuracy, stability, delta = 10^-6,
   alpha = 0.05, error = 1e-09)
 }
 \arguments{
@@ -12,7 +12,7 @@ histogram.getParameters(n.bins, n, accuracy, stability, delta = 2^-30,
 in which to tabulate values.}
 
 \item{n}{A numeric vector of length one specifying the number of
-observations in in the data.}
+observations in the data.}
 
 \item{accuracy}{A numeric vector representing the accuracy needed to 
 guarantee (percent).}
