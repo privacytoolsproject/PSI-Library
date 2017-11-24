@@ -14,11 +14,11 @@ test_that('histogram releases have expected dimensions', {
   my_delta <- 10^-6
 
   dp.histogram <- dpHistogram$new(mechanism='mechanismLaplace', var.type='numeric', n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta, rng=c(0.5,16.5))
-  dp.histogram <- dp.histogram$release(PUMS5extract10000$educ)
-  expect_equal(length(dp.histogram$release), 16)
+  dp.histogram$release(PUMS5extract10000$educ)
+  expect_equal(length(dp.histogram$result$release), 16)
 
   askAccuracy <- histogram.getAccuracy(n.bins=my_n.bins, n=my_n, epsilon=my_epsilon, stability=TRUE, delta=my_delta)
   #expect_equal(dp.histogram$accuracy, askAccuracy) # Doesn't seem to work correctly currently
   expect_equal(dp.histogram$epsilon, my_epsilon)
-  expect_equal(dim(dp.histogram$interval), c(16,2))
+  expect_equal(dim(dp.histogram$result$interval), c(16,2))
 })
