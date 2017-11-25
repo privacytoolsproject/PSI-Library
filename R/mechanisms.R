@@ -208,6 +208,7 @@ mechanismGaussian$methods(
 #' @param epsilon Numeric differential privacy parameter
 #' @param fun Function to evaluate
 #' @return Value of the function applied to one bootstrap sample
+#' @import stats
 #' @export
 
 bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
