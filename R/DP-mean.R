@@ -61,8 +61,9 @@ mean.postHistogram <- function(release, n) {
 #' @export mean.getAccuracy
 #' @return Accuracy guarantee for mean release given epsilon.
 #' @rdname mean.getAccuracy
-mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
-    accuracy <- log(1 / alpha) / (n * epsilon)
+mean.getAccuracy <- function(epsilon, n, alpha=0.05, rng) {
+	range <- max(rng)-min(rng)
+    accuracy <- log(1 / alpha)*range/ (n * epsilon)
     return(accuracy)
 }
 
@@ -81,8 +82,9 @@ mean.getAccuracy <- function(epsilon, n, alpha=0.05) {
 #' @export mean.getParameters
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 #' @rdname mean.getParameters
-mean.getParameters <- function(accuracy, n, alpha=0.05) {
-    epsilon <- log(1 / alpha) / (n * accuracy)
+mean.getParameters <- function(accuracy, n, alpha=0.05, rng) {
+	range <- max(rng)-min(rng)
+    epsilon <- log(1 / alpha)*range / (n * accuracy)
     return(epsilon)
 }
 

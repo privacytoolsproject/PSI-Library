@@ -1,3 +1,48 @@
+#JM added getaccuracy/getparameter functions, copied from dpmodules/Jack/DP_Quantiles.R
+tree.getAccuracy <- function(epsilon, alpha=.05, rng, gran, n) {
+  # Args: 
+  #  eps: epsilon value for DP
+  #  beta: the true value is within the accuracy range with
+  #    probability 1-beta
+  #  range: The range of the universe as a vector (min, max)
+  #  gran: The granularity of the universe between the min and max
+  #
+  # Returns:
+  #  The accuracy guaranteed by the given epsilon
+  #
+  #  The accuracy is interpreted as follows: The alpha value returned means that with probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's estimate of the count in [min, t] is within alpha of the true value
+  eps <- epsilon
+  beta <- alpha
+  range <- rng
+  universe_size <- ((range[2] - range[1]) / gran) + 1
+ # newer, tighter analysis:
+  return((2*sqrt(2)/eps) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
+
+}
+
+tree.getParameters <- function(accuracy, alpha=.05, rng, gran, n) {
+  # Args:
+  #  alpha: the accuracy parameter
+  #  beta: the true value is within the accuracy range (alpha)
+  #    with probability 1-beta
+  #  range: The range of the universe as a vector (min, max)
+  #  gran: The granularity of the universe between the min and max
+  #
+  # Returns:
+  #  The epsilon value necessary to gaurantee the given accuracy
+  acc <- accuracy
+  range <- rng
+  beta <- alpha
+  universe_size <- ((range[2] - range[1]) / gran) + 1
+
+  # newer, tighter analysis:
+  return((2*sqrt(2)/acc) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
+	
+}
+  
+
+
+
 #' Function to truncate negative noisy node counts at zero
 #'
 #' @param release The differentially private noisy binary tree
