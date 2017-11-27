@@ -176,14 +176,14 @@ dpMean$methods(
         .self$var.type <- var.type
         .self$n <- n
         .self$alpha <- alpha
+        .self$rng <- rng
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- mean.getParameters(accuracy, n, alpha)
+            .self$epsilon <- mean.getParameters(accuracy, n, alpha, rng)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- mean.getAccuracy(epsilon, n, alpha)
+            .self$accuracy <- mean.getAccuracy(epsilon, n, alpha, rng)
         }
-        .self$rng <- rng
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
