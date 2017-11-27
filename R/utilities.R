@@ -524,7 +524,7 @@ linear.reg <- function(formula, release, n, intercept) {
     coefs <- "The input matrix is not invertible"
     return(coefs)
   } else {
-    xy.locs <- extract.indices(formula, release, intercept)
+    xy.locs <- extract.indices(as.formula(formula), release, intercept)
     x.loc <- xy.locs$x.loc
     y.loc <- xy.locs$y.loc
     loc.vec <- rep(TRUE, (length(x.loc) + 1))
@@ -632,7 +632,7 @@ amsweep <- function(g, m, reverse=FALSE) {
 #' @rdname extract.indices
 #' @export
 extract.indices <- function(formula, data, intercept) {
-    t <- terms(formula, data=data)
+    t <- terms(as.formula(formula), data=data)
     y.loc <- attr(t, 'response')
     x.loc <- which(names(data) %in% attr(t, 'term.labels'))
     x.label <- names(data)[x.loc]
