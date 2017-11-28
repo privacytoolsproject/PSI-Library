@@ -24,72 +24,18 @@
 #' @rdname histogram.getAccuracy
 
 #JM replaced below with getaccuracy function from dpmodules/Jack/Histogramnew.R
-'
-histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, alpha=0.05, error=1e-9) {
-    if (stability) {
-        lo <- 0
-        hi <- 1
-        eval <- alpha + error
-        while ((eval <= alpha - error) || (eval > alpha)) {
-            accuracy <- (hi + lo) / 2
-            eval <- min((4 / accuracy), n.bins) * exp(-accuracy * n * epsilon / 4)
-            ifelse(eval < alpha, (hi <- accuracy), (lo <- accuracy))
-            if (hi - lo <= 0) { return(Inf) }
-        }
-        accuracy <- max(accuracy, (8 / n) * (0.5 - log(delta) / epsilon))
-    } else {
-        accuracy <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * epsilon)
-    }
-    return(accuracy)
-}
-'
+
 histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, alpha=0.05, error=1e-10) {
-   eps <- epsilon
-   del <- delta
-   beta <- alpha
-   # comment out line below when stability code is written to measure absolute error (plus/minus counts on each bin)
-   # to check: getparameters(getaccuracy()) should equal epsilon. Ask Victor about this.
-   stability <- F
-   if(stability){
-	   	acc <- -2 / (n * eps) * log(2 * beta) + error
-	
-	   if(acc > 1)
-	   {
-	      return(Inf)
-	   }
-	
-	   low <- acc
-	   high <- 1
-	   eval <- n + 1
-	
-	   while((n < eval) || (n >= eval + error))
-	   {
-	      acc <- (low + high) / 2
-	      eval <- 1 / acc - 2 / (acc * eps) *
-	            log(2 * del * (2 * beta - exp(-acc * n * eps / 2)))
-	
-	      if(n < eval)
-	      {
-	         low <- acc
-	      }
-	      else if(n >= eval + error)
-	      {
-	         high <- acc
-	      }
-	
-	      if(high - low <= 0)
-	      {
-	         return(Inf)
-	      }
-	   }
-	   #JM 11/14/17. Multiplying by n
-	   acc <- n*acc
-	   return(max(-2*log(beta) / (eps), acc))
-   }
-   else{
-   		acc <- -2*log(beta) / eps
-   		return(acc)
-   }
+ 	acc <- NULL
+	if(stability){
+		acc <- 2*log(2/(alpha*delta)) /epsilon
+	}
+	else{
+		acc <- 2*log(1/alpha) /epsilon
+	}
+	return(acc)
+}
+
 }
 
 
@@ -118,74 +64,16 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, al
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters
 
-#JM replaced below with getaccuracy function from dpmodules/Jack/Histogramnew.R
-'
-histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6, alpha=0.05, error=1e-9) {
-    if (stability) {
-        lo <- 0
-        hi <- 1
-        eval <- n + 1
-        while ((eval <= n * (1 - error)) || (eval > n)) {
-            if (is.infinite(accuracy)) {return("Accuracy is equal to infinity, cannot calculate parameters")}
-            ##need to fix histogram.getAccuracy so either it doesnt pass accuracy=Inf or make histogram.getParameters
-            ##be able to accept an infinite accuracy parameter
-            eps <- (hi + lo) / 2
-            eval <- 8 / accuracy * (0.5 - log(delta) / eps)
-            ifelse(eval < n, (hi <- eps), (lo <- eps))
-            if (hi - lo <= 0) { return(Inf) }
-        }
-        eps <- max(eps, 4 * log(min(n.bins, 4 / accuracy) / alpha) / (accuracy * n))
-    } else {
-        eps <- -2 * log(1 - (1 - alpha)^(1 / n.bins)) / (n * accuracy)
-    }
-    return(eps)
-}
-'
+
 histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6, alpha=0.05, error=1e-10) {
-	acc <- accuracy
-	del <- delta
-	beta <- alpha
-	# comment out line below when stability code is written to measure absolute error (plus/minus counts on each bin)
-   # to check: getparameters(getaccuracy()) should equal epsilon. Ask Victor about this.
-   stability <- F
+	eps <- NULL
 	if(stability){
-			eps <- -2 / (n * acc) * log(2 * beta) + error
-	
-	   if(eps > 1)
-	   {
-	      return(Inf)
-	   }
-	
-	   low <- eps
-	   high <- 1
-	   eval <- n + 1
-	
-	   while((n < eval) || (n >= eval + error))
-	   {
-	      eps <- (low + high) / 2
-	      eval <- 1 / acc - 2 / (acc * eps) *
-	            log(2 * del * (2 * beta - exp(-acc * n * eps / 2)))
-	
-	      if(n < eval)
-	      {
-	         low <- eps
-	      }
-	      else if(n >= eval + error)
-	      {
-	         high <- eps
-	      }
-	
-	      if(high - low <= 0)
-	      {
-	         return(Inf)
-	      }
-	   }
-	   return(eps)
+		eps <- 2*log(2/(alpha*delta)) /accuracy
 	}
 	else{
-		 eps <- -2*log(beta) /acc
-		 return(eps)	
+		eps <- 2*log(1/alpha) /accuracy
 	}
+	return(eps)
 }
 
 #' Histogram confidence interval
@@ -375,8 +263,12 @@ dpHistogram$methods(
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
         if (stability) {
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
-                a <- accuracy * n / 2
-                noisy$release <- noisy$release[noisy$release >= a]
+               # a <- accuracy * n / 2  
+               # noisy$release <- noisy$release[noisy$release >= a]
+               #JM changed to below after conversation with Victor
+               a <- 1+2*log(2/delta)/epsilon 
+               noisy$release <- noisy$release[noisy$release > a]
+                
             }
         } else {
             noisy$release <- round(noisy$release)
