@@ -8,4 +8,17 @@
 \description{
 Differentially private generalized linear models
 }
+\examples{
+
+data(PUMS5extract10000)
+n <- 10000
+epsilon <- 0.5
+rng <- matrix(c(0, 150000, 1, 16, 0, 1), ncol=2, byrow=TRUE)
+form <- 'income ~ educ + sex'
+
+model <- dpGLM$new(mechanism='mechanismObjective', var.type='numeric',
+                   n=n, rng=rng, epsilon=epsilon, formula=form, objective='ols')
+model$release(PUMS5extract10000)
+print(model$result)
+}
 

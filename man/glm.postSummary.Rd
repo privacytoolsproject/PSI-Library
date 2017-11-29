@@ -4,7 +4,7 @@
 \alias{glm.postSummary}
 \title{Summary statistics for differentially private GLM via the bootstrap}
 \usage{
-glm.postSummary(release, n, model, alpha = 0.1)
+glm.postSummary(release, n, model, alpha)
 }
 \arguments{
 \item{release}{Numeric matrix with differentially private estimates for each bootstrap sample}
