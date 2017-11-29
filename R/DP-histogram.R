@@ -36,8 +36,6 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, al
 	return(acc)
 }
 
-}
-
 
 #' Histogram epsilon
 #' 
@@ -63,7 +61,6 @@ histogram.getAccuracy <- function(n.bins, n, epsilon, stability, delta=10^-6, al
 #' @export histogram.getParameters
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters
-
 
 histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6, alpha=0.05, error=1e-10) {
 	eps <- NULL
