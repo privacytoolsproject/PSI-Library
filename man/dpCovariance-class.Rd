@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-covariance.R
 \docType{class}
 \name{dpCovariance-class}
-\alias{dpCovariance-class}
 \alias{dpCovariance}
+\alias{dpCovariance-class}
 \title{Differentially private covariance matrix}
 \description{
 Differentially private covariance matrix

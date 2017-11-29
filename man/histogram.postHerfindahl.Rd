@@ -18,3 +18,4 @@ Herfindahl index.
 \description{
 Produce differentially private Herfindahl index for categorical types of data.
 }
+

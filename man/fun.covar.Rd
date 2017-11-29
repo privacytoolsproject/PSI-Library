@@ -17,3 +17,4 @@ fun.covar(x, columns, intercept)
 This function is called by \code{dpCovariance} and
 produces the true value to be perturbed.
 }
+

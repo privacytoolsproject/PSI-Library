@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanism-class}
-\alias{mechanism-class}
 \alias{mechanism}
+\alias{mechanism-class}
 \title{Base mechanism class}
 \description{
 Base mechanism class
@@ -65,5 +65,4 @@ Base mechanism class
 
 \item{\code{tree.data}}{Binary tree attributes needed for efficient estimation}
 }}
-
 

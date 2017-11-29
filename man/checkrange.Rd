@@ -24,3 +24,4 @@ checkrange(c(1,3))
 checkrange(1:3)
 \dontrun{checkrange(1)}
 }
+

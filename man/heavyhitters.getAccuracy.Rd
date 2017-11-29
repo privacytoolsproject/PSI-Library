@@ -29,3 +29,4 @@ estimate of the count in [min, t] is within alpha of the true value.
 \author{
 Victor Balcer
 }
+

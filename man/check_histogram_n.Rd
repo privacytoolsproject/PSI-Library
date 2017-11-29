@@ -33,3 +33,4 @@ A logical vector indicating whether the number of observations is
 \description{
 Utility function to check sufficient N in data.
 }
+

@@ -41,3 +41,4 @@ s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
 \seealso{
 \code{\link{dpUnif}}
 }
+

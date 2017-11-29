@@ -5,7 +5,7 @@
 \title{Histogram epsilon}
 \usage{
 histogram.getParameters(n.bins, n, accuracy, stability, delta = 10^-6,
-  alpha = 0.05, error = 1e-09)
+  alpha = 0.05, error = 1e-10)
 }
 \arguments{
 \item{n.bins}{A numeric vector of length one specifying the number of cells 
@@ -37,3 +37,4 @@ Differential privacy parameter epsilon
 Function to find the epsilon value necessary to meet a desired level of accuracy for the
 differentially private histogram release.
 }
+

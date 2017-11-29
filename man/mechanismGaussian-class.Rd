@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanismGaussian-class}
-\alias{mechanismGaussian-class}
 \alias{mechanismGaussian}
+\alias{mechanismGaussian-class}
 \title{Gaussian mechanism}
 \description{
 Gaussian mechanism

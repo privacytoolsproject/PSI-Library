@@ -15,3 +15,4 @@ Sorted histogram with counts for each level
 \description{
 Function to evaluate most common categorical values
 }
+

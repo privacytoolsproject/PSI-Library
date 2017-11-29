@@ -16,3 +16,4 @@ check_histogram_categorical(x, bins)
 Utility function to include NA level for categorical types when vector of bins
 does not include all observed levels in the data vector.
 }
+

@@ -17,3 +17,4 @@ Standard deviation of the logical variable
 Calculates the standard deviation of the differentially private mean from a 
 logical variable.
 }
+

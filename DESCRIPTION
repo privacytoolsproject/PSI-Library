@@ -7,15 +7,18 @@ Authors@R: c(
     )
 Version: 0.1-1
 Date: 2017-08-05
-Imports: jsonlite,
-	 methods,
-	 openssl
-Description: This library allows researchers to access summary statistics of sensitive 		data that are generated using differential privacy.
-RoxygenNote: 6.0.1
-Suggests: knitr,
+Imports:
+    jsonlite,
+    methods,
+    openssl
+Description: This library allows researchers to access summary statistics of
+    sensitive data that are generated using differential privacy.
+RoxygenNote: 5.0.1
+Suggests:
+    knitr,
     rmarkdown,
     testthat
-Collate: 
+Collate:
     'mechanisms.R'
     'DP-covariance.R'
     'DP-glm.R'

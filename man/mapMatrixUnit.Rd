@@ -18,3 +18,4 @@ List that includes the transformed matrix and the value corresponding to the max
 \description{
 This function will ensure that the row having the largest p-norm will be located on the unit ball
 }
+

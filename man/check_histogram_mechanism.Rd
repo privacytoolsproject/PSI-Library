@@ -19,3 +19,4 @@ Utility function to verify the type of histogram mechanism
 
 check_histogram_mechanism('stability')
 }
+

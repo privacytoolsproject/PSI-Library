@@ -30,3 +30,4 @@ data <- data.frame(cbind(y, x))
 f <- as.formula('y ~ x')
 extract.indices(f, data, FALSE)
 }
+

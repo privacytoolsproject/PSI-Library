@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-tree.R
 \docType{class}
 \name{dpTree-class}
-\alias{dpTree-class}
 \alias{dpTree}
+\alias{dpTree-class}
 \title{Differentially private binary tree}
 \description{
 Differentially private binary tree

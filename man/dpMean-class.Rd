@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-mean.R
 \docType{class}
 \name{dpMean-class}
-\alias{dpMean-class}
 \alias{dpMean}
+\alias{dpMean-class}
 \title{Differentially private mean}
 \description{
 Differentially private mean

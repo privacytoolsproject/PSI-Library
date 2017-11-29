@@ -19,3 +19,4 @@ Standard error of the node estimate
 Function to evaluate the standard error of a node estimate given a weight and the standard
  deviation of the noise used to perturb the nodes
 }
+

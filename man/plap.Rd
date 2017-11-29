@@ -25,3 +25,4 @@ Determines the probability a draw from a LaPlace distribution is less than
 x <- 0
 plap(x)
 }
+

@@ -21,3 +21,4 @@ Function to evaluate a histogram for numeric and categorical types. This functio
 is used internally by \code{dpHistogram} to evaluate the true histogram prior to 
 perturbation.
 }
+

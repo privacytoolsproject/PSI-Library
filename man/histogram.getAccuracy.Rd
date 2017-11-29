@@ -5,7 +5,7 @@
 \title{Histogram accuracy}
 \usage{
 histogram.getAccuracy(n.bins, n, epsilon, stability, delta = 10^-6,
-  alpha = 0.05, error = 1e-09)
+  alpha = 0.05, error = 1e-10)
 }
 \arguments{
 \item{n.bins}{A numeric vector of length one specifying the number of cells 
@@ -37,3 +37,4 @@ Accuracy guarantee for histogram release, given epsilon.
 Determine accuracy of histogram release, given epsilon and delta, for the differentially 
 private histogram release.
 }
+

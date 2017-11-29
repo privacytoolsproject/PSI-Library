@@ -24,3 +24,4 @@ The coefficients from \code{g}.
 \description{
 Sweeps a covariance matrix to extract regression coefficients.
 }
+

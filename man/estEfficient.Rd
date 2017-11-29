@@ -23,3 +23,4 @@ Efficient noisy node estimate
 \description{
 Function to efficiently estimate the nodes of a tree using all available information in the tree
 }
+

@@ -4,7 +4,7 @@
 \alias{mean.getAccuracy}
 \title{Mean accuracy}
 \usage{
-\method{mean}{getAccuracy}(epsilon, n, alpha = 0.05)
+\method{mean}{getAccuracy}(epsilon, n, alpha = 0.05, rng)
 }
 \arguments{
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
@@ -22,3 +22,4 @@ Accuracy guarantee for mean release given epsilon.
 Function to find the accuracy guarantee of a mean release at a given epsilon 
 value.
 }
+

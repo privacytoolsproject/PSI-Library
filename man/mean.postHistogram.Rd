@@ -17,3 +17,4 @@ Data frame, histogram of the logical variable
 \description{
 Generate counts for levels of a logical variable based on the release
 }
+

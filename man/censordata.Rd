@@ -31,3 +31,4 @@ For numeric types, checks if x is in rng = (min, max) and censors values to
 censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
 censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
 }
+

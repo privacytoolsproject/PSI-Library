@@ -4,7 +4,7 @@
 \alias{mean.getParameters}
 \title{Mean epsilon}
 \usage{
-\method{mean}{getParameters}(accuracy, n, alpha = 0.05)
+\method{mean}{getParameters}(accuracy, n, alpha = 0.05, rng)
 }
 \arguments{
 \item{accuracy}{A numeric vector representing the accuracy needed to 
@@ -22,3 +22,4 @@ The scalar epsilon necessary to guarantee the needed accuracy.
 Function to find the epsilon value necessary to meet a desired level of 
 accuracy for a mean release.
 }
+

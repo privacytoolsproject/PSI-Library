@@ -15,3 +15,4 @@ Noisy estimate of the standard deviation of \code{release}.
 \description{
 Function to extract standard deviation from noisy estimate of variance.
 }
+

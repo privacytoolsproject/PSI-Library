@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-glm.R
 \docType{class}
 \name{dpGLM-class}
-\alias{dpGLM-class}
 \alias{dpGLM}
+\alias{dpGLM-class}
 \title{Differentially private generalized linear models}
 \description{
 Differentially private generalized linear models

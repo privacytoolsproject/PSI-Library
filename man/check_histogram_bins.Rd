@@ -19,3 +19,4 @@ Number of bins
 Utility function to check bins argument to histogram. If number of bins 
    is not provided, the Sturges method is used.
 }
+

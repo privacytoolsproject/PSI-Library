@@ -14,3 +14,4 @@ mpinv(X, tol = sqrt(.Machine$double.eps))
 \description{
 Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 }
+

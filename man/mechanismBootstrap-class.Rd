@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanismBootstrap-class}
-\alias{mechanismBootstrap-class}
 \alias{mechanismBootstrap}
+\alias{mechanismBootstrap-class}
 \title{Bootstrap mechanism}
 \description{
 Bootstrap mechanism

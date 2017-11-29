@@ -35,3 +35,4 @@ df_imputed <- fillMissing2d(x=df, var.type='numeric', impute.rng=imp.rng)
 \seealso{
 \code{\link{fillMissing}}
 }
+

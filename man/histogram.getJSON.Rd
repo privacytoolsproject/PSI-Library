@@ -16,3 +16,4 @@ JSON doc for histogram function.
 \description{
 Produce a JSON doc for differentially private histograms.
 }
+
