@@ -28,7 +28,7 @@ tree.getAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
 tree.getParameters <- function(accuracy, rng, gran, alpha=0.05) {
     universe.size <- diff(rng) / gran + 1
     epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universe.size)^(1.5)
-    return((2*sqrt(2)/acc) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
+    return(epsilon)
 }
 
 
