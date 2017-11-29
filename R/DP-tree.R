@@ -188,6 +188,8 @@ dpTree$methods(
         ellipsis.vals <- getFuncArgs(list(...), tree.postCDF)
         out$cdf <- do.call(tree.postCDF, c(list(release=out$release, rng=rng), ellipsis.vals))
         out$median <- tree.postMedian(out$cdf)
+        out$accuracy <- .self$accuracy
+        out$epsilon <- .self$epsilon
         if (!is.null(percentiles)) {
             out$percentiles <- tree.postPercentiles(out$cdf, percentiles)
         }
