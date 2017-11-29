@@ -1,46 +1,35 @@
-#JM added getaccuracy/getparameter functions, copied from dpmodules/Jack/DP_Quantiles.R
-tree.getAccuracy <- function(epsilon, alpha=.05, rng, gran, n) {
-  # Args: 
-  #  eps: epsilon value for DP
-  #  beta: the true value is within the accuracy range with
-  #    probability 1-beta
-  #  range: The range of the universe as a vector (min, max)
-  #  gran: The granularity of the universe between the min and max
-  #
-  # Returns:
-  #  The accuracy guaranteed by the given epsilon
-  #
-  #  The accuracy is interpreted as follows: The alpha value returned means that with probability 1 - beta, simultaneously for all t with min <= t <= max, the algorithm's estimate of the count in [min, t] is within alpha of the true value
-  eps <- epsilon
-  beta <- alpha
-  range <- rng
-  universe_size <- ((range[2] - range[1]) / gran) + 1
- # newer, tighter analysis:
-  return((2*sqrt(2)/eps) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
+#' Accuracy for a differentially private binary tree
+#'
+#' @param epsilon Numeric differential privacy parameter
+#' @param rng Numeric a priori estimate of the variable range
+#' @param gran Numeric granularity
+#' @param alpha Numeric level of statistical significance, default 0.05
+#' @return Accuracy guarantee for the tree given epsilon
+#' @export tree.getAccuracy
+#' @rdname tree.getAccuracy
 
+tree.getAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
+    universe.size <- diff(rng) / gran + 1
+    accuracy <- (2 * sqrt(2) / epsilon) * sqrt(log(2 / alpha)) * log2(universe.size)^(1.5)
+    return(accuracy)
 }
 
-tree.getParameters <- function(accuracy, alpha=.05, rng, gran, n) {
-  # Args:
-  #  alpha: the accuracy parameter
-  #  beta: the true value is within the accuracy range (alpha)
-  #    with probability 1-beta
-  #  range: The range of the universe as a vector (min, max)
-  #  gran: The granularity of the universe between the min and max
-  #
-  # Returns:
-  #  The epsilon value necessary to gaurantee the given accuracy
-  acc <- accuracy
-  range <- rng
-  beta <- alpha
-  universe_size <- ((range[2] - range[1]) / gran) + 1
 
-  # newer, tighter analysis:
-  return((2*sqrt(2)/acc) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
-	
+#' Epsilon for a differentially private binary tree
+#'
+#' @param accuracy Numeric accuracy needed
+#' @param rng Numeric a priori estimate of the variable range
+#' @param gran Numeric granularity
+#' @param alpha Numeric level of statistical significance, default 0.05
+#' @return Epsilon necessary to guarantee the given accuracy
+#' @export tree.getParameters
+#' @rdname tree.getParameters
+
+tree.getParameters <- function(accuracy, rng, gran, alpha=0.05) {
+    universe.size <- diff(rng) / gran + 1
+    epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universe.size)^(1.5)
+    return((2*sqrt(2)/acc) * sqrt(log(2/beta)) * log2(universe_size)^(1.5))
 }
-  
-
 
 
 #' Function to truncate negative noisy node counts at zero
@@ -121,6 +110,7 @@ tree.postPercentiles <- function(cdf, percentiles) {
 #' @param terminal.index Vector of indices corresponding to the terminal
 #'      leaf nodes of the binary tree
 #' @return Efficient differentially private binary tree
+
 tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) {
     n.nodes <- length(release)
     sigma <- sqrt(variance)
@@ -148,14 +138,21 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
-    initialize = function(mechanism, var.type, n, rng, gran, epsilon, impute.rng=NULL, percentiles=NULL, ...) {
+    initialize = function(mechanism, var.type, n, rng, gran, epsilon=NULL, accuracy=NULL, impute.rng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
-        .self$gran <- gran
-        .self$epsilon <- epsilon
         .self$rng <- rng
+        .self$gran <- gran
+        .self$alpha <- alpha
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- tree.getParameters(accuracy, rng, gran, alpha)
+        } else {
+            .self$epsilon <- epsilon
+            .self$accuracy <- tree.getAccuracy(epsilon, rng, gran, alpha)
+        }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
