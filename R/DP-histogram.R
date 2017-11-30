@@ -264,6 +264,8 @@ dpHistogram$methods(
                # noisy$release <- noisy$release[noisy$release >= a]
                #JM changed to below after conversation with Victor
                a <- 1+2*log(2/delta)/epsilon 
+              # noisy$release[noisy$release <= a] <- 0
+               #if not allowed to release names of zero bin counts, use below:
                noisy$release <- noisy$release[noisy$release > a]
                 
             }
@@ -279,7 +281,8 @@ dpHistogram$methods(
         out$release <- histogram.formatRelease(out$release)
         out$accuracy <- accuracy
         out$epsilon <- epsilon
-        out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+        # CI will cause errors if stability zeroed out all of the counts. Figure out the right fix before unblockin
+       #	out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy) 
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
         }
