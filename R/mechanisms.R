@@ -293,22 +293,20 @@ mechanismObjective$methods(
 mechanismObjective$methods(
     evaluate = function(x, postFun, ...) {
 
-        # extract X, y from input matrix and formula
-        intercept.loc <- !(.self$intercept)
-        xy.locs <- extract.indices(.self$formula, x, intercept.loc)
-        X.names <- xy.locs$x.label
-        X <- x[, xy.locs$x.loc]
-        y <- as.numeric(x[, xy.locs$y.loc])
-        
-        # censor input matrix and impute missing values
-        X <- censordata(X, .self$var.type, .self$rng, .self$bins)
-        if (NCOL(X) > 1) {
-            X <- fillMissing2d(X, .self$var.type, .self$impute.rng)
-        } else {
-            X <- fillMissing(X, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
-        }
+        # subset data from formula
+        cols <- all.vars(as.formula(.self$formula))
+        x <- x[, cols]
 
-        # add intercept if needed
+        # censor & impute missing values
+        x <- censordata(x, .self$var.type, .self$rng, .self$bins)
+        x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+
+        # extract X and y
+        y <- x[, cols[1]]
+        X <- x[, cols[2:length(cols)]]
+        X.names <- names(X)
+
+        # add intercept
         if (.self$intercept) {
             X <- cbind(1, X)
             X.names <- c('intercept', X.names)
@@ -321,7 +319,7 @@ mechanismObjective$methods(
         # set start params, adjust for ols objective
         if (.self$name == 'ols') {
             start.params <- rep(0, ncol(X) + 1)
-            X.names <- c(X.names, 'var')
+            X.names <- c(X.names, 'variance')
         } else {
             start.params <- rep(0, ncol(X))
         }
