@@ -23,4 +23,3 @@ Efficient estimate of noisy binary tree in vector form
 \description{
 Function to estimate a noisy binary tree efficiently using all available information in the tree
 }
-

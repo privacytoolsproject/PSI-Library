@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanismObjective-class}
-\alias{mechanismObjective}
 \alias{mechanismObjective-class}
+\alias{mechanismObjective}
 \title{Objective perturbation mechanism}
 \description{
 Objective perturbation mechanism

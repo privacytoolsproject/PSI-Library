@@ -19,4 +19,3 @@ Differnetially private estimate of the values corresponding to
 \description{
 Quantile function using the DP CDF
 }
-

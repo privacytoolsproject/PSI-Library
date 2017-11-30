@@ -29,4 +29,3 @@ uniform_repeatable <- dpUnif(n=1, seed=75436)
 \seealso{
 \code{\link{dpNoise}}
 }
-

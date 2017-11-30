@@ -1,5 +1,5 @@
 ---
-title: "Differentially Private Generalized Linear Model Release"
+title: "Differentially Private Generalized Linear Models"
 author: "James Honaker, Thomas Brawner, and Christian Baehr"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -9,67 +9,146 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Calculate Differentially Private Generalized Linear Model of a set of variables with `glm.release`.
+```{r setup, include=FALSE}
+knitr::opts_knit$set(
+        stop_on_error = 2L
+)
+knitr::opts_chunk$set(
+    fig.height = 7,
+    fig.width = 7
+)
+```
 
+Differentially Private Generalized Linear Models with `dpGLM`
+-------------------------------------------------------------
+
+The `dpGLM` class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via `'ols'`, count variables via `'poisson'` objective, and binary variables via either `'logit'` or `'probit'`. 
+
+<!-- 
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private versions of various statistics are available in this package.  For example, the `glm.release()` function releases coefficient estimates for a set of data after adding a precise about of noise to the objective function to guarantee `epsilon` differential privacy. 
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
+-->
 
 Syntax
 ------
 
+The minimal example below demonstrates a linear regression model fit via `dpGLM` using the `PUMS5extract10000` data. In this case, we fit a model of income as a linear function of education level and gender. First attach the data and specify the necessary metadata.
+
 ```{r, eval = FALSE}
+library(PSIlence)
+data(PUMS5extract10000)
+
+n <- 10000
+epsilon <- 0.5
+form <- 'income ~ educ + sex'
+#rng <- matrix(c(0, 200000, 1, 16, 0, 1), ncol=2, byrow=TRUE)
+rng <- matrix(c(1, 16, 0, 1), ncol=2, byrow=TRUE)
+mechanism <- 'mechanismObjective'
+var.type <- 'numeric'
+objective <- 'ols'
 ```
 
-Inputs
+Next, instantiate a `dpGLM` object using the metadata above.
+
+```{r, eval = FALSE}
+model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
+                   formula=form, rng=rng, objective=objective)
+```
+
+Last, call the `release` method and provide the data frame where the variables in the formula are located.
+
+```{r, eval = FALSE}
+model$release(PUMS5extract10000)
+```
+
+At this point, the results are available on the `result` attribute on the object, which is a list containing elements including:
+
+* the accuracy of the release (`$accuracy`); 
+* the privacy cost incurred in producing the release (`$epsilon`); 
+* the perturbed release (`$release`); 
+* any additional post-processing of the release.
+
+For the current example, view the full list of summary results as follows.
+
+```{r, eval = FALSE}
+print(model$result)
+```
+
+Or view only the private release by specifying the `release` attribute within `result`.
+
+```{r, eval = FALSE}
+print(model$result$release)
+```
+
+
+Arguments
+---------
+
+In typical usage, there are two methods to the `dpGLM` class. The `new` method, which creates an object of the class, accepts the following arguments.
+
+* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate. For `dpGLM`, this is always `'mechanismObjective'`.
+
+* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. For `dpGLM`, the subset of columns in the data frame to be used in the model fit must be numeric types, and thus this argument should always be `'numeric'`.
+
+* `n` \ Integer, the number of observations, or rows, in the data frame.
+
+* `rng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving an a priori estimate of the lower and upper bounds of the $p^{\text{th}}$ variable in the data frame.
+
+* `formula` \ Character, the formula for the regression model. Note that the formula is converted to an R formula type internally, so this argument should be of type character.
+
+* `objective` \ Character, the objective function to use in estimating the model. Available options are `'ols'`, `'poisson'`, `'logit'`, and `'probit'`.
+
+* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `accuracy`.
+
+* `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
+
+* `impute.rng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving a range within which missing values of the $p^{\text{th}}$ variable in the data frame are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the matrix provided in `rng`.
+
+* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
+
+* `intercept` \ Logical, whether to include the intercept in the model. Optional, default `TRUE`.
+
+* `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
+
+&nbsp; 
+
+The `release` method accepts a single argument. 
+
+* `x` \ Data frame containing numeric columns corresponding the names specified in `formula`.
+
+
+Values
 ------
 
-`dpGLM` accepts the following arguments to specify the the desired 
-level of privacy and characteristics of the variables of interest.
+The list of summary results is available on the `result` attribute on the fitted object once the `release` method has been called.
 
--  `x`: A data frame containing all variables of the model for which the differentially private           coefficient estimates will be calculated.
-   
--  `n`: A numeric vector of length one identifying the number of observations
-   in `x`. It is important the user specify the number of observations so
-   the `glm.release()` can touch the data as little as possible to ensure
-   privacy preservation.
-   
--  `epsilon`: A numeric vector of length one specifying the epsilon privacy 
-   parameter. Typically, this is between zero and one.
-   
--  `formula`: An object of class `formula` containing a regression formula using columns names from       `x` to specify variables.
-   
--  `objective`: The name of the objective function the user would like to use in the model. Should be:    `dp.ols`, `dp.logit`, `dp.poisson`, or `dp.probit`.
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. Other elements reflecting variable post-processing of the release.
 
--  `n.boot`: The number of bootstrap samples on which to evaluate the private parameter estimates, each    at `epsilon / n.boot` privacy cost. Default to `NULL`.
+&nbsp; 
 
--  `intercept`: A logical vector indicating whether an intercept should be added to the model. Default    to `TRUE`.
+The list in the `result` attribute has the following values.
+
+* `release` \ Vector of coefficient estimates. If the objective is `'ols'`, this also includes an estimate of the variance.
+* `accuracy` \ The accuracy guarantee of the release given `epsilon`
+* `epsilon` \ The privacy cost required to guarantee `accuracy`
+* `summary` \ A summary data frame including the vector of coefficient estimates, standard error estimates, and a 95% confidence interval. The summary is only produced if the bootstrap option is used, meaning `n.boot` is not `NULL`.
+
+
 
 Examples
 ------
 
-### Basic Example
+To fit a linear regression model via `dpGLM`.
 
-Attaching the sample dataset:
 
-```{r, eval = TRUE}
-data(PUMS5extract10000, package = "PSIlence")
-data <- PUMS5extract10000
-```
+&nbsp; 
 
-Calculating differentially private coefficient estimates for a binary dependent variable with a logit model using `glm.release`:
+Alternatively, use the bootstrap.
 
-```{r, eval = TRUE}
-library(PSIlence)
-```
-
-To estimate coefficients with a continuous dependent variable instead, use odrinary least squares:
-
-```{r, eval = TRUE}
-library(PSIlence)
-```
-
+<!--
 Output Values
 ------
 
 The output of the `glm.release` function stores fields containing the name of the function call, `glm`,  model type, the objective function of the specified model type, number of observations in the data, the selected epsilon value, the regression formula, whether an intercept was included, and the differentially private release of the coefficients. 
+-->

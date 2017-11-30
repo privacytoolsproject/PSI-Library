@@ -23,4 +23,3 @@ Random draw from Laplace distribution
 
 rlap(size=1000)
 }
-

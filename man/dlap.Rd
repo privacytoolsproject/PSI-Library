@@ -24,4 +24,3 @@ Probability density for Laplace distribution
 x <- seq(-3, 3, length.out=61)
 dlap(x)
 }
-

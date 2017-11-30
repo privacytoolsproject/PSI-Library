@@ -21,4 +21,3 @@ Accuracy guarantee for the tree given epsilon
 \description{
 Accuracy for a differentially private binary tree
 }
-

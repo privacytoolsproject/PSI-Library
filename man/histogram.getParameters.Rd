@@ -37,4 +37,3 @@ Differential privacy parameter epsilon
 Function to find the epsilon value necessary to meet a desired level of accuracy for the
 differentially private histogram release.
 }
-

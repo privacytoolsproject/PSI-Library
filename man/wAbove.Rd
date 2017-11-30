@@ -23,4 +23,3 @@ Weight
 Function to evaluate weights from the noise variance and standard errors in a parent and adjacent 
  nodes for the node of a differentially private binary tree
 }
-

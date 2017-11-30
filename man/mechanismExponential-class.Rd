@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanismExponential-class}
-\alias{mechanismExponential}
 \alias{mechanismExponential-class}
+\alias{mechanismExponential}
 \title{Exponential mechanism}
 \description{
 Exponential mechanism

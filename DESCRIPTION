@@ -13,7 +13,7 @@ Imports:
     openssl
 Description: This library allows researchers to access summary statistics of
     sensitive data that are generated using differential privacy.
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests:
     knitr,
     rmarkdown,

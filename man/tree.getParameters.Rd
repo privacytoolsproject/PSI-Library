@@ -21,4 +21,3 @@ Epsilon necessary to guarantee the given accuracy
 \description{
 Epsilon for a differentially private binary tree
 }
-

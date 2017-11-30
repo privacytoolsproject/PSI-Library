@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-variance.R
 \docType{class}
 \name{dpVariance-class}
-\alias{dpVariance}
 \alias{dpVariance-class}
+\alias{dpVariance}
 \title{Differentially private variance}
 \description{
 Differentially private variance

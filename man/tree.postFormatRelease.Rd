@@ -15,4 +15,3 @@ Noisy binary tree truncated at zero
 \description{
 Function to truncate negative noisy node counts at zero
 }
-

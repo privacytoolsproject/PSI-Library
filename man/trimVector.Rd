@@ -18,4 +18,3 @@ Trimmed vector
 \description{
 Function to trim lower and upper regions of a vector of values
 }
-

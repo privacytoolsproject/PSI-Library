@@ -21,4 +21,3 @@ Verifies that the variable is an element in the set of acceptable types.
 
 check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
 }
-

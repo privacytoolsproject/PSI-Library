@@ -2,12 +2,13 @@
 % Please edit documentation in R/DP-glm.R
 \docType{class}
 \name{dpGLM-class}
-\alias{dpGLM}
 \alias{dpGLM-class}
+\alias{dpGLM}
 \title{Differentially private generalized linear models}
 \description{
 Differentially private generalized linear models
 }
+
 \examples{
 
 data(PUMS5extract10000)
@@ -21,4 +22,3 @@ model <- dpGLM$new(mechanism='mechanismObjective', var.type='numeric',
 model$release(PUMS5extract10000)
 print(model$result)
 }
-

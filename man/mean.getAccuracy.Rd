@@ -22,4 +22,3 @@ Accuracy guarantee for mean release given epsilon.
 Function to find the accuracy guarantee of a mean release at a given epsilon 
 value.
 }
-

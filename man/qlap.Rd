@@ -23,4 +23,3 @@ Quantile function for Laplace distribution
 probs <- c(0.05, 0.50, 0.95)
 qlap(probs)
 }
-

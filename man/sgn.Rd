@@ -18,4 +18,3 @@ Function to determine what the sign of the passed values should be.
 \examples{
 sgn(rnorm(10))
 }
-

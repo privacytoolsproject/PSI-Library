@@ -2,8 +2,8 @@
 % Please edit documentation in R/mechanisms.R
 \docType{class}
 \name{mechanismLaplace-class}
-\alias{mechanismLaplace}
 \alias{mechanismLaplace-class}
+\alias{mechanismLaplace}
 \title{Laplace mechanism}
 \description{
 Laplace mechanism

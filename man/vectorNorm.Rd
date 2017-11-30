@@ -20,4 +20,3 @@ A vector of norms
 \description{
 Function to evaluate the p-norm of vectors in a matrix
 }
-

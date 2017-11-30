@@ -25,4 +25,3 @@ A binary tree in vector form
 \description{
 Function to evaluate a binary tree
 }
-

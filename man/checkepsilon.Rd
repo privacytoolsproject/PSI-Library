@@ -22,4 +22,3 @@ checkepsilon(0.1)
 \dontrun{checkepsilon(-2)}
 \dontrun{checkepsilon(c(0.1,0.5))}
 }
-

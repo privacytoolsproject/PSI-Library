@@ -15,4 +15,3 @@ Data frame
 \description{
 Convert the release from a table to a data frame
 }
-

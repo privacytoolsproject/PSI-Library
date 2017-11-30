@@ -23,4 +23,3 @@ Noisy node estimate
 \description{
 Function to estimate the nodes of a tree using noisy parent and adjacent nodes
 }
-

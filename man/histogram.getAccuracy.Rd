@@ -37,4 +37,3 @@ Accuracy guarantee for histogram release, given epsilon.
 Determine accuracy of histogram release, given epsilon and delta, for the differentially 
 private histogram release.
 }
-

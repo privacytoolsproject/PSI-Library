@@ -26,4 +26,3 @@ A numeric vector of regression coefficients corresponding
 Function to extract regression coefficients from the covariance matrix via 
    the sweep operator.
 }
-

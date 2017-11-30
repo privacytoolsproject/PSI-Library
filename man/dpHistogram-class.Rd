@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-histogram.R
 \docType{class}
 \name{dpHistogram-class}
-\alias{dpHistogram}
 \alias{dpHistogram-class}
+\alias{dpHistogram}
 \title{Differentially private histogram}
 \description{
 Differentially private histogram

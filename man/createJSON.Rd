@@ -9,4 +9,3 @@ createJSON()
 \description{
 Function to create JSON file defining differentially private statistics
 }
-

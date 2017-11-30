@@ -36,4 +36,3 @@ laplace_noise_repeatable <- dpNoise(n=1, scale=1, dist='laplace', seed=96845)
 \seealso{
 \code{\link{dpUnif}}
 }
-

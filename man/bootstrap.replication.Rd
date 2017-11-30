@@ -23,4 +23,3 @@ Value of the function applied to one bootstrap sample
 \description{
 Bootstrap replication for a function
 }
-

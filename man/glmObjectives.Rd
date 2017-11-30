@@ -12,4 +12,3 @@ glmObjectives
 List of objective functions support by \code{dpGLM}
 }
 \keyword{datasets}
-

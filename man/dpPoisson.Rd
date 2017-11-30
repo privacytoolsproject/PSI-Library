@@ -12,4 +12,3 @@ List with the name and objective function
 \description{
 Differentially private objective function for Poisson regression
 }
-

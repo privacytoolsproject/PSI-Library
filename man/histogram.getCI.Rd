@@ -25,4 +25,3 @@ Confidence interval for the noisy counts in each bin.
 Return the confidence interval for the differentially private histogram release given the
 accuracy.
 }
-

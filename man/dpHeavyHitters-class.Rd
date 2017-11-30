@@ -2,8 +2,8 @@
 % Please edit documentation in R/DP-heavyhitters.R
 \docType{class}
 \name{dpHeavyHitters-class}
-\alias{dpHeavyHitters}
 \alias{dpHeavyHitters-class}
+\alias{dpHeavyHitters}
 \title{Differentially private heavy hitters}
 \description{
 Differentially private heavy hitters

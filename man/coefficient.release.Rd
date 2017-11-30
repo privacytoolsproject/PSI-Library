@@ -18,4 +18,3 @@ Function to extract regression coefficients using the differentially private cov
    via the sweep operator. This is the function to obtain coefficients for additional models
    after the \code{covariance.release()} function has already been called.
 }
-

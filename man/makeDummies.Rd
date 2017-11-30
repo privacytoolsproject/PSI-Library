@@ -21,4 +21,3 @@ level represented by the indicator.
 \description{
 Function to convert factor variables to binary indicators
 }
-

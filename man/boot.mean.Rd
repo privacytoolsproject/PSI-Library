@@ -17,4 +17,3 @@ Mean
 \description{
 This function is used when the bootstrap mechanism is used
 }
-

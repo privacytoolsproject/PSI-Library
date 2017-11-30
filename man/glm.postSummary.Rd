@@ -22,4 +22,3 @@ Data frame summary statistics, including estimates and standard errors
 \description{
 Summary statistics for differentially private GLM via the bootstrap
 }
-

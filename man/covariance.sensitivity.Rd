@@ -23,4 +23,3 @@ The sensitivity of the data frame for which the covariance matrix
 \description{
 Function to get the sensitivity of the covariance matrix
 }
-
