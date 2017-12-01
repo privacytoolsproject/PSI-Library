@@ -332,8 +332,8 @@ mechanismObjective$methods(
         if (is.null(.self$n.boot)) {
             b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
             b <- dpNoise(n=length(start.params), scale=(-.self$epsilon * b.norm), dist='laplace')
-            estimates <- data.frame(optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n)$par)
-            release <- scaleRelease(estimates, scaler$max.norm, y.max.norm)
+            estimates <- optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n)$par
+            release <- data.frame(scaleRelease(estimates, scaler$max.norm, y.max.norm))
             names(release) <- 'estimate'
             rownames(release) <- X.names
         } else {
