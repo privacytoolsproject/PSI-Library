@@ -674,6 +674,26 @@ mapMatrixUnit <- function(X, p=1) {
 }
 
 
+#' Scale coefficient estimates
+#'
+#' This function puts coefficient estimates on the scale of the original features
+#'
+#' @param estimates Numeric, coefficient estimates vector.
+#' @param X.scaler Numeric, maximum norm from \code{mapMatrixUnit} fit on features.
+#' @param y.scaler Numeric, maximum norm from \code{mapMatrixUnit} fit on response,
+#'    default NULL.
+#' @return Transformed coefficients vector
+
+scaleRelease <- function(estimates, X.scaler, y.scaler=NULL) {
+    if (!is.null(y.scaler)) {
+        estimates <- estimates * y.scaler
+    }
+    p <- length(estimates)
+    estimates[2:p] <- estimates[2:p] / X.scaler
+    return(estimates)
+}
+
+
 #' Function to trim lower and upper regions of a vector of values
 #'
 #' @param vec Numeric vector
