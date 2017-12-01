@@ -12,7 +12,7 @@
 
 <meta name="author" content="James Honaker, Thomas Brawner, and Christian Baehr" />
 
-<meta name="date" content="2017-11-30" />
+<meta name="date" content="2017-12-01" />
 
 <title>Differentially Private Generalized Linear Models</title>
 
@@ -70,13 +70,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Differentially Private Generalized Linear Models</h1>
 <h4 class="author"><em>James Honaker, Thomas Brawner, and Christian Baehr</em></h4>
-<h4 class="date"><em>2017-11-30</em></h4>
+<h4 class="date"><em>2017-12-01</em></h4>
 
 
 
 <div id="differentially-private-generalized-linear-models-with-dpglm" class="section level2">
 <h2>Differentially Private Generalized Linear Models with <code>dpGLM</code></h2>
-<p>The <code>dpGLM</code> class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via <code>'ols'</code>, count variables via <code>'poisson'</code> objective, and binary variables via either <code>'logit'</code> or <code>'probit'</code>.</p>
+<p>The <code>dpGLM</code> class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via <code>'ols'</code>, count variables via <code>'poisson'</code>, and binary variables via either <code>'logit'</code> or <code>'probit'</code>.</p>
 <!-- 
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private versions of various statistics are available in this package.  For example, the `glm.release()` function releases coefficient estimates for a set of data after adding a precise about of noise to the objective function to guarantee `epsilon` differential privacy. 
 
@@ -85,22 +85,25 @@ The privacy loss parameter `epsilon` is chosen by the user and represents the de
 </div>
 <div id="syntax" class="section level2">
 <h2>Syntax</h2>
-<p>The minimal example below demonstrates a linear regression model fit via <code>dpGLM</code> using the <code>PUMS5extract10000</code> data. In this case, we fit a model of income as a linear function of education level and gender. First attach the data and specify the necessary metadata.</p>
+<p>The minimal example below demonstrates a linear regression model fit via <code>dpGLM</code> using the <code>PUMS5extract10000</code> data. In this case, we fit a model of income as a linear function of age and gender. First attach the data and specify the necessary metadata.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(PSIlence)
 <span class="kw">data</span>(PUMS5extract10000)
 
 n &lt;-<span class="st"> </span><span class="dv">10000</span>
 epsilon &lt;-<span class="st"> </span><span class="fl">0.5</span>
-form &lt;-<span class="st"> 'income ~ educ + sex'</span>
-rng &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">200000</span>, <span class="dv">1</span>, <span class="dv">16</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">ncol=</span><span class="dv">2</span>, <span class="dt">byrow=</span><span class="ot">TRUE</span>)
+form &lt;-<span class="st"> 'income ~ age + sex'</span>
+rng &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">200000</span>, <span class="dv">18</span>, <span class="dv">80</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">ncol=</span><span class="dv">2</span>, <span class="dt">byrow=</span><span class="ot">TRUE</span>)
 mechanism &lt;-<span class="st"> 'mechanismObjective'</span>
 var.type &lt;-<span class="st"> 'numeric'</span>
 objective &lt;-<span class="st"> 'ols'</span></code></pre></div>
+<p> </p>
 <p>Next, instantiate a <code>dpGLM</code> object using the metadata above.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span>dpGLM$<span class="kw">new</span>(<span class="dt">mechanism=</span>mechanism, <span class="dt">var.type=</span>var.type, <span class="dt">n=</span>n, <span class="dt">epsilon=</span>epsilon, 
                    <span class="dt">formula=</span>form, <span class="dt">rng=</span>rng, <span class="dt">objective=</span>objective)</code></pre></div>
+<p> </p>
 <p>Last, call the <code>release</code> method and provide the data frame where the variables in the formula are located.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">model$<span class="kw">release</span>(PUMS5extract10000)</code></pre></div>
+<p> </p>
 <p>At this point, the results are available on the <code>result</code> attribute on the object, which is a list containing elements including:</p>
 <ul>
 <li>the accuracy of the release (<code>$accuracy</code>);</li>
@@ -110,6 +113,7 @@ objective &lt;-<span class="st"> 'ols'</span></code></pre></div>
 </ul>
 <p>For the current example, view the full list of summary results as follows.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(model$result)</code></pre></div>
+<p> </p>
 <p>Or view only the private release by specifying the <code>release</code> attribute within <code>result</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(model$result$release)</code></pre></div>
 </div>
@@ -120,7 +124,7 @@ objective &lt;-<span class="st"> 'ols'</span></code></pre></div>
 <li><p><code>mechanism</code>  Character, the class name of the mechanism used to perturb the true estimate. For <code>dpGLM</code>, this is always <code>'mechanismObjective'</code>.</p></li>
 <li><p><code>var.type</code>  Character, the type of values in the data frame that will be passed to the mechanism. For <code>dpGLM</code>, the subset of columns in the data frame to be used in the model fit must be numeric types, and thus this argument should always be <code>'numeric'</code>.</p></li>
 <li><p><code>n</code>  Integer, the number of observations, or rows, in the data frame.</p></li>
-<li><p><code>rng</code>  Numeric, a <span class="math inline">\(p \times 2\)</span> matrix where each row is a 2-tuple giving an a priori estimate of the lower and upper bounds of the <span class="math inline">\(p^{\text{th}}\)</span> variable in the data frame.</p></li>
+<li><p><code>rng</code>  Numeric, a <span class="math inline">\(p \times 2\)</span> matrix where each row is a 2-tuple giving an a priori estimate of the lower and upper bounds of the <span class="math inline">\(p^{\text{th}}\)</span> variable in the data frame, including the response variable. Ranges should be entered in the order that they appear in the <code>formula</code>, such that for a formula <code>'y ~ x'</code>, the first row of <code>rng</code> should provide the lower and upper bounds on <code>y</code> and the second row should provide the lower and upper bounds on <code>x</code>.</p></li>
 <li><p><code>formula</code>  Character, the formula for the regression model. Note that the formula is converted to an R formula type internally, so this argument should be of type character.</p></li>
 <li><p><code>objective</code>  Character, the objective function to use in estimating the model. Available options are <code>'ols'</code>, <code>'poisson'</code>, <code>'logit'</code>, and <code>'probit'</code>.</p></li>
 <li><p><code>epsilon</code>  Numeric, the differential privacy parameter <span class="math inline">\(\epsilon\)</span>, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default <code>NULL</code>. If <code>NULL</code>, the user must specify a value for <code>accuracy</code>.</p></li>
@@ -153,14 +157,20 @@ objective &lt;-<span class="st"> 'ols'</span></code></pre></div>
 </div>
 <div id="examples" class="section level2">
 <h2>Examples</h2>
-<p>To fit a linear regression model via <code>dpGLM</code>.</p>
+<p>Fit a linear model of income as a function of age and gender. The output from <code>lm</code> is below.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(PSIlence)
 <span class="kw">data</span>(PUMS5extract10000)
 
-n &lt;-<span class="st"> </span><span class="dv">10000</span>
+form &lt;-<span class="st"> 'income ~ age + sex'</span>
+true.fit &lt;-<span class="st"> </span><span class="kw">lm</span>(form, <span class="dt">data=</span>PUMS5extract10000)
+<span class="kw">print</span>(<span class="kw">coef</span>(true.fit))</code></pre></div>
+<pre><code>## (Intercept)         age         sex 
+##  27862.7260    278.2915 -18148.0587</code></pre>
+<p> </p>
+<p>Fit a private linear regression model via <code>dpGLM</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n &lt;-<span class="st"> </span><span class="dv">10000</span>
 epsilon &lt;-<span class="st"> </span><span class="fl">0.5</span>
-form &lt;-<span class="st"> 'income ~ educ + sex'</span>
-rng &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">200000</span>, <span class="dv">1</span>, <span class="dv">16</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">ncol=</span><span class="dv">2</span>, <span class="dt">byrow=</span><span class="ot">TRUE</span>)
+rng &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">200000</span>, <span class="dv">18</span>, <span class="dv">80</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="dt">ncol=</span><span class="dv">2</span>, <span class="dt">byrow=</span><span class="ot">TRUE</span>)
 mechanism &lt;-<span class="st"> 'mechanismObjective'</span>
 var.type &lt;-<span class="st"> 'numeric'</span>
 objective &lt;-<span class="st"> 'ols'</span>
@@ -170,11 +180,11 @@ model &lt;-<span class="st"> </span>dpGLM$<span class="kw">new</span>(<span clas
 model$<span class="kw">release</span>(PUMS5extract10000)
 <span class="kw">print</span>(model$result)</code></pre></div>
 <pre><code>## $release
-##             estimate
-## intercept -0.6297746
-## sex        0.1163045
-## educ       0.1767567
-## var        0.9705086
+##               estimate
+## intercept   25547.7695
+## age           274.4571
+## sex        -16364.3457
+## variance  -283224.0591
 ## 
 ## $accuracy
 ## [1] 0.0005991465
@@ -182,39 +192,34 @@ model$<span class="kw">release</span>(PUMS5extract10000)
 ## $epsilon
 ## [1] 0.5</code></pre>
 <p> </p>
-<p>Alternatively, use the bootstrap.</p>
+<p>Alternatively, use the bootstrap, in which case the release returns a data frame with each row corresponding to a single bootstrap replication, and a separate summary is provided.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">n.boot &lt;-<span class="st"> </span><span class="dv">20</span>
-model.boot &lt;-<span class="st"> </span>dpGLM$<span class="kw">new</span>(<span class="dt">mechanism=</span>mechanism, <span class="dt">var.type=</span>var.type, <span class="dt">n=</span>n, <span class="dt">epsilon=</span>epsilon, 
-                       <span class="dt">formula=</span>form, <span class="dt">rng=</span>rng, <span class="dt">objective=</span>objective, <span class="dt">n.boot=</span>n.boot)
-model.boot$<span class="kw">release</span>(PUMS5extract10000)</code></pre></div>
-<pre><code>##             Estimate Std. Error CI95 Lower CI95 Upper
-## intercept -0.6297746          0 -0.6297746 -0.6297746
-## sex        0.1163045          0  0.1163045  0.1163045
-## educ       0.1767567          0  0.1767567  0.1767567
-## var        0.9705086          0  0.9705086  0.9705086</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(model.boot$result)</code></pre></div>
+boot.model &lt;-<span class="st"> </span>dpGLM$<span class="kw">new</span>(<span class="dt">mechanism=</span>mechanism, <span class="dt">var.type=</span>var.type, <span class="dt">n=</span>n, <span class="dt">epsilon=</span>epsilon, 
+                   <span class="dt">formula=</span>form, <span class="dt">rng=</span>rng, <span class="dt">objective=</span>objective, <span class="dt">n.boot=</span>n.boot)
+boot.model$<span class="kw">release</span>(PUMS5extract10000)
+<span class="kw">print</span>(boot.model$result)</code></pre></div>
 <pre><code>## $release
-##     intercept       sex      educ       var
-## 1  -0.6297746 0.1163045 0.1767567 0.9705086
-## 2  -0.6297746 0.1163045 0.1767567 0.9705086
-## 3  -0.6297746 0.1163045 0.1767567 0.9705086
-## 4  -0.6297746 0.1163045 0.1767567 0.9705086
-## 5  -0.6297746 0.1163045 0.1767567 0.9705086
-## 6  -0.6297746 0.1163045 0.1767567 0.9705086
-## 7  -0.6297746 0.1163045 0.1767567 0.9705086
-## 8  -0.6297746 0.1163045 0.1767567 0.9705086
-## 9  -0.6297746 0.1163045 0.1767567 0.9705086
-## 10 -0.6297746 0.1163045 0.1767567 0.9705086
-## 11 -0.6297746 0.1163045 0.1767567 0.9705086
-## 12 -0.6297746 0.1163045 0.1767567 0.9705086
-## 13 -0.6297746 0.1163045 0.1767567 0.9705086
-## 14 -0.6297746 0.1163045 0.1767567 0.9705086
-## 15 -0.6297746 0.1163045 0.1767567 0.9705086
-## 16 -0.6297746 0.1163045 0.1767567 0.9705086
-## 17 -0.6297746 0.1163045 0.1767567 0.9705086
-## 18 -0.6297746 0.1163045 0.1767567 0.9705086
-## 19 -0.6297746 0.1163045 0.1767567 0.9705086
-## 20 -0.6297746 0.1163045 0.1767567 0.9705086
+##    intercept      age       sex  variance
+## 1   24963.89 293.2775 -16286.73 -283066.4
+## 2   25855.79 274.1111 -16768.86 -282816.4
+## 3   25790.16 279.0794 -16973.53 -282991.7
+## 4   26253.03 259.4889 -16208.71 -282616.4
+## 5   26248.15 256.2954 -16159.52 -283121.0
+## 6   25608.43 279.9674 -16219.19 -283400.6
+## 7   24375.99 283.2741 -14956.31 -283888.1
+## 8   25139.30 314.9878 -17430.51 -282659.0
+## 9   25373.11 264.7039 -15796.24 -283374.8
+## 10  26026.78 262.3329 -15522.28 -284375.3
+## 11  24751.83 272.5445 -15786.83 -283567.3
+## 12  25887.12 270.6432 -16385.03 -282943.9
+## 13  23800.38 296.5415 -15617.66 -283456.1
+## 14  26238.12 264.2944 -16608.20 -282765.6
+## 15  25836.70 276.5988 -16477.34 -282472.3
+## 16  25189.45 298.4251 -17294.54 -283318.7
+## 17  25930.01 265.7568 -16113.80 -282161.4
+## 18  25986.61 245.3377 -15244.51 -283327.9
+## 19  25295.92 272.4874 -14949.83 -282907.6
+## 20  23665.03 299.4152 -14915.66 -281828.2
 ## 
 ## $accuracy
 ## [1] 0.0005991465
@@ -224,13 +229,13 @@ model.boot$<span class="kw">release</span>(PUMS5extract10000)</code></pre></div>
 ## 
 ## $summary
 ## $summary$coefficients
-##             Estimate Std. Error CI95 Lower CI95 Upper
-## intercept -0.6297746          0 -0.6297746 -0.6297746
-## sex        0.1163045          0  0.1163045  0.1163045
-## educ       0.1767567          0  0.1767567  0.1767567
+##              Estimate Std. Error  CI95 Lower  CI95 Upper
+## intercept  25460.9857  666.23182  26243.8847  24045.0115
+## age          276.0688   13.55554    298.9944    257.6526
+## sex       -16076.0622  654.98529 -14952.5846 -17158.1125
 ## 
 ## $summary$variance
-## [1] 0.9705086</code></pre>
+## [1] -283047.5</code></pre>
 <!--
 Output Values
 ------

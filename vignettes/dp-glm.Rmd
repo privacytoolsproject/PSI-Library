@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 Differentially Private Generalized Linear Models with `dpGLM`
 -------------------------------------------------------------
 
-The `dpGLM` class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via `'ols'`, count variables via `'poisson'` objective, and binary variables via either `'logit'` or `'probit'`. 
+The `dpGLM` class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via `'ols'`, count variables via `'poisson'`, and binary variables via either `'logit'` or `'probit'`. 
 
 <!-- 
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private versions of various statistics are available in this package.  For example, the `glm.release()` function releases coefficient estimates for a set of data after adding a precise about of noise to the objective function to guarantee `epsilon` differential privacy. 
@@ -33,7 +33,7 @@ The privacy loss parameter `epsilon` is chosen by the user and represents the de
 Syntax
 ------
 
-The minimal example below demonstrates a linear regression model fit via `dpGLM` using the `PUMS5extract10000` data. In this case, we fit a model of income as a linear function of education level and gender. First attach the data and specify the necessary metadata.
+The minimal example below demonstrates a linear regression model fit via `dpGLM` using the `PUMS5extract10000` data. In this case, we fit a model of income as a linear function of age and gender. First attach the data and specify the necessary metadata.
 
 ```{r, eval = FALSE}
 library(PSIlence)
@@ -41,13 +41,14 @@ data(PUMS5extract10000)
 
 n <- 10000
 epsilon <- 0.5
-form <- 'income ~ educ + sex'
-#rng <- matrix(c(0, 200000, 1, 16, 0, 1), ncol=2, byrow=TRUE)
-rng <- matrix(c(1, 16, 0, 1), ncol=2, byrow=TRUE)
+form <- 'income ~ age + sex'
+rng <- matrix(c(0, 200000, 18, 80, 0, 1), ncol=2, byrow=TRUE)
 mechanism <- 'mechanismObjective'
 var.type <- 'numeric'
 objective <- 'ols'
 ```
+
+&nbsp;
 
 Next, instantiate a `dpGLM` object using the metadata above.
 
@@ -56,11 +57,15 @@ model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon,
                    formula=form, rng=rng, objective=objective)
 ```
 
+&nbsp;
+
 Last, call the `release` method and provide the data frame where the variables in the formula are located.
 
 ```{r, eval = FALSE}
 model$release(PUMS5extract10000)
 ```
+
+&nbsp;
 
 At this point, the results are available on the `result` attribute on the object, which is a list containing elements including:
 
@@ -74,6 +79,8 @@ For the current example, view the full list of summary results as follows.
 ```{r, eval = FALSE}
 print(model$result)
 ```
+
+&nbsp;
 
 Or view only the private release by specifying the `release` attribute within `result`.
 
@@ -93,7 +100,7 @@ In typical usage, there are two methods to the `dpGLM` class. The `new` method, 
 
 * `n` \ Integer, the number of observations, or rows, in the data frame.
 
-* `rng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving an a priori estimate of the lower and upper bounds of the $p^{\text{th}}$ variable in the data frame.
+* `rng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving an a priori estimate of the lower and upper bounds of the $p^{\text{th}}$ variable in the data frame, including the response variable. Ranges should be entered in the order that they appear in the `formula`, such that for a formula `'y ~ x'`, the first row of `rng` should provide the lower and upper bounds on `y` and the second row should provide the lower and upper bounds on `x`.
 
 * `formula` \ Character, the formula for the regression model. Note that the formula is converted to an R formula type internally, so this argument should be of type character.
 
@@ -137,14 +144,48 @@ The list in the `result` attribute has the following values.
 
 
 Examples
-------
+--------
 
-To fit a linear regression model via `dpGLM`.
+Fit a linear model of income as a function of age and gender. The output from `lm` is below.
 
+```{r}
+library(PSIlence)
+data(PUMS5extract10000)
+
+form <- 'income ~ age + sex'
+true.fit <- lm(form, data=PUMS5extract10000)
+print(coef(true.fit))
+```
+
+&nbsp;
+
+Fit a private linear regression model via `dpGLM`.
+
+```{r}
+n <- 10000
+epsilon <- 0.5
+rng <- matrix(c(0, 200000, 18, 80, 0, 1), ncol=2, byrow=TRUE)
+mechanism <- 'mechanismObjective'
+var.type <- 'numeric'
+objective <- 'ols'
+
+model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
+                   formula=form, rng=rng, objective=objective)
+model$release(PUMS5extract10000)
+print(model$result)
+```
 
 &nbsp; 
 
-Alternatively, use the bootstrap.
+Alternatively, use the bootstrap, in which case the release returns a data frame with each row corresponding to a single bootstrap replication, and a separate summary is provided.
+
+```{r}
+n.boot <- 20
+boot.model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
+                   formula=form, rng=rng, objective=objective, n.boot=n.boot)
+boot.model$release(PUMS5extract10000)
+print(boot.model$result)
+```
 
 <!--
 Output Values
