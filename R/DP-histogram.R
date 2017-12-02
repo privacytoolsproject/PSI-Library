@@ -264,8 +264,6 @@ dpHistogram$methods(
                # noisy$release <- noisy$release[noisy$release >= a]
                #JM changed to below after conversation with Victor
                a <- 1+2*log(2/delta)/epsilon 
-              # noisy$release[noisy$release <= a] <- 0
-               #if not allowed to release names of zero bin counts, use below:
                noisy$release <- noisy$release[noisy$release > a]
                 
             }
