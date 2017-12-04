@@ -4,7 +4,7 @@
 \alias{mean.getAccuracy}
 \title{Mean accuracy}
 \usage{
-\method{mean}{getAccuracy}(epsilon, n, alpha = 0.05, rng)
+\method{mean}{getAccuracy}(epsilon, n, rng, alpha = 0.05)
 }
 \arguments{
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
@@ -12,6 +12,8 @@ Should be of length one and should be between zero and one.}
 
 \item{n}{A numeric vector of length one specifying the number of
 observations in the vector calculating the mean for.}
+
+\item{rng}{Numeric a priori estimate of the range}
 
 \item{alpha}{A numeric vector specifying the statistical significance level.}
 }

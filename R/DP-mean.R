@@ -8,6 +8,7 @@
 #'    
 #' @return Standard deviation of the logical variable
 #' @rdname mean.postStandardDeviation
+
 mean.postStandardDeviation <- function(release) {
     sd <- sqrt(release * (1 - release))
     return(sd)
@@ -24,6 +25,7 @@ mean.postStandardDeviation <- function(release) {
 #'
 #' @return Median of the logical variable
 #' @rdname mean.postMedian
+
 mean.postMedian <- function(release) {
     m <- ifelse(release < 0.5, 0, 1)
     return(m)
@@ -39,6 +41,7 @@ mean.postMedian <- function(release) {
 #'
 #' @return Data frame, histogram of the logical variable
 #' @rdname mean.postHistogram
+
 mean.postHistogram <- function(release, n) {
     ones <- round(release * n)
     histogram <- data.frame(matrix(c(n - ones, ones), ncol=2))
@@ -56,14 +59,16 @@ mean.postHistogram <- function(release, n) {
 #'    Should be of length one and should be between zero and one.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the vector calculating the mean for.
+#' @param rng Numeric a priori estimate of the range
 #' @param alpha A numeric vector specifying the statistical significance level.
+#' @return Accuracy guarantee for mean release given epsilon.
 #' 
 #' @export mean.getAccuracy
-#' @return Accuracy guarantee for mean release given epsilon.
 #' @rdname mean.getAccuracy
-mean.getAccuracy <- function(epsilon, n, alpha=0.05, rng) {
-	range <- max(rng)-min(rng)
-    accuracy <- log(1 / alpha)*range/ (n * epsilon)
+
+mean.getAccuracy <- function(epsilon, n, rng, alpha=0.05) {
+    rng <- checkrange(rng)
+    accuracy <- log(1 / alpha) * diff(rng) / (n * epsilon)
     return(accuracy)
 }
 
@@ -77,14 +82,16 @@ mean.getAccuracy <- function(epsilon, n, alpha=0.05, rng) {
 #'    guarantee (percent).
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the vector calculating the mean for.
+#' @param rng Numeric a priori estimate of the range
 #' @param alpha A numeric vector specifying the statistical significance level.
+#' @return The scalar epsilon necessary to guarantee the needed accuracy.
 #' 
 #' @export mean.getParameters
-#' @return The scalar epsilon necessary to guarantee the needed accuracy.
 #' @rdname mean.getParameters
-mean.getParameters <- function(accuracy, n, alpha=0.05, rng) {
-	range <- max(rng)-min(rng)
-    epsilon <- log(1 / alpha)*range / (n * accuracy)
+
+mean.getParameters <- function(accuracy, n, rng, alpha=0.05) {
+    rng <- checkrange(rng)
+    epsilon <- log(1 / alpha) * diff(rng) / (n * accuracy)
     return(epsilon)
 }
 
@@ -100,8 +107,11 @@ mean.getParameters <- function(accuracy, n, alpha=0.05, rng) {
 #' @param sensitivity The difference of the range of the data divided 
 #'    by \code{n}.
 #' @param alpha A numeric vector specifying the statistical significance level.
-#' 
 #' @return Confidence bounds for differentially private mean release.
+#'
+#' @export mean.getCI
+#' @rdname mean.getCI
+
 mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
     z <- qlap((1 - (alpha / 2)), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
@@ -118,6 +128,7 @@ mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
 #'
 #' @return JSON for mean function
 #' @rdname mean.getJSON
+
 mean.getJSON <- function(output.json=TRUE) {
     out <- list()
     out$statistic <- 'Mean'
@@ -157,6 +168,20 @@ boot.mean <- function(xi, n) {
 
 #' Differentially private mean
 #'
+#' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
+#'   of \code{c('mechanismLaplace', 'mechanismBootstrap')}.
+#' @param var.type Character, the R variable type. One of \code{c('numeric',
+#'   'integer', 'logical')}.
+#' @param n Integer, number of observations
+#' @param rng Numeric, a priori estimate of the range
+#' @param epsilon Numeric, privacy cost parameter
+#' @param accuracy Numeric, accuracy guarantee given \code{epsilon}
+#' @param impute.rng Numeric, range within which missing values are imputed. If \code{NULL},
+#'   the range provided in \code{rng} is used.
+#' @param alpha Numeric, the level of statistical significance. Default 0.05.
+#' @param n.boot Integer, the number of bootstrap replications if using the bootstrap
+#'   bootstrap mechanism, ignored otherwise. Default 20.
+#'
 #' @import methods
 #' @export dpMean
 #' @exportClass dpMean
@@ -179,10 +204,10 @@ dpMean$methods(
         .self$rng <- rng
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- mean.getParameters(accuracy, n, alpha, rng)
+            .self$epsilon <- mean.getParameters(accuracy, n, rng, alpha)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- mean.getAccuracy(epsilon, n, alpha, rng)
+            .self$accuracy <- mean.getAccuracy(epsilon, n, rng, alpha)
         }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng

@@ -4,7 +4,7 @@
 \alias{mean.getParameters}
 \title{Mean epsilon}
 \usage{
-\method{mean}{getParameters}(accuracy, n, alpha = 0.05, rng)
+\method{mean}{getParameters}(accuracy, n, rng, alpha = 0.05)
 }
 \arguments{
 \item{accuracy}{A numeric vector representing the accuracy needed to 
@@ -12,6 +12,8 @@ guarantee (percent).}
 
 \item{n}{A numeric vector of length one specifying the number of
 observations in the vector calculating the mean for.}
+
+\item{rng}{Numeric a priori estimate of the range}
 
 \item{alpha}{A numeric vector specifying the statistical significance level.}
 }
