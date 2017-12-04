@@ -303,7 +303,7 @@ mechanismObjective$methods(
 
         # extract X and y
         y <- x[, cols[1]]
-        X <- x[, cols[2:length(cols)]]
+        X <- x[, cols[2:length(cols)], drop=FALSE]
         X.names <- names(X)
 
         # scale inputs s.t. max Euclidean norm <= 1
