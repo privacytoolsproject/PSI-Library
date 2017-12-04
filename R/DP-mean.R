@@ -170,7 +170,7 @@ dpMean <- setRefClass(
 
 dpMean$methods(
     initialize = function(mechanism, var.type, n, rng, epsilon=NULL, accuracy=NULL, 
-                          impute.rng=NULL, alpha=0.05, boot.fun=boot.mean, ...) {
+                          impute.rng=NULL, alpha=0.05, n.boot=20, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -189,7 +189,8 @@ dpMean$methods(
         } else {
             .self$impute.rng <- impute.rng
         }
-        .self$boot.fun <- boot.fun
+        .self$boot.fun <- boot.mean
+        .self$n.boot <- n.boot
 })
 
 
