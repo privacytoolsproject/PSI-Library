@@ -90,6 +90,9 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6,
 #' @rdname histogram.getCI
 histogram.getCI <- function(release, n.bins, n, accuracy) {
     release <- as.numeric(release)
+    if (all(release == 0)) {
+        return(NULL)
+    }
     accxn <- accuracy * n
     out <- list()
     for (k in 1:n.bins) {
