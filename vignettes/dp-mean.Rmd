@@ -37,11 +37,13 @@ Syntax
 
 ```{r, eval = FALSE}
 mydata <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', epsilon=0.1, n=10, rng=c(0, 70))
+dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
+                      epsilon=0.1, n=10, rng=c(0, 70))
 dp.mean$release(mydata)
 
 mydata2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
-dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', epsilon=0.5, n=10, rng=c(0, 1))
+dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+                       epsilon=0.1, n=10, rng=c(0, 1))
 dp.mean2$release(mydata2)
 ```
 
@@ -78,36 +80,71 @@ The `release` method accepts a single argument.
 Examples
 ------
 
-### Basic Example
-
-Attaching the sample dataset:
-
-```{r, eval = TRUE}
-data(PUMS5extract10000, package = "PSIlence")
-data <- PUMS5extract10000
-```
-
-Calculating the differentially private mean of a numeric vector with `dpMean`:
+Attach the sample dataset. 
 
 ```{r, eval = TRUE}
 library(PSIlence)
+data(PUMS5extract10000)
+```
+
+&nbsp;
+
+Calculate a private mean of a numeric vector with `dpMean` using the Laplace mechanism:
+
+```{r}
 numeric_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
-                           n=10000, epsilon=0.01, rng=c(0, 750000))
-numeric_mean$release(data$income)
+                           n=10000, epsilon=0.1, rng=c(0, 750000))
+numeric_mean$release(PUMS5extract10000$income)
 print(numeric_mean$result)
 ```
 
-To calculate the mean of a logical vector instead, input a logical vector into `x` and update `var.type` and `rng`:
+&nbsp;
 
-```{r, eval = TRUE}
-library(PSIlence)
+To calculate the mean of a logical vector instead, input a logical vector into `x` and update `var.type` and `rng` appropriately:
+
+```{r}
 logical_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
-                           n=10000, epsilon=0.01, rng=c(0, 1))
-logical_mean$release(data$married)
+                           n=10000, epsilon=0.1, rng=c(0, 1))
+logical_mean$release(PUMS5extract10000$married)
 print(logical_mean$result)
 ```
 
-Output Values
+&nbsp;
+
+Use the bootstrap mechanism in place of the Laplace mechanism. In this case, `dpMean` returns an estimate for each of the bootstrap replications along with estimates for the standard error.
+
+```{r}
+n.boot <- 25
+boot_mean <- dpMean$new(mechanism='mechanismBootstrap', var.type='numeric', 
+                           n=10000, epsilon=0.1, rng=c(0, 750000), n.boot=n.boot)
+boot_mean$release(PUMS5extract10000$income)
+print(boot_mean$result)
+```
+
+&nbsp; 
+
+Using the result, we can obtain a bagged estimate of the mean.
+
+```{r}
+print(mean(boot_mean$result$release))
+```
+
+Values
 ------
 
-The `release` method makes a call to the mechanism, which generates a list of statistical summaries on the `result` field.
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. Other elements reflecting variable post-processing of the release.
+
+&nbsp; 
+
+The list in the `result` attribute has the following values.
+
+* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e., vector of length `n.boot`).
+* `accuracy` \ The accuracy guarantee of the release given `epsilon`.
+* `epsilon` \ The privacy cost required to guarantee `accuracy`.
+* `interval` \ Confidence interval of the private estimate given `accuracy`.
+* `std.dev` \ The standard deviation of the vector. Only available for logical vectors.
+* `median` \ The median of the vector. Only available for logical vectors.
+* `histogram` \ The histogram of the vector. Only available for logical vectors.
+* `std.error` \ Estimates of the standard error of the mean. Only available when the bootstrap mechanism is used.
