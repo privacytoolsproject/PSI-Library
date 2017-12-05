@@ -64,6 +64,23 @@ tree.postCDF <- function(release, rng, terminal.index) {
 }
 
 
+#' Function to evaluate the mean using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @param rng Numeric a priori estimate of the range
+#' @param gran Granularity
+#' @return Differentially private estimate of the mean
+
+tree.postMean <- function(cdf, rng) {
+    ecdf <- cdf$cdf
+    cdf.steps <- seq(rng[1], rng[2], length.out=length(ecdf))
+    pdf <- sapply(2:length(ecdf), function(i) ecdf[i] - ecdf[i - 1])
+    p <- c(ecdf[1], pdf) * cdf.steps 
+    return(sum(p))
+}
+
+
 #' Function to evaluate the median using the DP CDF
 #'
 #' @param cdf Differentially private estimate of the empirical cumulative
@@ -187,6 +204,7 @@ dpTree$methods(
         out$release <- do.call(tree.postEfficient, c(list(release=out$release, tree.data=tree.data, n=n), ellipsis.vals))
         ellipsis.vals <- getFuncArgs(list(...), tree.postCDF)
         out$cdf <- do.call(tree.postCDF, c(list(release=out$release, rng=rng), ellipsis.vals))
+        out$mean <- tree.postMean(out$cdf, rng)
         out$median <- tree.postMedian(out$cdf)
         out$accuracy <- .self$accuracy
         out$epsilon <- .self$epsilon
