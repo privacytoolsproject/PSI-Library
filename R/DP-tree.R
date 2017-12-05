@@ -74,9 +74,8 @@ tree.postCDF <- function(release, rng, terminal.index) {
 
 tree.postMean <- function(cdf, rng) {
     ecdf <- cdf$cdf
-    cdf.steps <- seq(rng[1], rng[2], length.out=length(ecdf))
     pdf <- sapply(2:length(ecdf), function(i) ecdf[i] - ecdf[i - 1])
-    p <- c(ecdf[1], pdf) * cdf.steps 
+    p <- c(ecdf[1], pdf) * cdf$val
     return(sum(p))
 }
 
