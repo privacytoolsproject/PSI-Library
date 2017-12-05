@@ -90,9 +90,6 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6,
 #' @rdname histogram.getCI
 histogram.getCI <- function(release, n.bins, n, accuracy) {
     release <- as.numeric(release)
-    if (all(release == 0)) {
-        return(NULL)
-    }
     accxn <- accuracy * n
     out <- list()
     for (k in 1:n.bins) {
@@ -282,8 +279,9 @@ dpHistogram$methods(
         out$release <- histogram.formatRelease(out$release)
         out$accuracy <- accuracy
         out$epsilon <- epsilon
-        # CI will cause errors if stability zeroed out all of the counts. Figure out the right fix before unblockin
-       #	out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy) 
+        if (length(out$release) > 0) {
+            out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+        }
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
         }
