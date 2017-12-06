@@ -923,3 +923,88 @@ binaryTree <- function(x, n, rng, gran, universe.size, depth) {
     }
     return(tree)
 }
+
+
+#' Create fields that are known based on type
+#' @param v an empty list needing initialization
+#' @param r a release object for that variable
+#' @param varname name of variable 
+
+createfields <- function(v,r, varname){
+
+    print(r$var.type)
+
+    if(r$var.type %in% c('factor', 'character')){
+        v$plottype <- "continuous"
+        v$varnamesSumStat <- varname
+
+    } else if (r$var.type == "logical"){
+        v$plottype <- "bar"
+        v$varnamesSumStat <- varname
+        v$uniques <- 2
+
+    } else if (r$var.type %in% c('factor', 'character')){
+        v$plottype <- "bar"
+        v$varnamesSumStat <- varname
+    }
+    return(v)
+}
+
+#' Fill in any fields available from release
+#' @param v a copy of the current metadata for a variable
+#' @param r the additional released information for the variable
+
+fillfields <- function(v,r){
+
+    keys <- names(r$result)
+    for(i in keys){
+        v[[i]] <- unname(r$result[i])  # will overwrite rather than duplicate if field already exists
+    }
+    print(v)
+    return(v)
+}
+
+
+# Create json file of metadata from list of release objects
+#' @param names vector of names of variable names matching to release list
+#' @param release a list of release objects
+
+release2json <- function(names, release){
+
+    unique.names  <- unique(names)
+
+    p <- length(unique.names)
+    k <- length(release)
+
+    variables <- vector("list", p)
+    names(variables) <- unique.names
+
+    initialized <- rep(FALSE, p)
+    names(initialized) <- unique.names
+
+    for(i in 1:k){
+        att <- names[i]
+
+        if(!initialized[[att]]){
+            variables[[att]] <- createfields(variables[[att]], release[[i]], att)
+        }
+
+        variables[[att]] <- fillfields(variables[[att]], release[[i]])
+
+    }
+
+
+    dataset_metadata<-list()
+    dataset_metadata$private <- TRUE
+
+    releasedMetadata <- list(dataset=dataset_metadata, variables=variables)
+
+    result <- jsonlite:::toJSON(releasedMetadata, digits=8)
+
+    return(result)
+
+}
+
+
+
+
