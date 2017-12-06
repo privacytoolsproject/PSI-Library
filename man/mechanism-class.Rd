@@ -15,6 +15,8 @@ Base mechanism class
 
 \item{\code{name}}{Name of the statistic}
 
+\item{\code{variable}}{Name of the variable}
+
 \item{\code{var.type}}{Variable type}
 
 \item{\code{var.type.orig}}{Variable type at instantiation}
