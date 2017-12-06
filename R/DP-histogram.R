@@ -257,6 +257,8 @@ dpHistogram$methods(
 
 dpHistogram$methods(
     release = function(x) {
+        v <- eval(deparse(substitute(x)), parent.frame())
+        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
         if (stability) {
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
@@ -276,6 +278,7 @@ dpHistogram$methods(
 
 dpHistogram$methods(
     postProcess = function(out) {
+        out$variable <- variable
         out$release <- histogram.formatRelease(out$release)
         out$accuracy <- accuracy
         out$epsilon <- epsilon

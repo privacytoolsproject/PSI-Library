@@ -84,11 +84,14 @@ dpHeavyHitters$methods(
 
 dpHeavyHitters$methods(
     release = function(x) {
+        v <- eval(deparse(substitute(x)), parent.frame())
+        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
         .self$result <- export(mechanism)$evaluate(fun.heavy, x, 2, .self$postProcess)
 })
 
 dpHeavyHitters$methods(
     postProcess = function(out, gap) {
+        out$variable <- variable
         out$accuracy <- heavyhitters.getAccuracy(gap, epsilon, delta)
         out$epsilon <- heavyhitters.getParameters(gap, delta, alpha)
 })

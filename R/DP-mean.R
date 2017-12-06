@@ -206,8 +206,11 @@ dpMean$methods(
             .self$accuracy <- accuracy
             .self$epsilon <- mean.getParameters(accuracy, n, rng, alpha)
         } else {
+            print('ok')
             .self$epsilon <- epsilon
+            print(epsilon)
             .self$accuracy <- mean.getAccuracy(epsilon, n, rng, alpha)
+            print(accuracy)
         }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
@@ -221,12 +224,15 @@ dpMean$methods(
 
 dpMean$methods(
     release = function(x, ...) {
+        v <- eval(deparse(substitute(x)), parent.frame())
+        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
         sens <- diff(rng) / n
         .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
 })
 
 dpMean$methods(
     postProcess = function(out) {
+        out$variable <- variable
         if (mechanism == 'mechanismLaplace') {
             out$accuracy <- accuracy
             out$epsilon <- epsilon

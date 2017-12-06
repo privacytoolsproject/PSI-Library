@@ -151,6 +151,7 @@ dpCovariance$methods(
 dpCovariance$methods(
     postProcess = function(out, columns, formula, intercept) {
         out$release <- covariance.formatRelease(out$release, columns)
+        out$variable <- columns
         if (!is.null(formula)) {
             out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)
         }

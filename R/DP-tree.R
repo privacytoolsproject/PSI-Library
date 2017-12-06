@@ -179,6 +179,8 @@ dpTree$methods(
 
 dpTree$methods(
     release = function(x) {
+        v <- eval(deparse(substitute(x)), parent.frame())
+        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
         sens <- 2 * log2(diff(rng) / gran + 1)
         variance <- 2 * sens / epsilon
         universe.size <- floor(diff(rng) / gran + 1)
@@ -198,6 +200,7 @@ dpTree$methods(
 
 dpTree$methods(
     postProcess = function(out, ...) {
+        out$variable <- variable
         out$release <- tree.postFormatRelease(out$release)
         ellipsis.vals <- getFuncArgs(list(...), tree.postEfficient)
         out$release <- do.call(tree.postEfficient, c(list(release=out$release, tree.data=tree.data, n=n), ellipsis.vals))

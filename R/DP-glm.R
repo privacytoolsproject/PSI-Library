@@ -9,6 +9,7 @@
 #'
 #' @return Accuracy guarantee for GLM release
 #' @rdname glm.getAccuracy
+#' @export
 
 glm.getAccuracy <- function(epsilon, n, alpha) {
     accuracy <- log(1 / alpha) / (n * epsilon)
@@ -27,6 +28,7 @@ glm.getAccuracy <- function(epsilon, n, alpha) {
 #' 
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 #' @rdname glm.getParameters
+#' @export
 
 glm.getParameters <- function(accuracy, n, alpha) {
     epsilon <- log(1 / alpha) / (n * accuracy)
@@ -200,6 +202,7 @@ dpGLM$methods(
 
 dpGLM$methods(
     postProcess = function(out) {
+        out$variable <- all.vars(as.formula(formula))
         out$accuracy <- accuracy
         out$epsilon <- epsilon
         if (!is.null(n.boot)) {

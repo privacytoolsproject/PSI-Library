@@ -44,12 +44,15 @@ dpVariance$methods(
 
 dpVariance$methods(
     release = function(x) {
+        v <- eval(deparse(substitute(x)), parent.frame())
+        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
         sens <- (n - 1) / n^2 * diff(rng)^2
         .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
 })
 
 dpVariance$methods(
     postProcess = function(out) {
+        out$variable <- variable
         out$std <- sqrt(out$release)
         return(out)
 })
