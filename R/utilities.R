@@ -1004,7 +1004,3 @@ release2json <- function(names, release){
     return(result)
 
 }
-
-
-
-

@@ -6,6 +6,7 @@
 #'
 #' @field mechanism Name of the mechanism
 #' @field name Name of the statistic
+#' @field variable Name of the variable
 #' @field var.type Variable type
 #' @field var.type.orig Variable type at instantiation
 #' @field n Number of observations
@@ -37,6 +38,7 @@ mechanism <- setRefClass(
     fields = list(
         mechanism = 'character',
         name = 'character',
+        variable = 'character',
         var.type = 'character',
         var.type.orig = 'character',
         n = 'numeric',
@@ -85,7 +87,6 @@ mechanism$methods(
         }
         return(spec)
 })
-
 
 #' Laplace mechanism
 #'
