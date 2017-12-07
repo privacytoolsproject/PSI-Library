@@ -206,11 +206,8 @@ dpMean$methods(
             .self$accuracy <- accuracy
             .self$epsilon <- mean.getParameters(accuracy, n, rng, alpha)
         } else {
-            #print('ok')
             .self$epsilon <- epsilon
-            #print(epsilon)
             .self$accuracy <- mean.getAccuracy(epsilon, n, rng, alpha)
-            #print(accuracy)
         }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
