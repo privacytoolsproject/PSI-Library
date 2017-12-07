@@ -932,8 +932,6 @@ binaryTree <- function(x, n, rng, gran, universe.size, depth) {
 
 createfields <- function(v,r, varname){
 
-    print(r$var.type)
-
     if(r$var.type %in% c('factor', 'character')){
         v$plottype <- "continuous"
         v$varnamesSumStat <- varname
@@ -960,37 +958,38 @@ fillfields <- function(v,r){
     for(i in keys){
         v[[i]] <- unname(r$result[i])  # will overwrite rather than duplicate if field already exists
     }
-    print(v)
     return(v)
 }
 
 
-# Create json file of metadata from list of release objects
-#' @param names vector of names of variable names matching to release list
+#' Create json file of metadata from list of release objects
 #' @param release a list of release objects
 
-release2json <- function(names, release){
+release2json <- function(release){
 
-    unique.names  <- unique(names)
-
-    p <- length(unique.names)
     k <- length(release)
 
-    variables <- vector("list", p)
-    names(variables) <- unique.names
+    names <- NULL
+	for(i in 1:k){
+        tempname <- release[[i]]$result$variable
+        if( ! (tempname %in% names) ){
+            names <- c(names, tempname)
+        }
+    }
 
+    p <- length(names)
+
+    variables <- vector("list", p)
+    names(variables) <- names
     initialized <- rep(FALSE, p)
-    names(initialized) <- unique.names
+    names(initialized) <- names
 
     for(i in 1:k){
-        att <- names[i]
-
+        att <- release[[i]]$result$variable
         if(!initialized[[att]]){
             variables[[att]] <- createfields(variables[[att]], release[[i]], att)
         }
-
         variables[[att]] <- fillfields(variables[[att]], release[[i]])
-
     }
 
 
@@ -998,7 +997,6 @@ release2json <- function(names, release){
     dataset_metadata$private <- TRUE
 
     releasedMetadata <- list(dataset=dataset_metadata, variables=variables)
-
     result <- jsonlite:::toJSON(releasedMetadata, digits=8)
 
     return(result)
