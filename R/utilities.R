@@ -964,6 +964,8 @@ fillfields <- function(v,r){
 
 #' Create json file of metadata from list of release objects
 #' @param release a list of release objects
+#' @export release2json
+
 
 release2json <- function(release, nameslist){
 
