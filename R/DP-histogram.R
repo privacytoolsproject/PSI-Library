@@ -101,7 +101,7 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
         }
     }
     out <- data.frame(do.call(rbind, out))
-    names(out) <- c('lower', 'upper')
+    #names(out) <- c('lower', 'upper')
     rownames(out) <- names(release)
     return(out)
 }
