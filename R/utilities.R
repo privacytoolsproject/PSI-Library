@@ -965,13 +965,13 @@ fillfields <- function(v,r){
 #' Create json file of metadata from list of release objects
 #' @param release a list of release objects
 
-release2json <- function(release){
+release2json <- function(release, nameslist){
 
     k <- length(release)
 
     names <- NULL
 	for(i in 1:k){
-        tempname <- release[[i]]$result$variable
+        tempname <- nameslist[[i]] #release[[i]]$result$variable
         if( ! (tempname %in% names) ){
             names <- c(names, tempname)
         }
@@ -985,7 +985,7 @@ release2json <- function(release){
     names(initialized) <- names
 
     for(i in 1:k){
-        att <- release[[i]]$result$variable
+        att <- nameslist[[i]] #release[[i]]$result$variable
         if(!initialized[[att]]){
             variables[[att]] <- createfields(variables[[att]], release[[i]], att)
         }
