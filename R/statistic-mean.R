@@ -172,6 +172,7 @@ boot.mean <- function(xi, n) {
 #'   of \code{c('mechanismLaplace', 'mechanismBootstrap')}.
 #' @param var.type Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
+#' @param Variable Character, variable name.
 #' @param n Integer, number of observations
 #' @param rng Numeric, a priori estimate of the range
 #' @param epsilon Numeric, privacy cost parameter
@@ -194,11 +195,12 @@ dpMean <- setRefClass(
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, n, rng, epsilon=NULL, accuracy=NULL, 
-                          impute.rng=NULL, alpha=0.05, n.boot=20, ...) {
+    initialize = function(mechanism, var.type, variable, n, rng, epsilon=NULL,
+                          accuracy=NULL, impute.rng=NULL, alpha=0.05, n.boot=20, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
+        .self$variable <- variable
         .self$n <- n
         .self$alpha <- alpha
         .self$rng <- rng
@@ -220,9 +222,8 @@ dpMean$methods(
 
 
 dpMean$methods(
-    release = function(x, ...) {
-        v <- eval(deparse(substitute(x)), parent.frame())
-        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
+    release = function(data, ...) {
+        x <- data[, variable]
         sens <- diff(rng) / n
         .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
 })
