@@ -196,6 +196,21 @@ fun.hist <- function(x, var.type, bins=NULL) {
 
 #' Differentially private histogram
 #'
+#' @param mechanism Character, the mechanism used to perturb histogram bins.
+#' @param var.type Character, the variable type.
+#' @param variable Character, the variable name in the data frame.
+#' @param n Integer, the number of observations.
+#' @param epsilon Numeric, the privacy loss parameter.
+#' @param accuracy Numeric, the desired accuracy of the query.
+#' @param rng Numeric, a priori estimate of the lower and upper bounds of a
+#'    variable taking numeric values. Ignored for categorical types.
+#' @param bins Character, the available bins or levels of a categorical variable.
+#'    Ignored for numeric types.
+#' @param n.bins Integer, the number of bins to release.
+#' @param alpha Numeric, level of statistical significance, default 0.05.
+#' @param delta Numeric, probability of privacy loss beyond \code{epsilon}.
+#' @param error Numeric, error.
+#'
 #' @import methods
 #' @export dpHistogram
 #' @exportClass dpHistogram
@@ -208,11 +223,12 @@ dpHistogram <- setRefClass(
 )
 
 dpHistogram$methods(
-    initialize = function(mechanism, var.type, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
+    initialize = function(mechanism, var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
                           bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
                           impute.rng=NULL, impute=FALSE, ...) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
+        .self$variable <- variable
         .self$var.type.orig <- .self$var.type <- var.type
         .self$n <- n
         .self$rng <- rng
@@ -256,9 +272,8 @@ dpHistogram$methods(
 })
 
 dpHistogram$methods(
-    release = function(x) {
-        v <- eval(deparse(substitute(x)), parent.frame())
-        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
+    release = function(data) {
+        x <- data[, variable]
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
         if (stability) {
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
