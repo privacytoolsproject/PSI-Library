@@ -15,6 +15,18 @@ variance.postStandardDeviation <- function(release) {
 
 #' Differentially private variance
 #'
+#' @param mechanism Character, the privacy mechanism.
+#' @param var.type Character, the R variable type. One of \code{c('numeric',
+#'   'integer', 'logical')}.
+#' @param Variable Character, variable name.
+#' @param n Integer, number of observations
+#' @param rng Numeric, a priori estimate of the range
+#' @param epsilon Numeric, privacy cost parameter
+#' @param accuracy Numeric, accuracy guarantee given \code{epsilon}
+#' @param impute.rng Numeric, range within which missing values are imputed. If \code{NULL},
+#'   the range provided in \code{rng} is used.
+#' @param alpha Numeric, the level of statistical significance. Default 0.05.
+#'
 #' @import methods
 #' @export dpVariance
 #' @exportClass dpVariance
@@ -27,10 +39,12 @@ dpVariance <- setRefClass(
 )
 
 dpVariance$methods(
-    initialize = function(mechanism, var.type, n, epsilon, rng, impute.rng=NULL, alpha=0.05) {
+    initialize = function(mechanism, var.type, variable, n, rng, epsilon,
+                          impute.rng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
+        .self$variable <- variable
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
@@ -43,9 +57,8 @@ dpVariance$methods(
 })
 
 dpVariance$methods(
-    release = function(x) {
-        v <- eval(deparse(substitute(x)), parent.frame())
-        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
+    release = function(data) {
+        x <- data[, variable]
         sens <- (n - 1) / n^2 * diff(rng)^2
         .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
 })
