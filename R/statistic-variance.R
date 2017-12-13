@@ -31,7 +31,8 @@ variance.postStandardDeviation <- function(release) {
 #' @export dpVariance
 #' @exportClass dpVariance
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
 
 dpVariance <- setRefClass(
     Class = 'dpVariance',

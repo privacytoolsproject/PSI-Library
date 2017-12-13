@@ -187,7 +187,9 @@ boot.mean <- function(xi, n) {
 #' @export dpMean
 #' @exportClass dpMean
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
+#' @include mechanism-bootstrap.R
 
 dpMean <- setRefClass(
     Class = 'dpMean',

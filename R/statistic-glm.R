@@ -146,7 +146,8 @@ glmObjectives = list(
 #' @export dpGLM
 #' @exportClass dpGLM
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-objective.R
 #'
 #' @examples
 #'

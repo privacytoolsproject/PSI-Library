@@ -215,7 +215,8 @@ fun.hist <- function(x, var.type, bins=NULL) {
 #' @export dpHistogram
 #' @exportClass dpHistogram
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',

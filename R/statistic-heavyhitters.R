@@ -16,6 +16,7 @@
 #' @return Accuracy guarantee for heavyhitters release given epsilon.
 #' @author Victor Balcer
 #' @rdname heavyhitters.getAccuracy
+
 heavyhitters.getAccuracy <- function(gap, epsilon, delta) {
     accuracy <- exp(-epsilon * gap / 2) / delta
     return(accuracy)
@@ -36,6 +37,7 @@ heavyhitters.getAccuracy <- function(gap, epsilon, delta) {
 #' @return The epsilon value necessary to gaurantee the given accuracy.
 #' @author Victor Balcer
 #' @rdname heavyhitters.getParameters
+
 heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
   epsilon <- -2 * log(alpha * delta) / gap
   return(epsilon)
@@ -73,7 +75,8 @@ fun.heavy <- function(x) {
 #' @export dpHeavyHitters
 #' @exportClass dpHeavyHitters
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-exponential.R
 
 dpHeavyHitters <- setRefClass(
     Class = 'dpHeavyHitters',
@@ -99,7 +102,7 @@ dpHeavyHitters$methods(
     release = function(data) {
         x <- data[, variable]
         .self$result <- export(mechanism)$evaluate(fun.heavy, x, 2, .self$postProcess)
-})
+s})
 
 dpHeavyHitters$methods(
     postProcess = function(out, gap) {

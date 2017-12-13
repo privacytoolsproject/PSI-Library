@@ -161,7 +161,8 @@ tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) 
 #' @export dpTree
 #' @exportClass dpTree
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
 
 dpTree <- setRefClass(
     Class = 'dpTree',
