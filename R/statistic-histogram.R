@@ -88,6 +88,7 @@ histogram.getParameters <- function(n.bins, n, accuracy, stability, delta=10^-6,
 #'    
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
+
 histogram.getCI <- function(release, n.bins, n, accuracy) {
     release <- as.numeric(release)
     accxn <- accuracy * n
@@ -112,16 +113,41 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
 #' Convert the release from a table to a data frame
 #'
 #' @param release Table, the result of \code{fun.hist}
+#' @param n Sample size
 #' @return Data frame
 
-histogram.formatRelease <- function(release) {
-    bin.names <- names(release)
-    if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
-    release <- data.frame(matrix(release, ncol=length(release)))
+histogram.formatRelease <- function(release, n) {
+    if (is(release, 'matrix')) {
+        bin.names <- rownames(release)
+        if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+        release <- apply(release, 2, histogram.compose, n=n)
+        release <- data.frame(t(release))
+    } else {
+        bin.names <- names(release)
+        if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+        release <- histogram.compose(release, n)
+        release <- data.frame(matrix(release, ncol=length(release)))
+    }
     names(release) <- bin.names
     return(release)
 }
 
+
+#' Constrain the sum of histogram bins to sample size
+#'
+#' @param h Histogram
+#' @param n Sample size
+
+histogram.compose <- function(h, n) {
+    h <- as.numeric(h)
+    j <- length(h)
+    suppress.index <- sample(1:j, size=1)
+    h[suppress.index] <- 0
+    h[h < 0] <- 0
+    h <- round(h)
+    h[suppress.index] <- n - sum(h)
+    return(h)
+}
 
 #' Histogram Herfindahl Index
 #' 
@@ -193,6 +219,21 @@ fun.hist <- function(x, var.type, bins=NULL) {
     return(histogram)
 }
 
+#' Bootstrap replication for histogram
+#'
+#' This is a wrapper for the histogram function used internally by the 
+#' bootstrap mechanism.
+#'
+#' @param xi Bootstrapped vector of numeric or categorical type.
+#' @param var.type Character indicating the variable type.
+#' @param bins Vector indicating the bins into which \code{xi} is partitioned.
+#' @return Histogram with counts for each level of \code{xi}.
+
+boot.hist <- function(xi, var.type, bins=NULL) {
+    histogram <- fun.hist(xi, var.type, bins)
+    return(histogram)
+}
+
 
 #' Differentially private histogram
 #'
@@ -217,16 +258,17 @@ fun.hist <- function(x, var.type, bins=NULL) {
 #'
 #' @include mechanism.R
 #' @include mechanism-laplace.R
+#' @include mechanism-bootstrap.R
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',
-    contains = 'mechanismLaplace'
+    contains = c('mechanismLaplace', 'mechanismBootstrap')
 )
 
 dpHistogram$methods(
     initialize = function(mechanism, var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
                           bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
-                          impute.rng=NULL, impute=FALSE, ...) {
+                          impute.rng=NULL, impute=FALSE, n.boot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         .self$mechanism <- mechanism
         .self$variable <- variable
@@ -270,6 +312,8 @@ dpHistogram$methods(
         } else {
             .self$impute.rng <- impute.rng
         }
+        .self$boot.fun <- boot.hist
+        .self$n.boot <- n.boot
 })
 
 dpHistogram$methods(
@@ -283,23 +327,24 @@ dpHistogram$methods(
                #JM changed to below after conversation with Victor
                a <- 1+2*log(2/delta)/epsilon 
                noisy$release <- noisy$release[noisy$release > a]
-                
             }
-        } else {
-            noisy$release <- round(noisy$release)
-            noisy$release[noisy$release < 0] <- 0
-        }
+        } #else {
+          #  noisy$release <- round(noisy$release)
+          #  noisy$release[noisy$release < 0] <- 0
+        #}
         .self$result <- noisy
 })
 
 dpHistogram$methods(
     postProcess = function(out) {
         out$variable <- variable
-        out$release <- histogram.formatRelease(out$release)
+        out$release <- histogram.formatRelease(out$release, n)
         out$accuracy <- accuracy
         out$epsilon <- epsilon
         if (length(out$release) > 0) {
-            out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+            if (mechanism == 'mechanismLaplace') {
+                out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+            }
         }
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)

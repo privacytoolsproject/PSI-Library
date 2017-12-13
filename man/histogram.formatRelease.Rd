@@ -4,10 +4,12 @@
 \alias{histogram.formatRelease}
 \title{Format the release of private histogram}
 \usage{
-histogram.formatRelease(release)
+histogram.formatRelease(release, n)
 }
 \arguments{
 \item{release}{Table, the result of \code{fun.hist}}
+
+\item{n}{Sample size}
 }
 \value{
 Data frame
