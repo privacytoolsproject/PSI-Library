@@ -3,6 +3,8 @@
 #' @import methods
 #' @export mechanismGaussian
 #' @exportClass mechanismGaussian
+#'
+#' @include mechanism.R
 
 mechanismGaussian <- setRefClass(
     Class = 'mechanismGaussian',

@@ -3,6 +3,8 @@
 #' @import methods
 #' @export mechanismObjective
 #' @exportClass mechanismObjective
+#'
+#' @include mechanism.R
 
 mechanismObjective <- setRefClass(
     Class = 'mechanismObjective',

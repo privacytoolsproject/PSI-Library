@@ -30,6 +30,8 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun) {
 #' @import methods
 #' @export mechanismBootstrap
 #' @exportClass mechanismBootstrap
+#'
+#' @include mechanism.R
 
 mechanismBootstrap <- setRefClass(
     Class = 'mechanismBootstrap',

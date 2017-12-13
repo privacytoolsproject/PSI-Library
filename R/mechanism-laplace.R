@@ -3,6 +3,8 @@
 #' @import methods
 #' @export mechanismLaplace
 #' @exportClass mechanismLaplace
+#'
+#' @include mechanism.R
 
 mechanismLaplace <- setRefClass(
     Class = 'mechanismLaplace',

@@ -3,6 +3,8 @@
 #' @import methods
 #' @export mechanismExponential
 #' @exportClass mechanismExponential
+#'
+#' @include mechanism.R
 
 mechanismExponential <- setRefClass(
     Class = 'mechanismExponential',
