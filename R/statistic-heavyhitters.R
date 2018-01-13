@@ -16,6 +16,7 @@
 #' @return Accuracy guarantee for heavyhitters release given epsilon.
 #' @author Victor Balcer
 #' @rdname heavyhitters.getAccuracy
+
 heavyhitters.getAccuracy <- function(gap, epsilon, delta) {
     accuracy <- exp(-epsilon * gap / 2) / delta
     return(accuracy)
@@ -36,6 +37,7 @@ heavyhitters.getAccuracy <- function(gap, epsilon, delta) {
 #' @return The epsilon value necessary to gaurantee the given accuracy.
 #' @author Victor Balcer
 #' @rdname heavyhitters.getParameters
+
 heavyhitters.getParameters <- function(gap, delta, alpha=0.05) {
   epsilon <- -2 * log(alpha * delta) / gap
   return(epsilon)
@@ -58,11 +60,23 @@ fun.heavy <- function(x) {
 
 #' Differentially private heavy hitters
 #'
+#' @param mechanism Character, the mechanism used to perturb the output.
+#' @param var.type Character, the variable type, one of \code{'character'} or
+#'    \code{'factor'}.
+#' @param variable Character, the variable name in the data frame.
+#' @param n Integer, the number of observations.
+#' @param epsilon Numeric, the privacy loss parameter.
+#' @param k Integer, the number of bins to release.
+#' @param bins Character, the available bins, or the levels of the categorical variable.
+#' @param alpha Numeric, level of statistical significance, default 0.05.
+#' @param delta Numeric, probability of privacy loss beyond \code{epsilon}.
+#'
 #' @import methods
 #' @export dpHeavyHitters
 #' @exportClass dpHeavyHitters
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-exponential.R
 
 dpHeavyHitters <- setRefClass(
     Class = 'dpHeavyHitters',
@@ -70,9 +84,11 @@ dpHeavyHitters <- setRefClass(
 )
 
 dpHeavyHitters$methods(
-    initialize = function(mechanism, var.type, n, epsilon, k, bins, alpha=0.05, delta=1e-5) {
+    initialize = function(mechanism, var.type, variable, n, epsilon, 
+                          k, bins, alpha=0.05, delta=1e-5) {
         .self$name <- 'Differentially private heavy hitters'
         .self$mechanism <- mechanism
+        .self$variable <- variable
         .self$var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
         .self$n <- n
         .self$epsilon <- epsilon
@@ -83,11 +99,10 @@ dpHeavyHitters$methods(
 })
 
 dpHeavyHitters$methods(
-    release = function(x) {
-        v <- eval(deparse(substitute(x)), parent.frame())
-        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
+    release = function(data) {
+        x <- data[, variable]
         .self$result <- export(mechanism)$evaluate(fun.heavy, x, 2, .self$postProcess)
-})
+s})
 
 dpHeavyHitters$methods(
     postProcess = function(out, gap) {

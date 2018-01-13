@@ -8,6 +8,7 @@
 #' @param release Numeric, private release of covariance matrix
 #' @param n Integer, indicating number of observations
 #' @export
+
 coefficient.release <- function(formula, release, n) {
   intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
   coefficients <- linear.reg(formula, release, n, intercept)
@@ -110,7 +111,8 @@ fun.covar <- function(x, columns, intercept) {
 #' @export dpCovariance
 #' @exportClass dpCovariance
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
 
 dpCovariance <- setRefClass(
     Class = 'dpCovariance',

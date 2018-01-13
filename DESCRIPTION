@@ -18,16 +18,21 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Collate:
-    'mechanisms.R'
-    'DP-covariance.R'
-    'DP-glm.R'
-    'DP-heavyhitters.R'
-    'DP-histogram.R'
-    'DP-mean.R'
-    'DP-tree.R'
-    'DP-variance.R'
+Collate: 
     'createJSON.R'
     'datasets.R'
+    'mechanism.R'
+    'mechanism-bootstrap.R'
+    'mechanism-exponential.R'
+    'mechanism-gaussian.R'
+    'mechanism-laplace.R'
+    'mechanism-objective.R'
+    'statistic-covariance.R'
+    'statistic-glm.R'
+    'statistic-heavyhitters.R'
+    'statistic-histogram.R'
+    'statistic-mean.R'
+    'statistic-tree.R'
+    'statistic-variance.R'
     'utilities.R'
 VignetteBuilder: knitr

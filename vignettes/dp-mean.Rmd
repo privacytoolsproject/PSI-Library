@@ -36,15 +36,17 @@ Syntax
 ------
 
 ```{r, eval = FALSE}
-mydata <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
-                      epsilon=0.1, n=10, rng=c(0, 70))
-dp.mean$release(mydata)
+x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
+x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
+data <- data.frame(x1, x2)
 
-mydata2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
+dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
+                      variable='x1', epsilon=0.1, n=10, rng=c(0, 70))
+dp.mean$release(data)
+
 dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
-                       epsilon=0.1, n=10, rng=c(0, 1))
-dp.mean2$release(mydata2)
+                       variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
+dp.mean2$release(data)
 ```
 
 Arguments
@@ -93,8 +95,8 @@ Calculate a private mean of a numeric vector with `dpMean` using the Laplace mec
 
 ```{r}
 numeric_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
-                           n=10000, epsilon=0.1, rng=c(0, 750000))
-numeric_mean$release(PUMS5extract10000$income)
+                           variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
+numeric_mean$release(PUMS5extract10000)
 print(numeric_mean$result)
 ```
 
@@ -104,8 +106,8 @@ To calculate the mean of a logical vector instead, input a logical vector into `
 
 ```{r}
 logical_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
-                           n=10000, epsilon=0.1, rng=c(0, 1))
-logical_mean$release(PUMS5extract10000$married)
+                           variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
+logical_mean$release(PUMS5extract10000)
 print(logical_mean$result)
 ```
 
@@ -116,8 +118,9 @@ Use the bootstrap mechanism in place of the Laplace mechanism. In this case, `dp
 ```{r}
 n.boot <- 25
 boot_mean <- dpMean$new(mechanism='mechanismBootstrap', var.type='numeric', 
-                           n=10000, epsilon=0.1, rng=c(0, 750000), n.boot=n.boot)
-boot_mean$release(PUMS5extract10000$income)
+                        variable='income', n=10000, epsilon=0.1, rng=c(0, 750000), 
+                        n.boot=n.boot)
+boot_mean$release(PUMS5extract10000)
 print(boot_mean$result)
 ```
 

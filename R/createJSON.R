@@ -1,7 +1,4 @@
 #' Function to create JSON file defining differentially private statistics
-#' 
-#' @include DP-histogram.R
-#' @include DP-mean.R
 
 createJSON <- function() { 
 

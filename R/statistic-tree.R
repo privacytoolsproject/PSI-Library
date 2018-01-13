@@ -142,11 +142,27 @@ tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) 
 
 #' Differentially private binary tree
 #'
+#' @param mechanism Character, the privacy mechanism.
+#' @param var.type Character, the R variable type. One of \code{'numeric'} or
+#'   \code{'integer'}.
+#' @param Variable Character, variable name.
+#' @param n Integer, number of observations.
+#' @param rng Numeric, a priori estimate of the range.
+#' @param gran Numeric, the granularity of the variable.
+#' @param epsilon Numeric, privacy cost parameter.
+#' @param accuracy Numeric, accuracy guarantee given \code{epsilon}.
+#' @param impute.rng Numeric, range within which missing values are imputed. If \code{NULL},
+#'   the range provided in \code{rng} is used.
+#' @param percentiles Numeric, the percentiles to evaluate in post-processing. Optional, 
+#'    default \code{NULL}.
+#' @param alpha Numeric, the level of statistical significance. Default 0.05.
+#'
 #' @import methods
 #' @export dpTree
 #' @exportClass dpTree
 #'
-#' @include mechanisms.R
+#' @include mechanism.R
+#' @include mechanism-laplace.R
 
 dpTree <- setRefClass(
     Class = 'dpTree',
@@ -154,10 +170,12 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
-    initialize = function(mechanism, var.type, n, rng, gran, epsilon=NULL, accuracy=NULL, impute.rng=NULL, percentiles=NULL, alpha=0.05, ...) {
+    initialize = function(mechanism, var.type, variable, n, rng, gran, epsilon=NULL,
+                          accuracy=NULL, impute.rng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
+        .self$variable <- variable
         .self$n <- n
         .self$rng <- rng
         .self$gran <- gran
@@ -178,9 +196,8 @@ dpTree$methods(
 })
 
 dpTree$methods(
-    release = function(x) {
-        v <- eval(deparse(substitute(x)), parent.frame())
-        .self$variable <- unlist(strsplit(v, split='$', fixed=TRUE))[2]
+    release = function(data) {
+        x <- data[, variable]
         sens <- 2 * log2(diff(rng) / gran + 1)
         variance <- 2 * sens / epsilon
         universe.size <- floor(diff(rng) / gran + 1)
