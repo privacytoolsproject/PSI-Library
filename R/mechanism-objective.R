@@ -53,7 +53,19 @@ mechanismObjective$methods(
             start.params <- rep(0, ncol(X))
             y.max.norm <- NULL
         }
-
+		
+		# Set scalar c from [CMS11]
+		#if(.self$name == 'logit'){
+		#	c <- .25
+		#}
+		# Set regularization parameter lambda
+		# lambda <- default value - what should this be?
+		# Ensure lambda satisfies condition in Algorithm 2 of [CMS11]
+		# compare <- c/(n*(exp(.self$epsilon/2)-1))
+		# if(lambda <= compare){
+		#	lambda <- compare + .001
+		#}
+		
         # fit
         if (is.null(.self$n.boot)) {
             b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
