@@ -62,7 +62,7 @@ mechanismObjective$methods(
 			c <- 1 # This is wrong! It is only a placeholder so that the code returns something. Must calculate c for each loss function we use.
 			}
 		#Set regularization parameter lambda
-		lambda <- .self$n/20 # What should the default value be?
+		lambda <- 1 #.self$n/20 # What should the default value be?
 		#Ensure lambda satisfies condition in Algorithm 2 of [CMS11]
 		compare <- c/(.self$n*(exp(.self$epsilon/2)-1))
 		if(lambda <= compare){
