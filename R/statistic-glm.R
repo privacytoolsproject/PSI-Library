@@ -96,7 +96,7 @@ dpLogit <- function() {
         noise <- (b %*% theta) / n
         regularizer <- (lambda/2)* t(theta)%*%theta
         llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-        llik.noisy <- noise + llik + regularizer # double check that subtracting regularizer here is correct (as opposed to adding)
+        llik.noisy <- noise + llik - regularizer # double check that subtracting regularizer here is correct (as opposed to adding)
         return(-llik.noisy)
     }
     return(list('name' = 'logit', 'objective' = objective.logit))
