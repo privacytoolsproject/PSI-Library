@@ -67,22 +67,49 @@ glm.postSummary <- function(release, n, model, alpha) {
 #' Differentially private objective function for Logistic regression
 #'
 #' @return List with the name and objective function
+# old dp Logit code blocked out below. 
+# dpLogit <- function() {
+    # objective.logit <- function(theta, X, y, b, n) {
+        # xb <- as.matrix(X) %*% as.matrix(theta)
+        # p <- as.numeric(1 / (1 + exp(-1 * xb)))
+        # noise <- (b %*% as.matrix(theta)) / n
+        # llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
+        # llik.noisy <- noise + llik
+        # return(-llik.noisy)
+    # }
+    # return(list('name' = 'logit', 'objective' = objective.logit))
+# }
 
+#' Differentially private objective function for Probit regression
+#'
+#' @return List with the name and objective function
+
+#' Differentially private objective function for Logistic regression
+#'
+#' @return List with the name and objective function
+# new dp logit including regularization below
 dpLogit <- function() {
-    objective.logit <- function(theta, X, y, b, n) {
-        xb <- as.matrix(X) %*% as.matrix(theta)
+    objective.logit <- function(theta, X, y, b, n, lambda) {
+    	theta <- as.matrix(theta)
+        xb <- as.matrix(X) %*% theta
         p <- as.numeric(1 / (1 + exp(-1 * xb)))
-        noise <- (b %*% as.matrix(theta)) / n
+        noise <- (b %*% theta) / n
+        regularizer <- (lambda/2)* t(theta)%*%theta
         llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-        llik.noisy <- noise + llik
+        llik.noisy <- noise + llik - regularizer # double check that subtracting regularizer here is correct (as opposed to adding)
         return(-llik.noisy)
     }
     return(list('name' = 'logit', 'objective' = objective.logit))
 }
 
-#' Differentially private objective function for Probit regression
-#'
-#' @return List with the name and objective function
+# ' Differentially private objective function for Probit regression
+# '
+# ' @return List with the name and objective function
+
+
+
+
+
 
 dpProbit <- function() {
     objective.probit <- function(theta, X, y, b, n) {

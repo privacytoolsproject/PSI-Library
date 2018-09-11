@@ -55,21 +55,38 @@ mechanismObjective$methods(
         }
 		
 		# Set scalar c from [CMS11]
-		#if(.self$name == 'logit'){
-		#	c <- .25
-		#}
-		# Set regularization parameter lambda
-		# lambda <- default value - what should this be?
-		# Ensure lambda satisfies condition in Algorithm 2 of [CMS11]
-		# compare <- c/(n*(exp(.self$epsilon/2)-1))
-		# if(lambda <= compare){
-		#	lambda <- compare + .001
-		#}
-		
+		if(.self$name == 'logit'){
+			c <- .25
+		}
+		else{
+			c <- 1 # This is wrong! It is only a placeholder so that the code returns something. Must calculate c for each loss function we use.
+			}
+		#Set regularization parameter lambda
+		lambda <- .self$n/20 # What should the default value be?
+		#Ensure lambda satisfies condition in Algorithm 2 of [CMS11]
+		compare <- c/(.self$n*(exp(.self$epsilon/2)-1))
+		if(lambda <= compare){
+			lambda <- compare + .001
+		}
+		term <- c/n*lambda
+		ep <- .self$epsilon-log(1+2*term+term^2)
+		if(ep <= 0){
+			print("Something went wrong with the regularization parameter")
+			stop()
+		}
+		beta <- ep/2
         # fit
         if (is.null(.self$n.boot)) {
-            b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
-            b <- dpNoise(n=length(start.params), scale=(-.self$epsilon * b.norm), dist='laplace')
+           # old noise draw based on gamma and laplace
+           # b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
+           # b <- dpNoise(n=length(start.params), scale=(-.self$epsilon * b.norm), dist='laplace')
+           
+           # new noise draw based on exponential and uniform
+            b.norm <- dpNoise(n=1, scale=(1/beta), dist='gamma', shape=1)
+            random_vec <- dpNoise(n=length(start.params), scale=1, dist='gaussian')
+            random_vec_norm <- sqrt(sum(random_vec^2))
+            b <- random_vec*(b.norm/random_vec_norm)
+            
             estimates <- optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n)$par
             release <- data.frame(scaleRelease(estimates, scaler$max.norm, y.max.norm))
             names(release) <- 'estimate'
