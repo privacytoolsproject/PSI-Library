@@ -87,7 +87,7 @@ mechanismObjective$methods(
             random_vec_norm <- sqrt(sum(random_vec^2))
             b <- random_vec*(b.norm/random_vec_norm)
             
-            estimates <- optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n)$par
+            estimates <- optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n, lambda=lambda)$par
             release <- data.frame(scaleRelease(estimates, scaler$max.norm, y.max.norm))
             names(release) <- 'estimate'
             rownames(release) <- X.names
