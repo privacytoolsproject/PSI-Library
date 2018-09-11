@@ -59,7 +59,7 @@ mechanismObjective$methods(
 			c <- .25
 		}
 		else{
-			c <- 1 # This is wrong! It is only a placeholder so that the code returns something. Must calculate c for each loss function we use.
+			c <- .25 # This is wrong! It is only a placeholder so that the code returns something. Must calculate c for each loss function we use.
 			}
 		#Set regularization parameter lambda
 		lambda <- 1 #.self$n/20 # What should the default value be?
@@ -70,10 +70,7 @@ mechanismObjective$methods(
 		}
 		term <- c/n*lambda
 		ep <- .self$epsilon-log(1+2*term+term^2)
-		if(ep <= 0){
-			print("Something went wrong with the regularization parameter")
-			stop()
-		}
+
 		beta <- ep/2
         # fit
         if (is.null(.self$n.boot)) {
