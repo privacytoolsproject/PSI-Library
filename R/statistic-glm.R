@@ -143,7 +143,7 @@ dpPoisson <- function() {
 #' @return List with the name and objective function
 
 dpOLS <- function() {
-    objective.ols <- function(theta, X, y, b, n, lambda) {
+    objective.ols <- function(theta, X, y, b, n) {
         s <- exp(theta[length(theta)])
         beta <- theta[1:(length(theta) - 1)]
         xb <- as.matrix(X) %*% as.matrix(beta) 
