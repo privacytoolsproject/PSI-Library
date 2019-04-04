@@ -165,12 +165,10 @@ Fit a private linear regression model via `dpGLM`.
 n <- 10000
 epsilon <- 0.5
 rng <- matrix(c(0, 200000, 18, 80, 0, 1), ncol=2, byrow=TRUE)
-mechanism <- 'mechanismObjective'
-var.type <- 'numeric'
-objective <- 'ols'
+form <- income ~ age + sex
 
-model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
-                   formula=form, rng=rng, objective=objective)
+model <- dpGLM$new(mechanism='mechanismObjective', var.type='numeric', n=10000, epsilon=0.5, 
+                   formula=form, rng=rng, objective='ols')
 model$release(PUMS5extract10000)
 print(model$result)
 ```
