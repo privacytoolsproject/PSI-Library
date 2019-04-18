@@ -78,7 +78,6 @@ covariance.formatRelease <- function(release, columns) {
 #' @return Linear regression coefficients and standard errors for all specified
 #'    \code{formula}.
 covariance.postLinearRegression <- function(release, n, intercept, formula) {
-    print('postlinearRegression called')
     out.summaries <- vector('list', length(formula))
     for (f in 1:length(formula)) {
         out.summaries[[f]] <- linear.reg(formula[[f]], release, n, intercept)
@@ -97,7 +96,6 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
 #' @param intercept Logical, should the intercept be included?
 
 fun.covar <- function(x, intercept) {
-    print('fun.covar')
     if (intercept) { x <- cbind(1, x) }
     covariance <- t(as.matrix(x)) %*% as.matrix(x)
     lower <- lower.tri(covariance, diag=TRUE)
@@ -152,13 +150,14 @@ dpCovariance$methods(
     release = function(data) {
         x <- data[columns];
         sens <- covariance.sensitivity(n, rng, intercept)
+        # shouldn't pass attributes of mechanism in as argument?
+        # TODO: verify that export here assigns attributes of the statistic method to the mechanism method, which it seems to.
         .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess,
                                                formula=formula, columns=columns, intercept=intercept)
 })
 
 dpCovariance$methods(
     postProcess = function(out, columns, formula, intercept) {
-        print('postProcess called')
         out$release <- covariance.formatRelease(out$release, columns)
         out$variable <- columns
         # if (!is.null(formula)) {

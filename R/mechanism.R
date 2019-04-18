@@ -75,15 +75,3 @@ mechanism$methods(
         }
         return(out)
 })
-
-mechanism$methods(
-    getFunArgs = function(fun) {
-        f <- .self$getFields()
-        spec <- list()
-        for (arg in names(f)) {
-            if (arg %in% names(formals(fun))) {
-                spec[[arg]] <- f[[arg]]
-            }
-        }
-        return(spec)
-})

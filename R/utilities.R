@@ -539,9 +539,9 @@ linear.reg <- function(formula, release, n, intercept) {
     coefs <- "The input matrix is not invertible"
     return(coefs)
   } else {
-    #xy.locs <- extract.indices(as.formula(formula), release, intercept)
-    # x.loc <- xy.locs$x.loc
-    # y.loc <- xy.locs$y.loc
+    xy.locs <- extract.indices(as.formula(formula), release, intercept)
+    x.loc <- xy.locs$x.loc
+    y.loc <- xy.locs$y.loc
     x.loc <- c(0,0)
     y.loc <- c(1,1)
     loc.vec <- rep(TRUE, (length(x.loc) + 1))
@@ -551,8 +551,7 @@ linear.reg <- function(formula, release, n, intercept) {
     se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
     coefs <- data.frame(cbind(coefs, se))
     coefs <- format(round(coefs, 5), nsmall=5)
-    #rownames(coefs) <- xy.locs$x.label
-    rownames(coefs) <- c('x','y')
+    rownames(coefs) <- xy.locs$x.label
     names(coefs) <- c('Estimate', 'Std. Error')
     return(coefs)
   }
