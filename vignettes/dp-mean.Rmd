@@ -36,34 +36,27 @@ Syntax
 ------
 
 ```{r, eval = FALSE}
-library(PSIlence)
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE)
+x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
 data <- data.frame(x1, x2)
 
 dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
-                      variable='x1', epsilon=1, n=10, rng=c(0, 70))
+                      variable='x1', epsilon=0.1, n=10, rng=c(0, 70))
 dp.mean$release(data)
-
-print(dp.mean$result)
 
 dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
 dp.mean2$release(data)
-
-print(dp.mean2$result)
 ```
 
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpMean` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpGLM` class. The `new` method, which creates an object of the class, accepts the following arguments.
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
-
-* `variable` \ Character, the name of the values in the data frame that will be passed to the mechanism. The name must match the name of a column of the dataframe that will be passed to the `release` method.
 
 * `n` \ Integer, the number of observations in the vector.
 
@@ -83,7 +76,7 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 The `release` method accepts a single argument. 
 
-* `x` \ Data frame containing numeric, logical, or integer-value columns corresponding the names specified in `variable` and the variable type specified in `var-type`.
+* `x` \ Data frame containing numeric columns corresponding the names specified in `formula`.
 
 
 Examples

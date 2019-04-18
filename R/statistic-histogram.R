@@ -320,7 +320,6 @@ dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
         noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
-        # TODO: NEED TO ADD PAPER CITATION FOR STABILITY MECHANISM!
         if (stability) {
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
                # a <- accuracy * n / 2  
