@@ -19,18 +19,15 @@ mechanismExponential$methods(
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         x <- censordata(x, .self$var.type, levels=.self$bins)
-        x <- fillMissing(x, .self$var.type, categories=.self$bins)
+        x <- fillMissing(x, .self$var.type, categories=.self$bins)   # Problem that this needs to work over other types than categorical
         field.vals <- .self$getFunArgs(fun)
-        true.val <- do.call(fun, c(list(x=x), field.vals))
+        ellipsis.vals <- getFuncArgs(list(...), fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals, ellipsis.vals))
         quality <- true.val - max(true.val)
-        probs <- ifelse(true.val == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
-        gap <- as.numeric(true.val[.self$k] - true.val[.self$k + 1])
-        if (gap < (-2 / epsilon * log(delta))) {
-            out <- list('release' = NULL)
-        } else {
-            release <- sample(names(true.val), size=.self$k, prob=probs)
-            out <- list('release' = release)
-            out <- postFun(out, gap)
-        }
+        likelihoods <- exp((.self$epsilon * quality) / (2 * sens))   # Problem that this zeroes out for quality differences > 800
+        probs <- likelihoods/sum(likelihoods)
+        release <- sample(names(true.val), size=.self$k, prob=probs) # Problem that this needs to use openssl randomness
+        out <- list('release' = release)
+        out <- postFun(out, ...)
         return(out)
 })
