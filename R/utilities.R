@@ -485,24 +485,38 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) {
 
 #' Extract function arguments
 #' 
-#' Utility function to match arguments of a function with list output of another function.
+#' Utility function to match arguments of a function with input list and/or attributes of input object
 #'
-#' @param output A list with the output of a function.
-#' @param target.func A character vector containing the name of the function 
+#' @param targetFunc A character vector containing the name of the function to find the matching inputs of
 #'    with arguments that need to be filled by output.
-#'    
+#' @param inputList A named list of values
+#' @param inputObject An object with a predefined getFields() function that takes all attributes of object and returns them as a list
 #' @return List of arguments and values needed for specification of \code{target.func}
 #' @rdname getFuncArgs
-getFuncArgs <- function(output, target.func) {
-    spec <- list()
-    for (element in names(output)) {
-        if (element %in% names(formals(target.func))) {
-            spec[[element]] <- output[[element]]
-        }
+getFuncArgs <- function(targetFunc, inputList=NULL, inputObject=NULL){
+  funcArgs <- list()                      # Initialize list of function arguments
+  argNames <- names(formals(targetFunc))  # Names of all arguments of targetFunc
+  inputListNames <- names(inputList)      # Names of all items in inputList
+  
+  if (!is.null(inputObject)){             
+    inputObjectNames <- names(inputObject$getFields()) # Names of all fields of inputObject
+  }
+  else{
+    inputObjectNames <- NULL
+  }
+  
+  for (argument in argNames) {
+    # If argument of targetFunc has an associated named attribute in the input list, save that attribute to funcArgs
+    if (argument %in% inputListNames) {
+      funcArgs[[argument]] <- inputList[[argument]] 
     }
-    return(spec)
+    # If argument of targetFunc has an associated field of inputObject, save that field value to funcArgs 
+    if (argument %in% inputObjectNames) {          
+      funcArgs[[argument]] <- inputObject[[argument]]
+    }
+  }
+  return(funcArgs)
 }
-
 
 #' Linear regression on covariance matrix
 #' 
@@ -521,12 +535,10 @@ getFuncArgs <- function(output, target.func) {
 #'    to \code{formula}.
 #' @rdname linear.reg
 linear.reg <- function(formula, release, n, intercept) {
-  print('linearregcalled')
   if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
     coefs <- "The input matrix is not invertible"
     return(coefs)
   } else {
-    print('else')
     #xy.locs <- extract.indices(as.formula(formula), release, intercept)
     # x.loc <- xy.locs$x.loc
     # y.loc <- xy.locs$y.loc
