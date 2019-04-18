@@ -12,13 +12,13 @@ mechanismExponential <- setRefClass(
 )
 
 mechanismExponential$methods(
-    getFunArgs = function(fun) { 
+    getFunArgs = function(fun) {
         callSuper(fun)
 })
 
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, rng=.self$rng, levels=.self$bins)
+        x <- censordata(x, .self$var.type, levels=.self$bins)
         x <- fillMissing(x, .self$var.type, categories=.self$bins)
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
