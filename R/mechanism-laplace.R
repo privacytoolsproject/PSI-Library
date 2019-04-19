@@ -19,27 +19,13 @@ mechanismLaplace$methods(
 mechanismLaplace$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-        if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-            if (NCOL(x) > 1) {
-                x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
-            } else {
-                x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
-            }
-        } else {
-            x <- fillMissing(x, .self$var.type, categories=.self$bins)
-        }
+        x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
         field.vals <- .self$getFunArgs(fun)
-        print('field.vals')
-        print(field.vals)
-        #ellipsis.vals <- getFuncArgs(list(...), fun)
-        #true.val <- do.call(fun, c(list(x=x), field.vals, ellipsis.vals))
-        true.val <- do.call(fun, c(list(x=x), field.vals))
-        print('true.val')
-        print(true.val)
+        ellipsis.vals <- getFuncArgs(list(...), fun)
+        true.val <- do.call(fun, c(list(x=x), field.vals, ellipsis.vals))
         scale <- sens / .self$epsilon
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
         out <- list('release' = release)
         out <- postFun(out, ...)
-        print('i')
         return(out)
 })
