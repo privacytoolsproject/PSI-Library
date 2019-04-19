@@ -78,7 +78,6 @@ covariance.formatRelease <- function(release, columns) {
 #' @return Linear regression coefficients and standard errors for all specified
 #'    \code{formula}.
 covariance.postLinearRegression <- function(release, n, intercept, formula) {
-    print('postlinearRegression called')
     out.summaries <- vector('list', length(formula))
     for (f in 1:length(formula)) {
         out.summaries[[f]] <- linear.reg(formula[[f]], release, n, intercept)
@@ -87,7 +86,7 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
 }
 
 
-#' Lower triangle of covariance matrix
+#' Lower triangle of ovariance matrix
 #'
 #' This function is called by \code{dpCovariance} and
 #' produces the true value to be perturbed.
@@ -96,10 +95,10 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
 #' @param columns Columns to include in output
 #' @param intercept Logical, should the intercept be included?
 
-fun.covar <- function(x, intercept) {
-    print('fun.covar')
-    if (intercept) { x <- cbind(1, x) }
-    covariance <- t(as.matrix(x)) %*% as.matrix(x)
+fun.covar <- function(x, columns, intercept) {
+    data <- x[, columns]
+    if (intercept) { data <- cbind(1, data) }
+    covariance <- t(as.matrix(data)) %*% as.matrix(data)
     lower <- lower.tri(covariance, diag=TRUE)
     covariance <- covariance[lower]
     return(covariance)
@@ -130,10 +129,6 @@ dpCovariance$methods(
         .self$epsilon <- epsilon
         .self$delta <- delta
         .self$rng <- rng
-        
-        checkepsilon(epsilon)
-        #checkrange(range) this won't work since range here is > 2 since actually range of multiple columns
-        
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
@@ -149,20 +144,18 @@ dpCovariance$methods(
 })
 
 dpCovariance$methods(
-    release = function(data) {
-        x <- data[columns];
+    release = function(x) {
         sens <- covariance.sensitivity(n, rng, intercept)
-        .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess,
-                                               formula=formula, columns=columns, intercept=intercept)
+        .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess, 
+                                                   columns=columns, formula=formula, intercept=intercept)
 })
 
 dpCovariance$methods(
     postProcess = function(out, columns, formula, intercept) {
-        print('postProcess called')
         out$release <- covariance.formatRelease(out$release, columns)
         out$variable <- columns
-        # if (!is.null(formula)) {
-        #     out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)
-        # }
+        if (!is.null(formula)) {
+            out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)
+        }
         return(out)
 })
