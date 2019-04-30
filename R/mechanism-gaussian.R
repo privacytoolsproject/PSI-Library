@@ -23,7 +23,6 @@ mechanismGaussian$methods(
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
-        noise <- dpNoise(n=length(true.val), scale=scale, dist='gaussian')
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='gaussian')
         out <- list('release' = release)
         out <- postFun(out)
