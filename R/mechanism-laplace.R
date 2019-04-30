@@ -12,12 +12,6 @@ mechanismLaplace <- setRefClass(
 )
 
 mechanismLaplace$methods(
-    getFunArgs = function(fun) {
-        callSuper(fun)
-})
-
-
-mechanismLaplace$methods(
   #' Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
   #' "x" using the Laplace mechanism.
   #' 
@@ -38,15 +32,7 @@ mechanismLaplace$methods(
   # TODO: add examples 
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-    if (.self$var.type %in% c('numeric', 'integer', 'logical')) {
-      if (NCOL(x) > 1) {
-        x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
-      } else {
-        x <- fillMissing(x, .self$var.type, .self$impute.rng[1], .self$impute.rng[2])
-      }
-    } else {
-      x <- fillMissing(x, .self$var.type, categories=.self$bins)
-    }
+    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
     input.vals = c(list(x=x), fun.args)
     true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.

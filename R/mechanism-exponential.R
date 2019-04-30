@@ -18,8 +18,8 @@ mechanismExponential$methods(
 
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, levels=.self$bins)
-        x <- fillMissing(x, .self$var.type, categories=.self$bins)
+        x <- censordata(x, .self$var.type, rng=.self$rng, levels=.self$bins)
+        x <- fillMissing(x, .self$var.type, rng=.self$rng, categories=.self$bins)
         field.vals <- .self$getFunArgs(fun)
         true.val <- do.call(fun, c(list(x=x), field.vals))
         quality <- true.val - max(true.val)
