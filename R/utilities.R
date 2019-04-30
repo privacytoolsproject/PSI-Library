@@ -78,9 +78,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #'
 #' @return Array of values, either characters, integers, logicals, numerics depending on var.type, scaled according to either the 
 #' number of categories if var.type='factor' or 'character', or based on lower and upper when var.type='logical','numeric', or 'integer'.
-#' @export
 #'
-#' @examples
 scaleValues = function(vals, var.type, lower=NULL, upper=NULL, categories=NULL) {
   if (var.type %in% c('character', 'factor')) { 
     lower <- 1
@@ -607,9 +605,9 @@ linear.reg <- function(formula, release, n, intercept) {
 }
 
 
-#' Moore Penrose Inverse Function ###Must assign authorship to this###
+#' Moore Penrose Inverse Function
 #' 
-#' @cite Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
+#' @references Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
 #' 
 #' Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 #' 
@@ -630,11 +628,11 @@ mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
 #' Sweep operator
 #' 
 #' General sweep operator citation:
-#' @cite Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
+#' @references Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
 #' This implementation is from pseudocode from:
-#' @cite Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
+#' @references Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
 #' Code ported from:
-#' @cite Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
+#' @references Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
 #' 
 #' Sweeps a covariance matrix to extract regression coefficients.
 #' 

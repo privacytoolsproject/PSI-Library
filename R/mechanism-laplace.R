@@ -12,10 +12,13 @@ mechanismLaplace <- setRefClass(
 )
 
 mechanismLaplace$methods(
+  #' Laplace Mechanism
+  #' 
   #' Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
   #' "x" using the Laplace mechanism.
   #' 
-  #' @cite C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
+  #' @name Laplace Mechanism
+  #' @references C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
   #'
   #' @param fun function of input x to add Laplace noise to.
   #' @param x input that function fun will be evaluated on. 
@@ -26,8 +29,6 @@ mechanismLaplace$methods(
   #'
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
   #' @export
-  #'
-  #' @examples
   #'
   # TODO: add examples 
   evaluate = function(fun, x, sens, postFun, ...) {

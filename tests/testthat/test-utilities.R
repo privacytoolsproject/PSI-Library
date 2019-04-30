@@ -1,6 +1,18 @@
 library(PSIlence)
 context("utilities")
 
+test_that('Uniform distribution drawing functions as expected', {
+  uniform_repeatable1 <- dpUnif(n=1, seed=75436)
+  uniform_repeatable2 <- dpUnif(n=1, seed=75436)
+  expect_equal(uniform_repeatable1, uniform_repeatable2)
+  
+  n <- 5
+  uniform_list <- dpUnif(n=n)
+  expect_length(uniform_list, n)
+  expect_equal(sum(uniform_list<1), n)
+  expect_equal(sum(uniform_list>0), n)
+})
+
 test_that('checkrange is as expected', {
   rng1 = c(0,1)
   rng2 = c(0,1,2)
