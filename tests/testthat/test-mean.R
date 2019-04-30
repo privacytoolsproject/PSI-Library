@@ -3,7 +3,6 @@ context("mean")
 
 test_that('range checks throw correct warning', {
   data(PUMS5extract10000, package = "PSIlence")
-  print('test-mean.R')
 
   my_n <- 10000
   my_epsilon <- 0.1
