@@ -14,7 +14,7 @@ test_that('range checks throw correct warning', {
                  "range argument supplied has more than two values.  Will proceed using min and max values as range.")
 
   dp.mean <- dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, delta=my_delta, rng=c(0,100))
-  dp.mean$release(PUMS5extract10000$age)
+  dp.mean$release(PUMS5extract10000)
   expect_equal(length(dp.mean$result$release), 1)
   expect_equal(dp.mean$epsilon, my_epsilon)
   expect_equal(length(dp.mean$result$interval), 2)
