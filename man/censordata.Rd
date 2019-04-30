@@ -9,7 +9,8 @@ censordata(x, var_type, rng = NULL, levels = NULL)
 \arguments{
 \item{x}{A vector of numeric or categorial values to censor.}
 
-\item{var_type}{Character indicating the variable type of \code{x}.}
+\item{var_type}{Character indicating the variable type of \code{x}.
+Possible values include: numeric, logical, ...}
 
 \item{rng}{For numeric vectors, a vector (min, max) of the bounds of the 
 range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 

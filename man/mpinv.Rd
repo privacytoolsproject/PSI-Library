@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{mpinv}
 \alias{mpinv}
-\title{Moore Penrose Inverse Function ###Must assign authorship to this###}
+\title{Moore Penrose Inverse Function}
 \usage{
 mpinv(X, tol = sqrt(.Machine$double.eps))
 }
@@ -12,5 +12,10 @@ mpinv(X, tol = sqrt(.Machine$double.eps))
 \item{tol}{Convergence requirement.}
 }
 \description{
+Moore Penrose Inverse Function
+}
+\references{
+Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
+
 Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 }

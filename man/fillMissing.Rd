@@ -4,19 +4,19 @@
 \alias{fillMissing}
 \title{Fill missing values}
 \usage{
-fillMissing(x, var.type, lower = NULL, upper = NULL, categories = NULL)
+fillMissing(x, var.type, impute.rng = NULL, categories = NULL)
 }
 \arguments{
 \item{x}{Vector with missing values to impute}
 
 \item{var.type}{Character specifying the variable type}
 
+\item{categories}{Set of possible categories from which to choose,
+default NULL}
+
 \item{lower}{Numeric lower bound, default NULL}
 
 \item{upper}{Numeric upper bound, default NULL}
-
-\item{categories}{Set of possible categories from which to choose,
-default NULL}
 }
 \value{
 Vector \code{x} with missing values imputed
