@@ -63,6 +63,93 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 }
 
 
+#' Scaling helper function for fillMissing
+#' 
+#' Takes input array and scales to upper and lower bounds, which are either defined by lower and upper or calculated depending on
+#' the type of variable. (Note that input array will always be numeric; var.type refers to the variable type of the input array in
+#' the fillMissing function.)
+#' 
+#' @param vals Input array of values to scale Type: numeric array
+#' @param var.type Variable type of input array to fillMissing function; affects how scaling occurs. 
+#'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
+#' @param lower Lower bound for scaling. Type: numeric
+#' @param upper Upper bound for scaling. Type: numeric
+#' @param categories List of categories. Type: factor
+#'
+#' @return Array of values, either characters, integers, logicals, numerics depending on var.type, scaled according to either the 
+#' number of categories if var.type='factor' or 'character', or based on lower and upper when var.type='logical','numeric', or 'integer'.
+#' @export
+#'
+#' @examples
+scaleValues = function(vals, var.type, lower=NULL, upper=NULL, categories=NULL) {
+  if (var.type %in% c('character', 'factor')) { 
+    lower <- 1
+    upper <- length(categories)
+  }
+  
+  if (var.type == 'logical') {       # logical values can only be 0 or 1 so set bounds accordingly
+    lower <- 0
+    upper <- 2                       # upper bound of 2 not 1 because as.integer always rounds down.
+  }
+  
+  out <- vals * (upper - lower) + lower  # scale uniform random numbers based on upper and lower bounds
+  
+  if (var.type %in% c('logical', 'integer')) { # if logical or integer, trim output to integer values
+    out <- as.integer(out)
+  } else if(var.type == 'logical') {
+    
+  } else if (var.type %in% c('character', 'factor')) { # if character or factor, assign output to categories.
+    out <- categories[as.integer(out)]
+  }
+  
+  return(out)
+}
+
+#' Helper function for fillMissing; fills missing values in one-dimensional array
+#'
+#' Imputes uniformly in the range of the provided variable.
+#'
+#' @param x Input array of missing values.
+#' @param var.type Variable type of input array to fillMissing function; affects how scaling occurs. 
+#'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
+#' @param lower Lower bound for scaling. Type: numeric. Default NULL.
+#' @param upper Upper bound for scaling. Type: numeric. Default NULL.
+#' @param categories List of categories. Type: factor. Default NULL.
+#' @return Vector \code{x} with missing values imputed
+fillMissing1D <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) {
+  naIndices <- is.na(x)         # indices of NA values in x
+  nMissing <- sum(naIndices)    # number of missing values
+  
+  if (nMissing == 0) { 
+    return(x) 
+  }
+  
+  u <- dpUnif(nMissing) # array of uniform random numbers of length nMissing
+  scaledVals <- scaleValues(u, var.type, lower, upper, categories) # scale uniform vals
+  x[naIndices] <- scaledVals #assign to NAs in input array
+  return(x)
+}
+
+
+#' Helper function for fillMissing. Fills missing values column-wise for matrix.
+#'
+#' Impute uniformly in the range of the provided variable
+#'
+#' @param x Numeric matrix with missing values
+#' @param var.type Variable type of input array.
+#'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
+#' @param impute.rng Px2 matrix where the pth row contains the range
+#'      within which the pth variable in x is imputed.
+#' @return Matrix \code{x} with missing values imputed
+#'
+#' @seealso \code{\link{fillMissing}}
+fillMissing2D <- function(x, var.type, impute.rng=NULL) {
+  for (j in 1:ncol(x)) {
+    x[, j] <- fillMissing1D(x[, j], var.type, lower=impute.rng[j, 1], upper=impute.rng[j, 2])
+  }
+  return(x)
+}
+
 #' Fill missing values
 #'
 #' Impute uniformly in the range of the provided variable
@@ -90,55 +177,19 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @seealso \code{\link{dpUnif}}
 #' @rdname fillMissing
 #' @export
-fillMissing <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) {
-    miss_idx <- is.na(x)
-    if (sum(miss_idx) == 0) { return(x) }
-    u <- dpUnif(sum(miss_idx))
-    if (var.type %in% c('character', 'factor')) {
-        lower <- 1
-        upper <- length(categories)
+fillMissing = function(x, var.type, impute.rng=NULL, categories=NULL) {
+  if (var.type %in% c('numeric', 'integer', 'logical')) {
+    if (NCOL(x) > 1) {
+      x <- fillMissing2D(x, var.type, impute.rng)
+    } else {
+      x <- fillMissing1D(x, var.type, impute.rng[1], impute.rng[2])
     }
-    out <- u * (upper - lower) + lower
-    if (var.type %in% c('logical', 'integer')) {
-        out <- as.integer(out)
-    } else if (var.type %in% c('character', 'factor')) {
-        out <- categories[as.integer(out)]
-    }
-    x[miss_idx] <- out
-    return(x)
+  } else {
+    x <- fillMissing1D(x, var.type, categories=categories)
+  }
+  return(x)
 }
 
-
-#' Fill missing values column-wise for matrix
-#'
-#' Impute uniformly in the range of the provided variable
-#'
-#' @param x Numeric matrix with missing values
-#' @param var.type Character specifying the variable type
-#' @param impute.rng Px2 matrix where the pth row contains the range
-#'      within which the pth variable in x is imputed.
-#' @return Matrix \code{x} with missing values imputed
-#' @examples
-#'
-#' # numeric example
-#' N <- 100
-#' x1 <- x2 <- rnorm(N)
-#' x1[sample(1:N, size=10)] <- NA
-#' x2[sample(1:N, size=10)] <- NA
-#' imp.rng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
-#' df <- data.frame(x1, x2)
-#' df_imputed <- fillMissing2d(x=df, var.type='numeric', impute.rng=imp.rng)
-#'
-#' @seealso \code{\link{fillMissing}}
-#' @rdname fillMissing2d
-#' @export
-fillMissing2d <- function(x, var.type, impute.rng=NULL) {
-    for (j in 1:ncol(x)) {
-        x[, j] <- fillMissing(x[, j], var.type, lower=impute.rng[j, 1], upper=impute.rng[j, 2])
-    }
-    return(x)
-}
-            
 
 #' Random draw from Laplace distribution
 #'
@@ -285,7 +336,7 @@ checkepsilon <- function(epsilon) {
 		stop("Privacy parameter epsilon must be a value greater than zero.")
 	}
 	if (length(epsilon) > 1) {
-		stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length ", length(epsilon)))
+		stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
 	}
 	return(epsilon)
 }
@@ -299,6 +350,7 @@ checkepsilon <- function(epsilon) {
 #'
 #' @param x A vector of numeric or categorial values to censor.
 #' @param var_type Character indicating the variable type of \code{x}.
+#'    Possible values include: numeric, logical, ...
 #' @param rng For numeric vectors, a vector (min, max) of the bounds of the 
 #'    range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 
 #'    (min, max) bounds.
@@ -543,6 +595,8 @@ linear.reg <- function(formula, release, n, intercept) {
 
 #' Moore Penrose Inverse Function ###Must assign authorship to this###
 #' 
+#' @cite Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
+#' 
 #' Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 #' 
 #' @param X A numeric, symmetric covariance matrix.
@@ -559,7 +613,14 @@ mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
 }
 
 
-#' Sweep operator ###Check if we need to assign authorship to this###
+#' Sweep operator
+#' 
+#' General sweep operator citation:
+#' @cite Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
+#' This implementation is from pseudocode from:
+#' @cite Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
+#' Code ported from:
+#' @cite Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
 #' 
 #' Sweeps a covariance matrix to extract regression coefficients.
 #' 
