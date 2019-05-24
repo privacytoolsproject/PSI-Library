@@ -2,16 +2,16 @@
 % Please edit documentation in R/statistic-covariance.R
 \name{fun.covar}
 \alias{fun.covar}
-\title{Lower triangle of ovariance matrix}
+\title{Lower triangle of covariance matrix}
 \usage{
-fun.covar(x, columns, intercept)
+fun.covar(x, intercept)
 }
 \arguments{
 \item{x}{Data frame}
 
-\item{columns}{Columns to include in output}
-
 \item{intercept}{Logical, should the intercept be included?}
+
+\item{columns}{Columns to include in output}
 }
 \description{
 This function is called by \code{dpCovariance} and

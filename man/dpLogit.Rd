@@ -8,6 +8,12 @@ dpLogit()
 }
 \value{
 List with the name and objective function
+Differentially private objective function for Probit regression
+
+List with the name and objective function
+Differentially private objective function for Logistic regression
+
+List with the name and objective function
 }
 \description{
 Differentially private objective function for Logistic regression

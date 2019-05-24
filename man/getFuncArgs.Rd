@@ -4,17 +4,19 @@
 \alias{getFuncArgs}
 \title{Extract function arguments}
 \usage{
-getFuncArgs(output, target.func)
+getFuncArgs(targetFunc, inputList = NULL, inputObject = NULL)
 }
 \arguments{
-\item{output}{A list with the output of a function.}
-
-\item{target.func}{A character vector containing the name of the function 
+\item{targetFunc}{A character vector containing the name of the function to find the matching inputs of
 with arguments that need to be filled by output.}
+
+\item{inputList}{A named list of values}
+
+\item{inputObject}{An object with a predefined getFields() function that takes all attributes of object and returns them as a list}
 }
 \value{
 List of arguments and values needed for specification of \code{target.func}
 }
 \description{
-Utility function to match arguments of a function with list output of another function.
+Utility function to match arguments of a function with input list and/or attributes of input object
 }

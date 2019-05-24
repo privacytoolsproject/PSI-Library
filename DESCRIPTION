@@ -7,6 +7,7 @@ Authors@R: c(
     )
 Version: 0.1-1
 Date: 2017-08-05
+Encoding: UTF-8
 Imports:
     jsonlite,
     methods,
@@ -19,6 +20,7 @@ Suggests:
     rmarkdown,
     testthat
 Collate: 
+    'CompositionTheorems.R'
     'createJSON.R'
     'datasets.R'
     'mechanism.R'
@@ -34,5 +36,6 @@ Collate:
     'statistic-mean.R'
     'statistic-tree.R'
     'statistic-variance.R'
+    'update_parameters.R'
     'utilities.R'
 VignetteBuilder: knitr

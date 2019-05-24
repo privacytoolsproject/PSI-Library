@@ -39,14 +39,10 @@ mechanismBootstrap <- setRefClass(
 )
 
 mechanismBootstrap$methods(
-    getFunArgs = function(fun) {
-        callSuper(fun)
-})
-
-mechanismBootstrap$methods(
     bootStatEval = function(xi) {
-        field.vals <- .self$getFunArgs(boot.fun)
-        stat <- do.call(boot.fun, c(list(xi=xi), field.vals))
+        fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+        input.vals = c(list(x=x), fun.args)
+        stat <- do.call(boot.fun, input.vals)
         return(stat)
 })
 

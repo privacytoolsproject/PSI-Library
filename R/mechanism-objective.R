@@ -12,11 +12,6 @@ mechanismObjective <- setRefClass(
 )
 
 mechanismObjective$methods(
-    getFunArgs = function(fun) {
-        callSuper(fun)
-})
-
-mechanismObjective$methods(
     evaluate = function(x, postFun, ...) {
 
         # subset data from formula
@@ -25,7 +20,7 @@ mechanismObjective$methods(
 
         # censor & impute missing values
         x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-        x <- fillMissing2d(x, .self$var.type, .self$impute.rng)
+        x <- fillMissing(x, .self$var.type, impute.rng=.self$impute.rng)
 
         # extract X and y
         y <- x[, cols[1]]

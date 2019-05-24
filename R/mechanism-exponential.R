@@ -12,16 +12,12 @@ mechanismExponential <- setRefClass(
 )
 
 mechanismExponential$methods(
-    getFunArgs = function(fun) { 
-        callSuper(fun)
-})
-
-mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         x <- censordata(x, .self$var.type, rng=.self$rng, levels=.self$bins)
         x <- fillMissing(x, .self$var.type, rng=.self$rng, categories=.self$bins)
-        field.vals <- .self$getFunArgs(fun)
-        true.val <- do.call(fun, c(list(x=x), field.vals))
+        fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+        input.vals = c(list(x=x), fun.args)
+        true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
         quality <- true.val - max(true.val)
         probs <- ifelse(true.val == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
         gap <- as.numeric(true.val[.self$k] - true.val[.self$k + 1])

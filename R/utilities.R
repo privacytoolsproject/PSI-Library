@@ -78,9 +78,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #'
 #' @return Array of values, either characters, integers, logicals, numerics depending on var.type, scaled according to either the 
 #' number of categories if var.type='factor' or 'character', or based on lower and upper when var.type='logical','numeric', or 'integer'.
-#' @export
 #'
-#' @examples
 scaleValues = function(vals, var.type, lower=NULL, upper=NULL, categories=NULL) {
   if (var.type %in% c('character', 'factor')) { 
     lower <- 1
@@ -536,24 +534,38 @@ check_histogram_n <- function(accuracy, n, n_bins, epsilon, delta, alpha) {
 
 #' Extract function arguments
 #' 
-#' Utility function to match arguments of a function with list output of another function.
+#' Utility function to match arguments of a function with input list and/or attributes of input object
 #'
-#' @param output A list with the output of a function.
-#' @param target.func A character vector containing the name of the function 
+#' @param targetFunc A character vector containing the name of the function to find the matching inputs of
 #'    with arguments that need to be filled by output.
-#'    
+#' @param inputList A named list of values
+#' @param inputObject An object with a predefined getFields() function that takes all attributes of object and returns them as a list
 #' @return List of arguments and values needed for specification of \code{target.func}
 #' @rdname getFuncArgs
-getFuncArgs <- function(output, target.func) {
-    spec <- list()
-    for (element in names(output)) {
-        if (element %in% names(formals(target.func))) {
-            spec[[element]] <- output[[element]]
-        }
+getFuncArgs <- function(targetFunc, inputList=NULL, inputObject=NULL){
+  funcArgs <- list()                      # Initialize list of function arguments
+  argNames <- names(formals(targetFunc))  # Names of all arguments of targetFunc
+  inputListNames <- names(inputList)      # Names of all items in inputList
+  
+  if (!is.null(inputObject)){             
+    inputObjectNames <- names(inputObject$getFields()) # Names of all fields of inputObject
+  }
+  else{
+    inputObjectNames <- NULL
+  }
+  
+  for (argument in argNames) {
+    # If argument of targetFunc has an associated named attribute in the input list, save that attribute to funcArgs
+    if (argument %in% inputListNames) {
+      funcArgs[[argument]] <- inputList[[argument]] 
     }
-    return(spec)
+    # If argument of targetFunc has an associated field of inputObject, save that field value to funcArgs 
+    if (argument %in% inputObjectNames) {          
+      funcArgs[[argument]] <- inputObject[[argument]]
+    }
+  }
+  return(funcArgs)
 }
-
 
 #' Linear regression on covariance matrix
 #' 
@@ -593,9 +605,9 @@ linear.reg <- function(formula, release, n, intercept) {
 }
 
 
-#' Moore Penrose Inverse Function ###Must assign authorship to this###
+#' Moore Penrose Inverse Function
 #' 
-#' @cite Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
+#' @references Gill, Jeff, and Gary King. "What to do when your Hessian is not invertible: Alternatives to model respecification in nonlinear estimation." Sociological methods & research 33, no. 1 (2004): 54-87.
 #' 
 #' Generate the Moore-Penrose pseudoinverse matrix of \code{X}.
 #' 
@@ -616,11 +628,11 @@ mpinv <- function(X, tol = sqrt(.Machine$double.eps)) {
 #' Sweep operator
 #' 
 #' General sweep operator citation:
-#' @cite Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
+#' @references Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
 #' This implementation is from pseudocode from:
-#' @cite Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
+#' @references Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
 #' Code ported from:
-#' @cite Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
+#' @references Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
 #' 
 #' Sweeps a covariance matrix to extract regression coefficients.
 #' 

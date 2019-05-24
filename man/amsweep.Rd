@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{amsweep}
 \alias{amsweep}
-\title{Sweep operator ###Check if we need to assign authorship to this###}
+\title{Sweep operator}
 \usage{
 amsweep(g, m, reverse = FALSE)
 }
@@ -22,5 +22,16 @@ should be flipped. Default to \code{FALSE}.}
 The coefficients from \code{g}.
 }
 \description{
+General sweep operator citation:
+}
+\references{
+Goodnight, James H. "A tutorial on the SWEEP operator." The American Statistician 33, no. 3 (1979): 149-158.
+This implementation is from pseudocode from:
+
+Schafer, Joseph L. Analysis of incomplete multivariate data. Chapman and Hall/CRC, 1997.
+Code ported from:
+
+Honaker, James, Gary King, and Matthew Blackwell. "Amelia II: A program for missing data." Journal of statistical software 45, no. 7 (2011): 1-47.
+
 Sweeps a covariance matrix to extract regression coefficients.
 }
