@@ -65,7 +65,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
 #         }
 #     }
 #     stat.out <- do.call(rbind, stat.partitions)
-#     return(apply(stat.out, 2, sum))
+#     return(apply(stat.out, 2, mean))
 # }
 
 
