@@ -34,7 +34,10 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
         stat.partitions[[i]] <- currentPartition * stat.currentPartition + noise.currentPartition
     }
     stat.out <- do.call(rbind, stat.partitions)
-    return(apply(stat.out, 2, sum))
+    # return(apply(stat.out, 2, sum))
+    # returnedBootstrappedResult = apply(stat.out, 2, sum)
+    returnedBootstrappedResult = apply(X = stat.out, MARGIN = 2, FUN = fun)
+    return(returnedBootstrappedResult)
 }
 
 # 2: treat it as a partition with a mean of 0 and keep it in the calculation, adding noise and adding it to the final calculation
@@ -52,7 +55,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
 #     for (i in 1:max.appearances) {
 #         variance.i <- (i * probs[i] * (sensitivity^2)) / (2 * epsilon)
 #         if (i %in% validPartitions) {
-#             stat.i <- fun(x[partition == i])
+#             stat.i <- inputObject$bootStatEval(x[partition == currentPartition], fun, ...)
 #             noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
 #             stat.partitions[[i]] <- i * stat.i + noise.i
 #         } else {
