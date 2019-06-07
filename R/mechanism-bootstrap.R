@@ -35,8 +35,8 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
     }
     stat.out <- do.call(rbind, stat.partitions)
     # return(apply(stat.out, 2, sum))
-    # returnedBootstrappedResult = apply(stat.out, 2, sum)
-    returnedBootstrappedResult = apply(X = stat.out, MARGIN = 2, FUN = fun)
+    # returnedBootstrappedResult <- apply(stat.out, 2, sum)
+    returnedBootstrappedResult <- apply(X = stat.out, MARGIN = 2, FUN = fun)
     return(returnedBootstrappedResult)
 }
 
