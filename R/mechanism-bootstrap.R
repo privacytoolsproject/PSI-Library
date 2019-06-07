@@ -10,6 +10,10 @@
 #' @import stats
 #' @export
 
+# There are 2 options for handling empty partitions:
+
+# 1: skip it entirely, and say the total number of partitions is just the number of partitions that are not empty
+
 bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
     # make a sorted vector of the partitions of the data
@@ -32,6 +36,34 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
     stat.out <- do.call(rbind, stat.partitions)
     return(apply(stat.out, 2, sum))
 }
+
+# 2: treat it as a partition with a mean of 0 and keep it in the calculation, adding noise and adding it to the final calculation
+
+# bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
+#     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
+#     # make a sorted vector of the partitions of the data
+#     # because it is not guaranteed that every partition from 1:max.appearances will have a value in it
+#     validPartitions <- validPartitions <- sort(unique(partition[,1]))
+#     # print the unique values of the partition, to track which entries may result in NaN
+#     print(validPartitions)
+#     max.appearances <- max(partition)
+#     probs <- sapply(1:max.appearances, dbinom, size=n, prob=(1 / n))
+#     stat.partitions <- vector('list', max.appearances)
+#     for (i in 1:max.appearances) {
+#         variance.i <- (i * probs[i] * (sensitivity^2)) / (2 * epsilon)
+#         if (i %in% validPartitions) {
+#             stat.i <- fun(x[partition == i])
+#             noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
+#             stat.partitions[[i]] <- i * stat.i + noise.i
+#         } else {
+#             stat.i <- 0
+#             noise.i <- dpNoise(n=length(stat.i), scale=sqrt(variance.i), dist='gaussian')
+#             stat.partitions[[i]] <- i * stat.i + noise.i
+#         }
+#     }
+#     stat.out <- do.call(rbind, stat.partitions)
+#     return(apply(stat.out, 2, sum))
+# }
 
 
 #' Bootstrap mechanism
