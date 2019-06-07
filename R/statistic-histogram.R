@@ -209,15 +209,28 @@ histogram.getJSON <- function(output.json=TRUE) {
 #' @param var.type Character indicating the variable type.
 #' @param bins Vector indicating the bins into which \code{x} is partitioned.
 #' @return Histogram with counts for each level of \code{x}.
+#' 
+#' 
 
-fun.hist <- function(x, var.type, bins=NULL) {
+fun.hist <- function(x, var.type, bins=NULL, stability) {
     if (var.type %in% c('numeric', 'integer')) {
+        # if the variable type is numeric or integer, the mechanism will always
+        # be a non-stability mechanism, so we want to sort the values into bins
+        # and KEEP bins that are empty
+        # (see dpHistogram$initialize to see that if variable type is in c(numeric, integer),
+        # the stability is always FALSE)
         histogram <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
     } else {
         histogram <- table(x, useNA='ifany')
+        # if the histogram is for a stability mechanism, remove all bins with a count of 0
+        # (i.e. keep all bins that have a count > 0)
+        if (stability) {
+            histogram <- histogram[histogram > 0]
+        }
     }
     return(histogram)
 }
+
 
 #' Bootstrap replication for histogram
 #'
@@ -319,19 +332,22 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability)
         if (stability) {
+            # if the histogram is for a stability mechanism, set all bins below a certain threshold to 0
+            # but first, check if the number of observations is sufficient for privacy (print to the console if not)
             if (check_histogram_n(noisy$accuracy, n, n.bins, epsilon, delta, alpha)) {
-               # a <- accuracy * n / 2  
-               # noisy$release <- noisy$release[noisy$release >= a]
-               #JM changed to below after conversation with Victor
-               a <- 1+2*log(2/delta)/epsilon 
-               noisy$release <- noisy$release[noisy$release > a]
+               # a is the threshold below which the noisy histogram bins are set to 0
+               a <- 1+2*log(2/delta)/epsilon
+               # set all bins below (or equal to) the threshold to 0
+               noisy$release[noisy$release <= a] <- 0
+            } else {
+                # Megan Fantes added this print statement, as it was not clear what the if statement was checking
+                # This way, the user knows why the histogram may not be accurate
+                print("The number of observations is not sufficient to provide desired privacy and accuracy with given parameters.")
             }
-        } #else {
-          #  noisy$release <- round(noisy$release)
-          #  noisy$release[noisy$release < 0] <- 0
-        #}
+        }
+        # if the histogram is not for a stability mechanism, we do not set a threshold and set bins to 0, we just return the noisy bins
         .self$result <- noisy
 })
 
