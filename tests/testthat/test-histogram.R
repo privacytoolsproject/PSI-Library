@@ -19,6 +19,32 @@ test_that('histogram releases have expected dimensions', {
   dp.histogram <- dpHistogram$new(mechanism='mechanismLaplace', var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta, rng=c(0.5,16.5))
   dp.histogram$release(PUMS5extract10000)
   expect_equal(length(dp.histogram$result$release), 16)
+  # print(dp.histogram$result$release)
+  # print(table(PUMS5extract10000$educ))
+  # print(dp.histogram$result)
+  
+  my_n.bins2 <- 2
+  my_n2 <- 10000
+  my_epsilon2 <- 0.1
+  my_delta2 <- 10^-6
+  
+  dp.histogram2 <- dpHistogram$new(mechanism='mechanismLaplace', var.type='logical', variable="sex", n=my_n2, epsilon=my_epsilon2, n.bins=my_n.bins2, delta=my_delta2, impute = TRUE, rng = c(0,1))
+  dp.histogram2$release(PUMS5extract10000)
+  expect_equal(length(dp.histogram2$result$release), 2)
+  # print(dp.histogram2$result$release)
+  
+  my_n.bins3 <- 76
+  my_n3 <- 10000
+  my_epsilon3 <- 0.1
+  my_delta3 <- 10^-6
+  
+  dp.histogram3 <- dpHistogram$new(mechanism='mechanismLaplace', var.type='numeric', variable="age", n=my_n3, epsilon=my_epsilon3, n.bins=my_n.bins3, delta=my_delta3, rng=c(17.5,93.5))
+  dp.histogram3$release(PUMS5extract10000)
+  expect_equal(length(dp.histogram3$result$release), 76)
+  # print(dp.histogram$result$release)
+  print(table(cut(sort(PUMS5extract10000$age), breaks = 76)))
+  print(dp.histogram3$result$release)
+  print(dp.histogram3$stability)
   
   askAccuracy <- histogram.getAccuracy(n.bins=my_n.bins, n=my_n, epsilon=my_epsilon, stability=FALSE, delta=my_delta)
   expect_equal(dp.histogram$epsilon, my_epsilon)
