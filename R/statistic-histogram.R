@@ -391,7 +391,7 @@ dpHistogram$methods(
         # the mechanism, we pass an identity function as the function and the vector
         # of bins as x into `evaluate`.
         #noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
-        noisy <- export(mechanism)$evaluate(function(x){return(x)}, stabilityHistogram, 2, .self$postProcess, stability)
+        noisy <- export(mechanism)$evaluate(function(x){return(x)}, stabilityHistogram, 2, .self$postProcess)
         # noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess) # previous code
         if (stability) {
             # if the histogram is for a stability mechanism, set all bins below a certain threshold to 0
