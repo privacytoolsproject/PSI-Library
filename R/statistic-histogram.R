@@ -212,23 +212,70 @@ histogram.getJSON <- function(output.json=TRUE) {
 #' 
 #' 
 
-fun.hist <- function(x, var.type, bins=NULL, stability) {
+fun.hist <- function(x, var.type, bins=NULL) {
     if (var.type %in% c('numeric', 'integer')) {
-        # if the variable type is numeric or integer, the mechanism will always
-        # be a non-stability mechanism, so we want to sort the values into bins
-        # and KEEP bins that are empty
-        # (see dpHistogram$initialize to see that if variable type is in c(numeric, integer),
-        # the stability is always FALSE)
         histogram <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
     } else {
         histogram <- table(x, useNA='ifany')
-        # if the histogram is for a stability mechanism, remove all bins with a count of 0
-        # (i.e. keep all bins that have a count > 0)
-        if (stability) {
-            histogram <- histogram[histogram > 0]
-        }
     }
     return(histogram)
+}
+
+#' Remove empty histogram bins in a stability mechanism
+#' 
+#' Helper function to remove empty histogram bins for a stability mechanism.
+#' The empty bins will be added back in duirng postprocessing.
+#' (We remove the empty buckets and then add them back in to maintain the
+#' encapsulation of the mechanism code, we only want it to add noise to given
+#' histogram bins, not test for which bins to add noise to.)
+#' 
+#' @param x Vector of numeric or categorical type.
+#' @return Histogram with counts for each level of \code{x} that are greater than zero
+
+removeEmptyBins <- function(x) {
+    return (x[x > 0])
+}
+
+#' Add originally empty histogram bins back into the histogram for a stability mechanism
+#' 
+#' Helper function to add empty histogram bins back in for a stability mechanism.
+#' 
+#' @param originalBins Histogram with counts for each level of \code{x}
+#' @param noisyBins Histogram with noisy counts for each level of \code{x} that was originally greater than 0
+#' @return Histogram with noisy counts for each level of \code{x}, including bins that were originally empty
+
+addOriginalEmptyBins <- function(originalBins, noisyBins) {
+    # get the original number of bins, this should be the final number of bins
+    finalLength <- length(originalBins)
+    # make an empty vector of the length of the final number of bins
+    finalBins <- numeric(finalLength)
+    # get the labels of the original histogram bins, this will include the labels
+    # of the originally empty bins
+    originalLabels <- unlist(labels(originalBins))
+    # get the labels of the bins to which noise was added, this will NOT include
+    # the originally empty bins
+    noisyLabels <- unlist(labels(noisyBins))
+    # make a counter that will be used to loop through the noisy bins
+    # (initialize it to point to the first value in the noisy bins vector)
+    noisyPointer <- 1
+    # this loop will loop through the original histogram bins
+    for (i in 1:finalLength) {
+        # if the label at the current index (i) of the original bins is equal to the 
+        # label at the current index (noisyPointer) of the noisy bins, set the value
+        # and label of finalBins[i] equal to the noisy bin and advance the noisy
+        # pointer (i will adance with the for loop)
+        if (originalLabels[i] == noisyLabels[noisyPointer]) {
+            finalBins[i] = noisyBins[noisyPointer]
+            noisyPointer = noisyPointer + 1
+        } else {
+            # if the labels are NOT equal, then the bin at index i of the original
+            # bins is empty and is not in the noisy bins. Set the value and label
+            # of finalBins[i] equal to the noisy bin and DO NOT advance the noisy
+            # pointer (because we want to compare the next original value to it)
+            finalBins[i] = originalBins[i]
+        }
+    }
+    return(finalBins)
 }
 
 
@@ -332,7 +379,20 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess, stability)
+        histogram <- fun.hist(x, var.type, bins)
+        # The `stabilityHistogram` variable is initialized as a copy of the histogram bins,
+        # but if the mechanism is a stability mechanism, then the stability histogram
+        # has the empty bins removed. The bins will be added back in after noise is added.
+        stabilityHistogram <- histogram
+        if (stability) {
+            stabilityHistogram <- removeEmptyBins(histogram)
+        }
+        # Because we determine the histogram bins before calling the evaluate method of
+        # the mechanism, we pass an identity function as the function and the vector
+        # of bins as x into `evaluate`.
+        #noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(function(x){return(x)}, stabilityHistogram, 2, .self$postProcess, stability)
+        # noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess) # previous code
         if (stability) {
             # if the histogram is for a stability mechanism, set all bins below a certain threshold to 0
             # but first, check if the number of observations is sufficient for privacy (print to the console if not)
@@ -341,9 +401,9 @@ dpHistogram$methods(
                a <- 1+2*log(2/delta)/epsilon
                # set all bins below (or equal to) the threshold to 0
                noisy$release[noisy$release <= a] <- 0
+               # add the originally empty histogram bins back in
+               noisy$release <- addOriginalEmptyBins(histogram, noisy$release)
             } else {
-                # Megan Fantes added this print statement, as it was not clear what the if statement was checking
-                # This way, the user knows why the histogram may not be accurate
                 print("The number of observations is not sufficient to provide desired privacy and accuracy with given parameters.")
             }
         }
