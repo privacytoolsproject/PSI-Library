@@ -407,7 +407,8 @@ dpHistogram$methods(
                 print("The number of observations is not sufficient to provide desired privacy and accuracy with given parameters.")
             }
         }
-        # if the histogram is not for a stability mechanism, we do not set a threshold and set bins to 0, we just return the noisy bins
+        # if the histogram is not for a stability mechanism, we do not set a threshold and set bins to 0, 
+        # we just return the noisy bins
         .self$result <- noisy
 })
 
