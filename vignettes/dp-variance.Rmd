@@ -1,15 +1,15 @@
 ---
-title: "Differentially Private Mean Release"
-author: "James Honaker, Thomas Brawner, and Christian Baehr"
+title: "Differentially Private Variance Release"
+author: "Megan Fantes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{dp-mean}
+  %\VignetteIndexEntry{dp-variance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
+```{r setup , include = FALSE}
 knitr::opts_knit$set(
         stop_on_error = 2L
 )
@@ -19,10 +19,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-Differentially Private Mean with `dpMean`
+Differentially Private Variance with `dpVariance`
 -----------------------------------------
 
-The `dpMean` class evaluates a privacy-preserving mean of a vector of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric`, `integer`, and `logical`.
+The `dpVariance` class evaluates a privacy-preserving variance of a vector of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric`, `integer`, and `logical`.
 
 <!--
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
@@ -40,25 +40,34 @@ x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
-dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
+example_dpVariance <- dpVariance$new(mechanism='mechanismLaplace', var.type='numeric', 
                       variable='x1', epsilon=10, n=10, rng=c(0, 70))
-out1 <- dp.mean$release(data)
+out1 <- example_dpVariance$release(data)
 print(out1)
 
-dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+example_dpVariance2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
-out2 <- dp.mean2$release(data)
+out2 <- example_dpVariance2$release(data)
 print(out2)
 ```
+
+
+dpVariance$methods(
+    initialize = function(mechanism, var.type, variable, n, rng, epsilon,
+                          impute.rng=NULL, alpha=0.05)
+
+
 
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpMean` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpVariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
+
+* `variable` \ character, the name of the variable in the data on which to calculate the variance.
 
 * `n` \ Integer, the number of observations in the vector.
 
@@ -66,11 +75,7 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 * `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `accuracy`.
 
-* `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
-
 * `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
-
-* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
 
 * `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
 
@@ -79,7 +84,6 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 The `release` method accepts a single argument. 
 
 * `data` \ Data frame containing numeric columns corresponding the names specified in `formula`.
-
 
 Examples
 ------
@@ -93,45 +97,24 @@ data(PUMS5extract10000)
 
 &nbsp;
 
-Calculate a private mean of a numeric vector with `dpMean` using the Laplace mechanism:
+Calculate a private variance of a numeric vector with `dpVariance` using the Laplace mechanism:
 
 ```{r}
-numeric_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
+numeric_variance <- dpVariance$new(mechanism='mechanismLaplace', var.type='numeric', 
                            variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
-numeric_mean$release(PUMS5extract10000)
-print(numeric_mean$result)
+numeric_variance$release(PUMS5extract10000)
+print(numeric_variance$result)
 ```
 
 &nbsp;
 
-To calculate the mean of a logical vector instead, input a logical vector into `variable` and update `var.type` and `rng` appropriately:
+To calculate the variance of a logical vector instead, input a logical vector into `variable` and update `var.type` and `rng` appropriately:
 
 ```{r}
-logical_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+logical_variance <- dpVariance$new(mechanism='mechanismLaplace', var.type='logical', 
                            variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
-logical_mean$release(PUMS5extract10000)
-print(logical_mean$result)
-```
-
-&nbsp;
-
-Use the bootstrap mechanism in place of the Laplace mechanism. In this case, `dpMean` returns an estimate for each of the bootstrap replications along with estimates for the standard error.
-
-```{r}
-n.boot <- 25
-boot_mean <- dpMean$new(mechanism='mechanismBootstrap', var.type='numeric', 
-                        variable='income', n=10000, epsilon=0.1, rng=c(0, 750000), 
-                        n.boot=n.boot)
-boot_mean$release(PUMS5extract10000)
-print(boot_mean$result)
-```
-
-&nbsp; 
-
-Using the result, we can obtain a bagged estimate of the mean.
-
-```{r}
-print(mean(boot_mean$result$release))
+logical_variance$release(PUMS5extract10000)
+print(logical_variance$result)
 ```
 
 Values
@@ -145,7 +128,7 @@ The `release` method makes a call to the mechanism, which generates a list of st
 
 The list in the `result` attribute has the following values.
 
-* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e., vector of length `n.boot`).
+* `release` \ Differentially private estimate of the variance.
 * `accuracy` \ The accuracy guarantee of the release given `epsilon`.
 * `epsilon` \ The privacy cost required to guarantee `accuracy`.
 * `interval` \ Confidence interval of the private estimate given `accuracy`.

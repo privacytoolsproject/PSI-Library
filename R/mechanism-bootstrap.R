@@ -19,7 +19,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
     # we do not want the 0 partition, so we remove it from the list
     validPartitions <- validPartitions[2:length(validPartitions)]
     # print the unique values of the partition, to track which entries may result in NaN
-    print(validPartitions)
+    # print(validPartitions)
     probs <- sapply(1:length(validPartitions), dbinom, size=n, prob=(1 / n))
     stat.partitions <- vector('list', length(validPartitions))
     for (i in 1:length(validPartitions)) {
