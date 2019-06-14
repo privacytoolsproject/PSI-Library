@@ -1,6 +1,6 @@
 ---
 title: "Differentially Private Mean Release"
-author: "James Honaker, Thomas Brawner, and Christian Baehr"
+author: "James Honaker, Thomas Brawner, Christian Baehr, and Megan Fantes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -60,6 +60,8 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
+* `variable` \ Character, the name of the variable in the data for which to calculate the mean.
+
 * `n` \ Integer, the number of observations in the vector.
 
 * `rng` \ Numeric, a 2-tuple giving an a priori estimate of the lower and upper bounds of the vector.
@@ -78,7 +80,7 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 The `release` method accepts a single argument. 
 
-* `data` \ Data frame containing numeric columns corresponding the names specified in `formula`.
+* `data` \ Data frame containing numeric columns corresponding the name specified in `variable`.
 
 
 Examples

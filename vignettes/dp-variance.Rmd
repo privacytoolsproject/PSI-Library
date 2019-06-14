@@ -1,6 +1,6 @@
 ---
 title: "Differentially Private Variance Release"
-author: "Megan Fantes"
+author: "James Honaker, Thomas Brawner, Christian Baehr, and Megan Fantes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -83,7 +83,7 @@ In typical usage, there are two methods to the `dpVariance` class. The `new` met
 
 The `release` method accepts a single argument. 
 
-* `data` \ Data frame containing numeric columns corresponding the names specified in `formula`.
+* `data` \ Data frame containing numeric columns corresponding the name specified in `variable`.
 
 Examples
 ------
