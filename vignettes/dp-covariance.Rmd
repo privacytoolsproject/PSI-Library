@@ -107,3 +107,17 @@ numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', var.type='n
 numeric_covariance$release(PUMS5extract10000)
 print(numeric_covariance$result)
 ```
+
+Values
+------
+
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the covariance matrix and the list of the variables in the covariance matrix. Other elements reflecting variable post-processing of the release.
+
+&nbsp; 
+
+The list in the `result` attribute has the following values.
+
+* `release` \ Differentially private estimate of the covariance matrix.
+* `variable` \ List of the variables in the covariance matrix (variables listed as strings)

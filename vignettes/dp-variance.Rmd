@@ -129,10 +129,5 @@ The `release` method makes a call to the mechanism, which generates a list of st
 The list in the `result` attribute has the following values.
 
 * `release` \ Differentially private estimate of the variance.
-* `accuracy` \ The accuracy guarantee of the release given `epsilon`.
-* `epsilon` \ The privacy cost required to guarantee `accuracy`.
-* `interval` \ Confidence interval of the private estimate given `accuracy`.
-* `std.dev` \ The standard deviation of the vector. Only available for logical vectors.
-* `median` \ The median of the vector. Only available for logical vectors.
-* `histogram` \ The histogram of the vector. Only available for logical vectors.
-* `std.error` \ Estimates of the standard error of the mean. Only available when the bootstrap mechanism is used.
+* `variable` \ The variable n the data for which the differntially private variance was calculated.
+* `std` \ Differentially private estimate of the standard deviation of the variable (the square root of the variance estimate).
