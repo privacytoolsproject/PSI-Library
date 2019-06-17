@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 Differentially Private Covariance with `dpCovariance`
 -----------------------------------------
 
-The `dpCovariance` class evaluates a privacy-preserving covariance of a pair of vectors of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric`, `integer`, and `logical`.
+The `dpCovariance` class evaluates a privacy-preserving covariance of a pair of vectors of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric` and `integer`.
 
 <!--
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
@@ -58,7 +58,7 @@ In typical usage, there are two methods to the `dpCovariance` class. The `new` m
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, must be `'mechanismLaplace'`.
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
+* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'` or `'integer'`.
 
 * `n` \ Integer, the number of observations in the columns.
 
