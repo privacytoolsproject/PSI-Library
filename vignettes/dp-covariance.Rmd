@@ -29,6 +29,8 @@ Differential privacy is a rigorous mathematical framework for making statistical
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
 
+There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `10^-5`, and never greater than `1/n` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
+
 It is noteworthy the user must manually specify the number of observations, variable type, and range of the data of interest; data will only be touched at the point the estimate to be released is actually computed, and only by the function computing that estimate. This structure decreases the possibility of an unauthorized release of information. Additional parameter specification includes the desired `epsilon` value and post-processing steps the user would like to perform on the released statistic. 
 -->
 
@@ -38,7 +40,7 @@ Syntax
 ```{r, eval = FALSE}
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 range1 <- c(0,70)
-x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
+x2 <- c(11, 42, 16, 20, 21, 86, 30, 50, 73, 94)
 range2 <- c(0,1)
 data <- data.frame(x1, x2)
 ranges <- do.call(rbind, list(range1, range2))
@@ -54,7 +56,7 @@ Arguments
 
 In typical usage, there are two methods to the `dpCovariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
 
-* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
+* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, must be `'mechanismLaplace'`.
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
@@ -72,7 +74,7 @@ In typical usage, there are two methods to the `dpCovariance` class. The `new` m
 
 * `formula` \ Formula, a list of the regression equations to be performed on the covariance matrix.
 
-* `delta` \ 
+* `delta` \ Numeric, the differential privacy parameter $\delta$, typically taking values $10^{-5}$ or less and likelihood of additional privacy loss beyond $\epsilon$.
 
 &nbsp; 
 
@@ -95,11 +97,13 @@ data(PUMS5extract10000)
 Calculate a private covariance of a set of numeric vectors with `dpCovariance` using the Laplace mechanism:
 
 ```{r}
+# before calculating the covariance, create a matrix of the column ranges
 income_range = c(0, 750000)
 education_range = c(1,16)
-column_ranges <- matrix(c(income_range, education_range), nrow=2, ncol=2, byrow=TRUE)
+column_ranges_matrix <- matrix(c(income_range, education_range), nrow=2, ncol=2, byrow=TRUE)
+
 numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric', 
-                           columns=c('income', 'educ'), n=10000, epsilon=0.1, rng=column_ranges)
+                           columns=c('income', 'educ'), n=10000, epsilon=0.1, rng=column_ranges_matrix)
 numeric_covariance$release(PUMS5extract10000)
 print(numeric_covariance$result)
 ```

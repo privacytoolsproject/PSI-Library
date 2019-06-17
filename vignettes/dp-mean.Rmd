@@ -117,25 +117,6 @@ print(logical_mean$result)
 
 &nbsp;
 
-Use the bootstrap mechanism in place of the Laplace mechanism. In this case, `dpMean` returns an estimate for each of the bootstrap replications along with estimates for the standard error.
-
-```{r}
-n.boot <- 25
-boot_mean <- dpMean$new(mechanism='mechanismBootstrap', var.type='numeric', 
-                        variable='income', n=10000, epsilon=0.1, rng=c(0, 750000), 
-                        n.boot=n.boot)
-boot_mean$release(PUMS5extract10000)
-print(boot_mean$result)
-```
-
-&nbsp; 
-
-Using the result, we can obtain a bagged estimate of the mean.
-
-```{r}
-print(mean(boot_mean$result$release))
-```
-
 Values
 ------
 
