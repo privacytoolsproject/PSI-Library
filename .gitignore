@@ -4,3 +4,4 @@
 .Ruserdata
 vignettes/*.html
 vignettes/*.pdf
+.Rproj
