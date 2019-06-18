@@ -234,6 +234,131 @@ boot.hist <- function(xi, var.type, bins=NULL) {
     return(histogram)
 }
 
+#' Determine Mechanism
+#' 
+#' This is a set of helper functions to determine which mechanism to use when
+#' calculating the histogram (either the stability mechanism or the passed
+#' in mechanism).
+#' 
+#' @param mechanism
+#' @param var.type
+#' @param rng
+#' @param bins
+#' @param n.bins
+#' @param granularity
+
+determineMechanism(mechanism, var.type, rng, bins, n.bins, granularity) {
+    if (!is.null(bins)) {
+        # if the bins are specified, then the user has previous knowledge
+        # of the data, so the stability mechanism is not necessary
+        return(mechanism)
+    } else {
+        # if the bins are not specified, then we need to look at the
+        # variable type to determine which mechanism to use
+        return(determineMechanismByVariableType(mechanism, var.type, rng, bins, n.bins, granularity))
+    }
+}
+
+determineMechanismByVariableType(mechanism, var.type, rng, bins, n.bins, granularity) {
+    if (var.type == 'logical') {
+        # if the variable type if logical, we will never use the
+        # stability mechanism because the user already knows the
+        # possible values of the data.
+        return(mechanism)
+    } else if (var.type == 'categorical') {
+        # if we have reached this conditional statement, then we
+        # already know that the bins have not been specified. If
+        # the data is categorical and the bins are not specified,
+        # then the mechanism must be the stability mechanism.
+        return('mechanismStability')
+    } else if (var.type %in% c('numeric', 'integer')) {
+        # if the variable type is numeric or integer, then the user
+        # must enter either the number of bins or the granularity
+        # of the histogram bins. If neither is entered, then an
+        # error must be thrown. Otherwise, we determine the mechanism
+        # based on whether the user has prior knowledge of the range
+        # of the data.
+        if (is.null(n.bins) & is.null(granularity)) {
+            stop('number of bins or granularity must be specified')
+        } else {
+            return(determineMechanismByRange(mechanism, var.type, rng, bins, n.bins, granularity))
+        }
+    } else {
+        # if the variable type is none of the above or it is null,
+        # then use the stability mechanism by default
+        return('mechanismStability')
+    }
+}
+
+determineMechanismByRange(mechanism, var.type, rng, bins, n.bins, granularity) {
+    if (is.null(rng)) {
+        # if the range is null, then the user has no prior knowledge of the
+        # range of the data. Thus the stability mechanism must be used,
+        # becuase it gives preserves privacy by giving plausible denialbility
+        # about the range of the data (by removing buckets that have too low
+        # of a count)
+        return('mechanismStability')
+    } else {
+        # if we have gotten to this conditional statement, then we know the
+        # number of bins or the granularity of the histogram bins has been
+        # specified, and we also know that the range has been specified.
+        # That means that the user has prior knowledge of the data, and we
+        # do not need the stability mechanism to preserve privacy.
+        return(mechanism)
+    }
+}
+
+#' Determine Bins
+#' 
+#' Determine the bins of the histogram based on the inputs from the user
+
+determineBins(var.type, rng, bins, n.bins, impute, granularity) {
+    if (!is.null(bins)) {
+        # if the user passed in bins, then the passed bins are the histogram bins
+        return(bins)
+    } else {
+        # if we have reached this condition, then the data is not categorical,
+        # because we only call this function if the mechanism is not the stability
+        # mechanism and the bins are not passed in by the user. If the variable is
+        # categorical and the bins are not passed in, then the mechanism is the
+        # stability mechanism. So we only need to check logical, numeric, and integer.
+        if (var.type == 'logical') {
+            return(determineLogicalBins(impute))
+        } else {
+            # if we have reached this conditional statement, then the variable type can
+            # only be numeric or integer, and the user must have entered the range and
+            # either the number of bins or the granularity.
+            return(determineNumericIntegerBins(rng, n.bins, granularity))
+        }
+    }
+}
+
+determineLogicalBins(impute) {
+    if (impute) {
+        # if the variable is logical and the user wants to impute empty data points,
+        # then the histogram bins are only true and false
+        return(c(0,1))
+    } else {
+        # if the variable is logical but the user does not want to impute empty
+        # data points, then there needs to be a histogram bins for empty datapoints
+        return(c(0,1,NA))
+    }
+}
+
+determineNumericIntegerBins(rng, n.bins, granularity) {
+    if (is.null(granularity)) {
+        # if the granularity is null, then the the number of bins
+        # must be entered
+        return(seq(rng[1], rng[2], length.out=(n.bins + 1)))
+    } else {
+        # if granularity if not null, then we can use it to calculate
+        # the histogram bins
+        r <- rng[2] - rng[1] # get the width of the range
+        nBinsFromGranularity <- r / granularity # get the number of bins
+        return(seq(rng[1], rng[2], length.out=(nBinsFromGranularity + 1)))
+    }
+}
+
 
 #' Differentially private histogram
 #'
@@ -268,38 +393,34 @@ dpHistogram <- setRefClass(
 dpHistogram$methods(
     initialize = function(mechanism, var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
                           bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
-                          impute.rng=NULL, impute=FALSE, n.boot=NULL, ...) {
+                          impute.rng=NULL, impute=FALSE, n.boot=NULL, granularity = NULL, ...) {
         .self$name <- 'Differentially private histogram'
-        .self$mechanism <- mechanism
+        
+        # determine  which mechanism to use based on inputs
+        .self$mechanism <- determineMechanism(mechanism, var.type, rng, bins, n.bins, granularity)
+        
+        # set parameters of the histogram
         .self$variable <- variable
         .self$var.type.orig <- .self$var.type <- var.type
         .self$n <- n
-        .self$rng <- rng
+        .self$rng <- rng # may be null
         .self$alpha <- alpha
         .self$delta <- delta
         .self$error <- error
         .self$impute <- impute
-        if (var.type %in% c('numeric', 'integer')) {
-            if (is.null(n.bins)) {
-                stop('number of bins must be specified')
-            }
-            .self$n.bins <- n.bins
-            .self$bins <- seq(rng[1], rng[2], length.out=(n.bins + 1))
-            .self$stability <- FALSE
-        } else if (var.type == 'logical') {
-            .self$n.bins = ifelse(impute, 2, 3)
-            if (!impute) {
-                .self$bins = c(0, 1, NA)
-                .self$var.type = 'factor'
-            } else {
-                .self$bins = c(0, 1)
-            }
-            .self$stability = FALSE
-        } else {
-            .self$bins <- bins
-            .self$n.bins <- length(bins)
-            .self$stability <- ifelse(is.null(bins), TRUE, FALSE)
+        .self$n.bins <- n.bins # may be null
+        .self$granularity <- granularity # may be null
+        .self$boot.fun <- boot.hist
+        .self$n.boot <- n.boot
+        
+        # if the mechanism used is NOT the stability mechanism, determine the
+        # bins of the histogram. If the mechanism is the stability mechanism,
+        # then the bins will be determined in the stability mechanism
+        if (.self$mechanism != 'mechanismStability') {
+            .self$bins <- determineBins(mechanism, var.type, rng, bins, n.bins, impute, granularity)
         }
+        
+        # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- histogram.getParameters(n.bins, n, accuracy, stability, delta, alpha, error)
@@ -307,13 +428,13 @@ dpHistogram$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- histogram.getAccuracy(.self$n.bins, n, epsilon, stability, delta, alpha, error)
         }
+        
+        # set the range for data imputation
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- impute.rng
         }
-        .self$boot.fun <- boot.hist
-        .self$n.boot <- n.boot
 })
 
 dpHistogram$methods(
