@@ -28,7 +28,6 @@ mechanismLaplace$methods(
   #' @param ... any additional (optional) parameters
   #'
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
-  #' @export
   #'
   # TODO: add examples 
   evaluate = function(fun, x, sens, postFun, ...) {

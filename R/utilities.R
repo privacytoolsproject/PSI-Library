@@ -363,7 +363,7 @@ checkepsilon <- function(epsilon) {
 #' @rdname censordata
 #' @export
 censordata <- function(x, var_type, rng=NULL, levels=NULL) {
-    if (var_type %in% c('character', 'factor')) {
+    if (var_type %in% c('character', 'factor', 'logical')) {
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
         } else {

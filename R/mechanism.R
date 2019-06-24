@@ -47,7 +47,7 @@ mechanism <- setRefClass(
         rng = 'ANY',
         result = 'ANY',
         alpha = 'numeric',
-        accuracy = 'numeric',
+        accuracy = 'ANY',
         bins = 'ANY',
         n.bins = 'ANY',
         k = 'numeric',
@@ -61,7 +61,7 @@ mechanism <- setRefClass(
         intercept = 'logical', 
         stability = 'logical',
         objective = 'function',
-        gran = 'numeric',
+        granularity = 'ANY',
         percentiles = 'ANY',
         tree.data = 'ANY'
 ))

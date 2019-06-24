@@ -28,21 +28,43 @@ mechanismStability$methods(
     #' @param ... any additional (optional) parameters
     #'
     #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
-    #' @export
     #'
     # TODO: add examples 
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-        x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
-        fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-        input.vals = c(list(x=x), fun.args)
+        # if the variable is numeric or integer and the stability mechanism is being used,
+        # then the stability mechanism needs to determine the bins to maintain privacy.
+        # Get the range of the data, then get the number of bins from the input number of
+        # bins or the input granularity
+        dataRange <- NULL
+        numHistogramBins <- NULL
+        imputationRange <- NULL
+        histogramBins <- NULL
+        if (.self$var.type %in% c('numeric', 'integer')) {
+            dataRange <- range(x)
+            numHistogramBins <- ifelse(is.null(.self$n.bins), .self$n / .self$granularity, .self$n.bins)
+            histogramBins <- seq(dataRange[1], dataRange[2], length.out=(numHistogramBins + 1))
+            # set the imputation range to the detected data range to maintain privacy,
+            # a user could have entered an imputation range without entering a range
+            imputationRange <- dataRange
+        }
+        
+        x <- censordata(x, .self$var.type, dataRange, .self$bins)
+        x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=.self$bins)
+        fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
+        input.vals <- c(list(x=x), fun.args)
         true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+        
+        # remove empty bins before noise is added (per definition of stability mechanism)
+        true.val <- true.val[true.val > 0]
+        
         scale <- sens / .self$epsilon
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
+        
         # calculate the accuracy threshold, below which histogram buckets should be removed
-        a <- 1+2*log(2/delta)/epsilon 
+        accuracyThreshold <- 1+2*log(2/delta)/epsilon 
         # remove buckets below the threshold
-        release <- release[release > a]
+        release <- release[release > accuracyThreshold]
+        
         out <- list('release' = release)
         out <- postFun(out, ...)
         return(out)
