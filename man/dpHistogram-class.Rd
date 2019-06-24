@@ -6,8 +6,6 @@
 \alias{dpHistogram}
 \title{Differentially private histogram}
 \arguments{
-\item{mechanism}{Character, the mechanism used to perturb histogram bins.}
-
 \item{var.type}{Character, the variable type.}
 
 \item{variable}{Character, the variable name in the data frame.}
@@ -21,8 +19,7 @@
 \item{rng}{Numeric, a priori estimate of the lower and upper bounds of a
 variable taking numeric values. Ignored for categorical types.}
 
-\item{bins}{Character, the available bins or levels of a categorical variable.
-Ignored for numeric types.}
+\item{bins}{Character, the available bins or levels of a categorical variable.}
 
 \item{n.bins}{Integer, the number of bins to release.}
 
@@ -31,6 +28,9 @@ Ignored for numeric types.}
 \item{delta}{Numeric, probability of privacy loss beyond \code{epsilon}.}
 
 \item{error}{Numeric, error.}
+
+\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
+to calculate histogram bins in comination with `rng`.}
 }
 \description{
 Differentially private histogram

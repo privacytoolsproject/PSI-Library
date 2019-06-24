@@ -4,7 +4,7 @@
 \alias{histogram.getParameters}
 \title{Histogram epsilon}
 \usage{
-histogram.getParameters(n.bins, n, accuracy, stability, delta = 10^-6,
+histogram.getParameters(mechanism, n.bins, n, accuracy, delta = 10^-6,
   alpha = 0.05, error = 1e-10)
 }
 \arguments{
@@ -17,9 +17,6 @@ observations in the data.}
 \item{accuracy}{A numeric vector representing the accuracy needed to 
 guarantee (percent).}
 
-\item{stability}{A logical vector indicating whether the stability 
-mechanism is used.}
-
 \item{delta}{The probability of an arbitrary leakage of information from 
 the data. Should be of length one and should be a very small value. 
 Default to 10^-6.}
@@ -29,6 +26,9 @@ statistical significance level. Default to 0.05.}
 
 \item{error}{The error term of the statistical significance level. Default
 to 1e-9.}
+
+\item{stability}{A logical vector indicating whether the stability 
+mechanism is used.}
 }
 \value{
 Differential privacy parameter epsilon

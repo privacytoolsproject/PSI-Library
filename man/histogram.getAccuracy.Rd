@@ -4,7 +4,7 @@
 \alias{histogram.getAccuracy}
 \title{Histogram accuracy}
 \usage{
-histogram.getAccuracy(n.bins, n, epsilon, stability, delta = 10^-6,
+histogram.getAccuracy(mechanism, n.bins, n, epsilon, delta = 10^-6,
   alpha = 0.05, error = 1e-10)
 }
 \arguments{
@@ -17,9 +17,6 @@ observations in the data.}
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
 
-\item{stability}{A logical vector indicating whether the stability 
-mechanism is used.}
-
 \item{delta}{The probability of an arbitrary leakage of information from 
 the data. Should be of length one and should be a very small value. 
 Default to 10^-6.}
@@ -29,6 +26,9 @@ statistical significance level. Default to 0.05.}
 
 \item{error}{The error term of the statistical significance level. Default
 to 1e-9.}
+
+\item{stability}{A logical vector indicating whether the stability 
+mechanism is used.}
 }
 \value{
 Accuracy guarantee for histogram release, given epsilon.
