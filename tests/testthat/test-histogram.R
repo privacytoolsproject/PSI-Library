@@ -82,3 +82,16 @@ test_that('histogram release has expected dimensions and accuracy for logical va
     expect_equal(dim(dp.histogram$result$interval), c(2,2))
     expect_equal(dp.histogram$accuracy, askAccuracy)
 })
+
+
+test_that('stability mechanism returns error if delta is >= 1/n', {
+    data(PUMS5extract10000, package = "PSIlence")
+    
+    my_n.bins <- 16
+    my_n <- 10000
+    my_epsilon <- 0.1
+    my_delta <- 0.1 # set delta to > 1/n
+    
+    dp.histogram2 <- dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta)
+    expect_error(dp.histogram2$release(PUMS5extract10000), "Delta must be less than 1/n")
+})

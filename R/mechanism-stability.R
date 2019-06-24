@@ -31,6 +31,10 @@ mechanismStability$methods(
     #'
     # TODO: add examples 
     evaluate = function(fun, x, sens, postFun, ...) {
+        # before calculating the histogram statistic, confirm that delta is less than (1/n)
+        # if deta is greater than or equal to (1/n), return an error message to the user
+        if (.self$delta >= (1 / .self$n)) stop("Delta must be less than 1/n")
+        
         # if the variable is numeric or integer and the stability mechanism is being used,
         # then the stability mechanism needs to determine the bins to maintain privacy.
         # Get the range of the data, then get the number of bins from the input number of
