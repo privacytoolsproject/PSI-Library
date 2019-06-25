@@ -95,3 +95,22 @@ test_that('stability mechanism returns error if delta is >= 1/n', {
     dp.histogram2 <- dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta)
     expect_error(dp.histogram2$release(PUMS5extract10000), "Delta must be less than 1/n")
 })
+
+test_that('histogram on categorical data', {
+    library(datasets)
+    data(esoph)
+    
+    my_n <- 88
+    my_epsilon <- 1
+    my_delta <- 10^-3
+    
+    catHistogram <- dpHistogram(var.type='character', variable='tobgp', n=my_n, epsilon=my_epsilon, delta=my_delta)
+    catHistogram$release(esoph)
+    
+    print('')
+    print(catHistogram$result$release)
+
+    askAccuracy <- histogram.getAccuracy(mechanism = 'mechanismStability', n.bins=length(catHistogram$result$release), n=my_n, epsilon=my_epsilon, delta=my_delta)
+    expect_equal(catHistogram$epsilon, my_epsilon)
+    expect_equal(catHistogram$accuracy, askAccuracy)
+})

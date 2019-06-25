@@ -137,14 +137,28 @@ histogram.formatRelease <- function(release, n) {
 #' @param n Sample size
 
 histogram.compose <- function(h, n) {
-    h <- as.numeric(h)
-    j <- length(h)
-    suppress.index <- sample(1:j, size=1)
-    h[suppress.index] <- 0
-    h[h < 0] <- 0
-    h <- round(h)
-    h[suppress.index] <- n - sum(h)
-    return(h)
+    # get just the bins sizes for each bin in the histogram (without bin labels)
+    binSizes <- as.numeric(h)
+    
+    # round all negative bins to 0 and all bins greater than n to n
+    for (i in 1:length(binSizes)) {
+        if (binSizes[i] < 0) {
+            binSizes[i] <- 0
+        } else if (binSizes[i] > n) {
+            binSizes[i] <- n
+        }
+    }
+    
+    # get the total size of the histogram, it is not necessarily equal to n
+    sumOfBins <- sum(binSizes)
+    
+    # get a vector of the bin weights
+    binWeights <- binSizes / sumOfBins
+    
+    # get a vector of the normalized bin counts
+    normalizedBinCounts <- binWeights * n
+    
+    return(normalizedBinCounts)
 }
 
 #' Histogram Herfindahl Index
@@ -440,7 +454,7 @@ errorCheckBinRange <- function(var.type, rng, bins) {
         # if the user user has both specified bins and entered a range,
         # show an error message, because we do not need both. Default to
         # the bins entered.
-        cat('You have entered both bins and a data range, when you do not need both.
+        warning('You have entered both bins and a data range, when you do not need both.
             Default is to use the bins that have been entered.
             If you would like to use the range, please enter the range and the desired number of bins and omit the bins.')
     }

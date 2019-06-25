@@ -52,8 +52,8 @@ mechanismStability$methods(
             imputationRange <- dataRange
         }
         
-        x <- censordata(x, .self$var.type, dataRange, .self$bins)
-        x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=.self$bins)
+        x <- censordata(x, .self$var.type, dataRange, histogramBins)
+        x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
         fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
         input.vals <- c(list(x=x), fun.args)
         true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
@@ -65,7 +65,7 @@ mechanismStability$methods(
         release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
         
         # calculate the accuracy threshold, below which histogram buckets should be removed
-        accuracyThreshold <- 1+2*log(2/delta)/epsilon 
+        accuracyThreshold <- 1+2*log(2/delta)/epsilon
         # remove buckets below the threshold
         release <- release[release > accuracyThreshold]
         
