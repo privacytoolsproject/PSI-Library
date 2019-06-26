@@ -118,12 +118,12 @@ histogram.formatRelease <- function(release, n) {
     if (is(release, 'matrix')) {
         bin.names <- rownames(release)
         if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
-        release <- apply(release, 2, histogram.compose, n=n)
+        release <- apply(release, 2, normalizeHistogram, n=n)
         release <- data.frame(t(release))
     } else {
         bin.names <- names(release)
         if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
-        release <- histogram.compose(release, n)
+        release <- normalizeHistogram(release, n)
         release <- data.frame(matrix(release, ncol=length(release)))
     }
     names(release) <- bin.names
@@ -136,18 +136,13 @@ histogram.formatRelease <- function(release, n) {
 #' @param h Histogram
 #' @param n Sample size
 
-histogram.compose <- function(h, n) {
+normalizeHistogram <- function(h, n) {
     # get just the bins sizes for each bin in the histogram (without bin labels)
     binSizes <- as.numeric(h)
     
     # round all negative bins to 0 and all bins greater than n to n
-    for (i in 1:length(binSizes)) {
-        if (binSizes[i] < 0) {
-            binSizes[i] <- 0
-        } else if (binSizes[i] > n) {
-            binSizes[i] <- n
-        }
-    }
+    binSizes[binSizes < 0] <- 0
+    binSizes[binSizes > n] <- n
     
     # get the total size of the histogram, it is not necessarily equal to n
     sumOfBins <- sum(binSizes)

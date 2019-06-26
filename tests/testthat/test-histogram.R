@@ -106,9 +106,6 @@ test_that('histogram on categorical data', {
     
     catHistogram <- dpHistogram(var.type='character', variable='tobgp', n=my_n, epsilon=my_epsilon, delta=my_delta)
     catHistogram$release(esoph)
-    
-    print('')
-    print(catHistogram$result$release)
 
     askAccuracy <- histogram.getAccuracy(mechanism = 'mechanismStability', n.bins=length(catHistogram$result$release), n=my_n, epsilon=my_epsilon, delta=my_delta)
     expect_equal(catHistogram$epsilon, my_epsilon)
