@@ -1,4 +1,4 @@
-*.Rproj.user
+.Rproj.user
 *.Rproj
 .Rhistory
 .RData
@@ -6,5 +6,6 @@
 vignettes/*.html
 vignettes/*.pdf
 vignettes/*.R
-.Rproj.user
 inst/doc
+debug.log
+.Rbuildignore
