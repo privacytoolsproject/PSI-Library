@@ -382,16 +382,18 @@ determineLogicalBins <- function(impute, object) {
 
 # only called by determineBins()
 determineNumericIntegerBins <- function(rng, n.bins, granularity) {
-    if (is.null(granularity)) {
-        # if the granularity is null, then the the number of bins
+	# first check if n.bins is NULL, n.bins is considered the truth for the number
+	# of bins if the user has entered both n.bins and granularity.
+    if (is.null(n.bins)) {
+        # if the n.bins is null, then the the granularity
         # must be entered
-        return(seq(rng[1], rng[2], length.out=(n.bins + 1)))
+    	r <- rng[2] - rng[1] # get the width of the range
+    	nBinsFromGranularity <- r / granularity # get the number of bins
+    	return(seq(rng[1], rng[2], length.out=(nBinsFromGranularity + 1)))
     } else {
-        # if granularity if not null, then we can use it to calculate
+        # if n.bins is not null, then we can use it to calculate
         # the histogram bins
-        r <- rng[2] - rng[1] # get the width of the range
-        nBinsFromGranularity <- r / granularity # get the number of bins
-        return(seq(rng[1], rng[2], length.out=(nBinsFromGranularity + 1)))
+    	return(seq(rng[1], rng[2], length.out=(n.bins + 1)))
     }
 }
 
