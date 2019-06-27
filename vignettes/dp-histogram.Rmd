@@ -50,17 +50,10 @@ out1 <- example_dpHistogram$release(data)
 print(out1)
 ```
 
-
-(var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
-                          bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
-                          impute.rng=NULL, impute=FALSE, n.boot=NULL, granularity=NULL, ...)
-                          
-                          
-                          
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpCovariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpHistogram` class. The `new` method, which creates an object of the class, accepts the following arguments.
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
 
@@ -100,4 +93,53 @@ The `release` method accepts a single argument.
 
 * `data` \ Data frame containing a column corresponding the name specified in `variable`.
 
+Attach the sample dataset. 
+
+```{r, eval = TRUE}
+library(PSIlence)
+data(PUMS5extract10000)
+```
+
+&nbsp;
+
+Calculate a private histogram of a numeric vector with `dpHistogram`:
+
+
+var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
+                          bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
+                          impute.rng=NULL, impute=FALSE, n.boot=NULL, granularity=NULL, ...)
+                          
+                          
+
+```{r}
+numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, 
+                                     rng=c(0, 750000), n.bins = 5)
+numeric_histogram$release(PUMS5extract10000)
+print(numeric_histogram$result)
+```
+
+&nbsp;
+
+To calculate the histogram of a logical vector instead, input a logical vector into `variable` and update `var.type` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only me two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
+
+```{r}
+logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
+logical_histogram$release(PUMS5extract10000)
+print(logical_histogram$result)
+```
+
+&nbsp;
+
+To calculate the histogram of a categorical (or 'character') variable instead, input a character vector into `variable` and update `var.type` to 'character'.
+
+```{r}
+library(datasets)
+data(esoph)
+
+character_histogram <- dpHistogram(var.type='character', variable='tobgp', n=88, epsilon=1, delta=10^-3)
+character_histogram$release(esoph)
+print(character_histogram)
+```
+
+Notice that in the character histogram example above, the sample size is very small, only 88 observations, so the `epsilon` and `delta` parameters must be much larger to accomodate the small data size. A large `epsilon` and `delta` indicate less privacy and more accuracy than the small values used in earlier examples with larger sample sizes. However, less privacy indicates more accuracy, which is necessary with small sample sizes that are sensitive to the differentially private noise added during calculation.
 
