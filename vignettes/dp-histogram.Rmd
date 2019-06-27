@@ -1,0 +1,103 @@
+---
+title: "Differentially Private Histogram Release"
+author: "Megan Fantes"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dp-covariance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(
+        stop_on_error = 2L
+)
+knitr::opts_chunk$set(
+    fig.height = 7,
+    fig.width = 7
+)
+```
+
+Differentially Private Histogram with `dpHistogram`
+-----------------------------------------
+
+The `dpHistogram` class evaluates a privacy-preserving histogram of a vector of values. The class supports any vector type, meaning that it can handle the R types `numeric`, `integer`, `logical`, and `character`.
+
+<!--
+Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
+
+The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
+
+There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `10^-5`, and never greater than `1/n` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
+
+It is noteworthy the user must manually specify the number of observations, variable type, and range of the data of interest; data will only be touched at the point the estimate to be released is actually computed, and only by the function computing that estimate. This structure decreases the possibility of an unauthorized release of information. Additional parameter specification includes the desired `epsilon` value and post-processing steps the user would like to perform on the released statistic. 
+-->
+
+Syntax
+------
+
+```{r, eval = FALSE}
+x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
+data <- data.frame(x1)
+
+example_dpHistogram <- dpHistogram$new(var.type = 'numeric', variable = 'x1', n = 10, epsilon=1, rng=c(3,70), 
+                          n.bins=3, delta=10^-3)
+
+out1 <- example_dpHistogram$release(data)
+
+print(out1)
+```
+
+
+(var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
+                          bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
+                          impute.rng=NULL, impute=FALSE, n.boot=NULL, granularity=NULL, ...)
+                          
+                          
+                          
+Arguments
+---------
+
+In typical usage, there are two methods to the `dpCovariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
+
+* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
+
+* `variable` \ Character, the name of the variable in the data for which to calculate the histogram.
+
+* `n` \ Integer, the number of observations in the data.
+
+* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query.
+
+* `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
+
+* `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
+
+* `bins` \ Numeric or character (must match the variable type in `var.type`), a vector of bins for the histogram, as chosen by the user. Optional, default `NULL`. If `NULL`, bins are detected by the histogram statistic. If `NULL` for `'character'` type variables, the detected bins will only be the variables present in the data, and the stability mechanism will be used to calculate the histogram. If `NULL` for `'numeric'` or `'integer'` type variables, the detected bins will be of equal width.
+
+* `n.bins` \ Numeric, the number of bins for the histogram. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `'NULL'` for `numeric` and `integer` types, `granularity` must be entered.
+
+* `granularity` \ Numeric, the number of items per histogram bin. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `'NULL'` for `numeric` and `integer` types, `granularity` must be entered.
+
+* `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
+
+* `delta` \ Numeric, the differential privacy parameter $\delta$, typically taking values $10^{-5}$ or less and likelihood of additional privacy loss beyond $\epsilon$.
+
+* `error` \ 
+
+* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+
+* `impute` \ 
+
+* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
+
+
+
+&nbsp; 
+
+The `release` method accepts a single argument. 
+
+* `data` \ Data frame containing a column corresponding the name specified in `variable`.
+
+
