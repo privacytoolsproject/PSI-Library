@@ -74,7 +74,7 @@ In typical usage, there are two methods to the `dpCovariance` class. The `new` m
 
 * `formula` \ Formula, a list of the regression equations to be performed on the covariance matrix.
 
-* `delta` \ Numeric, the differential privacy parameter $\delta$, typically taking values $10^{-5}$ or less and likelihood of additional privacy loss beyond $\epsilon$.
+* `delta` \ Numeric, the differential privacy parameter $\delta$, the likelihood of additional privacy loss beyond $\epsilon$. Typically takes values of $10^{-5}$ or less, should never be less than $1/n$
 
 &nbsp; 
 

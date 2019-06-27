@@ -82,13 +82,13 @@ In typical usage, there are two methods to the `dpCovariance` class. The `new` m
 
 * `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
 
-* `delta` \ Numeric, the differential privacy parameter $\delta$, typically taking values $10^{-5}$ or less and likelihood of additional privacy loss beyond $\epsilon$.
+* `delta` \ Numeric, the differential privacy parameter $\delta$, the likelihood of additional privacy loss beyond $\epsilon$. Typically takes values of $10^{-5}$ or less, should never be less than $1/n$
 
-* `error` \ 
+* `error` \ Numeric, the error term of the statistical significance level. Default is $10^{-9}$.
 
 * `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
 
-* `impute` \ 
+* `impute` \ Boolean, if true then the mechanism should replace missing values with known values from the data. If false, the mechanism should leave missing values as `NA`
 
 * `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
 
