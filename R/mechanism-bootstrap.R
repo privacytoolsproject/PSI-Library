@@ -40,7 +40,7 @@ mechanismBootstrap <- setRefClass(
 
 mechanismBootstrap$methods(
     bootStatEval = function(xi) {
-        fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+        fun.args <- getFuncArgs(fun, inputList, inputObject=.self)
         input.vals = c(list(x=x), fun.args)
         stat <- do.call(boot.fun, input.vals)
         return(stat)

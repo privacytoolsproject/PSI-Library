@@ -347,7 +347,7 @@ dpHistogram$methods(
             }
         }
         if (var.type %in% c('factor', 'character')) {
-            out$herfindahl <- sum((out$release / n)^2)
+            out$herfindahl <- sum((out$release / n)^2)      
         }
         if (var.type.orig == 'logical') {
             temp.release <- out$release[na.omit(names(out$release))]
