@@ -36,6 +36,8 @@ Collate:
     'statistic-mean.R'
     'statistic-tree.R'
     'statistic-variance.R'
+    'tree-scratchwork.R'
     'update_parameters.R'
+    'utilities-tree.R'
     'utilities.R'
 VignetteBuilder: knitr
