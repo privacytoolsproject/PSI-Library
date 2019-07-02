@@ -6,3 +6,7 @@ vignettes/*.html
 vignettes/*.pdf
 *.Rproj
 .Rbuildignore
+
+# IDES
+.idea/
+*.Rproj
