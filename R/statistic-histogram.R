@@ -15,19 +15,15 @@
 #'    Default to 10^-6.
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
-#' @param error The error term of the statistical significance level. Default
-#'    to 1e-9. 
 #' 
 #' @export histogram.getAccuracy
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
 
-#JM replaced below with getaccuracy function from dpmodules/Jack/Histogramnew.R
-
-histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, alpha=0.05, error=1e-10) {
+histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, alpha=0.05) {
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
-		acc <- 2*log(2/(alpha*delta)) /epsilon
+		acc <- (2*log(2/(alpha*delta)) /epsilon) + 1
 	}
 	else{
 		acc <- 2*log(1/alpha) /epsilon
@@ -53,14 +49,12 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #'    Default to 10^-6.
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
-#' @param error The error term of the statistical significance level. Default
-#'    to 1e-9. 
 #' 
 #' @export histogram.getParameters
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getParameters
 
-histogram.getParameters <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05, error=1e-10) {
+histogram.getParameters <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
 		eps <- 2*log(2/(alpha*delta)) /accuracy
@@ -73,8 +67,8 @@ histogram.getParameters <- function(mechanism, n.bins, n, accuracy, delta=10^-6,
 
 #' Histogram confidence interval
 #' 
-#' Return the confidence interval for the differentially private histogram release given the
-#' accuracy.
+#' Return the confidence interval for each bins of the differentially private histogram
+#' release, given the accuracy.
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -106,15 +100,17 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
 }
 
 
-#' Format the release of private histogram
-#'
-#' Convert the release from a table to a data frame
+#' Convert normalized histogram release to data frame
+#' 
+#' Convert the release of the private histogram from a table to a data frame.
+#' While converting, the normalizeHistogram method is called, which normalizes
+#' the private histogram so that the sum of the bin counts is equal to n.
 #'
 #' @param release Table, the result of \code{fun.hist}
 #' @param n Sample size
 #' @return Data frame
 
-histogram.formatRelease <- function(release, n) {
+normalizeReleaseAndConvertToDataFrame <- function(release, n) {
     if (is(release, 'matrix')) {
         bin.names <- rownames(release)
         if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
@@ -159,6 +155,12 @@ normalizeHistogram <- function(h, n) {
 #' Histogram Herfindahl Index
 #' 
 #' Produce differentially private Herfindahl index for categorical types of data.
+#' 
+#' Let \eqn{s_i} be the percentage of data points in category \eqn{i} in the result histogram.
+#' Then, the Herfindahl index is defined to be the sum of the squares of \eqn{s_i} over all
+#' categories. Since the percentage of data points in category \eqn{i} may be computed
+#' directly from the bin counts in a histogram, a differentially private Herfindahl index
+#' may be calculated from a noisy histogram with no additional privacy loss incurred.
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n A numeric vector of length one specifying the number of
@@ -471,6 +473,102 @@ setVariableTypeAsFactor <- function(object) {
     object$var.type <- 'factor'
 }
 
+#' Error check imputation range for numeric or integer variables
+#' 
+#' Check that the entered imputation range is within the entered data range. If yes, return
+#' TRUE, and the entered imputation range will be set as the imputation range for the call
+#' to the utility function `fillMissing()`. If not, return FALSE, and the imputation range
+#' will be set to the entered data range. If the imputation range is NULL, default to FALSE
+#' and the imputation range will be set to the data range. If the data range is NULL, default
+#' to FALSE, because the stability mechanism will be used to determine the data range and
+#' imputation range.
+#' 
+#' @param imputationRange The imputation range entered by the user
+#' @param rng The data range entered by the user
+#' @param var.type The variable type for the histogram data
+#' 
+#' @return a boolean value indicating whether or not the given imputation range should be
+#' used as the imputation range for `fillMissing()`.
+
+checkImputationRange <- function(imputationRange, rng, var.type) {
+    # if no imputation range was entered, return FALSE
+    # and the imputation range will be set as the data range.
+    # If the range was not entered, also default to FALSE,
+    # because the stability mechanism will be used.
+    if (is.null(imputationRange) | is.null(rng)) {
+        return(FALSE)
+    }
+    
+    # if an imputation range was entered, check that it is
+    # within the data range. If it is not, return FALSE.
+    if (var.type %in% c('numeric', 'integer')) {
+        # for numeric and integer variables, the imputation range should be a 2-tuple
+        # with the minimum and maximum of the imputation range. Loop through each number in the
+        # imputation range given by the 2-tuple and check that it is in the range given by the
+        # 2-tuple of the rng parameter.
+        for (x in imputationRange[1]:imputationRange[2]) {
+            if (!(x %in% rng[1]:rng[2])) {
+                warning("The entered imputation range is not within the data range. Setting the imputation range to the data range.")
+                return(FALSE)
+            }
+        }
+        # if entered imputation range is within the data range, return TRUE
+        return(TRUE)
+    } else {
+        # if the variable type is something other than numeric or integer,
+        # default to FALSE
+        return(FALSE)
+    }
+}
+
+#' Error check imputation bins for logical, factor, or character variables
+#' 
+#' Check that the entered imputation bins are a subset of the histogram bins. If yes, return
+#' TRUE, and the entered imputation bins will be set as the imputation bins for the call
+#' to the utility function `fillMissing()`. If not, return FALSE, and the imputation bins
+#' will be set to the histogram bins. If the imputation bins are NULL, default to FALSE
+#' and the imputation bins will be set to the histogram bins. If the histgram bins are NULL, default
+#' to FALSE, because the stability mechanism will be used to determine the histogram bins and
+#' imputation bins.
+#' 
+#' @param imputationBins The imputation bins entered by the user
+#' @param rng The histogram bins entered by the user
+#' @param var.type The variable type for the histogram data
+#' 
+#' @return a boolean value indicating whether or not the given imputation bins should be
+#' used as the imputation bins for `fillMissing()`.
+
+checkImputationBins <- function(imputationBins, bins, var.type) {
+    # if no imputation bins were entered, return FALSE
+    # and the imputation bins will be set as the bins.
+    # If bins were not entered, also default to FALSE,
+    # because the stability mechanism will be used.
+    if (is.null(imputationBins) | is.null(bins)) {
+        return(FALSE)
+    }
+    
+    # if imputation bins were entered, check that they are
+    # within the list of bins. If not, return FALSE.
+    if (var.type %in% c('logical','factor','character')) {
+        # Loop through each bin in the imputation bins given by the user and check 
+        # that they are a subset of the list of histogram bins
+        for (x in imputationBins) {
+            if (!(x %in% bins)) {
+                # if one of the given imputation bins is not one of the histgram bins, return FALSE 
+                # becaues the imputation bins must be within the hitogram bins.
+                warning("Imputation bins must be a subset of the histogram bins. Setting the imputation bins to the histogram bins.")
+                return(FALSE)
+            }
+        }
+        # if entered imputation bins are wihtin histogram bins, return TRUE
+        return(TRUE)
+    } else {
+        # if the variable type is something other than logical, factor, or character,
+        # default to FALSE
+        return(FALSE)
+    }
+}
+
 #' Differentially private histogram
 #'
 #' @param var.type Character, the variable type.
@@ -503,15 +601,15 @@ dpHistogram <- setRefClass(
 
 dpHistogram$methods(
     initialize = function(var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
-                          bins=NULL, n.bins=NULL, alpha=0.05, delta=2^-30, error=1e-9,
-                          impute.rng=NULL, impute=FALSE, n.boot=NULL, granularity=NULL, ...) {
+                          bins=NULL, n.bins=NULL, granularity=NULL, alpha=0.05, delta=2^-30,
+                          impute.rng=NULL, impute.bins=NULL, impute=FALSE, n.boot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
         # determine  which mechanism to use based on inputs
         .self$mechanism <- determineMechanism(var.type, rng, bins, n.bins, granularity)
         
         # set parameters of the histogram
-        .self$var.type.orig <- .self$var.type <- var.type
+        .self$var.type <- var.type
         .self$variable <- variable
         .self$n <- n
         .self$epsilon <- epsilon
@@ -521,7 +619,6 @@ dpHistogram$methods(
         .self$n.bins <- n.bins # may be null
         .self$alpha <- alpha
         .self$delta <- delta
-        .self$error <- error
         .self$impute.rng <- impute.rng
         .self$impute <- impute
         .self$n.boot <- n.boot
@@ -540,17 +637,24 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- histogram.getParameters(mechanism, n.bins, n, accuracy, delta, alpha, error)
+            .self$epsilon <- histogram.getParameters(mechanism, n.bins, n, accuracy, delta, alpha)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha, error)
+            .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha)
         }
         
-        # set the range for data imputation
-        if (is.null(impute.rng)) {
-            .self$impute.rng <- rng
-        } else {
+        # set the range for data imputation (will be null if no range entered)
+        if (checkImputationRange(impute.rng, rng, var.type)) {
             .self$impute.rng <- impute.rng
+        } else {
+            .self$impute.rng <- rng
+        }
+        
+        # set the bins for data imputation (will be null if no bins entered)
+        if (checkImputationBins(impute.bins, bins, var.type)) {
+            .self$impute.bins <- impute.bins
+        } else {
+            .self$impute.bins <- bins
         }
 })
 
@@ -564,9 +668,11 @@ dpHistogram$methods(
 dpHistogram$methods(
     postProcess = function(out) {
         out$variable <- variable
-        out$release <- histogram.formatRelease(out$release, n)
+        out$release <- normalizeReleaseAndConvertToDataFrame(out$release, n)
         out$accuracy <- accuracy
         out$epsilon <- epsilon
+        out$mechanism <- mechanism
+        if (mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
             if (mechanism == 'mechanismLaplace') {
                 out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
@@ -575,7 +681,7 @@ dpHistogram$methods(
         if (var.type %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
         }
-        if (var.type.orig == 'logical') {
+        if (var.type %in% c('logical', 'factor')) {
             temp.release <- out$release[na.omit(names(out$release))]
             out$mean <- as.numeric(temp.release[2] / sum(temp.release))
             out$median <- ifelse(out$mean < 0.5, 0, 1)

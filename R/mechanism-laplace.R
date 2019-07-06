@@ -32,7 +32,7 @@ mechanismLaplace$methods(
   # TODO: add examples 
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
+    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$impute.bins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
     input.vals = c(list(x=x), fun.args)
     true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.

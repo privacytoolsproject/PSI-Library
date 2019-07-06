@@ -15,7 +15,7 @@ test_that('histogram getAccuracy and getParameters return approximately correct 
 	expect_equal(val2, 12)
 })
 
-test_that('histogram releases have expected dimensions for lapalce mechanism', {
+test_that('histogram releases have expected dimensions for Laplace mechanism', {
 	data(PUMS5extract10000, package = "PSIlence")
 	
 	my_n.bins <- 16
@@ -39,10 +39,11 @@ test_that('histogram has expected accuracy for stability mechanism', {
 	my_n.bins <- 16
 	my_n <- 10000
 	my_epsilon <- 0.1
-	my_delta <- 10^-6
+	my_delta <- 10^-9
 	
 	dp.histogram2 <- dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta)
 	dp.histogram2$release(PUMS5extract10000)
+	print(dp.histogram2$result)
 	
 	askAccuracy <- histogram.getAccuracy(mechanism = 'mechanismStability', n.bins=my_n.bins, n=my_n, epsilon=my_epsilon, delta=my_delta)
 	expect_equal(dp.histogram2$epsilon, my_epsilon)
@@ -93,7 +94,7 @@ test_that('stability mechanism returns error if delta is >= 1/n', {
 	my_delta <- 0.1 # set delta to > 1/n
 	
 	dp.histogram2 <- dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, delta=my_delta)
-	expect_error(dp.histogram2$release(PUMS5extract10000), "Delta must be less than 1/n")
+	expect_error(dp.histogram2$release(PUMS5extract10000), "A delta value on the order of 1/n is a privacy risk, as it allows for additional data to leak beyond the privacy parameter epsilon. Choose a smaller value for delta to maintain your privacy guarantee.")
 })
 
 test_that('histogram on categorical data', {
@@ -102,7 +103,7 @@ test_that('histogram on categorical data', {
 	
 	my_n <- 88
 	my_epsilon <- 1
-	my_delta <- 10^-3
+	my_delta <- 10^-4
 	
 	catHistogram <- dpHistogram(var.type='character', variable='tobgp', n=my_n, epsilon=my_epsilon, delta=my_delta)
 	catHistogram$release(esoph)
@@ -118,7 +119,7 @@ test_that('histogram release has expected dimensions and accuracy for manually c
 	
 	my_n <- 26
 	my_epsilon <- 1
-	my_delta <- 10^-2
+	my_delta <- 10^-3
 	
 	dp.histogram <- dpHistogram$new(var.type='logical', variable="logicalVar_withNA", n=my_n, epsilon=my_epsilon, delta=my_delta, impute = TRUE)
 	dp.histogram$release(dataLog)

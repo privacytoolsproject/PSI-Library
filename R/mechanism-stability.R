@@ -54,8 +54,7 @@ mechanismStability$methods(
             dataRange <- range(x)
             numHistogramBins <- ifelse(is.null(.self$n.bins), .self$n / .self$granularity, .self$n.bins)
             histogramBins <- seq(dataRange[1], dataRange[2], length.out=(numHistogramBins + 1))
-            # set the imputation range to the detected data range to maintain privacy,
-            # a user could have entered an imputation range without entering a range
+            # set the imputation range to the detected data range to maintain privacy
             imputationRange <- dataRange
         }
         
