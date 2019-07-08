@@ -79,7 +79,9 @@ In typical usage, there are two methods to the `dpHistogram` class. The `new` me
 
 * `error` \ Numeric, the error term of the statistical significance level. Default is $10^{-9}$.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the numeric vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. Ignored for `character` and `logical` types.
+
+* `impute.bins` \ Character (or numeric for logical variables), a list of bins from which missing (or NA) values of character or logical-type variables will be imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the histogram bins. Ignored for `numeric` and `integer` types.
 
 * `impute` \ Boolean, if true then the mechanism should replace missing values with known values from the data. If false, the mechanism should leave missing values as `NA`
 
