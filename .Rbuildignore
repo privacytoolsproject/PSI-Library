@@ -3,5 +3,3 @@ images
 README.md
 README_files
 .DS_Store
-^.*\.Rproj$
-^\.Rproj\.user$
