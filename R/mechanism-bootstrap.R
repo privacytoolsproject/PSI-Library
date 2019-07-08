@@ -39,7 +39,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
     return(returnedBootstrappedResult)
 }
 
-# 2: treat it as a partition with a mean of 0 and keep it in the calculation, adding noise and adding it to the final calculation
+# 2: treat it as a partition with a statistic of value 0 and keep it in the calculation, adding noise and adding it to the final calculation
 
 # bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
 #     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
