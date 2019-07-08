@@ -476,96 +476,113 @@ setVariableTypeAsFactor <- function(object) {
 #' Error check imputation range for numeric or integer variables
 #' 
 #' Check that the entered imputation range is within the entered data range. If yes, return
-#' TRUE, and the entered imputation range will be set as the imputation range for the call
-#' to the utility function `fillMissing()`. If not, return FALSE, and the imputation range
-#' will be set to the entered data range. If the imputation range is NULL, default to FALSE
-#' and the imputation range will be set to the data range. If the data range is NULL, default
-#' to FALSE, because the stability mechanism will be used to determine the data range and
+#' the entered imputation range, which will be used as the imputation range for the call
+#' to the utility function `fillMissing()`. If not, return the data range. 
+#' If the imputation range is NULL, default to the data range. The data range may be NULL,
+#' in which case the stability mechanism will be used to determine the data range and
 #' imputation range.
 #' 
 #' @param imputationRange The imputation range entered by the user
 #' @param rng The data range entered by the user
 #' @param var.type The variable type for the histogram data
 #' 
-#' @return a boolean value indicating whether or not the given imputation range should be
-#' used as the imputation range for `fillMissing()`.
+#' @return the imputation range that will be used for `fillMissing()`.
 
 checkImputationRange <- function(imputationRange, rng, var.type) {
-    # if no imputation range was entered, return FALSE
-    # and the imputation range will be set as the data range.
-    # If the range was not entered, also default to FALSE,
-    # because the stability mechanism will be used.
-    if (is.null(imputationRange) | is.null(rng)) {
-        return(FALSE)
+    # if no imputation range was entered, return the data range.
+    # (Note: rng may be NULL, in which case stability mechanism will be used)
+    if (is.null(imputationRange)) {
+        return(rng)
     }
     
+    # for numeric and integer variables, the imputation range should be a 2-tuple
+    # with the minimum and maximum of the imputation range.
     # if an imputation range was entered, check that it is
-    # within the data range. If it is not, return FALSE.
+    # within the data range. If it is not, clip it to be within the data range
     if (var.type %in% c('numeric', 'integer')) {
-        # for numeric and integer variables, the imputation range should be a 2-tuple
-        # with the minimum and maximum of the imputation range. Loop through each number in the
-        # imputation range given by the 2-tuple and check that it is in the range given by the
-        # 2-tuple of the rng parameter.
-        for (x in imputationRange[1]:imputationRange[2]) {
-            if (!(x %in% rng[1]:rng[2])) {
-                warning("The entered imputation range is not within the data range. Setting the imputation range to the data range.")
-                return(FALSE)
-            }
+        lowerBound <- NULL
+        upperBound <- NULL
+        
+        # if the imputation range lower bound is below the data range lower bound,
+        # clip the lower bound to the data range
+        if (imputationRange[1] < rng[1]) {
+            warning('Lower bound of imputation range is outside of the data range.
+                    Setting lower bound of the imputation range to the lower bound of the data range.')
+            lowerBound <- rng[1]
+        } else {
+            lowerBound <- imputationRange[1]
         }
-        # if entered imputation range is within the data range, return TRUE
-        return(TRUE)
+        
+        # if the imputation rnage upper bound is above the data range upper bound,
+        # clip the upper bound to the data range
+        if (imputationRange[2] > rng[2]) {
+            warning('Upper bound of imputation range is outside of the data range.
+                    Setting upper bound of the imputation range to the upper bound of the data range.')
+            upperBound <- rng[2]
+        } else {
+            upperBound <- imputationRange[2]
+        }
+        
+        # return the (potentially clipped) imputation range
+        return(c(lowerBound,upperBound))
+        
     } else {
         # if the variable type is something other than numeric or integer,
-        # default to FALSE
-        return(FALSE)
+        # default to the data range
+        warning('Imputation range entered for variable that is not of numeric or integer type.
+                Setting imputation range to data range.')
+        return(rng)
     }
 }
 
 #' Error check imputation bins for logical, factor, or character variables
 #' 
 #' Check that the entered imputation bins are a subset of the histogram bins. If yes, return
-#' TRUE, and the entered imputation bins will be set as the imputation bins for the call
-#' to the utility function `fillMissing()`. If not, return FALSE, and the imputation bins
-#' will be set to the histogram bins. If the imputation bins are NULL, default to FALSE
-#' and the imputation bins will be set to the histogram bins. If the histgram bins are NULL, default
-#' to FALSE, because the stability mechanism will be used to determine the histogram bins and
+#' the entered imputation bins, which will be used as the imputation bins for the call
+#' to the utility function `fillMissing()`. If not, return the histogram bins. 
+#' If the imputation bins are NULL, default to the histogram bins. The histogram bins may be
+#' NULL, in which case the stability mechanism will be used to determine the histogram bins and
 #' imputation bins.
 #' 
 #' @param imputationBins The imputation bins entered by the user
 #' @param rng The histogram bins entered by the user
 #' @param var.type The variable type for the histogram data
 #' 
-#' @return a boolean value indicating whether or not the given imputation bins should be
-#' used as the imputation bins for `fillMissing()`.
+#' @return a list of the imputation bins that will be used for `fillMissing()`.
 
 checkImputationBins <- function(imputationBins, bins, var.type) {
-    # if no imputation bins were entered, return FALSE
-    # and the imputation bins will be set as the bins.
-    # If bins were not entered, also default to FALSE,
-    # because the stability mechanism will be used.
-    if (is.null(imputationBins) | is.null(bins)) {
-        return(FALSE)
+    # if no imputation bins were entered, return the bins.
+    # (Note:  bins may be NULL, in which case stability mechanism will be used.)
+    if (is.null(imputationBins)) {
+        return(bins)
     }
     
     # if imputation bins were entered, check that they are
-    # within the list of bins. If not, return FALSE.
+    # within the list of bins. If not, do not use them in imputation.
+    clippedBins <- c()
     if (var.type %in% c('logical','factor','character')) {
         # Loop through each bin in the imputation bins given by the user and check 
-        # that they are a subset of the list of histogram bins
-        for (x in imputationBins) {
-            if (!(x %in% bins)) {
-                # if one of the given imputation bins is not one of the histgram bins, return FALSE 
-                # becaues the imputation bins must be within the hitogram bins.
-                warning("Imputation bins must be a subset of the histogram bins. Setting the imputation bins to the histogram bins.")
-                return(FALSE)
+        # that they are in the list of histogram bins
+        for (b in imputationBins) {
+            if (b %in% bins) {
+                # if the bin is in the list of histogram bins, add it to the list of imputation bins
+                clippedBins <- c(clippedBins, b)
+            } else {
+                warning('Imputation bin entered is not in list of histogram bins, removing bins from imputation bins.')
             }
         }
-        # if entered imputation bins are wihtin histogram bins, return TRUE
-        return(TRUE)
+        
+        # check if the list of (potentially clipped) imputation bins is null
+        # (this would be the case if all entered bins are outside of the histogram bins)
+        # if yes, return the histogram bins, otherwise return the imputation bins
+        ifelse(is.null(clippedBins), return(bins), return(clippedBins))
+        
     } else {
         # if the variable type is something other than logical, factor, or character,
-        # default to FALSE
-        return(FALSE)
+        # default to the histogram bins
+        warning('Imputation bins entered for variable that is not of logical or categorical type.
+                Setting imputation bins to histogram bins')
+        return(bins)
     }
 }
 
@@ -609,7 +626,7 @@ dpHistogram <- setRefClass(
 
 dpHistogram$methods(
     initialize = function(var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
-                          bins=NULL, n.bins=NULL, granularity=NULL, alpha=0.05, delta=2^-30,
+                          bins=NULL, n.bins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
                           impute.rng=NULL, impute.bins=NULL, impute=FALSE, n.boot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
@@ -626,20 +643,34 @@ dpHistogram$methods(
         .self$bins <- bins
         .self$n.bins <- n.bins # may be null
         .self$alpha <- alpha
-        .self$delta <- delta
         .self$impute.rng <- impute.rng
         .self$impute <- impute
         .self$n.boot <- n.boot
         .self$granularity <- granularity # may be null
         .self$boot.fun <- boot.hist
         
-        # if the mechanism used is NOT the stability mechanism, determine the
-        # bins of the histogram. If the mechanism is the stability mechanism,
-        # then the bins will be determined in the stability mechanism.
-        # Once the bins are determined, get the number of bins.
+        # if the mechanism used is NOT the stability mechanism:
+        # 1) determine the bins of the histogram. (If the mechanism is 
+        #    the stability mechanism, then the bins will be determined in 
+        #    the stability mechanism.)
+        # 2) Once the bins are determined, get the number of bins.
+        # 3) throw an error if the user entered a delta value (because 
+        #    a delta value is only used in the stability mechanism)
         if (.self$mechanism != 'mechanismStability') {
             .self$bins <- determineBins(var.type, rng, bins, n.bins, impute, granularity, .self)
             .self$n.bins <- ifelse(is.null(.self$n.bins), length(.self$bins), .self$n.bins)
+            if (!is.null(delta)) {
+                warning('A delta parameter has been entered, but the stability mechanism is not being used.
+                        A delta value is only necessary for the stability mechanism. Entered delta value ignored.')
+            } 
+        } else {
+            # if the stability mechanism is being used, set the delta value
+            if (is.null(delta)) {
+                # default delta value
+                .self$delta <- 2^-30
+            } else {
+                .self$delta <- delta
+            }
         }
         
         # get the epsilon and accuracy
@@ -652,18 +683,10 @@ dpHistogram$methods(
         }
         
         # set the range for data imputation (will be null if no range entered)
-        if (checkImputationRange(impute.rng, rng, var.type)) {
-            .self$impute.rng <- impute.rng
-        } else {
-            .self$impute.rng <- rng
-        }
+        .self$impute.rng <- checkImputationRange(impute.rng, rng, var.type)
         
         # set the bins for data imputation (will be null if no bins entered)
-        if (checkImputationBins(impute.bins, bins, var.type)) {
-            .self$impute.bins <- impute.bins
-        } else {
-            .self$impute.bins <- bins
-        }
+        .self$impute.bins <- checkImputationBins(impute.bins, bins, var.type)
 })
 
 dpHistogram$methods(
