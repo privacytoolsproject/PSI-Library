@@ -5,9 +5,11 @@
 \title{Histogram accuracy}
 \usage{
 histogram.getAccuracy(mechanism, n.bins, n, epsilon, delta = 10^-6,
-  alpha = 0.05, error = 1e-10)
+  alpha = 0.05)
 }
 \arguments{
+\item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
+
 \item{n.bins}{A numeric vector of length one specifying the number of cells 
 in which to tabulate values.}
 
@@ -23,12 +25,6 @@ Default to 10^-6.}
 
 \item{alpha}{A numeric vector of length one specifying the numeric 
 statistical significance level. Default to 0.05.}
-
-\item{error}{The error term of the statistical significance level. Default
-to 1e-9.}
-
-\item{stability}{A logical vector indicating whether the stability 
-mechanism is used.}
 }
 \value{
 Accuracy guarantee for histogram release, given epsilon.
@@ -36,4 +32,25 @@ Accuracy guarantee for histogram release, given epsilon.
 \description{
 Determine accuracy of histogram release, given epsilon and delta, for the differentially 
 private histogram release.
+}
+\details{
+In differential privacy, "accuracy" is defined as the threshold value above which a given value 
+is "significantly different" from the expected value. Mathematically, this is written as:
+$$\alpha = Pr[Y > a]$$
+Where \alpha is the statistical significance level, $a$ is the accuracy, and $Y$ is a random 
+variable following the Laplace distribution.
+
+In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
+this "accuracy" because most values will be below this threshold, and thus are "accurate" enough
+to be considered "expected" values.
+
+Deriving the accuracy formula:
+1. The probability density function (PDF) $f(x)$ of the Laplace distribution is: $f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}$
+2. For differential privacy calculations \mu = 0, because the "average" amount of noise added is 0 noise
+3. For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values,
+   so the distrubution is "folded", or doubled
+4. So we can consider the differentially private PDF $g(Y)$ to be: $g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}$
+5. Using $\alpha = Pr[Y > a]$ and the PDF, we can solve for $a$ and plug in $\lambda = \frac{2}{\epsilon}$
+6. We end up with the accuracy formula: $a = \frac{2}{\epsilon}ln(1/\alpha)$
+7. The accuracy formula for the stability mechanism has an added $+ 1$ term because...
 }

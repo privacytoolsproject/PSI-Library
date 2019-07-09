@@ -25,7 +25,7 @@ mechanismStability$methods(
     #' The accuracy threshold for removing bins with low counts is calculated by: $1+\frac{2*log(2/delta)}{epsilon}$.
     #' 
     #' @name Stability Mechanism
-    #' @references C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 7.3 Stabiilty and Privacy p.150-157. August 2014.
+    #' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
     #'
     #' @param fun function of input x to add Laplace noise to.
     #' @param x input that function fun will be evaluated on. 
@@ -40,7 +40,7 @@ mechanismStability$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
         # before calculating the histogram statistic, confirm that delta is less than (1/n)
         # if deta is greater than or equal to (1/n), return an error message to the user
-        if (.self$delta >= (1 / (.self$n)^2)) stop("A delta value on the order of 1/n is a privacy risk, as it allows for additional data to leak beyond the privacy parameter epsilon. Choose a smaller value for delta to maintain your privacy guarantee.")
+        if (.self$delta >= (1 / (.self$n)^2)) stop("A delta value on the order of 1/n^2 is a privacy risk, as it allows for additional data to leak beyond the privacy parameter epsilon. Choose a smaller value for delta to maintain your privacy guarantee.")
         
         # if the variable is numeric or integer and the stability mechanism is being used,
         # then the stability mechanism needs to determine the bins to maintain privacy.

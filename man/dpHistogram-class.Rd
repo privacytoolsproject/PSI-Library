@@ -23,14 +23,24 @@ variable taking numeric values. Ignored for categorical types.}
 
 \item{n.bins}{Integer, the number of bins to release.}
 
+\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
+to calculate histogram bins in comination with `rng`.}
+
 \item{alpha}{Numeric, level of statistical significance, default 0.05.}
 
 \item{delta}{Numeric, probability of privacy loss beyond \code{epsilon}.}
 
-\item{error}{Numeric, error.}
+\item{impute.rng}{Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
+values in numeric or integer-type variables should be imputed}
 
-\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
-to calculate histogram bins in comination with `rng`.}
+\item{impute.bins}{Character (or numeric for logical variables), a list of bins from which NA values
+values in character or logical-type variables should be imputed}
+
+\item{impute}{Boolean, a boolean value indicating if logical-type variables should have NA values
+imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
+histogram will have 3 bins: 0, 1, and NA.}
+
+\item{n.boot}{Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)}
 }
 \description{
 Differentially private histogram

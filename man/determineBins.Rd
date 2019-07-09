@@ -4,7 +4,7 @@
 \alias{determineBins}
 \title{Determine Bins}
 \usage{
-determineBins(var.type, rng, bins, n.bins, impute, granularity)
+determineBins(var.type, rng, bins, n.bins, impute, granularity, object)
 }
 \arguments{
 \item{var.type}{Character, the variable type.}
@@ -22,6 +22,8 @@ for categorical variables, a vector of numbers for numeric variables.}
 values from the data.If false, the mechanism should leave missing values as `NA`}
 
 \item{granularity}{Numeric, the width of each histogram bin.}
+
+\item{object}{Object, the dpHistogram object for the given variable (used it access and assign variable type)}
 }
 \value{
 a vector of histogram bins. Character vector for categorical variables. Numeric 

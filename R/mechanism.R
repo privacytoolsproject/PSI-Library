@@ -29,7 +29,7 @@
 #' @field intercept Logical, is the intercept included?
 #' @field stability Logical, use stability histogram
 #' @field objective Objective function for regression models
-#' @field gran Granularity
+#' @field granularity Granularity
 #' @field percentiles Percentiles evaluated by binary tree
 #' @field tree.data Binary tree attributes needed for efficient estimation
 
@@ -55,6 +55,7 @@ mechanism <- setRefClass(
         n.boot = 'ANY',
         boot.fun = 'function',
         impute.rng = 'ANY',
+        impute.bins = 'ANY',
         impute = 'logical',
         formula = 'ANY',
         columns = 'ANY',

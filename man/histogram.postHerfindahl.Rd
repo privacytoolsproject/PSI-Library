@@ -18,3 +18,10 @@ Herfindahl index.
 \description{
 Produce differentially private Herfindahl index for categorical types of data.
 }
+\details{
+Let \eqn{s_i} be the percentage of data points in category \eqn{i} in the result histogram.
+Then, the Herfindahl index is defined to be the sum of the squares of \eqn{s_i} over all
+categories. Since the percentage of data points in category \eqn{i} may be computed
+directly from the bin counts in a histogram, a differentially private Herfindahl index
+may be calculated from a noisy histogram with no additional privacy loss incurred.
+}

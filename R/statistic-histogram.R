@@ -5,8 +5,8 @@
 #' 
 #' In differential privacy, "accuracy" is defined as the threshold value above which a given value 
 #' is "significantly different" from the expected value. Mathematically, this is written as:
-#' $$\alpha = Pr[Y > a]$$
-#' Where \alpha is the statistical significance level, $a$ is the accuracy, and $Y$ is a random 
+#' \deqn{\alpha = Pr[Y > a]}
+#' Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy, and \eqn{Y} is a random 
 #' variable following the Laplace distribution.
 #' 
 #' In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
@@ -14,14 +14,16 @@
 #' to be considered "expected" values.
 #' 
 #' Deriving the accuracy formula:
-#' 1. The probability density function (PDF) $f(x)$ of the Laplace distribution is: $f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}$
-#' 2. For differential privacy calculations \mu = 0, because the "average" amount of noise added is 0 noise
+#' 1. The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is: \eqn{f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}}
+#' 2. For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
 #' 3. For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values,
-#'    so the distrubution is "folded", or doubled
-#' 4. So we can consider the differentially private PDF $g(Y)$ to be: $g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}$
-#' 5. Using $\alpha = Pr[Y > a]$ and the PDF, we can solve for $a$ and plug in $\lambda = \frac{2}{\epsilon}$
-#' 6. We end up with the accuracy formula: $a = \frac{2}{\epsilon}ln(1/\alpha)$
-#' 7. The accuracy formula for the stability mechanism has an added $+ 1$ term because...
+#'    so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
+#' 4. So we can consider the differentially private PDF \eqn{g(Y)} to be: \eqn{g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}}
+#' 5. Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = \frac{2}{\epsilon}}
+#' 6. We end up with the accuracy formula: \eqn{a = \frac{2}{\epsilon}ln(\frac{1}{\alpha})}
+#' 7. The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{\frac{2}{\epsilon}ln(\frac{2}{\delta})+1}
+#' 
+#' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
 #'
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -618,6 +620,26 @@ checkImputationBins <- function(imputationBins, bins, var.type) {
     }
 }
 
+checkDelta <- function(mechanism, delta) {
+    # throw an error if the stability mechanism is NOT being used and the
+    # user entered a delta value (because a delta value is only used in 
+    # the stability mechanism) and return NULL so the delta value is ignored
+    if (mechanism != 'mechanismStability') {
+        if (!is.null(delta)) {
+            warning('A delta parameter has been entered, but the stability mechanism is not being used. A delta value is only necessary for the stability mechanism. Entered delta value ignored.')
+        }
+        return(NULL)
+    } else {
+        # if the stability mechanism is being used, return the delta value
+        if (is.null(delta)) {
+            # default delta value
+            return(2^-30)
+        } else {
+            return(delta)
+        }
+    }
+}
+
 #' Differentially private histogram
 #'
 #' @param var.type Character, the variable type.
@@ -686,23 +708,9 @@ dpHistogram$methods(
         #    the stability mechanism, then the bins will be determined in 
         #    the stability mechanism.)
         # 2) Once the bins are determined, get the number of bins.
-        # 3) throw an error if the user entered a delta value (because 
-        #    a delta value is only used in the stability mechanism)
         if (.self$mechanism != 'mechanismStability') {
             .self$bins <- determineBins(var.type, rng, bins, n.bins, impute, granularity, .self)
             .self$n.bins <- ifelse(is.null(.self$n.bins), length(.self$bins), .self$n.bins)
-            if (!is.null(delta)) {
-                warning('A delta parameter has been entered, but the stability mechanism is not being used.
-                        A delta value is only necessary for the stability mechanism. Entered delta value ignored.')
-            } 
-        } else {
-            # if the stability mechanism is being used, set the delta value
-            if (is.null(delta)) {
-                # default delta value
-                .self$delta <- 2^-30
-            } else {
-                .self$delta <- delta
-            }
         }
         
         # get the epsilon and accuracy
@@ -713,6 +721,9 @@ dpHistogram$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha)
         }
+        
+        # get the delta parameter (will be NULL unless stability mechanism is being used)
+        .self$delta <- checkDelta(.self$mechanism, delta)
         
         # set the range for data imputation (will be null if no range entered)
         .self$impute.rng <- checkImputationRange(impute.rng, rng, var.type)
