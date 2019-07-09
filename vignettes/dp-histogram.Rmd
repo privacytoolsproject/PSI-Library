@@ -143,7 +143,7 @@ print(numeric_histogram$result)
 To calculate the histogram of a logical variable, input a logical vector into `variable` and update `var.type` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only me two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
 
 ```{r}
-logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
+logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE, rng=c(0,1))
 logical_histogram$release(PUMS5extract10000)
 print(logical_histogram$result)
 ```
@@ -151,7 +151,7 @@ print(logical_histogram$result)
 In the example above, we set the `impute` parameter equal to `TRUE`, meaning that any `NA` (empty) values would be randomly assigned 0 or 1 so no values in the data set are empty, and there is no `NA` bucket in the histogram. By default `impute = FALSE`, so if we do not specify a value for `impute`, then there will be an `NA` bucket in the histogram release:
 
 ```{r}
-logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1)
+logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1, rng=c(0,1))
 logical_histogram$release(PUMS5extract10000)
 print(logical_histogram$result)
 ```

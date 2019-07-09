@@ -43,7 +43,7 @@ mechanism <- setRefClass(
         var.type.orig = 'character',
         n = 'numeric',
         epsilon = 'numeric',
-        delta = 'numeric',
+        delta = 'ANY',
         rng = 'ANY',
         result = 'ANY',
         alpha = 'numeric',
