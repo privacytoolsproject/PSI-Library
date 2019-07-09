@@ -1077,3 +1077,41 @@ release2json <- function(release, nameslist){
     return(result)
 
 }
+
+				  
+#' Extract regression indices
+#' 
+#' Function to obtain indices in data frame for dependent & independent variables from a formula.
+#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param data A numeric data frame with at least two columns.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#' 
+#' @return A named list with names corresponding to labels and locations 
+#'    (i.e., columns) for variables in the specification.
+#' @examples
+#'
+#' y <- rnorm(100) * 2
+#' x <- (y + rnorm(100)) > 0
+#' data <- data.frame(cbind(y, x))
+#' f <- as.formula('y ~ x')
+#' extract.indices(f, data, FALSE)
+#' @rdname extract.indices
+#' @export
+extract.indices <- function(formula, data, intercept) {
+    t <- terms(formula, data=data)
+    y.loc <- attr(t, 'response')
+    x.loc <- which(names(data) %in% attr(t, 'term.labels'))
+    x.label <- names(data)[x.loc]
+    if (intercept) {
+        intercept.loc <- which(names(data) == 'intercept')
+        x.loc <- c(intercept.loc, x.loc)
+        x.label <- append(x.label, 'Intercept', after=(intercept.loc - 1))
+        if (intercept.loc <= y.loc) { y.loc <- y.loc + 1 }
+    }
+    return(list('y.loc' = y.loc,
+                'x.loc' = x.loc,
+                'x.label' = x.label))
+}
