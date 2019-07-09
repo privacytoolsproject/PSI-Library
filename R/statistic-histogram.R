@@ -2,6 +2,26 @@
 #' 
 #' Determine accuracy of histogram release, given epsilon and delta, for the differentially 
 #' private histogram release.
+#' 
+#' In differential privacy, "accuracy" is defined as the threshold value above which a given value 
+#' is "significantly different" from the expected value. Mathematically, this is written as:
+#' $$\alpha = Pr[Y > a]$$
+#' Where \alpha is the statistical significance level, $a$ is the accuracy, and $Y$ is a random 
+#' variable following the Laplace distribution.
+#' 
+#' In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
+#' this "accuracy" because most values will be below this threshold, and thus are "accurate" enough
+#' to be considered "expected" values.
+#' 
+#' Deriving the accuracy formula:
+#' 1. The probability density function (PDF) $f(x)$ of the Laplace distribution is: $f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}$
+#' 2. For differential privacy calculations \mu = 0, because the "average" amount of noise added is 0 noise
+#' 3. For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values,
+#'    so the distrubution is "folded", or doubled
+#' 4. So we can consider the differentially private PDF $g(Y)$ to be: $g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}$
+#' 5. Using $\alpha = Pr[Y > a]$ and the PDF, we can solve for $a$ and plug in $\lambda = \frac{2}{\epsilon}$
+#' 6. We end up with the accuracy formula: $a = \frac{2}{\epsilon}ln(1/\alpha)$
+#' 7. The accuracy formula for the stability mechanism has an added $+ 1$ term because...
 #'
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -50,11 +70,11 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
 #' 
-#' @export histogram.getParameters
+#' @export histogram.getEpsilon
 #' @return Differential privacy parameter epsilon
-#' @rdname histogram.getParameters
+#' @rdname histogram.getEpsilon
 
-histogram.getParameters <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05) {
+histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
 		eps <- 2*log(2/(alpha*delta)) /accuracy
@@ -69,6 +89,14 @@ histogram.getParameters <- function(mechanism, n.bins, n, accuracy, delta=10^-6,
 #' 
 #' Return the confidence interval for each bins of the differentially private histogram
 #' release, given the accuracy.
+#' 
+#' A confidence interval indicates the range in which we estimate the true value of a
+#' statistic to be. In this case, the confidence interval indicates the range in which
+#' the true count for each histogram bin could be. In this histogram statistic, we use
+#' a 95% confidence interval. To give an example: say a differentially private release 
+#' of a histogram bucket has a count of 5. Say the confidence interval for that bucket 
+#' is [3,7]. We can say "we are 95% confident that the true count of this histogram
+#' bin is between 3 and 7."
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -113,12 +141,16 @@ histogram.getCI <- function(release, n.bins, n, accuracy) {
 normalizeReleaseAndConvertToDataFrame <- function(release, n) {
     if (is(release, 'matrix')) {
         bin.names <- rownames(release)
-        if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+        if (anyNA(bin.names)) { 
+            bin.names[is.na(bin.names)] <- 'NA' 
+        }
         release <- apply(release, 2, normalizeHistogram, n=n)
         release <- data.frame(t(release))
     } else {
         bin.names <- names(release)
-        if (anyNA(bin.names)) { bin.names[is.na(bin.names)] <- 'NA' }
+        if (anyNA(bin.names)) { 
+            bin.names[is.na(bin.names)] <- 'NA'
+        }
         release <- normalizeHistogram(release, n)
         release <- data.frame(matrix(release, ncol=length(release)))
     }
@@ -676,7 +708,7 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- histogram.getParameters(mechanism, n.bins, n, accuracy, delta, alpha)
+            .self$epsilon <- histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta, alpha)
         } else {
             .self$epsilon <- epsilon
             .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha)
