@@ -17,6 +17,7 @@ Node <- setRefClass(
      .self$leftChild <- NULL
      .self$rightChild <- NULL
      .self$weight <- 0
+     .self$depth <- 0
      .self$range <- range
    },
    
@@ -109,6 +110,7 @@ Tree <- setRefClass(
       .self$range <- range
       .self$nLeaves <- nLeaves
       .self$depth <- calculateDepth(.self$nLeaves)
+      
       .self$head <- NULL
 
       buildTree()
@@ -125,6 +127,14 @@ Tree <- setRefClass(
 
     calculateDepth = function(nLeaves){
       return(log2(nLeaves)+1)
+    },
+    
+    #ToDo: write method that calculates size of subtree at node
+    # should store this at nodes for ease
+    # note this is trivial here since trees are perfect;
+    # would otherwise need to be a recursive method.
+    calculateSize = function(currNode=.self$head){
+      print("blah")
     },
     
     insertChild = function(parent){
@@ -170,6 +180,25 @@ Tree <- setRefClass(
         printTree(currNode=currNode$leftChild)
         printTree(currNode=currNode$rightChild)
       }
+      else{
+        return(NULL)
+      }
+    },
+    
+    #function to add values in toAdd to the nodes in the Tree object.
+    #the nth item in itemsToAdd is added to the node with index n.
+    add = function(itemsToAdd){
+      
+    },
+    
+    addHelper = function(itemToAdd, targetNodeIndex, currNode){
+      if (targetNodeIndex == currNode$index){
+        currNode$weight <- currNode$weight + itemToAdd;
+      }
+      # else if (!is.null(currNode)){
+      #   #determine direction to traverse tree
+      #   if targetNodeIndex
+      # }
       else{
         return(NULL)
       }
@@ -256,9 +285,37 @@ dpTreeStatistic <- setRefClass(
     }
     release = function(data){
       x <- data[,variable]
-      
     }
   )
+)
+
+#' Generalized Laplace mechanism
+#' 
+#' Laplace mechanism as applied to a generic object which has a specified
+#' add() function that describes how the noise should be added. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+mechanismGenLaplace <- setRefClass(
+  Class = 'GenLaplace',
+  contains = 'mechanism'
+)
+
+mechanismGenLaplace$methods(
+  evaluate = function(fun, x, sens, postFun, ...) {
+    x <- censordata(x, .self$var.type, .self$rng, .self$bins)
+    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
+    fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+    input.vals = c(list(x=x), fun.args)
+    true.val <- do.call(fun, input.vals)
+    scale <- sens / .self$epsilon
+    release <- true.val$add(dpNoise(n=length(true.val), scale=scale, dist='laplace'))
+    out <- list('release' = release)
+    out <- postFun(out, ...)
+    return(out)
+  }
 )
 
 
