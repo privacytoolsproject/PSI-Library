@@ -584,10 +584,16 @@ getFuncArgs <- function(targetFunc, inputList=NULL, inputObject=NULL){
 #'    to \code{formula}.
 #' @rdname linear.reg
 linear.reg <- function(formula, release, n, intercept) {
-  if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
+  eigenvals <- eigen(release)$values
+  if (all(eigenvals == 0)) {  # could do is.positive.definite() but that requires matrixcalc package
     coefs <- "The input matrix is not invertible"
     return(coefs)
-  } else {
+  }
+  else if (!all(eigenvals) > 0){
+    coefs <- "The input covariance matrix is not positive definite due to noise addition so linear regression will not be run."
+    return(coefs)
+  }
+  else {
     xy.locs <- extract.indices(as.formula(formula), release, intercept)
     x.loc <- xy.locs$x.loc
     y.loc <- xy.locs$y.loc

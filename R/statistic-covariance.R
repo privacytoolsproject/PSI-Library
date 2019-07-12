@@ -54,7 +54,7 @@ covariance.sensitivity <- function(n, rng, intercept) {
 #' @return A symmetric differentially private covariance matrix.
 #'
 #' This function is used by the mechanism in post-processing and not intended for interactive post-processing
-covariance.formatRelease <- function(release, columns) {
+covarianceFormatRelease <- function(release, columns) {
   out.dim <- length(columns)
   out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
   out.matrix[lower.tri(out.matrix, diag=TRUE)] <- release
@@ -85,19 +85,33 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
   return(out.summaries)
 }
 
-
 #' Lower triangle of covariance matrix
 #'
-#' This function is called by \code{dpCovariance} and
-#' produces the true value to be perturbed.
-#'
-#' @param x Data frame
-#' @param columns Columns to include in output
-#' @param intercept Logical, should the intercept be included?
+#' This function is called by \code{mechanismLaplace$evaluate}, which is called within the 
+#' differentially private covariance release function \code{dpCovariance$release}. It
+#' produces the true covariance matrix of input \code{x} that is then perturbed within
+#' \code{mechanismLaplace$evaluate}.
+#' 
+#' Since the Laplace mechanism as instantiated within \code{mechanismLaplace$evaluate} expects 
+#' an output of the true function which can have a 1-dimensional vector of noise added to it, 
+#' the covariance function here outputs a flattened version of the lower triangle of the
+#' covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
+#' matrices are symmetric.
+#' 
+#' The traditional covariance matrix is then reconstructed from the noisy version of this output
+#' as a post-processing step in \code{covarianceFormatRelease}.
+#' 
+#' @param x Input data frame that covariance matrix will be calculated with.
+#' @param intercept Logical, indicates if intercept column should be appended to x.
+#' @return The lower triangle of the covariance matrix of x, flattened to a 1-dimensional array.
+#' 
+#' @seealso dpCovariance$release
+#' @seealso mechanismLaplace$evaluate
 
-fun.covar <- function(x, intercept) {
+covar <- function(x, intercept) {
   if (intercept) { x <- cbind(1, x) }
-  covariance <- t(as.matrix(x)) %*% as.matrix(x)
+  #covariance <- t(as.matrix(x)) %*% as.matrix(x)
+  covariance <- cov(x)
   lower <- lower.tri(covariance, diag=TRUE)
   covariance <- covariance[lower]
   return(covariance)
@@ -130,6 +144,7 @@ dpCovariance$methods(
     .self$rng <- rng
     
     checkepsilon(epsilon)
+    checkrange(.self$rng)
     
     if (is.null(impute.rng)) {
       .self$impute.rng <- rng
@@ -149,14 +164,13 @@ dpCovariance$methods(
   release = function(data) {
     x <- data[columns];
     sens <- covariance.sensitivity(n, rng, intercept)
-    .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess,
+    .self$result <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens, postFun=.self$postProcess,
                                                formula=formula, columns=columns, intercept=intercept)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
-    
-    out$release <- covariance.formatRelease(out$release, columns)
+    out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {
       out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)

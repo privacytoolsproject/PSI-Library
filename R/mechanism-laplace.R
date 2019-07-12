@@ -2,7 +2,6 @@
 #'
 #' @import methods
 #' @export mechanismLaplace
-#' @exportClass mechanismLaplace
 #'
 #' @include mechanism.R
 
@@ -17,7 +16,7 @@ mechanismLaplace$methods(
   #' Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
   #' "x" using the Laplace mechanism.
   #' 
-  #' @name Laplace Mechanism
+  #' @name LaplaceMechanism
   #' @references C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
   #'
   #' @param fun function of input x to add Laplace noise to.
@@ -36,7 +35,7 @@ mechanismLaplace$methods(
     x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
     input.vals = c(list(x=x), fun.args)
-    true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+    true.val <- do.call(fun, input.vals)
     scale <- sens / .self$epsilon
     release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
     out <- list('release' = release)
