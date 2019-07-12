@@ -35,8 +35,11 @@ mechanismStability$methods(
     #' @param ... any additional (optional) parameters
     #'
     #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
+    #' 
+    #' @examples 
+    #' stability_histogram <- mechanismStability$evaluate(fun.hist, data[, variable], 2, dpHistogram$postProcess)
+    #' stability_mean <- mechanismStability$evaluate(mean, data[, variable], sens, dpMean$postProcess)
     #'
-    # TODO: add examples 
     evaluate = function(fun, x, sens, postFun, ...) {
         # before calculating the histogram statistic, confirm that delta is less than (1/n)
         # if deta is greater than or equal to (1/n), return an error message to the user

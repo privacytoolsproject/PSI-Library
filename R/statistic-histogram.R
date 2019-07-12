@@ -14,14 +14,18 @@
 #' to be considered "expected" values.
 #' 
 #' Deriving the accuracy formula:
-#' 1. The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is: \eqn{f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}}
-#' 2. For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
-#' 3. For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values,
-#'    so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
-#' 4. So we can consider the differentially private PDF \eqn{g(Y)} to be: \eqn{g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}}
-#' 5. Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = \frac{2}{\epsilon}}
-#' 6. We end up with the accuracy formula: \eqn{a = \frac{2}{\epsilon}ln(\frac{1}{\alpha})}
-#' 7. The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{\frac{2}{\epsilon}ln(\frac{2}{\delta})+1}
+#' 
+#' \enumerate{
+#'     \item The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is:\cr
+#'           \eqn{f(x) = {1 / 2\lambda} * e^{-|x-\mu| / \lambda}}
+#'     \item For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
+#'     \item For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values, so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
+#'     \item So we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
+#'     \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
+#'     \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}
+#'     \item We end up with the accuracy formula: \eqn{a = {2 / \epsilon} * ln(1 / \alpha)}
+#'     \item The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
+#' }
 #' 
 #' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
 #'
@@ -165,6 +169,8 @@ normalizeReleaseAndConvertToDataFrame <- function(release, n) {
 #'
 #' @param h Histogram
 #' @param n Sample size
+#' 
+#' @return The noisy histogram with the sum of the bin counts normalized to the input data size
 
 normalizeHistogram <- function(h, n) {
     # get just the bins sizes for each bin in the histogram (without bin labels)
@@ -370,13 +376,13 @@ determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) 
 #' @param n.bins Integer, the number of bins to release.
 #' @param impute Boolean, if true then the mechanism should replace missing values with known 
 #'    values from the data.If false, the mechanism should leave missing values as `NA`
-#' @param granularity Numeric, the width of each histogram bin.
+#' @param granularity Numeric, the width of each histogram bin, or the number of observations in each bin
 #' @param object Object, the dpHistogram object for the given variable (used it access and assign variable type)
 #' 
 #' @return a vector of histogram bins. Character vector for categorical variables. Numeric 
 #'    vector for logical, numeric, and integer variables.
 
-determineBins <- function(var.type, rng, bins, n.bins, impute, granularity, object) {
+determineBins <- function(var.type, rng, bins, n, n.bins, impute, granularity, object) {
     if (!is.null(bins)) {
         # if the user passed in bins, then the passed bins are the histogram bins
         # check entered bins for errors. If there are not errors, entered bins will be assigned as histogram bins.
@@ -395,7 +401,7 @@ determineBins <- function(var.type, rng, bins, n.bins, impute, granularity, obje
             # if we have reached this conditional statement, then the variable type can
             # only be numeric or integer, and the user must have entered the range and
             # either the number of bins or the granularity.
-            return(determineNumericIntegerBins(rng, n.bins, granularity))
+            return(determineNumericIntegerBins(rng, n, n.bins, granularity))
         }
     }
 }
@@ -417,14 +423,13 @@ determineLogicalBins <- function(impute, object) {
 }
 
 # only called by determineBins()
-determineNumericIntegerBins <- function(rng, n.bins, granularity) {
+determineNumericIntegerBins <- function(rng, n, n.bins, granularity) {
 	# first check if n.bins is NULL, n.bins is considered the truth for the number
 	# of bins if the user has entered both n.bins and granularity.
     if (is.null(n.bins)) {
         # if the n.bins is null, then the the granularity
         # must be entered
-    	r <- rng[2] - rng[1] # get the width of the range
-    	nBinsFromGranularity <- r / granularity # get the number of bins
+    	nBinsFromGranularity <- n / granularity # get the number of bins
     	return(seq(rng[1], rng[2], length.out=(nBinsFromGranularity + 1)))
     } else {
         # if n.bins is not null, then we can use it to calculate
@@ -487,9 +492,7 @@ errorCheckBinRange <- function(var.type, rng, bins) {
         # if the user user has both specified bins and entered a range,
         # show an error message, because we do not need both. Default to
         # the bins entered.
-        warning('You have entered both bins and a data range, when you do not need both.
-            Default is to use the bins that have been entered.
-            If you would like to use the range, please enter the range and the desired number of bins and omit the bins.')
+        warning('You have entered both bins and a data range, when you do not need both. Default is to use the bins that have been entered. If you would like to use the range, please enter the range and the desired number of bins and omit the bins.')
     }
 }
 
@@ -620,6 +623,8 @@ checkImputationBins <- function(imputationBins, bins, var.type) {
     }
 }
 
+# ADD DOCUMENTATION HERE FOR CHECK DELTA
+
 checkDelta <- function(mechanism, delta) {
     # throw an error if the stability mechanism is NOT being used and the
     # user entered a delta value (because a delta value is only used in 
@@ -637,6 +642,26 @@ checkDelta <- function(mechanism, delta) {
         } else {
             return(delta)
         }
+    }
+}
+
+# ADD DOCUMENTATION HERE FOR CHECK RANGE
+
+checkRange <- function(rng, var.type, bins) {
+    if (var.type == 'logical') {
+        return(c(0,1))
+    } else if (var.type %in% c('numeric','integer') & !(is.null(bins))) {
+        bin_range = c(bins[1],bins[length(bins)])
+        return(bin_range)
+    } else {
+        return(rng)
+    }
+}
+
+# ADD DOCUMENTATION
+checkVarType <- function(var.type) {
+    if (!(var.type %in% c("numeric", "integer", "logical", "character"))) {
+        stop("Please enter a data type of 'numeric', 'integer', 'logical', or 'character'")
     }
 }
 
@@ -684,6 +709,9 @@ dpHistogram$methods(
                           impute.rng=NULL, impute.bins=NULL, impute=FALSE, n.boot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
+        # check variable type, can only continue initialization for certain variable type: numeric, integer, logical, character
+        checkVarType(var.type)
+        
         # determine  which mechanism to use based on inputs
         .self$mechanism <- determineMechanism(var.type, rng, bins, n.bins, granularity)
         
@@ -693,8 +721,7 @@ dpHistogram$methods(
         .self$n <- n
         .self$epsilon <- epsilon
         .self$accuracy <- accuracy
-        .self$rng <- rng # may be null
-        .self$bins <- bins
+        .self$bins <- bins # may be null
         .self$n.bins <- n.bins # may be null
         .self$alpha <- alpha
         .self$impute.rng <- impute.rng
@@ -707,11 +734,26 @@ dpHistogram$methods(
         # 1) determine the bins of the histogram. (If the mechanism is 
         #    the stability mechanism, then the bins will be determined in 
         #    the stability mechanism.)
-        # 2) Once the bins are determined, get the number of bins.
+        # 2) determine the number of bins from the input number of bins, the granularity, or the list of bins.
         if (.self$mechanism != 'mechanismStability') {
-            .self$bins <- determineBins(var.type, rng, bins, n.bins, impute, granularity, .self)
-            .self$n.bins <- ifelse(is.null(.self$n.bins), length(.self$bins), .self$n.bins)
+            .self$bins <- determineBins(.self$var.type, rng, bins, .self$n, n.bins, impute, granularity, .self)
+            if (is.null(n.bins)) {
+                # if there is no input for number of bins, get it from from granularity or the list of bins
+                if (!is.null(granularity)) {
+                    .self$n.bins <- n / granularity
+                } else {
+                    .self$n.bins <- length(.self$bins)
+                }
+            } else {
+                .self$n.bins <- n.bins
+            }
         }
+        
+        # check the data range
+        # if numeric bins have been entered, set the range to the range of the bins 
+        # if logical variable is entered, set the range to c(0,1)
+        # (may be NULL)
+        .self$rng <- checkRange(rng, .self$var.type, bins)
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {

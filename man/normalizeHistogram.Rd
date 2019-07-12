@@ -11,6 +11,9 @@ normalizeHistogram(h, n)
 
 \item{n}{Sample size}
 }
+\value{
+The noisy histogram with the sum of the bin counts normalized to the input data size
+}
 \description{
 Constrain the sum of histogram bins to sample size
 }

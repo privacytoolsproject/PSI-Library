@@ -22,6 +22,11 @@ result of post-processing on input function "fun" evaluated on database "x", ass
 Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
 "x" using the Laplace mechanism.
 }
+\examples{
+laplace_histogram <- mechanismLaplace$evaluate(fun.hist, data[, variable], 2, dpHistogram$postProcess)
+laplace_mean <- mechanismLaplace$evaluate(mean, data[, variable], sens, dpMean$postProcess)
+
+}
 \references{
 C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
 }

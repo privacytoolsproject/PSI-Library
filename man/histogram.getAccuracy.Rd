@@ -36,8 +36,8 @@ private histogram release.
 \details{
 In differential privacy, "accuracy" is defined as the threshold value above which a given value 
 is "significantly different" from the expected value. Mathematically, this is written as:
-$$\alpha = Pr[Y > a]$$
-Where \alpha is the statistical significance level, $a$ is the accuracy, and $Y$ is a random 
+\deqn{\alpha = Pr[Y > a]}
+Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy, and \eqn{Y} is a random 
 variable following the Laplace distribution.
 
 In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
@@ -45,12 +45,19 @@ this "accuracy" because most values will be below this threshold, and thus are "
 to be considered "expected" values.
 
 Deriving the accuracy formula:
-1. The probability density function (PDF) $f(x)$ of the Laplace distribution is: $f(x) = \frac{1}{2\lambda}e^{\frac{-|x-\mu|}{\lambda}}$
-2. For differential privacy calculations \mu = 0, because the "average" amount of noise added is 0 noise
-3. For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values,
-   so the distrubution is "folded", or doubled
-4. So we can consider the differentially private PDF $g(Y)$ to be: $g(y) = \frac{1}{\lambda}e^{\frac{-y}{\lambda}}$
-5. Using $\alpha = Pr[Y > a]$ and the PDF, we can solve for $a$ and plug in $\lambda = \frac{2}{\epsilon}$
-6. We end up with the accuracy formula: $a = \frac{2}{\epsilon}ln(1/\alpha)$
-7. The accuracy formula for the stability mechanism has an added $+ 1$ term because...
+
+\enumerate{
+    \item The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is:\cr
+          \eqn{f(x) = {1 / 2\lambda} * e^{-|x-\mu| / \lambda}}
+    \item For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
+    \item For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values, so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
+    \item So we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
+    \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
+    \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}
+    \item We end up with the accuracy formula: \eqn{a = {2 / \epsilon} * ln(1 / \alpha)}
+    \item The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
+}
+}
+\references{
+S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
 }

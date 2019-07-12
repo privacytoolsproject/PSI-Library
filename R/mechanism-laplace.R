@@ -29,7 +29,10 @@ mechanismLaplace$methods(
   #'
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
   #'
-  # TODO: add examples 
+  #' @examples
+  #' laplace_histogram <- mechanismLaplace$evaluate(fun.hist, data[, variable], 2, dpHistogram$postProcess)
+  #' laplace_mean <- mechanismLaplace$evaluate(mean, data[, variable], sens, dpMean$postProcess)
+  #' 
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censordata(x, .self$var.type, .self$rng, .self$bins)
     x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$impute.bins)
