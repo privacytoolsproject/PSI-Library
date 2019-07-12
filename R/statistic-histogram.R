@@ -6,24 +6,22 @@
 #' In differential privacy, "accuracy" is defined as the threshold value above which a given value 
 #' is "significantly different" from the expected value. Mathematically, this is written as:
 #' \deqn{\alpha = Pr[Y > a]}
-#' Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy, and \eqn{Y} is a random 
-#' variable following the Laplace distribution.
-#' 
-#' In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
-#' this "accuracy" because most values will be below this threshold, and thus are "accurate" enough
-#' to be considered "expected" values.
+#' Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy,
+#' and \eqn{Y} is a random  variable indicating the difference between the differentially 
+#' private noisy output and the true value. \eqn{Y} does not follow the Laplace distribution,
+#' instead it follows a folded Laplace distribution, because the difference between noisy
+#' and true outputs is measured in magnitude, so it is calculated using the absolute value
+#' function, thus we fold the Laplace distribution and center it at 0.
 #' 
 #' Deriving the accuracy formula:
 #' 
 #' \enumerate{
 #'     \item The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is:\cr
 #'           \eqn{f(x) = {1 / 2\lambda} * e^{-|x-\mu| / \lambda}}
-#'     \item For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
-#'     \item For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values, so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
-#'     \item So we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
+#'     \item Using the definition of \eqn{Y} above, we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
 #'     \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
-#'     \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}
-#'     \item We end up with the accuracy formula: \eqn{a = {2 / \epsilon} * ln(1 / \alpha)}
+#'     \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}, and end up with the accuracy formula: 
+#'          \deqn{a = {2 / \epsilon} * ln(1 / \alpha)}
 #'     \item The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
 #' }
 #' 
@@ -63,6 +61,8 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' Function to find the epsilon value necessary to meet a desired level of accuracy for the
 #' differentially private histogram release.
 #' 
+#' This calculation is the inverse of the calculation for `histogram.getAccuracy`.
+#' 
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
@@ -98,37 +98,34 @@ histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, al
 #' 
 #' A confidence interval indicates the range in which we estimate the true value of a
 #' statistic to be. In this case, the confidence interval indicates the range in which
-#' the true count for each histogram bin could be. In this histogram statistic, we use
-#' a 95% confidence interval. To give an example: say a differentially private release 
-#' of a histogram bucket has a count of 5. Say the confidence interval for that bucket 
-#' is [3,7]. We can say "we are 95% confident that the true count of this histogram
-#' bin is between 3 and 7."
+#' the true count for each histogram bin could be. To give an example: say a 
+#' differentially private release of a histogram bucket has a count of 5. Say the 
+#' confidence interval for that bucket is [3,7]. We can say "we are 95% confident that 
+#' the true count of this histogram bin is between 3 and 7."
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in in the data.
-#' @param accuracy A numeric vector representing the accuracy needed to 
-#'    guarantee (percent).
+#' @param accuracy A numeric vector representing the accuracy guarantee.
 #'    
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
 
 histogram.getCI <- function(release, n.bins, n, accuracy) {
-    release <- as.numeric(release)
-    accxn <- accuracy * n
+    release_asNumeric <- as.numeric(release)
     out <- list()
     for (k in 1:n.bins) {
-        bin.count <- release[k]
+        bin.count <- release_asNumeric[k]
         if (bin.count == 0) {
-            out[[k]] <- c(0, accxn)
+            out[[k]] <- c(0, accuracy)
         } else {
-            out[[k]] <- c(max(0, bin.count - accxn), accxn + bin.count)
+            out[[k]] <- c(max(0, bin.count - accuracy), accuracy + bin.count)
         }
     }
     out <- data.frame(do.call(rbind, out))
-    #names(out) <- c('lower', 'upper')
+    names(out) <- c('lower bound', 'upper bound')
     rownames(out) <- names(release)
     return(out)
 }
@@ -623,7 +620,22 @@ checkImputationBins <- function(imputationBins, bins, var.type) {
     }
 }
 
-# ADD DOCUMENTATION HERE FOR CHECK DELTA
+#' Check if delta value was entered
+#' 
+#' This method is to send the user a warning message if they entered a delta value
+#' that will not be used.
+#' 
+#' If the mechanism is NOT the stabiltiy mechanism and the user entered a delta value, 
+#' send a warning message saying the delta value with not be used and set the delta 
+#' value to NULL. If the stability mechanism is being used and the user entered a 
+#' delta value, set it as the delta value (the value of delta will be checked in the 
+#' stability mechanism). If the stability mechanism is being used and the user did 
+#' not enter a delta value, set the delta to the default value (2^-30).
+#' 
+#' @param mechanism The mechanism chosen by determineMechanism
+#' @param delta The delta value entered by the user, may be NULL
+#' 
+#' @return The value that will be used as the delta value for the statistic, may be NULL.
 
 checkDelta <- function(mechanism, delta) {
     # throw an error if the stability mechanism is NOT being used and the
@@ -645,9 +657,28 @@ checkDelta <- function(mechanism, delta) {
     }
 }
 
-# ADD DOCUMENTATION HERE FOR CHECK RANGE
+#' Set histogram range if bins are entered 
+#' 
+#' If the user enters a logical variable, they should not need to enter a
+#' histogram range, but calculating the sensitivity requires a range. This
+#' method sets the range for a logical variable as c(0,1).
+#' 
+#' If the user enters numeric bins, they should not need to enter a histogram
+#' range, but calculating the sensitivity requires a range. This method sets
+#' the range for a numeric variable with bins entered to the bins lower bound
+#' and the bin upper bound.
+#' 
+#' If neither of the cases are true for the histogram, the range the user entered
+#' if returned.
+#' 
+#' @param rng The rng entered by the user, may be NULL
+#' @param delta The variable type of the data
+#' @param bins The histogram bins entered by the user, may be NULL
+#' 
+#' @return The 2-tuple that will be used as the range for the histogram when 
+#' calculating sensitivity, censoring data, and imputing values.
 
-checkRange <- function(rng, var.type, bins) {
+setHistogramRange <- function(rng, var.type, bins) {
     if (var.type == 'logical') {
         return(c(0,1))
     } else if (var.type %in% c('numeric','integer') & !(is.null(bins))) {
@@ -658,8 +689,15 @@ checkRange <- function(rng, var.type, bins) {
     }
 }
 
-# ADD DOCUMENTATION
-checkVarType <- function(var.type) {
+#' Check the histogram variable type entered by the user 
+#' 
+#' The variable type for a histogram must be 'numeric', 'integer', 'logical', or 'character'.
+#' If it is not one of these, send an error message to the user.
+#' 
+#' @param var.type The variable type of the data that was entered by the user
+#' 
+#' @return No return value, will only send an error message if variable tyep is invalid.
+checkHistogramVariableType <- function(var.type) {
     if (!(var.type %in% c("numeric", "integer", "logical", "character"))) {
         stop("Please enter a data type of 'numeric', 'integer', 'logical', or 'character'")
     }
@@ -710,7 +748,7 @@ dpHistogram$methods(
         .self$name <- 'Differentially private histogram'
         
         # check variable type, can only continue initialization for certain variable type: numeric, integer, logical, character
-        checkVarType(var.type)
+        checkHistogramVariableType(var.type)
         
         # determine  which mechanism to use based on inputs
         .self$mechanism <- determineMechanism(var.type, rng, bins, n.bins, granularity)
@@ -753,7 +791,7 @@ dpHistogram$methods(
         # if numeric bins have been entered, set the range to the range of the bins 
         # if logical variable is entered, set the range to c(0,1)
         # (may be NULL)
-        .self$rng <- checkRange(rng, .self$var.type, bins)
+        .self$rng <- setHistogramRange(rng, .self$var.type, bins)
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {

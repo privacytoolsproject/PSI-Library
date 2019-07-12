@@ -43,16 +43,16 @@ mechanism <- setRefClass(
         var.type.orig = 'character',
         n = 'numeric',
         epsilon = 'numeric',
-        delta = 'ANY',
-        rng = 'ANY',
+        delta = 'ANY', # not 'numeric' because it can be NULL if the Stability mechanism is not being used
+        rng = 'ANY', # not 'numeric' because it can be NULL (if the Stability mechanism is being used, or the variable is logical)
         result = 'ANY',
         alpha = 'numeric',
-        accuracy = 'ANY',
+        accuracy = 'ANY', # not 'numeric' because can be NULL if epsilon is given
         bins = 'ANY',
-        n.bins = 'ANY',
+        n.bins = 'ANY', # not 'numeric' because can be NULL if granularity given
         k = 'numeric',
         error = 'numeric',
-        n.boot = 'ANY',
+        n.boot = 'ANY', # not 'numeric' becuase can be NULL
         boot.fun = 'function',
         impute.rng = 'ANY',
         impute.bins = 'ANY',
@@ -62,7 +62,7 @@ mechanism <- setRefClass(
         intercept = 'logical', 
         stability = 'logical',
         objective = 'function',
-        granularity = 'ANY',
+        granularity = 'ANY', # not 'numeric' because can be NULL if n.bins given
         percentiles = 'ANY',
         tree.data = 'ANY'
 ))

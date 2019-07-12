@@ -30,8 +30,31 @@ mechanismLaplace$methods(
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
   #'
   #' @examples
-  #' laplace_histogram <- mechanismLaplace$evaluate(fun.hist, data[, variable], 2, dpHistogram$postProcess)
-  #' laplace_mean <- mechanismLaplace$evaluate(mean, data[, variable], sens, dpMean$postProcess)
+  #' # histogram example
+  #' 
+  #' # the function in `statistic-histogram.R` that creates a histogram from input data
+  #' histogram_function <- fun.hist 
+  #' # the data frame that holds the data we want to analyze, in this case the data is called "PUMS5extract10000"
+  #' data <- data(PUMS5extract10000) 
+  #' # the variable for which we want a histogram
+  #' variable <- "age"
+  #' # the sensitivity for the histogram, the default sensitivity for histograms is 2 
+  #' sens <- 2 
+  #' # the post-processing function to use to format the histogram release correctly
+  #' post_processing_function <- dpHistogram$postProcess 
+  #' 
+  #' laplace_histogram <- mechanismLaplace$evaluate(histogram_function, data[, variable], sens, post_processing_function)
+  #' 
+  #' # mean example
+  #' 
+  #' mean_function <- mean
+  #' # the sensitivity for a differntially private mean in calculated as the difference in the data range divided by the number of data points
+  #' sens <- diff(rng) / n 
+  #' # the post-processing function to use to format the mean release correctly
+  #' post_processing_function <- dpMean$postProcess 
+  #' # `data` and `variable` same as above
+  #' 
+  #' laplace_mean <- mechanismLaplace$evaluate(mean_function, data[, variable], sens, post_processing_function)
   #' 
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censordata(x, .self$var.type, .self$rng, .self$bins)

@@ -37,24 +37,22 @@ private histogram release.
 In differential privacy, "accuracy" is defined as the threshold value above which a given value 
 is "significantly different" from the expected value. Mathematically, this is written as:
 \deqn{\alpha = Pr[Y > a]}
-Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy, and \eqn{Y} is a random 
-variable following the Laplace distribution.
-
-In other words, the accuracy is a threshold value, above which a value is "unexpected". We call
-this "accuracy" because most values will be below this threshold, and thus are "accurate" enough
-to be considered "expected" values.
+Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy,
+and \eqn{Y} is a random  variable indicating the difference between the differentially 
+private noisy output and the true value. \eqn{Y} does not follow the Laplace distribution,
+instead it follows a folded Laplace distribution, because the difference between noisy
+and true outputs is measured in magnitude, so it is calculated using the absolute value
+function, thus we fold the Laplace distribution and center it at 0.
 
 Deriving the accuracy formula:
 
 \enumerate{
     \item The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is:\cr
           \eqn{f(x) = {1 / 2\lambda} * e^{-|x-\mu| / \lambda}}
-    \item For differential privacy calculations \eqn{\mu = 0}, because the "average" amount of noise added is \eqn{0} noise
-    \item For differential privacy, "accuracy" is defined as the magnitude of difference between the expected and observed values, so the distrubution is "folded", or doubled, because we are only concerned with the absolute value
-    \item So we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
+    \item Using the definition of \eqn{Y} above, we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
     \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
-    \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}
-    \item We end up with the accuracy formula: \eqn{a = {2 / \epsilon} * ln(1 / \alpha)}
+    \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}, and end up with the accuracy formula: 
+         \deqn{a = {2 / \epsilon} * ln(1 / \alpha)}
     \item The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
 }
 }
