@@ -39,6 +39,8 @@ Syntax
 ------
 
 ```{r, eval = FALSE}
+library(PSIlence)
+
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 data <- data.frame(x1)
 
@@ -79,15 +81,13 @@ In typical usage, there are two methods to the `dpHistogram` class. The `new` me
 
 * `error` \ Numeric, the error term of the statistical significance level. Default is $10^{-9}$.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the numeric vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. Ignored for `character` and `logical` types.
+* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the numeric vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. Ignored for `character` and `logical` types. See Notes below for more information.
 
 * `impute.bins` \ Character (or numeric for logical variables), a list of bins from which missing (or NA) values of character or logical-type variables will be imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the histogram bins. Ignored for `numeric` and `integer` types.
 
 * `impute` \ Boolean, if true then the mechanism should replace missing values with known values from the data. If false, the mechanism should leave missing values as `NA`
 
 * `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
-
-
 
 &nbsp; 
 
@@ -203,3 +203,7 @@ The list in the `result` attribute has the following values.
 * `median` \ The median of the noisy data. Only available for logical vectors.
 * `variance` \ The variance of the noise dat. Only available for logical vectors.
 * `std.dev` \ The standard deviation of the noise dat. Only available for logical vectors.
+
+Notes
+------
+* For the `impute.rng` argument, the imputation strategy is to use a Uniform distribution to choose any value in the imputation range with equal probability.
