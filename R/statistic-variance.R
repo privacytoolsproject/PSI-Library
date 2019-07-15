@@ -7,7 +7,7 @@
 #' @return Noisy estimate of the standard deviation of \code{release}.
 #' @rdname variance.postStandardDeviation
 
-variancePostStandardDeviation <- function(release) {
+variance.postStandardDeviation <- function(release) {
     std <- sqrt(release)
     return(std)
 }

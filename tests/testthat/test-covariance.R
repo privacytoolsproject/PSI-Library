@@ -3,7 +3,6 @@ context("covariance")
 
 data(PUMS5extract10000)
 
-
 test_that('epsilon checks throw correct warning', {
   range.income <- c(-10000, 713000)
   range.education <- c(1, 16)
@@ -42,12 +41,12 @@ test_that('true covariance function is correct', {
   expect_equal(as.matrix(x), y)
 })
 
-test_that('linear regression post-processing function is correct',{
+test_that('linear regression post-processing function is correct for 2x2 covariance matrix',{
   
-  columns <- c('income', 'educ')
+  columns <- c('income', 'age')
   n <- 10000
   intercept <- FALSE
-  formula <- 'income~educ'
+  formula <- 'income~age'
   data <- PUMS5extract10000[columns]
   
   covar <- covar(data, intercept=FALSE)
@@ -55,22 +54,55 @@ test_that('linear regression post-processing function is correct',{
   formattedCovar <- covarianceFormatRelease(covar, columns)
   postLnReg <- covariance.postLinearRegression(formattedCovar, n, intercept, formula)
   output <- as.numeric(postLnReg[[1]][1]) #extracts coefficient from output
- 
-  trueLinearReg <- lm(income~educ, data=PUMS5extract10000)
+  trueLinearReg <- lm(formula, data=PUMS5extract10000)
   expectedOutput <- as.numeric(trueLinearReg[[1]][2]) #extracts coefficient from output
+  expect_equal(floor(output), floor(expectedOutput)) #check floor of values due to floating point errors.
+})
 
-  #print(output)
-  #print(expectedOutput)
+test_that('linear regression post-processing function is correct for 3x3 covariance matrix',{
+  columns <- c('income', 'age', 'educ')
+  n <- 10000
+  intercept <- FALSE
+  formula <- 'income~educ'
+  data <- PUMS5extract10000[columns]
+  
+  covarMatrix <- covar(data, intercept=FALSE)
+  
+  formattedCovar <- covarianceFormatRelease(covarMatrix, columns)
+  postLnReg <- covariance.postLinearRegression(formattedCovar, n, intercept, formula)
+  output <- as.numeric(postLnReg[[1]][1]) #extracts coefficient from output
+  
+  trueLinearReg <- lm(formula, data=PUMS5extract10000)
+  expectedOutput <- as.numeric(trueLinearReg[[1]][2]) #extracts coefficient from output
   expect_equal(floor(output), floor(expectedOutput)) #check floor of values due to floating point errors.
 })
 
 test_that('DP covariance workflow runs', {
-  range.income <- c(-10000, 713000)
-  range.education <- c(1, 16)
-  range <- rbind(range.income, range.education)
+  range.income <- range(PUMS5extract10000['income'])
+  range.education <- range(PUMS5extract10000['educ'])
+  range.age <- range(PUMS5extract10000['age'])
+  range <- rbind(range.income, range.education, range.age)
 
   dpCov <- dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000,
-                            epsilon = 1, columns = c("income", "educ"), rng = range, formula='income~educ')
+                            epsilon = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
   out <- dpCov$release(PUMS5extract10000)
   expect_equal(length(out),3)
+})
+
+test_that('coefficient release function is correct', {
+  range.income <- range(PUMS5extract10000['income'])
+  range.education <- range(PUMS5extract10000['educ'])
+  range.age <- range(PUMS5extract10000['age'])
+  range <- rbind(range.income, range.education, range.age)
+  
+  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000,
+                            epsilon = 10000000000, columns = c("income", "educ", "age"), rng = range, formula='income~educ')
+  out <- dpCov$release(PUMS5extract10000)
+  coeffs <- coefficient.release('income~age', out$release, n=10000)
+  expect_equal(length(coeffs), 4)
+  linreg <- lm(income~age, data=PUMS5extract10000)
+  
+  output <- as.numeric(coeffs$coefficients[[1]][1]) #extracts coefficient from output
+  expectedOutput <- as.numeric(linreg[[1]][2])
+  expect_equal(floor(output), floor(expectedOutput)) #check floor of values due to fact that there is some noise added here
 })

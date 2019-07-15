@@ -1,9 +1,19 @@
 #' Release additional model coefficients from DP covariance matrix
 #' 
 #' Function to extract regression coefficients using the differentially private covariance matrix 
-#'    via the sweep operator. This is the function to obtain coefficients for additional models
-#'    after the \code{covariance.release()} function has already been called. 
+#' via the sweep operator. This is the function to obtain coefficients for additional models
+#' after the \code{covariance.release()} function has already been called. 
 #' 
+#' @examples 
+#' \dontrun{
+#' range.income <- c(-10000, 713000)
+#' range.education <- c(1, 16)
+#' range <- rbind(range.income, range.education)
+#' dpCov <- dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000,
+#'                           epsilon = 1, columns = c("income", "educ"), rng = range, formula='income~educ')
+#' out <- dpCov$release(PUMS5extract10000)
+#' coefficient.release('educ~income', out$release, n=10000)
+#' }
 #' @param formula Formula, regression formula used on data
 #' @param release Numeric, private release of covariance matrix
 #' @param n Integer, indicating number of observations
@@ -12,9 +22,9 @@
 coefficient.release <- function(formula, release, n) {
   intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
   coefficients <- linear.reg(formula, release, n, intercept)
-  release <- list(name='Linear regression', 
-                  n=n, 
-                  formula=formula, 
+  release <- list(name='Linear regression',
+                  n=n,
+                  formula=formula,
                   coefficients=coefficients)
   return(release)
 }
