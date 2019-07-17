@@ -91,7 +91,7 @@ histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, al
 	return(eps)
 }
 
-#' Histogram confidence interval
+#' Histogram confidence intervals
 #' 
 #' Return the confidence interval for each bins of the differentially private histogram
 #' release, given the accuracy.
@@ -507,68 +507,6 @@ setVariableTypeAsFactor <- function(object) {
     object$var.type <- 'factor'
 }
 
-#' Error check imputation range for numeric or integer variables
-#' 
-#' Check that the entered imputation range is within the entered data range. If yes, return
-#' the entered imputation range, which will be used as the imputation range for the call
-#' to the utility function `fillMissing()`. If not, return the data range. 
-#' If the imputation range is NULL, default to the data range. The data range may be NULL,
-#' in which case the stability mechanism will be used to determine the data range and
-#' imputation range.
-#' 
-#' @param imputationRange The imputation range entered by the user
-#' @param rng The data range entered by the user
-#' @param var.type The variable type for the histogram data
-#' 
-#' @return the imputation range that will be used for `fillMissing()`.
-
-checkImputationRange <- function(imputationRange, rng, var.type) {
-    # if no imputation range was entered, return the data range.
-    # (Note: rng may be NULL, in which case stability mechanism will be used)
-    if (is.null(imputationRange)) {
-        return(rng)
-    }
-    
-    # for numeric and integer variables, the imputation range should be a 2-tuple
-    # with the minimum and maximum of the imputation range.
-    # if an imputation range was entered, check that it is
-    # within the data range. If it is not, clip it to be within the data range
-    if (var.type %in% c('numeric', 'integer')) {
-        lowerBound <- NULL
-        upperBound <- NULL
-        
-        # if the imputation range lower bound is below the data range lower bound,
-        # clip the lower bound to the data range
-        if (imputationRange[1] < rng[1]) {
-            warning('Lower bound of imputation range is outside of the data range.
-                    Setting lower bound of the imputation range to the lower bound of the data range.')
-            lowerBound <- rng[1]
-        } else {
-            lowerBound <- imputationRange[1]
-        }
-        
-        # if the imputation rnage upper bound is above the data range upper bound,
-        # clip the upper bound to the data range
-        if (imputationRange[2] > rng[2]) {
-            warning('Upper bound of imputation range is outside of the data range.
-                    Setting upper bound of the imputation range to the upper bound of the data range.')
-            upperBound <- rng[2]
-        } else {
-            upperBound <- imputationRange[2]
-        }
-        
-        # return the (potentially clipped) imputation range
-        return(c(lowerBound,upperBound))
-        
-    } else {
-        # if the variable type is something other than numeric or integer,
-        # default to the data range
-        warning('Imputation range entered for variable that is not of numeric or integer type.
-                Setting imputation range to data range.')
-        return(rng)
-    }
-}
-
 #' Error check imputation bins for logical, factor, or character variables
 #' 
 #' Check that the entered imputation bins are a subset of the histogram bins. If yes, return
@@ -703,6 +641,44 @@ checkHistogramVariableType <- function(var.type) {
     }
 }
 
+#' Set the number of histogram bins 
+#' 
+#' Set the number of bins for the histogram, given either the entered number of bins,
+#' the entered granularity, or the vector of bins.
+#' 
+#' @param n.bins the number of bins entered by the user, may be null
+#' @param granularity the number of items to be in each bin (i.e. the height of each bin), may be null
+#' @param var.type The variable type of the data that was entered by the user
+#' @param bins the bin vector either entered by the user or set by determineBins()
+#' 
+#' @return No return value, will only send an error message if variable tyep is invalid.
+setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
+    if (var.type %in% c('numeric', 'integer')) {
+        # if the variable type is numeric or integer, then the length of the bins vector will
+        # be 1 larger than the number of bins. So if the user did not enter a number of bins,
+        # calculate the number of bins by subtracting one from the length of the bins vector.
+        if (is.null(n.bins)) {
+            return(length(bins) - 1)
+        } else {
+            return(n.bins)
+        }
+    } else {
+        # if the variable type is not numeric or integer, then the nuber of bins can either be entered
+        # by the user, calculated from the granularity, or calculate the number of bins from the length
+        # of the bin vector.
+        if (is.null(n.bins)) {
+            # if there is no input for number of bins, get it from from granularity or the list of bins
+            if (!is.null(granularity)) {
+                .return(n / granularity)
+            } else {
+                return(length(.self$bins))
+            }
+        } else {
+            return(n.bins)
+        }
+    }
+}
+
 #' Differentially private histogram
 #'
 #' @param var.type Character, the variable type.
@@ -775,16 +751,7 @@ dpHistogram$methods(
         # 2) determine the number of bins from the input number of bins, the granularity, or the list of bins.
         if (.self$mechanism != 'mechanismStability') {
             .self$bins <- determineBins(.self$var.type, rng, bins, .self$n, n.bins, impute, granularity, .self)
-            if (is.null(n.bins)) {
-                # if there is no input for number of bins, get it from from granularity or the list of bins
-                if (!is.null(granularity)) {
-                    .self$n.bins <- n / granularity
-                } else {
-                    .self$n.bins <- length(.self$bins)
-                }
-            } else {
-                .self$n.bins <- n.bins
-            }
+            .self$n.bins <- setNumHistogramBins(n.bins, granularity, var.type, bins)
         }
         
         # check the data range
@@ -829,7 +796,7 @@ dpHistogram$methods(
         if (mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
             if (mechanism == 'mechanismLaplace') {
-                out$interval <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+                out$intervals <- histogram.getCI(out$release, n.bins, n, out$accuracy)
             }
         }
         if (var.type %in% c('factor', 'character')) {

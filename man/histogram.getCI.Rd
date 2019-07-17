@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic-histogram.R
 \name{histogram.getCI}
 \alias{histogram.getCI}
-\title{Histogram confidence interval}
+\title{Histogram confidence intervals}
 \usage{
 histogram.getCI(release, n.bins, n, accuracy)
 }
