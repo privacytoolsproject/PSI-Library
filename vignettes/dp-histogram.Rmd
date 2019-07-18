@@ -95,6 +95,9 @@ The `release` method accepts a single argument:
 
 * `data` \ Data frame containing a column corresponding the name specified in `variable`.
 
+Examples
+------
+
 Import the PSIlence library and the datasets library, and attach the sample datasets. 
 
 ```{r, eval = TRUE}
@@ -107,7 +110,9 @@ data(esoph)
 
 &nbsp;
 
-To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (should be less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
+__Numeric Examples__
+
+To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
 
 ```{r}
 numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, 
@@ -116,7 +121,7 @@ numeric_histogram$release(PUMS5extract10000)
 print(numeric_histogram$result)
 ```
 
-In the numeric example above, the histogram statistic detects the buckets for the histogram by creating 5 equal-width buckets for the range of the data. But in the result, we can see that a disproportional number of the data points are in the first bucket. This makes sense, as this is income data, and a large portion of people have an income less than \$150,000 dollars (the range of the first bucket). If we have prior knowledge of the data, we can enter specific buckets for the histogram in the `bins` parameter. For example, let's say we want a histogram of incomes less than or equal to \$50,000; \$50,000 - \$100,000; \$100,000 - \$200,000; \$200,000 - \$300,000; \$300,000 - \$400,000; and > \$400,000:
+In the numeric example above, the histogram statistic detects the buckets for the histogram by creating 5 equal-width buckets for the range of the data. But in the result, we can see that a disproportional number of the data points are in the first bucket. This makes sense, as this is income data, and a large portion of people have an income less than \$150,000 dollars (the range of the first bucket). If we have prior knowledge of the data, we can enter specific buckets for the histogram in the `bins` parameter instead of entering a range. For example, let's say we want a histogram of incomes less than or equal to \$50,000; \$50,000 - \$100,000; \$100,000 - \$200,000; \$200,000 - \$300,000; \$300,000 - \$400,000; and > \$400,000:
 
 ```{r}
 # When entering bins, enter the minimum of the range, the upper bound of each bin, and the maximum of the range
@@ -133,7 +138,7 @@ incomeBins <- c(0,50000, 100000, 200000, 300000, 400000, 750000)
 # and max = the maximum of the dataset = 750000
 
 numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, 
-                                     rng=c(0,750000), n.bins=6, bins=incomeBins)
+                                     n.bins=6, bins=incomeBins)
 numeric_histogram$release(PUMS5extract10000)
 print(numeric_histogram$result)
 ```
@@ -141,6 +146,8 @@ print(numeric_histogram$result)
 Note: entering bins is completely optional and should only be done if you have prior knowledge of the data.
 
 &nbsp;
+
+__Logical Examples__
 
 To calculate the histogram of a logical variable, input a logical vector into `variable` and update `var.type` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
 
@@ -162,6 +169,8 @@ For logical variables, it is never necessary to enter a vector of bins, you just
 
 &nbsp;
 
+__Character (or Categorical) Examples__
+
 To calculate the histogram of a categorical (or 'character') variable, input a character variable name into `variable` and update `var.type` to 'character'.
 
 ```{r}
@@ -170,7 +179,7 @@ character_histogram$release(esoph)
 print(character_histogram$result)
 ```
 
-Notice that in the character histogram example above, the sample size is very small, only 88 observations, so the `epsilon` and `delta` parameters must be much larger to accomodate the small data size. A large `epsilon` and `delta` indicate less privacy and more accuracy than the small values used in earlier examples with larger sample sizes.
+Notice that the sample size in this example is only 88 observations, so to preserve accuracy we are forced to increase the epsilon and delta parameters. In some cases, increasing the privacy budget may not be a viable option (the data be sensitive and the user cannot risk leaking data with a low level of priacy), so the user would be forced to use noisier data (i.e. keep using a small value for epsilon to maintain privacy, but get a less accurate differentially private estimate).
 
 Similar to numeric variables, you can enter a specific vector of bins for the histogram for a character variable if you have prior knowledge of the data. In this case, the resulting histogram will have each bin entered in the `bins` vector, even if the bin would be empty in the underlying data:
 
@@ -192,12 +201,12 @@ print(character_histogram$result)
 
 &nbsp;
 
-What is the Stability Mechanism and How is it used?
+What is the Stability Mechanism and How is it Used?
 ------------
 
-There may be cases where you do not have prior knowledge about the data, and you are making a histogram to learn more about the data. Alternatively, there may be cases where you do not want certain features of the data to be released or revealed with the histogram. In these cases, the stability mechanism will be used to add noise to the histogram to create a differentially private release instead of the general Laplace mechanism. In general, the stability mechanism is one which takes advantage of “stable” functions, i.e. ones where the function output is constant in some neighborhood around the input database. In this library, the stability mechanism is implemented to be used specifically for the histogram statistic. For a histogram generated by the Stability mechanism, empty buckets will be removed and any buckets with a count below an accuracy threshold will also be removed. Removing these buckets based on low counts is what creates the added guarantee of privacy.
+There may be cases where you do not have prior knowledge about the data, and you are making a histogram to learn more about the data. Alternatively, there may be cases where you do not want certain features of the data to be released or revealed with the histogram. In these cases, the stability mechanism, instead of the general Laplace mechanism, will be used to add noise to the histogram to create a differentially private release. In general, the stability mechanism is one which takes advantage of “stable” functions, i.e. ones where the function output is constant in some neighborhood around the input database. In this library, the stability mechanism is implemented to be used specifically for the histogram statistic. For a histogram generated by the Stability mechanism, empty buckets will be removed and any buckets with a count below an accuracy threshold will also be removed. Removing these buckets based on low counts is what creates the added guarantee of privacy. Releasing an empty bucket or a bucket with a low count is a privacy breach not only because it reveals new information about the bucket (that it may be empty, or only a few people are in that category, making those individuals identifiable), but it also gives a possibility that the histogram will be different in a neighboring database. If a neighboring database has one new individual in the previously empty bucket, the histogram of the neighboring database will look different and thus not be differentially private.
 
-If you enter a list of bins for any type of variable, the Lapalce mechanism will be used. Similarly, the Laplace mechanism will always be used for logical variables.
+If you enter a list of bins for any type of variable, the Laplace mechanism will be used. Similarly, the Laplace mechanism will always be used for logical variables.
 
 If you do not enter bins for categorical variables, the stability mechanism will be used. The stability mechanism wil determine appropriate bins for the histogram, and will remove any bins with too low of a count, which may breach privacy. The example below is the same as the character histogram with the bins entered above, except the bins are removed and a delta value is entered. Notice how the result is different because the stability mechanism is used:
 

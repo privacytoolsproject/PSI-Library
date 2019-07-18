@@ -54,8 +54,8 @@ mechanismStability$methods(
     #' stability_histogram <- mechanismStability$evaluate(histogram_function, data[, variable], sens, post_processing_function)
     #'
     evaluate = function(fun, x, sens, postFun, ...) {
-        # before calculating the histogram statistic, confirm that delta is less than (1/n)
-        # if deta is greater than or equal to (1/n), return an error message to the user
+        # before calculating the histogram statistic, confirm that delta is less than (1/n^2)
+        # if delta is greater than or equal to (1/n^2), return an error message to the user
         if (.self$delta >= (1 / (.self$n)^2)) stop("A delta value on the order of 1/n^2 is a privacy risk, as it allows for additional data to leak beyond the privacy parameter epsilon. Choose a smaller value for delta to maintain your privacy guarantee.")
         
         # if the variable is numeric or integer and the stability mechanism is being used,

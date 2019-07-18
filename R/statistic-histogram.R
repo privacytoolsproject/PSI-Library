@@ -8,10 +8,16 @@
 #' \deqn{\alpha = Pr[Y > a]}
 #' Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy,
 #' and \eqn{Y} is a random  variable indicating the difference between the differentially 
-#' private noisy output and the true value. \eqn{Y} does not follow the Laplace distribution,
-#' instead it follows a folded Laplace distribution, because the difference between noisy
-#' and true outputs is measured in magnitude, so it is calculated using the absolute value
-#' function, thus we fold the Laplace distribution and center it at 0.
+#' private noisy output and the true value. This equation is saying that with probability 
+#' \eqn{1-\alpha}, the count of a hisotgram bin will be within \eqn{a} of the true count. 
+#' 
+#' The equation for \eqn{Y} is:
+#' \deqn{Y = |X - \mu|}
+#' Where \eqn{\mu} is the true value of a bin and \eqn{X} is the noisy count. \eqn{X}
+#' follows a Lapalce distribution centered at \eqn{\mu}. Subtracting \eqn{mu} centers
+#' \eqn{Y} at \eqn{0}, and taking the absolute value "folds" the Lapalce distribution.
+#' The absolute value is taken because the difference between noisy and true outputs 
+#' is measured in magnitude.
 #' 
 #' Deriving the accuracy formula:
 #' 
@@ -22,7 +28,7 @@
 #'     \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
 #'     \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}, and end up with the accuracy formula: 
 #'          \deqn{a = {2 / \epsilon} * ln(1 / \alpha)}
-#'     \item The accuracy formula for the stability mechanism is dervied by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
+#'     \item The accuracy formula for the stability mechanism is derived by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
 #' }
 #' 
 #' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
@@ -62,6 +68,8 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' differentially private histogram release.
 #' 
 #' This calculation is the inverse of the calculation for `histogram.getAccuracy`.
+#' 
+#' @seealso \code{\link{histogram.getAccuracy}} for accuracy derivation
 #' 
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
 #' @param n.bins A numeric vector of length one specifying the number of cells 
@@ -671,7 +679,7 @@ setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
             if (!is.null(granularity)) {
                 .return(n / granularity)
             } else {
-                return(length(.self$bins))
+                return(length(bins))
             }
         } else {
             return(n.bins)
@@ -751,7 +759,7 @@ dpHistogram$methods(
         # 2) determine the number of bins from the input number of bins, the granularity, or the list of bins.
         if (.self$mechanism != 'mechanismStability') {
             .self$bins <- determineBins(.self$var.type, rng, bins, .self$n, n.bins, impute, granularity, .self)
-            .self$n.bins <- setNumHistogramBins(n.bins, granularity, var.type, bins)
+            .self$n.bins <- setNumHistogramBins(n.bins, granularity, .self$var.type, .self$bins)
         }
         
         # check the data range

@@ -36,3 +36,6 @@ differentially private histogram release.
 \details{
 This calculation is the inverse of the calculation for `histogram.getAccuracy`.
 }
+\seealso{
+\code{\link{histogram.getAccuracy}} for accuracy derivation
+}
