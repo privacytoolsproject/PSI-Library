@@ -372,6 +372,14 @@ determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) 
 #' 
 #' Determine the bins of the histogram based on the inputs from the user
 #' 
+#' If the user inputs a list of bins, the input bins will override the data and will
+#' be released as the histogram bins. If a given bin does not exist in the data, it
+#' will still be released in the result. It is possible that this non-existent bin
+#' will still have a count, because it will be an option during data imputation in 
+#' the call to `fillmissing()`. If the input list of bins does not include a value 
+#' that exists in the data, the existing value will be changed to `NA` in the call 
+#' to `censordata()` and will then be imputed as one of the input bins in `fillmissing()`.
+#' 
 #' @param var.type Character, the variable type.
 #' @param rng Numeric, a priori estimate of the lower and upper bounds of a
 #'    variable taking numeric values. Ignored for categorical types. Maybe be null for 
