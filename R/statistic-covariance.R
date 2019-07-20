@@ -53,6 +53,27 @@ covariance.sensitivity <- function(n, rng, intercept) {
   return(sensitivity)
 }
 
+#' Function to determine accuracy of dpCovariance for a given epsilon
+#' 
+#' Since the covariance matrix that is released by the dpCovariance statistic has
+#' the global epsilon budget distributed between each of the calculated covariances,
+#' this function is passed the amount of epsilon that each individual covariance
+#' calculation receives, rather than the global epsilon.
+#'
+#' @param epsilonPart A numeric vector of length one. The amount of the global epsilon that is 
+#' allocated to each covariance calculation within the covariance matrix.
+#' @param sens A numeric vector of length one. The sensitivity of the covariance function
+#' @param alpha A numeric vector of length one specifying the numeric 
+#'    statistical significance level. Default to 0.05.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+covarianceGetAccuracy <- function(epsilonPart, sens, alpha=0.05){
+  a <- sens * log(1/alpha) / epsilonPart
+  return(a)
+} 
 
 #' Function to convert unique private covariances into symmetric matrix
 #'
@@ -127,6 +148,11 @@ covar <- function(x, intercept) {
   return(covariance)
 }
 
+covarianceDistributeEpsilon(columns, epsilon){
+  d <- length(columns)
+  nCovars <- d(d+1)/2
+  return (epsilon/nCovars)
+}
 
 #' Differentially private covariance matrix
 #'
@@ -142,27 +168,29 @@ dpCovariance <- setRefClass(
   contains = 'mechanismLaplace'
 )
 
+# Note: covariance currently doesn't have a way to input accuracy since this will result in 
+# different epsilon values across the different covariance calculations, and that currently
+# is not supported by the Laplace mechanism. 
+
 dpCovariance$methods(
-  initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL, 
-                        intercept=FALSE, formula=NULL, delta=1e-5) {
+  initialize = function(var.type, n, columns, rng, epsilon=NULL, impute.rng=NULL, 
+                        intercept=FALSE, formula=NULL) {
     .self$name <- 'Differentially private covariance matrix'
-    .self$mechanism <- mechanism
+    .self$mechanism <- 'mechanismLaplace'
     .self$var.type <- var.type
     .self$n <- n
-    .self$epsilon <- epsilon
-    .self$delta <- delta
     .self$rng <- rng
+    .self$formula <- formula
+    .self$intercept <- intercept
     
     checkepsilon(epsilon)
     checkrange(.self$rng)
     
-    if (is.null(impute.rng)) {
-      .self$impute.rng <- rng
-    } else {
-      .self$impute.rng <- impute.rng
-    }
-    .self$formula <- formula
-    .self$intercept <- intercept
+    .self$epsilon <- covarianceDistributeEpsilon(epsilon)
+    .self$sensitivity <- covariance.sensitivity(.self$n, .self$rng, .self$intercept) 
+    .self$accuracy <- covarianceGetAccuracy(.self$epsilon,.self$sensitivity, .self$intercept)
+    .self$impute.rng <- checkImputationRange(imputationRange, rng, var.type)
+    
     if (.self$intercept) { 
       .self$columns <- c('intercept', columns)
     } else {
