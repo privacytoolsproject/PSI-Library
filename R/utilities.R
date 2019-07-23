@@ -1144,6 +1144,23 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
         return(rng)
     }
 }
+
+#' Check validity of n
+#' 
+#' n should always be a positive whole number, check the user's input
+#' 
+#' @param n the input n from te user
+#' 
+#' @return n, if n is a positive whole number
+
+check_n_validity <- function(n) {
+    if ((n > 0) & (n%%1 == 0)) {
+        return(n)
+    } else {
+        stop("n must be a positive whole number")
+    }
+}
+
 #' Get accuracy for Laplace statistics
 #' 
 #' Function to find the accuracy guarantee of a statistic release at a given epsilon 

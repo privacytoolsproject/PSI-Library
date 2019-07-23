@@ -124,7 +124,7 @@ dpCovariance$methods(
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism
     .self$var.type <- var.type
-    .self$n <- n
+    .self$n <- check_n_validity(n)
     .self$epsilon <- epsilon
     .self$delta <- delta
     .self$rng <- rng

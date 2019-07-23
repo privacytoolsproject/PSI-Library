@@ -650,7 +650,7 @@ setHistogramRange <- function(rng, var.type, bins) {
 #' 
 #' @param var.type The variable type of the data that was entered by the user
 #' 
-#' @return No return value, will only send an error message if variable tyep is invalid.
+#' @return No return value, will only send an error message if variable type is invalid.
 checkHistogramVariableType <- function(var.type) {
     if (!(var.type %in% c("numeric", "integer", "logical", "character"))) {
         stop("Please enter a data type of 'numeric', 'integer', 'logical', or 'character'")
@@ -748,7 +748,7 @@ dpHistogram$methods(
         # set parameters of the histogram
         .self$var.type <- var.type
         .self$variable <- variable
-        .self$n <- n
+        .self$n <- check_n_validity(n)
         .self$epsilon <- epsilon
         .self$accuracy <- accuracy
         .self$bins <- bins # may be null

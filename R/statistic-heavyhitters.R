@@ -90,7 +90,7 @@ dpHeavyHitters$methods(
         .self$mechanism <- mechanism
         .self$variable <- variable
         .self$var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
-        .self$n <- n
+        .self$n <- check_n_validity(n)
         .self$epsilon <- epsilon
         .self$k <- k
         .self$bins <- bins

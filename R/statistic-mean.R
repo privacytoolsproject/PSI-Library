@@ -156,10 +156,11 @@ dpMean$methods(
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$variable <- variable
-        .self$n <- n
+        .self$n <- check_n_validity(n)
         .self$alpha <- alpha
         .self$rng <- checkrange(rng, var.type)
         .self$sens <- diff(.self$rng) / n
+        
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
@@ -168,11 +169,13 @@ dpMean$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
         }
+        
         if (is.null(impute.rng)) {
             .self$impute.rng <- .self$rng
         } else {
             .self$impute.rng <- checkImputationRange(impute.rng)
         }
+        
         .self$boot.fun <- boot.mean
         .self$n.boot <- n.boot
 })

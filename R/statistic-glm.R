@@ -203,7 +203,7 @@ dpGLM$methods(
         .self$objective <- fn$objective
         .self$mechanism <- mechanism
         .self$var.type <- var.type
-        .self$n <- n
+        .self$n <- check_n_validity(n)
         .self$rng <- checkrange(rng, var.type)
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy

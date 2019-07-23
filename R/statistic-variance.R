@@ -46,9 +46,10 @@ dpVariance$methods(
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$variable <- variable
-        .self$n <- n
+        .self$n <- check_n_validity(n)
         .self$rng <- checkrange(rng, var.type)
         .self$sens <- (n - 1) / n^2 * diff(rng)^2
+        
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
@@ -57,11 +58,13 @@ dpVariance$methods(
             .self$epsilon <- epsilon
             .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
         }
+        
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
             .self$impute.rng <- checkImputationRange(impute.rng)
         }
+        
         .self$alpha <- alpha
 })
 
