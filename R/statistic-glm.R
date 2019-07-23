@@ -204,7 +204,7 @@ dpGLM$methods(
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$n <- n
-        .self$rng <- rng
+        .self$rng <- checkrange(rng, var.type)
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- glm.getParameters(accuracy, n, alpha)

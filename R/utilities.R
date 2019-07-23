@@ -294,13 +294,15 @@ sgn <- function(x) {
 #' \dontrun{checkrange(1)}
 #' @rdname checkrange
 #' @export
-checkrange <- function(rng) {
+checkrange <- function(rng, var.type) {
     if (NCOL(rng) > 1) {
         for (i in 1:nrow(rng)) {
             rng[i, ] <- sort(rng[i, ])
         }
     } else {
-        if (length(rng) < 2) {
+        if (var.type == 'logical') {
+            rng <- c(0,1)
+        } else if (length(rng) < 2) {
             stop("range argument in error: requires upper and lower values as vector of length 2.")
         } else if (length(rng) > 2) {
             warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")

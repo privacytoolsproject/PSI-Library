@@ -158,7 +158,7 @@ dpMean$methods(
         .self$variable <- variable
         .self$n <- n
         .self$alpha <- alpha
-        .self$rng <- checkrange(rng)
+        .self$rng <- checkrange(rng, var.type)
         .self$sens <- diff(.self$rng) / n
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
@@ -169,7 +169,7 @@ dpMean$methods(
             .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
         }
         if (is.null(impute.rng)) {
-            .self$impute.rng <- rng
+            .self$impute.rng <- .self$rng
         } else {
             .self$impute.rng <- checkImputationRange(impute.rng)
         }

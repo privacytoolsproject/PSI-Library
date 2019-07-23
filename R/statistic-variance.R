@@ -47,8 +47,7 @@ dpVariance$methods(
         .self$var.type <- var.type
         .self$variable <- variable
         .self$n <- n
-        .self$epsilon <- epsilon
-        .self$rng <- rng
+        .self$rng <- checkrange(rng, var.type)
         .self$sens <- (n - 1) / n^2 * diff(rng)^2
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
