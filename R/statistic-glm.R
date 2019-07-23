@@ -215,7 +215,7 @@ dpGLM$methods(
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
-            .self$impute.rng <- impute.rng
+            .self$impute.rng <- checkImputationRange(impute.rng)
         }
         .self$formula <- formula
         .self$n.boot <- n.boot

@@ -52,7 +52,7 @@ dpVariance$methods(
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
-            .self$impute.rng <- impute.rng
+            .self$impute.rng <- checkImputationRange(impute.rng)
         }
         .self$alpha <- alpha
 })
