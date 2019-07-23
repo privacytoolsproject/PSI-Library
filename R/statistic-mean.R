@@ -49,53 +49,6 @@ mean.postHistogram <- function(release, n) {
     return(histogram)
 }
 
-
-#' Mean accuracy
-#' 
-#' Function to find the accuracy guarantee of a mean release at a given epsilon 
-#' value. 
-#'    
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the vector calculating the mean for.
-#' @param rng Numeric a priori estimate of the range
-#' @param alpha A numeric vector specifying the statistical significance level.
-#' @return Accuracy guarantee for mean release given epsilon.
-#' 
-#' @export mean.getAccuracy
-#' @rdname mean.getAccuracy
-
-mean.getAccuracy <- function(epsilon, n, rng, alpha=0.05) {
-    rng <- checkrange(rng)
-    accuracy <- log(1 / alpha) * diff(rng) / (n * epsilon)
-    return(accuracy)
-}
-
-
-#' Mean epsilon
-#' 
-#' Function to find the epsilon value necessary to meet a desired level of 
-#' accuracy for a mean release.
-#'
-#' @param accuracy A numeric vector representing the accuracy needed to 
-#'    guarantee (percent).
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the vector calculating the mean for.
-#' @param rng Numeric a priori estimate of the range
-#' @param alpha A numeric vector specifying the statistical significance level.
-#' @return The scalar epsilon necessary to guarantee the needed accuracy.
-#' 
-#' @export mean.getParameters
-#' @rdname mean.getParameters
-
-mean.getParameters <- function(accuracy, n, rng, alpha=0.05) {
-    rng <- checkrange(rng)
-    epsilon <- log(1 / alpha) * diff(rng) / (n * accuracy)
-    return(epsilon)
-}
-
-
 #' Mean confidence interval
 #' 
 #' Return the confidence interval for the differentially private mean release given the
@@ -208,10 +161,11 @@ dpMean$methods(
         .self$rng <- rng
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- mean.getParameters(accuracy, n, rng, alpha)
+            .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
+            checkepsilon(epsilon)
             .self$epsilon <- epsilon
-            .self$accuracy <- mean.getAccuracy(epsilon, n, rng, alpha)
+            .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
         }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
@@ -226,8 +180,7 @@ dpMean$methods(
 dpMean$methods(
     release = function(data, ...) {
         x <- data[, variable]
-        sens <- diff(rng) / n
-        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
+        .self$result <- export(mechanism)$evaluate(mean, x, .self$sens, .self$postProcess, ...)
 })
 
 dpMean$methods(
@@ -236,7 +189,7 @@ dpMean$methods(
         if (mechanism == 'mechanismLaplace') {
             out$accuracy <- accuracy
             out$epsilon <- epsilon
-            out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+            out$interval <- mean.getCI(out$release, epsilon, .self$sens, alpha)
         } 
         if (var.type == 'logical') {
             if (mechanism == 'mechanismBootstrap') {

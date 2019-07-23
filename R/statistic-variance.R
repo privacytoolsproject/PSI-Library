@@ -49,6 +49,15 @@ dpVariance$methods(
         .self$n <- n
         .self$epsilon <- epsilon
         .self$rng <- rng
+        .self$sens <- (n - 1) / n^2 * diff(rng)^2
+        if (is.null(epsilon)) {
+            .self$accuracy <- accuracy
+            .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
+        } else {
+            checkepsilon(epsilon)
+            .self$epsilon <- epsilon
+            .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
+        }
         if (is.null(impute.rng)) {
             .self$impute.rng <- rng
         } else {
@@ -60,7 +69,6 @@ dpVariance$methods(
 dpVariance$methods(
     release = function(data) {
         x <- data[, variable]
-        sens <- (n - 1) / n^2 * diff(rng)^2
         .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
 })
 

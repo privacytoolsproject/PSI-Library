@@ -50,13 +50,13 @@
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
 
-histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, alpha=0.05) {
+histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, alpha=0.05, sensitivity) {
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
 		acc <- (2*log(2/(alpha*delta)) /epsilon) + 1
 	}
 	else{
-		acc <- 2*log(1/alpha) /epsilon
+	    acc <- laplace.getAccuracy(sensitivity, epsilon, alpha)
 	}
 	return(acc)
 }
@@ -88,13 +88,13 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getEpsilon
 
-histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05) {
+histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
 		eps <- 2*log(2/(alpha*delta)) /accuracy
 	}
 	else{
-		eps <- 2*log(1/alpha) /accuracy
+	    eps <- laplace.getEpsilon(sensitivity, accuracy, alpha)
 	}
 	return(eps)
 }
@@ -759,6 +759,7 @@ dpHistogram$methods(
         .self$n.boot <- n.boot
         .self$granularity <- granularity # may be null
         .self$boot.fun <- boot.hist
+        .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
         
         # if the mechanism used is NOT the stability mechanism:
         # 1) determine the bins of the histogram. (If the mechanism is 
@@ -779,10 +780,10 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta, alpha)
+            .self$epsilon <- histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta, alpha, .self$sens)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha)
+            .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha, .self$sens)
         }
         
         # get the delta parameter (will be NULL unless stability mechanism is being used)
@@ -798,7 +799,7 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(fun.hist, x, 2, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(fun.hist, x, .self$sens, .self$postProcess)
         .self$result <- noisy
 })
 

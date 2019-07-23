@@ -64,7 +64,8 @@ mechanism <- setRefClass(
         objective = 'function',
         granularity = 'ANY', # not 'numeric' because can be NULL if n.bins given
         percentiles = 'ANY',
-        tree.data = 'ANY'
+        tree.data = 'ANY',
+        sens = 'numeric'
 ))
 
 mechanism$methods(
