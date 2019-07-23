@@ -158,7 +158,8 @@ dpMean$methods(
         .self$variable <- variable
         .self$n <- n
         .self$alpha <- alpha
-        .self$rng <- rng
+        .self$rng <- checkrange(rng)
+        .self$sens <- diff(.self$rng) / n
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
