@@ -377,12 +377,12 @@ censordata <- function(x, var_type, rng=NULL, levels=NULL) {
         }
         if (NCOL(x) > 1) {
             for (j in 1:ncol(x)) {
-                rng[j, ] <- checkrange(rng[j, ])
+                rng[j, ] <- checkrange(rng[j, ], var_type)
                 x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
                 x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
             }
         } else {
-            rng <- checkrange(rng)
+            rng <- checkrange(rng, var_type)
             x[x < rng[1]] <- rng[1]
             x[x > rng[2]] <- rng[2]
         }

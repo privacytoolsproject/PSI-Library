@@ -12,3 +12,13 @@ test_that('output is a list', {
   out <- model$release(PUMS5extract10000)
   expect_output(str(out), "List of 4")
 })
+
+# make sure error thrown when n not positive or a whole number
+test_that('error thrown when n not positive or whole number', {
+    expect_error(dpGLM$new(mechanism='mechanismObjective', var.type='numeric', n=-1, epsilon=0.5, 
+                           formula=form, rng=rng, objective='ols'),
+                 "n must be a positive whole number")
+    expect_error(dpGLM$new(mechanism='mechanismObjective', var.type='numeric', n=0.5, epsilon=0.5, 
+                           formula=form, rng=rng, objective='ols'),
+                 "n must be a positive whole number")
+})

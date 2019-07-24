@@ -49,3 +49,13 @@ test_that('covariance running as expected', {
   print(range(data["income"]))
   print(range(data["educ"]))
 })
+
+# make sure error thrown when n not positive or a whole number
+test_that('error thrown when n not positive or whole number', {
+    expect_error(dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = -1, 
+                                  epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
+                 "n must be a positive whole number")
+    expect_error(dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 0.5, 
+                                  epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
+                 "n must be a positive whole number")
+})
