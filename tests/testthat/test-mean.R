@@ -29,3 +29,19 @@ test_that('error thrown when n not positive or whole number', {
     expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=0.5, epsilon=my_epsilon, rng=c(-10,0,100)),
                  "n must be a positive whole number")
 })
+
+# make sure you do not have to enter range for a logical variable
+test_that('range checks throw correct warning', {
+    data(PUMS5extract10000, package = "PSIlence")
+    
+    my_n <- 10000
+    my_epsilon <- 0.1
+    my_delta <- 10^-6
+    
+    dp.mean <- dpMean$new(mechanism='mechanismLaplace', variable='sex', var.type='logical', n=my_n, epsilon=my_epsilon, delta=my_delta)
+    dp.mean$release(PUMS5extract10000)
+    
+    expect_equal(length(dp.mean$result$release), 1)
+    expect_equal(dp.mean$epsilon, my_epsilon)
+    expect_equal(length(dp.mean$result$interval), 2)
+})

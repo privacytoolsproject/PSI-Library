@@ -195,7 +195,7 @@ dpGLM <- setRefClass(
 )
 
 dpGLM$methods(
-    initialize = function(mechanism, var.type, n, rng, formula, objective, epsilon=NULL,
+    initialize = function(mechanism, var.type, n, rng=NULL, formula, objective, epsilon=NULL,
                           accuracy=NULL, impute.rng=NULL, n.boot=NULL, intercept=TRUE, 
                           alpha=0.05) {
         fn <- glmObjectives[[objective]]()

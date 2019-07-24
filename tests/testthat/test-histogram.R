@@ -220,7 +220,8 @@ test_that('test on determineBins - get error when you enter character bins for n
     my_n <- 10000
     my_epsilon <- 0.1
     
-    expect_error(dpHistogram$new(var.type='numeric', variable="age", n=my_n, epsilon=my_epsilon, bins=my_bins), 'Bins must be numeric for a numeric variable')
+    expect_error(dpHistogram$new(var.type='numeric', variable="age", n=my_n, epsilon=my_epsilon, bins=my_bins), 
+                 'Bins must be numeric for a numeric variable')
 })
 
 # expect error saying numeric bins cannot be entered for character variables
@@ -233,7 +234,8 @@ test_that('test on determineBins - get error when you enter numeric bins for cha
     my_n <- 88
     my_epsilon <- 1
     
-    expect_error(dpHistogram(var.type='character', variable='tobgp', n=my_n, epsilon=my_epsilon, bins=my_bins), 'Bins must be of type `character` for a variable of type `character`')
+    expect_error(dpHistogram(var.type='character', variable='tobgp', n=my_n, epsilon=my_epsilon, bins=my_bins), 
+                 'Bins must be of type `character` for a variable of type `character`')
 })
 
 # expect error saying logical bins must be 0,1,NA
@@ -245,7 +247,8 @@ test_that('test on determineBins - get error when you enter incorrect bins for l
     my_n <- 10000
     my_epsilon <- 0.1
     
-    expect_error(dpHistogram$new(var.type='logical', variable="sex", n=my_n, epsilon=my_epsilon, bins=my_bins), 'Histogram bins for a logical variable may only be 0, 1, or NA')
+    expect_error(dpHistogram$new(var.type='logical', variable="sex", n=my_n, epsilon=my_epsilon, bins=my_bins), 
+                 'Histogram bins for a logical variable may only be 0, 1, or NA')
 })
 
 # 3. enter both bins and a range
@@ -309,7 +312,7 @@ test_that('histogram release has expected dimensions and accuracy for manually c
     my_epsilon <- 1
     my_delta <- 10^-3
     
-    dp.histogram <- dpHistogram$new(var.type='logical', variable="logicalVar_withNA", n=my_n, epsilon=my_epsilon, impute = TRUE, rng=c(0,1))
+    dp.histogram <- dpHistogram$new(var.type='logical', variable="logicalVar_withNA", n=my_n, epsilon=my_epsilon, impute = TRUE)
     dp.histogram$release(dataLog)
     expect_equal(length(dp.histogram$result$release), 2) # there should be 2 bins when impute = TRUE: 0,1
     
