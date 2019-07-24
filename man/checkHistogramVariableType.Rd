@@ -10,7 +10,7 @@ checkHistogramVariableType(var.type)
 \item{var.type}{The variable type of the data that was entered by the user}
 }
 \value{
-No return value, will only send an error message if variable tyep is invalid.
+No return value, will only send an error message if variable type is invalid.
 }
 \description{
 The variable type for a histogram must be 'numeric', 'integer', 'logical', or 'character'.

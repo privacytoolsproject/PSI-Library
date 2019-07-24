@@ -5,7 +5,7 @@
 \title{Histogram epsilon}
 \usage{
 histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta = 10^-6,
-  alpha = 0.05)
+  alpha = 0.05, sensitivity)
 }
 \arguments{
 \item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}

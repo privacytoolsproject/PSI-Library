@@ -4,7 +4,7 @@
 \alias{checkrange}
 \title{Range Parameter Check}
 \usage{
-checkrange(rng)
+checkrange(rng, var.type)
 }
 \arguments{
 \item{rng}{A numeric vector of length two, that ought to be an 

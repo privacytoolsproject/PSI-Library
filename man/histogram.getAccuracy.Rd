@@ -5,7 +5,7 @@
 \title{Histogram accuracy}
 \usage{
 histogram.getAccuracy(mechanism, n.bins, n, epsilon, delta = 10^-6,
-  alpha = 0.05)
+  alpha = 0.05, sensitivity)
 }
 \arguments{
 \item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
@@ -45,7 +45,7 @@ private noisy output and the true value. This equation is saying that with proba
 The equation for \eqn{Y} is:
 \deqn{Y = |X - \mu|}
 Where \eqn{\mu} is the true value of a bin and \eqn{X} is the noisy count. \eqn{X}
-follows a Lapalce distribution centered at \eqn{\mu}. Subtracting \eqn{mu} centers
+follows a Laplace distribution centered at \eqn{\mu}. Subtracting \eqn{mu} centers
 \eqn{Y} at \eqn{0}, and taking the absolute value "folds" the Lapalce distribution.
 The absolute value is taken because the difference between noisy and true outputs 
 is measured in magnitude.
