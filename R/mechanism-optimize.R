@@ -5,11 +5,76 @@
 #' @exportClass mechanismOptimize
 #'
 #' @include mechanism.R
+source('mechanism.R')
+
+# Compute the multi-class cross entropy loss for each observation with mutually exclusive class membership
+# expected: numeric vector of [batchSize]
+# predicted: numeric matrix of [batchSize, numClasses]
+# returns: numeric matrix of [batchSize]
+crossEntropy <- function(expected, predicted, classes=NULL) {
+  if (is.null(classes)) {
+    classes <- if (is.factor(expected)) levels(expected) else sort(unique(expected))
+    colnames(predicted) <- classes
+  }
+
+  # rows must sum to one
+  predicted <- predicted / rowSums(predicted)
+
+  # compute loss for each observation
+  -sapply(1:length(expected), function(rowIdx)
+    log(predicted[rowIdx, expected[rowIdx]]))
+}
+
+
+# Compute the binary log-likelihood loss for each observation with mutually exclusive level membership
+# expected: numeric vector or factor of [batchSize]
+# predicted: numeric vector of [batchSize]
+# returns: numeric matrix of [batchSize]
+binaryCrossEntropy <- function(expected, predicted)
+  crossEntropy(expected, cbind(predicted, 1 - predicted))
+
+
+# Compute the sum squared error
+# expected: numeric vector of [batchSize]
+# predicted: numeric vector of [batchSize]
+sumSquaredError <- function(expected, predicted)
+  sum((expected - predicted)^2)
+
+
+# Compute the mean squared error
+# expected: numeric vector of [batchSize]
+# predicted: numeric vector of [batchSize]
+meanSquaredError <- function(expected, predicted)
+  sumSquaredError(expected, predicted) / length(expected)
+
+
+costFunctions <- list(
+  crossEntropy=crossEntropy,
+  binaryCrossEntropy=binaryCrossEntropy,
+  sumSquaredError=sumSquaredError,
+  meanSquaredError=meanSquaredError
+)
+
+gaussianReleaseNoise <- function(size, sensitivity, epsilon, delta){
+  # Source from 3.1 Differentially Private SGD Algorithm, Moments Accountant
+  # https://arxiv.org/pdf/1607.00133.pdf
+  sigma <- sqrt(2*log(1.25/delta)) / epsilon
+  rnorm(n=size, mean=0, sd=sensitivity * sigma)
+}
+
+
+clip <- function(x, lower, upper){
+  x.clipped <- x
+  x.clipped[x.clipped<lower] <- lower
+  x.clipped[x.clipped>upper] <- upper
+  return(x.clipped)
+}
+
 
 mechanismOptimize <- setRefClass(
-  Class = 'mechanismOptimize',
-  contains = 'mechanism',
-  fields = list(
+    Class = 'mechanismOptimize',
+    contains = 'mechanism',
+    fields = list(
     predictors = 'character',
     forwardFun = 'function',
     theta = 'numeric',
@@ -21,8 +86,8 @@ mechanismOptimize <- setRefClass(
     clippingInterval = 'numeric'
   ),
   methods=list(
-    initialize = function(..., forwardFun, predictors, theta, clippingInterval, costFun, 
-                          batchSize=NULL, stepSize=.01, gradientFun=NULL, gradientNumericOffset=.001) {
+    initialize = function(..., forwardFun, predictors, theta, clippingInterval, costFun,
+    batchSize=NULL, stepSize=.01, gradientFun=NULL, gradientNumericOffset=.0001) {
       callSuper(...)
       .self$forwardFun <- forwardFun
       .self$predictors <- predictors
@@ -30,17 +95,16 @@ mechanismOptimize <- setRefClass(
       .self$clippingInterval <- clippingInterval
       .self$batchSize <- batchSize
       .self$stepSize <- stepSize
-  
+
       if (is.character(costFun)) .self$costFun <- costFunctions[[costFun]]
       else {
         warning('Privacy is not guaranteed for a custom cost function.')
         .self$costFun <- costFun
       }
-      
+
       if (is.null(gradientFun)) .self$gradientFun <- function(lossFun, stimulus, expected, theta) {
         original <- lossFun(expected, stimulus, theta)
-        # print('original')
-        # print(original)
+
         sapply(1:length(theta), function(axis) {
           offset <- numeric(length(theta))
           offset[[axis]] <- gradientNumericOffset
@@ -54,43 +118,45 @@ mechanismOptimize <- setRefClass(
       }
       .self
     },
-  
+
     # x: dataset
     evaluate = function(x, ...) {
       # x <- fillMissing(x, .self$var.type, rng=.self$rng, categories=.self$bins)
       # fun.args <- getFuncArgs(.self$forwardFun, inputList=list(...), inputObject=.self)
       # predictFun <- function(x, theta) do.call(.self$forwardFun, c(list(x), fun.args))
-      
+
       # loss is the composition of cost and predict functions
       lossFun <- function(expected, stimulus, theta) .self$costFun(expected, .self$forwardFun(stimulus, theta))
-      
+
       .self$batchSize <- if (is.null(.self$batchSize)) nrow(x) else .self$batchSize
       sensitivity <- 2 * .self$clippingInterval / .self$batchSize
-  
+
       samplingRatio <- .self$batchSize / nrow(x)
-      
+
       for (iteration in 1:floor(epsilon / samplingRatio)) {
         # print(iteration)
         batch <- if (.self$batchSize == length(x)) x else x[sample(1:nrow(x), .self$batchSize),]
-      
+
         stimulus <- batch[,.self$predictors, drop=FALSE]
         expected <- batch[,.self$variable]
-        
+
         # compute gradient
         grad <- .self$gradientFun(lossFun, stimulus, expected, .self$theta)
-        
+
+        print('gradient')
+        print(grad)
         # clip and collapse gradient
         grad <- sapply(grad, function (partial) mean(clip(partial, -.self$clippingInterval, .self$clippingInterval)))
-        
+
         # compute update direction
         direction <- .self$iterate(grad, iteration)
-        
+
         noise <- gaussianReleaseNoise(length(.self$theta), sensitivity, .self$epsilon * nrow(batch) / 2, .self$delta) / nrow(batch)
-        
-        .self$theta <- .self$theta + direction + noise
+
+        .self$theta <- .self$theta + direction # + noise
       }
     },
-    
+
     release = function(data) {
       x <- data[,c(.self$variable, .self$predictors)]
       .self$result <- .self$evaluate(x)
@@ -102,69 +168,6 @@ mechanismOptimize <- setRefClass(
     }
   )
 )
-
-# Compute the multi-class log-likelihood loss with mutually exclusive level membership
-# expected: numeric vector of [batchSize]
-# predicted: numeric matrix of [batchSize, numLevels]
-# levels: optional vector of [numLevels]
-crossEntropy <- function(expected, predicted, classes=NULL) {
-  if (is.null(classes))
-    classes <- if (is.factor(expected)) levels(expected) else sort(unique(expected))
-  
-  # rows must sum to one
-  predicted <- predicted / rowSums(predicted)
-  
-  # compute costs of the nth class
-  classCost <- function(classID) log(predicted[classes[classID] == expected, classID])
-  
-  # add together losses of each class
-  -sum(unlist(sapply(1:length(classes), classCost), recursive=FALSE))
-}
-
-
-# Compute the binary log-likelihood loss with mutually exclusive level membership
-# expected: numeric vector or factor of [batchSize]
-# predicted: numeric vector of [batchSize]
-# levels: optional vector of [numLevels]
-binaryCrossEntropy <- function(expected, predicted, levels=NULL) 
-  crossEntropy(expected, cbind(predicted, 1 - predicted), levels)
-
-
-# Compute the sum squared error
-# expected: numeric vector of [batchSize]
-# predicted: numeric vector of [batchSize]
-sumSquaredError <- function(expected, predicted) 
-  sum((expected - predicted)**2)
-
-
-# Compute the mean squared error
-# expected: numeric vector of [batchSize]
-# predicted: numeric vector of [batchSize]
-meanSquaredError <- function(expected, predicted) 
-  sumSquaredError(expected, predicted) / length(expected)
-
-
-costFunctions <- list(
-  crossEntropy=crossEntropy,
-  binaryCrossEntropy=binaryCrossEntropy,
-  sumSquaredError=sumSquaredError,
-  meanSquaredError=meanSquaredError
-)
-
-gaussianReleaseNoise <- function(size, sensitivity, epsilon, delta){
-  # Source from 3.1 Differentially Private SGD Algorithm, Moments Accountant
-  # https://arxiv.org/pdf/1607.00133.pdf  
-  sigma <- sqrt(2*log(1.25/delta)) / epsilon
-  rnorm(n=size, mean=0, sd=sensitivity * sigma)
-}
-
-
-clip <- function(x, lower, upper){
-  x.clipped <- x
-  x.clipped[x.clipped<lower] <- lower
-  x.clipped[x.clipped>upper] <- upper
-  return(x.clipped)
-}
 
 dpOptimizerSGD <- setRefClass(
   Class = 'dpOptimizerSGD',
@@ -187,21 +190,21 @@ dpOptimizerAdam <- setRefClass(
       callSuper(...)
       .self$gradCache <- if(is.null(gradSquare)) matrix(0L, nrow=nrow(.self$theta), ncol=ncol(.self$theta)) else gradCache
       .self$gradSquare <- if(is.null(gradSquare)) matrix(0L, nrow=nrow(.self$theta), ncol=nrow(.self$theta)) else gradSquare
-      
+
       .self$decay <- decay
       .self$wedge <- wedge
       .self
     },
     iterate = function(gradient, stepNumber) {
-      .self$gradCache <- .self$decayMoments[[1]] * .self$gradCache + 
+      .self$gradCache <- .self$decayMoments[[1]] * .self$gradCache +
         (1 - .self$decayMoments[[1]]) * gradient
-      
-      .self$gradSquare <- .self$decayMoments[[2]] * .self$gradSquare + 
+
+      .self$gradSquare <- .self$decayMoments[[2]] * .self$gradSquare +
         (1 - .self$decayMoments[[2]]) * gradient %*% t(gradient)
-      
+
       firstMoment <- .self$gradCache / (1 - .self$decayMoments[[1]] ^ stepNumber)
       secondMoment <- .self$gradSquare / (1 - .self$decayMoments[[2]] ^ stepNumber)
-      
+
        -.self$stepSize * firstMoment / (sqrt(diag(secondMoment)) + .self$wedge)
     }
   )
@@ -219,16 +222,16 @@ dpOptimizerAdagrad <- setRefClass(
     initialize=function(..., gradSquare=NULL, decay=.9, wedge=1e-8) {
       callSuper(...)
       .self$gradSquare <- if(is.null(gradSquare)) matrix(0L, nrow=nrow(.self$theta), ncol=nrow(.self$theta)) else gradSquare
-      
+
       .self$decay <- decay
       .self$wedge <- wedge
       .self
     },
-    
+
     iterate = function(gradient, stepNumber) {
       # update stored hessian approximation
       .self$gradSquare <- .self$decay * .self$gradSquare + (1 - .self$decay) * gradient %*% t(gradient)
-      
+
       # rescale each axis of the gradient
       -.self$stepSize * gradient / (sqrt(diag(.self$gradSquare)) + .self$wedge)
     }
@@ -237,16 +240,31 @@ dpOptimizerAdagrad <- setRefClass(
 
 
 testLoss <- function() {
-  expected <- c(1,2,1)
-  
+  # expected <- c(1,2,1)
+
   # CASE 1: classifier-produced class probabilities
-  predicted <- matrix(c(.6, .01, 0.1, .5, .8, .9), ncol=length(unique(expected)))
+  # predicted <- matrix(c(.6, .01, 0.1, .5, .8, .9), ncol=length(unique(expected)))
+  # print(costFunctions$crossEntropy(expected, predicted))
+
+  # expected <- rbind(
+  #   c(0, 0, 0, 1),
+  #   c(0, 0, 0, 1)
+  # )
+  expected <- c(4, 4)
+  predicted <- rbind(
+    c(.25, .25, .25, .25),
+    c(.01, .01, .01, .96)
+  )
+  print(expected)
+  print(predicted)
   print(costFunctions$crossEntropy(expected, predicted))
-  
+
   # CASE 2: correct predictions
-  predicted <- matrix(c(1, 0, 1, 0, 1, 0), ncol=length(unique(expected)))
-  print(costFunctions$crossEntropy(expected, predicted))
+  # predicted <- matrix(c(1, 0, 1, 0, 1, 0), ncol=length(unique(expected)))
+  # print(costFunctions$crossEntropy(expected, predicted))
 }
+
+# testLoss()
 
 PUMSdata <- read.csv(file="/home/shoe/Desktop/MaPUMS5full.csv")
 mydata<-PUMSdata[c("married","educ")]
@@ -258,13 +276,13 @@ predict <- function(x, params)
 optimizer <- dpOptimizerSGD$new(
   epsilon=.1, delta=1e-6,
   batchSize=50,
-  predictors=c('educ'), variable='married', 
-  clippingInterval=10, 
+  predictors=c('educ'), variable='married',
+  clippingInterval=10,
   forwardFun=predict, theta=theta, costFun='binaryCrossEntropy')
 optimizer$release(mydata)
 
 # results
-optimizer$theta
+print(optimizer$theta)
 
 # baseline
-coef(glm(married ~ educ, family="binomial", data=mydata))
+print(coef(glm(married ~ educ, family="binomial", data=mydata)))
