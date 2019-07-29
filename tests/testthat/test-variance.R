@@ -59,3 +59,22 @@ test_that('getAccuracy and getEpsilon return approximately correct values for la
     expect_equal(val1, 17)
     expect_equal(val2, 0.1)
 })
+
+# check for correct errors when imputation range is outside of entered range
+test_that('error messages when imputation range is outside of data range', {
+    my_n <- 10000
+    my_epsilon <- 0.1
+    my_rng <- c(18,93)
+    
+    expect_warning(dpVariance$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, rng=my_rng, impute.rng=c(0,93)),
+                   'Lower bound of imputation range is outside of the data range. Setting lower bound of the imputation range to the lower bound of the data range.')
+    
+    expect_warning(dpVariance$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, rng=my_rng, impute.rng=c(18,200)),
+                   'Upper bound of imputation range is outside of the data range. Setting upper bound of the imputation range to the upper bound of the data range.')
+    
+    expect_warning(dpVariance$new(mechanism='mechanismLaplace', variable='sex', var.type='logical', n=my_n, epsilon=my_epsilon, impute.rng=c(2,3)),
+                   'Imputation range entered for variable that is not of numeric or integer type. Setting imputation range to data range.')
+    
+    expect_warning(dpVariance$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, rng=my_rng, impute.rng=c('wrong','type')),
+                   'Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
+})

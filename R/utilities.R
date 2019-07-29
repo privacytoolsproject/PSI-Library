@@ -1116,21 +1116,27 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
         # if the imputation range lower bound is below the data range lower bound,
         # clip the lower bound to the data range
         if (imputationRange[1] < rng[1]) {
-            warning('Lower bound of imputation range is outside of the data range.
-                    Setting lower bound of the imputation range to the lower bound of the data range.')
+            warning('Lower bound of imputation range is outside of the data range. Setting lower bound of the imputation range to the lower bound of the data range.')
             lowerBound <- rng[1]
         } else {
             lowerBound <- imputationRange[1]
         }
         
-        # if the imputation rnage upper bound is above the data range upper bound,
+        # if the imputation range upper bound is above the data range upper bound,
         # clip the upper bound to the data range
         if (imputationRange[2] > rng[2]) {
-            warning('Upper bound of imputation range is outside of the data range.
-                    Setting upper bound of the imputation range to the upper bound of the data range.')
+            warning('Upper bound of imputation range is outside of the data range. Setting upper bound of the imputation range to the upper bound of the data range.')
             upperBound <- rng[2]
         } else {
             upperBound <- imputationRange[2]
+        }
+        
+        for (entry in imputationRange) {
+            if (!is.numeric(entry)) {
+                warning('Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
+                lowerBound <- rng[1]
+                upperBound <- rng[2]
+            }
         }
         
         # return the (potentially clipped) imputation range
@@ -1139,8 +1145,7 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
     } else {
         # if the variable type is something other than numeric or integer,
         # default to the data range
-        warning('Imputation range entered for variable that is not of numeric or integer type.
-                Setting imputation range to data range.')
+        warning('Imputation range entered for variable that is not of numeric or integer type. Setting imputation range to data range.')
         return(rng)
     }
 }

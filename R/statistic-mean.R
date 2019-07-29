@@ -173,7 +173,7 @@ dpMean$methods(
         if (is.null(impute.rng)) {
             .self$impute.rng <- .self$rng
         } else {
-            .self$impute.rng <- checkImputationRange(impute.rng)
+            .self$impute.rng <- checkImputationRange(imputationRange=impute.rng, rng=.self$rng, var.type=.self$var.type)
         }
         
         .self$boot.fun <- boot.mean
