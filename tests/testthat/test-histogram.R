@@ -11,8 +11,8 @@ test_that('histogram getAccuracy and getEpsilon return approximately correct val
 
 # test accuracy and epsilon calculation for laplace mechanism 
 test_that('histogram getAccuracy and getEpsilon return approximately correct values for laplace mechanism', {
-	val1 <- round(histogram.getAccuracy(mechanism = 'mechanismLaplace', n.bins=10, n=2000, epsilon=0.2, delta=10^-6, sensitivity=2))
-	val2 <- round(histogram.getEpsilon(mechanism = 'mechanismLaplace', n.bins=20, n=2000, accuracy=0.5, delta=10^-6, sensitivity=2))
+	val1 <- round(histogram.getAccuracy(mechanism = 'mechanismLaplace', n.bins=10, n=2000, epsilon=0.2, sensitivity=2))
+	val2 <- round(histogram.getEpsilon(mechanism = 'mechanismLaplace', n.bins=20, n=2000, accuracy=0.5, sensitivity=2))
 	expect_equal(val1, 30)
 	expect_equal(val2, 12)
 })

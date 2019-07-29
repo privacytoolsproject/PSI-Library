@@ -45,3 +45,27 @@ test_that('range checks throw correct warning', {
     expect_equal(dp.mean$epsilon, my_epsilon)
     expect_equal(length(dp.mean$result$interval), 2)
 })
+
+# test accuracy and epsilon calculations 
+test_that('histogram getAccuracy and getEpsilon return approximately correct values for laplace mechanism', {
+    data(PUMS5extract10000, package = "PSIlence")
+    
+    my_n <- 10000
+    my_epsilon <- 0.1
+    my_rng <- c(18,93)
+    my_acc <- 0.25
+    
+    dp.mean <- dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, rng=my_rng)
+    dp.mean$release(PUMS5extract10000)
+    
+    acc <- round(dp.mean$result$accuracy, digits = 5)
+    
+    expect_equal(acc, 0.22468)
+    
+    dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, accuracy=my_acc, rng=my_rng)
+    dp.mean2$release(PUMS5extract10000)
+    
+    ep <- round(dp.mean2$result$epsilon, digits = 2)
+    
+    expect_equal(ep, 0.09)
+})
