@@ -91,7 +91,7 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
-		eps <- 2*log(2/(alpha*delta)) /accuracy
+		eps <- 2*log(2/(alpha*delta)) / (accuracy - 1)
 	}
 	else{
 		eps <- 2*log(1/alpha) /accuracy

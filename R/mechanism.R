@@ -52,7 +52,7 @@ mechanism <- setRefClass(
         n.bins = 'ANY', # not 'numeric' because can be NULL if granularity given
         k = 'numeric',
         error = 'numeric',
-        n.boot = 'ANY', # not 'numeric' becuase can be NULL
+        n.boot = 'ANY', # not 'numeric' because can be NULL
         boot.fun = 'function',
         impute.rng = 'ANY',
         impute.bins = 'ANY',

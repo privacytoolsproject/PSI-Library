@@ -19,8 +19,8 @@ and returns some form of output in principal based on the differentially private
 result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
 }
 \description{
-Differentially private evaluation of input function “fun” with sensitivity “sens” on input data “x” using 
-the stability mechanism. In general, the stability mechanism is one which takes advantage of “stable” 
+Differentially private evaluation of input function `fun` with sensitivity `sens` on input data `x` using 
+the stability mechanism. In general, the stability mechanism is one which takes advantage of `stable` 
 functions, i.e. ones where the function output is constant in some neighborhood around the input database. 
 In this library, the stability mechanism is implemented to be used specifically for the histogram statistic, 
 and should not be used for any other function except by users who are confident in their understanding of 
@@ -36,12 +36,16 @@ The accuracy threshold for removing bins with low counts is calculated by: \eqn{
 \examples{
 # the function in `statistic-histogram.R` that creates a histogram from input data
 histogram_function <- fun.hist 
+
 # the data frame that holds the data we want to analyze, in this case the data is called "PUMS5extract10000"
 data <- data(PUMS5extract10000) 
+
 # the variable for which we want a histogram
 variable <- "age"
+
 # the sensitivity for the histogram, the default sensitivity for histograms is 2 
 sens <- 2 
+
 # the post-processing function to use to format the histogram release correctly
 post_processing_function <- dpHistogram$postProcess 
 
@@ -50,4 +54,8 @@ stability_histogram <- mechanismStability$evaluate(histogram_function, data[, va
 }
 \references{
 S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
+
+Also discussed in: 
+
+A. Smith, A. Thakurta Differentially Private Model Selection via Stability Arguments and the Robustness of the Lasso. 2013.
 }
