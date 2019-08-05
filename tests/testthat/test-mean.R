@@ -87,4 +87,8 @@ test_that('error messages when imputation range is outside of data range', {
     
     expect_warning(dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon, rng=my_rng, impute.rng=c('wrong','type')),
                    'Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
+    
+    # make sure error thrown when range is null for variable that requires range
+    expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', var.type='numeric', n=my_n, epsilon=my_epsilon),
+                 'requires upper and lower values as vector of length 2.')
 })
