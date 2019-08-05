@@ -38,5 +38,13 @@ Collate:
     'statistic-tree.R'
     'statistic-variance.R'
     'update_parameters.R'
+    'utilities-categorical.R'
+    'utilities-covariance.R'
+    'utilities-data-validation.R'
+    'utilities-histogram.R'
+    'utilities-noise-generation.R'
+    'utilities-objective.R'
+    'utilities-postprocessing.R'
+    'utilities-tree.R'
     'utilities.R'
 VignetteBuilder: knitr

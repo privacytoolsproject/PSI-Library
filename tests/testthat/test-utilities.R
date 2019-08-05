@@ -18,10 +18,10 @@ test_that('checkrange is as expected', {
   rng2 = c(0,1,2)
   rng3 = c(1)
   
-  expect_equal(checkrange(rng1),rng1)
-  expect_warning(checkrange(rng2),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
-  expect_equal(checkrange(rng2), c(0,2))
-  expect_error(checkrange(rng3),"range argument in error: requires upper and lower values as vector of length 2.")
+  expect_equal(checkrange(rng1, "numeric"),rng1)
+  expect_warning(checkrange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_equal(checkrange(rng2, "numeric"), c(0,2))
+  expect_error(checkrange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
 })
 
 test_that('censordata is as expected', {
