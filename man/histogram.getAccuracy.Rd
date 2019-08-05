@@ -4,10 +4,12 @@
 \alias{histogram.getAccuracy}
 \title{Histogram accuracy}
 \usage{
-histogram.getAccuracy(n.bins, n, epsilon, stability, delta = 10^-6,
-  alpha = 0.05, error = 1e-10)
+histogram.getAccuracy(mechanism, n.bins, n, epsilon, delta = 10^-6,
+  alpha = 0.05)
 }
 \arguments{
+\item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
+
 \item{n.bins}{A numeric vector of length one specifying the number of cells 
 in which to tabulate values.}
 
@@ -17,18 +19,12 @@ observations in the data.}
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
 
-\item{stability}{A logical vector indicating whether the stability 
-mechanism is used.}
-
 \item{delta}{The probability of an arbitrary leakage of information from 
 the data. Should be of length one and should be a very small value. 
 Default to 10^-6.}
 
 \item{alpha}{A numeric vector of length one specifying the numeric 
 statistical significance level. Default to 0.05.}
-
-\item{error}{The error term of the statistical significance level. Default
-to 1e-9.}
 }
 \value{
 Accuracy guarantee for histogram release, given epsilon.
@@ -36,4 +32,36 @@ Accuracy guarantee for histogram release, given epsilon.
 \description{
 Determine accuracy of histogram release, given epsilon and delta, for the differentially 
 private histogram release.
+}
+\details{
+In differential privacy, "accuracy" is defined as the threshold value above which a given value 
+is "significantly different" from the expected value. Mathematically, this is written as:
+\deqn{\alpha = Pr[Y > a]}
+Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy,
+and \eqn{Y} is a random  variable indicating the difference between the differentially 
+private noisy output and the true value. This equation is saying that with probability 
+\eqn{1-\alpha}, the count of a hisotgram bin will be within \eqn{a} of the true count.
+
+The equation for \eqn{Y} is:
+\deqn{Y = |X - \mu|}
+Where \eqn{\mu} is the true value of a bin and \eqn{X} is the noisy count. \eqn{X}
+follows a Laplace distribution centered at \eqn{\mu}. Subtracting \eqn{mu} centers
+\eqn{Y} at \eqn{0}, and taking the absolute value "folds" the Lapalce distribution.
+The absolute value is taken because the difference between noisy and true outputs 
+is measured in magnitude.
+
+Deriving the accuracy formula:
+
+\enumerate{
+    \item The probability density function (PDF) \eqn{f(x)} of the Laplace distribution is:\cr
+          \eqn{f(x) = {1 / 2\lambda} * e^{-|x-\mu| / \lambda}}
+    \item Using the definition of \eqn{Y} above, we can consider the differentially private PDF \eqn{g(Y)} to be:\cr
+    \eqn{g(y) = {1 / \lambda} * e^{-y / \lambda}}
+    \item Using \eqn{\alpha = Pr[Y > a]} and the PDF, we can solve for \eqn{a} and plug in \eqn{\lambda = 2 / \epsilon}, and end up with the accuracy formula: 
+         \deqn{a = {2 / \epsilon} * ln(1 / \alpha)}
+    \item The accuracy formula for the stability mechanism is derived by adding the accuracy formula above to the accuracy threshold (which is the worst-case potentially added noise in the stability mechanism): \eqn{{2 / \epsilon} * ln(2 / \delta)+1}
+}
+}
+\references{
+S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
 }

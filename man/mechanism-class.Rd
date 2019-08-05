@@ -61,7 +61,7 @@ Base mechanism class
 
 \item{\code{objective}}{Objective function for regression models}
 
-\item{\code{gran}}{Granularity}
+\item{\code{granularity}}{Granularity}
 
 \item{\code{percentiles}}{Percentiles evaluated by binary tree}
 

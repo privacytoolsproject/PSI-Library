@@ -29,6 +29,7 @@ Collate:
     'mechanism-gaussian.R'
     'mechanism-laplace.R'
     'mechanism-objective.R'
+    'mechanism-stability.R'
     'statistic-covariance.R'
     'statistic-glm.R'
     'statistic-heavyhitters.R'

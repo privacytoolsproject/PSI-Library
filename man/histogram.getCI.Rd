@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic-histogram.R
 \name{histogram.getCI}
 \alias{histogram.getCI}
-\title{Histogram confidence interval}
+\title{Histogram confidence intervals}
 \usage{
 histogram.getCI(release, n.bins, n, accuracy)
 }
@@ -15,13 +15,20 @@ in which to tabulate values.}
 \item{n}{A numeric vector of length one specifying the number of
 observations in in the data.}
 
-\item{accuracy}{A numeric vector representing the accuracy needed to 
-guarantee (percent).}
+\item{accuracy}{A numeric vector representing the accuracy guarantee.}
 }
 \value{
 Confidence interval for the noisy counts in each bin.
 }
 \description{
-Return the confidence interval for the differentially private histogram release given the
-accuracy.
+Return the confidence interval for each bins of the differentially private histogram
+release, given the accuracy.
+}
+\details{
+A confidence interval indicates the range in which we estimate the true value of a
+statistic to be. In this case, the confidence interval indicates the range in which
+the true count for each histogram bin could be. To give an example: say a 
+differentially private release of a histogram bucket has a count of 5. Say the 
+confidence interval for that bucket is [3,7]. We can say "we are 95% confident that 
+the true count of this histogram bin is between 3 and 7."
 }

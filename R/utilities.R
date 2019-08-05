@@ -1077,3 +1077,68 @@ release2json <- function(release, nameslist){
     return(result)
 
 }
+
+#' Error check imputation range for numeric or integer variables
+#' 
+#' Check that the entered imputation range is within the entered data range. If yes, return
+#' the entered imputation range, which will be used as the imputation range for the call
+#' to the utility function `fillMissing()`. If not, return the data range. 
+#' If the imputation range is NULL, default to the data range.
+#' 
+#' We check if the imputation range is within the data range because it is a privacy concern.
+#' If the imputation range is outside of the data range, NA values will be replaced with values 
+#' outside of the data range, which will show that there are NA values in the data or skew the 
+#' result when the differentially private estimate is released.
+#' 
+#' @param imputationRange The imputation range entered by the user
+#' @param rng The data range entered by the user
+#' @param var.type The variable type for the histogram data
+#' 
+#' @return the imputation range that will be used for `fillMissing()`.
+
+checkImputationRange <- function(imputationRange, rng, var.type) {
+    # if no imputation range was entered, return the data range.
+    # (Note: rng may be NULL, in which case stability mechanism will be used)
+    if (is.null(imputationRange)) {
+        return(rng)
+    }
+    
+    # for numeric and integer variables, the imputation range should be a 2-tuple
+    # with the minimum and maximum of the imputation range.
+    # if an imputation range was entered, check that it is
+    # within the data range. If it is not, clip it to be within the data range
+    if (var.type %in% c('numeric', 'integer')) {
+        lowerBound <- NULL
+        upperBound <- NULL
+        
+        # if the imputation range lower bound is below the data range lower bound,
+        # clip the lower bound to the data range
+        if (imputationRange[1] < rng[1]) {
+            warning('Lower bound of imputation range is outside of the data range.
+                    Setting lower bound of the imputation range to the lower bound of the data range.')
+            lowerBound <- rng[1]
+        } else {
+            lowerBound <- imputationRange[1]
+        }
+        
+        # if the imputation rnage upper bound is above the data range upper bound,
+        # clip the upper bound to the data range
+        if (imputationRange[2] > rng[2]) {
+            warning('Upper bound of imputation range is outside of the data range.
+                    Setting upper bound of the imputation range to the upper bound of the data range.')
+            upperBound <- rng[2]
+        } else {
+            upperBound <- imputationRange[2]
+        }
+        
+        # return the (potentially clipped) imputation range
+        return(c(lowerBound,upperBound))
+        
+    } else {
+        # if the variable type is something other than numeric or integer,
+        # default to the data range
+        warning('Imputation range entered for variable that is not of numeric or integer type.
+                Setting imputation range to data range.')
+        return(rng)
+    }
+}
