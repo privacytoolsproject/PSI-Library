@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities-categorical.R
 \name{createfields}
 \alias{createfields}
-\title{Create fields that are known based on type}
+\title{Create plot fields}
 \usage{
 createfields(v, r, varname)
 }
@@ -14,5 +14,9 @@ createfields(v, r, varname)
 \item{varname}{name of variable}
 }
 \description{
-Create fields that are known based on type
+Designate the plot type based on the variable type.
+Also assign the plot variable based on the variable the plot is for.
+}
+\details{
+This function is called by \code{\link{release2json}} in \code{\link{utilities-postprocessing.R}}.
 }

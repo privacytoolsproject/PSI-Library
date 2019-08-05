@@ -1,4 +1,10 @@
-#' Create fields that are known based on type
+#' Create plot fields
+#' 
+#' Designate the plot type based on the variable type.
+#' Also assign the plot variable based on the variable the plot is for.
+#' 
+#' This function is called by \code{\link{release2json}} in \code{\link{utilities-postprocessing.R}}.
+#' 
 #' @param v an empty list needing initialization
 #' @param r a release object for that variable
 #' @param varname name of variable 
