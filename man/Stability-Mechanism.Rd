@@ -58,4 +58,6 @@ S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable V
 Also discussed in: 
 
 A. Smith, A. Thakurta Differentially Private Model Selection via Stability Arguments and the Robustness of the Lasso. 2013.
+
+C. Dwork, J. Lei Differential Privacy and Robust Statistics. November 2008.
 }

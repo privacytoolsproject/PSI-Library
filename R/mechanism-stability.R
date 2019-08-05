@@ -35,7 +35,7 @@ mechanismStability$methods(
     #' 
     #' A. Smith, A. Thakurta Differentially Private Model Selection via Stability Arguments and the Robustness of the Lasso. 2013.
     #' 
-    #' C. Dwork, J. Lei Differential Privacy and Rbust Statistics. November 2008.
+    #' C. Dwork, J. Lei Differential Privacy and Robust Statistics. November 2008.
     #' 
     #'
     #' @param fun function of input x to add Laplace noise to.
