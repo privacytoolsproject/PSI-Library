@@ -264,10 +264,10 @@ Tree$methods(
   printTree = function(currNode=.self$head){
     if (identical(currNode,.self$head)){
       print("")
-      print("Index, Left Child,  Right Child, Range")
+      print("Index, Left Child,  Right Child, Range, weight")
     }
     if (!is.null(currNode)){
-      print(c(currNode$index, currNode$leftChild$index, currNode$rightChild$index, currNode$range))
+      print(c(currNode$index, currNode$leftChild$index, currNode$rightChild$index, currNode$range, currNode$weight))
       printTree(currNode=currNode$leftChild)
       printTree(currNode=currNode$rightChild)
     }
@@ -278,25 +278,99 @@ Tree$methods(
 )
 
 Tree$methods(
-  #function to add values in toAdd to the nodes in the Tree object.
-  #the nth item in itemsToAdd is added to the node with index n.
-  add = function(itemsToAdd){
-    #ToDo
+#' Add values to the weights of nodes in Tree object.
+#' 
+#' The nth item in itemsToAdd is added to the weight of the node with index n.
+#' @param itemsToAdd Array of numeric values.
+#'
+#' @examples 
+#' t <- Tree$new(c(0,4),2) # this will be a tree with 2 leaves and 3 total nodes including the root
+#' t$addItems(c(1,3,7)) # this will add weight 1 to the root, weight 3 to the node with index 2, and weight 7 to the node with index 3.
+#' t$printTree() 
+  addItems = function(itemsToAdd){
+    for(i in 1:length(itemsToAdd)){
+      print(i)
+      print(itemsToAdd[i])
+      addItem(itemsToAdd[i],i)
+    }
   }
 )
 
 Tree$methods(
-  addHelper = function(itemToAdd, targetNodeIndex, currNode){
+#' Add numeric value itemtoAdd to node's weight. 
+#'
+#' @param itemToAdd Numeric value
+#' @param targetNodeIndex Integer, target index of the node whose weight is to be added to.
+  addItem = function(itemToAdd, targetNodeIndex){
+    currNode <- .self$head
+    addHelper(itemToAdd, currNode, targetNodeIndex)
+    }
+)
+
+Tree$methods(
+  addHelper = function(itemToAdd, currNode, targetNodeIndex){
+    #If target node is currentNode, add itemtoAdd to the currentNode
     if (targetNodeIndex == currNode$index){
       currNode$weight <- currNode$weight + itemToAdd;
     }
-    # else if (!is.null(currNode)){
-    #   #determine direction to traverse tree
-    #   if targetNodeIndex
-    # }
+    #Otherwise, determine whether or not to traverse the tree to the left or right
+    #and then recurse on that subtree.
     else{
-      return(NULL)
+      if (traverseLeft(currNode$index, targetNodeIndex)){
+        currNode <- currNode$leftChild
+      }
+      else{
+        currNode <- currNode$rightChild
+      }
+      addHelper(itemToAdd, currNode, targetNodeIndex)
     }
+  }
+)
+
+Tree$methods(
+#' Determine whether or not the targetNode is to the left of the
+#' current node (currNode) in the tree, assuming the targetNode is beneath the
+#' current node.
+#'
+#' @param currNodeIndex Positive integer, index of current node in tree.
+#' @param targetNodeIndex Positive integer, index of target node in tree.
+#'
+#' @return Boolean. TRUE if targetNode is to the left of currNode, FALSE otherwise.
+  traverseLeft = function(currNodeIndex, targetNodeIndex){
+    isPositiveInteger <- (currNodeIndex%%1==0) && (targetNodeIndex%%1==0) && (currNodeIndex > 0) && (targetNodeIndex >0)
+    isProperlyOrdered <- targetNodeIndex > currNodeIndex
+    if (isPositiveInteger && isProperlyOrdered){
+      #determine depth of targetNode and currNode (note that we start depth at 1 not 0, hence the addition of the 1)
+      targetNodeDepth <- floor(log2(targetNodeIndex))+1
+      currNodeDepth <- floor(log2(currNodeIndex))+1
+      
+      #difference in depth between targetNode and currNode
+      depthDiff <- targetNodeDepth - currNodeDepth
+
+      #the left-most index of the subtree that has currNode at its head and leaves at the depth of targetNode
+      leftMostIndex <- currNodeIndex * 2**depthDiff
+
+      #width of this subtree
+      subtreeWidth <- 2**depthDiff
+      
+      #cut-off value for leaves of this subtree that are reachable by traversing from currNode left rather than right down the tree.
+      cutOff <- leftMostIndex + subtreeWidth/2
+
+      if(targetNodeIndex < cutOff){
+        return(TRUE)
+      }
+      else{
+        return(FALSE)
+      }
+    }
+  else{
+    if (!isPositiveInteger){
+      stop("Inputs must be positive integers.")
+    }
+    if (!isProperlyOrdered){
+      stop("currNodeIndex must be smaller than targetNodeIndex.")
+    }
+  }  
   }
 )
 
@@ -360,23 +434,6 @@ publicTreeStatistic$methods(
 )
 
 
-publicTreeStatistic$methods(
-  printTree = function(currNode=.self$head){
-    if (identical(currNode,.self$head)){
-      print("")
-      print("Index, Left Child,  Right Child, Range, weight")
-    }
-    if (!is.null(currNode)){
-      print(c(currNode$index, currNode$leftChild$index, currNode$rightChild$index, currNode$range, currNode$weight))
-      printTree(currNode=currNode$leftChild)
-      printTree(currNode=currNode$rightChild)
-    }
-    else{
-      return(NULL)
-    }
-  }
-)
-
 
 # efficientTree <- setRefClass(
 #   Class = 'efficientTree'
@@ -421,7 +478,7 @@ mechanismGenLaplace$methods(
     x <- censordata(x, .self$var.type, .self$rng, .self$bins)
     x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    input.vals = c(list(x=x), fun.args)
+    input.vals <- c(list(x=x), fun.args)
     true.val <- do.call(fun, input.vals)
     scale <- sens / .self$epsilon
     release <- true.val$add(dpNoise(n=length(true.val), scale=scale, dist='laplace'))
