@@ -1,13 +1,13 @@
 #' Get accuracy for Laplace statistics
-#' 
-#' Function to find the accuracy guarantee of a statistic release at a given epsilon 
+#'
+#' Function to find the accuracy guarantee of a statistic release at a given epsilon
 #' value.
-#' 
+#'
 #' @param sensitivity the sensitivity of the statistic
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
 #' @param alpha A numeric vector specifying the statistical significance level.
-#' 
+#'
 #' @return Accuracy guarantee for statistic release given epsilon.
 
 laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
@@ -17,15 +17,15 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 
 
 #' Get epsilon for Laplace statistics
-#' 
-#' Function to find the epsilon value necessary to meet a desired level of 
+#'
+#' Function to find the epsilon value necessary to meet a desired level of
 #' accuracy for a statistic release.
-#' 
+#'
 #' @param sensitivity the sensitivity of the statistic
-#' @param accuracy A numeric vector representing the accuracy needed to 
+#' @param accuracy A numeric vector representing the accuracy needed to
 #'    guarantee (percent).
 #' @param alpha A numeric vector specifying the statistical significance level.
-#' 
+#'
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 
 laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
@@ -34,20 +34,20 @@ laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
 }
 
 
-#' Differentially Private Uniform Draw 
-#' 
+#' Differentially Private Uniform Draw
+#'
 #' Draw cryptographically secure random variates from a uniform distribution.
 #'
 #' @param n An integer giving number of variates needed.
 #' @param seed An integer indicating a seed for R's PNRG, defaults to \code{NULL}.
-#' 
+#'
 #' @return Random numeric vector of length \code{n} containing values between
 #'    zero and one.
 #'
 #' Draws secure random variates from the uniform distribution through \code{openssl}.
 #' If a seed is provided, the \code{runif} function is used to draw the random variates.
 #' @examples
-#' 
+#'
 #' uniform_secure <- dpUnif(n=1000)
 #' uniform_repeatable <- dpUnif(n=1, seed=75436)
 #' @seealso \code{\link{dpNoise}}
@@ -63,17 +63,17 @@ dpUnif <- function(n, seed=NULL) {
 
 
 #' Differentially Private Noise Generator
-#' 
+#'
 #' Compile noise from a cryptographically secure random variates to achieve
 #'    differentially private statistics.
 #'
 #' @param n An integer giving number of variates needed.
 #' @param scale Numeric, the scale for the distribution.
-#' @param dist A character specifying the distribution from which to draw the 
+#' @param dist A character specifying the distribution from which to draw the
 #'    noise.
 #' @param shape An integer giving the shape parameter for the gamma
 #'    distribution. Default to \code{NULL}.
-#' @param seed An integer indicating a seed for R's PNRG, defaults 
+#' @param seed An integer indicating a seed for R's PNRG, defaults
 #'    to \code{NULL}.
 #'
 #' @return Cryptographically secure noise vector or matrix.
@@ -98,16 +98,47 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     }
 }
 
+#' Noise Generator for Snapping Mechanism
+#'
+#' Generate noise for use in Snapping Mechanism.
+#'
+#' @param true_val True value of the parameter.
+#' @param n An integer giving number of variates needed.
+#' @param sens Sensitivity of the function for which we are releasing a private estimate.
+#' @param epsilon Desired level of differential privacy
+#' @param B Bound such that the true value should lie within [-B, B]
+#'
+#' noise <- snappingNoise(true_val = 50, sens = 5e-4, epsilon = 1e-3, B = 200)
+#' @rdname snappingNoise
+#' @export
+snappingNoise <- function(true_val, n, sens, epsilon, B) {
+    # source snapping mechanism file
+    reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
+
+    # intialize snapping mechanism object
+    snapping_mech <- Snapping_Mechanism(mechanism_input = true_val,
+                                                sensitivity = sens,
+                                                epsilon = epsilon,
+                                                B = B)
+
+    # calculate and return noise
+    noise <- c()
+    for (i in 1:n) {
+        noise[i] <- snapping_mech$get_snapped_noise()
+    }
+    return(noise)
+}
+
 
 #' Random draw from Laplace distribution
 #'
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
 #' @param size integer, number of draws
-#' 
+#'
 #' @return Random draws from Laplace distribution
 #' @examples
-#' 
+#'
 #' rlap(size=1000)
 #' @export
 rlap = function(mu=0, b=1, size=1) {
@@ -122,10 +153,10 @@ rlap = function(mu=0, b=1, size=1) {
 #' @param x numeric, value
 #' @param mu numeric, center of the distribution
 #' @param b numeric, spread
-#' 
+#'
 #' @return Density for elements of x
 #' @examples
-#' 
+#'
 #' x <- seq(-3, 3, length.out=61)
 #' dlap(x)
 #' @export
@@ -136,17 +167,17 @@ dlap <- function(x, mu=0, b=1) {
 
 
 #' LaPlace Cumulative Distribution Function
-#' 
-#' Determines the probability a draw from a LaPlace distribution is less than 
+#'
+#' Determines the probability a draw from a LaPlace distribution is less than
 #'    or equal to the specified value.
 #'
 #' @param x Numeric, the value(s) at which the user wants to know the CDF height.
 #' @param mu Numeric, the center of the LaPlace distribution, defaults to 0.
 #' @param b Numeric, the spread of the LaPlace distribution, defaults to 1.
-#' 
+#'
 #' @return Probability the LaPlace draw is less than or equal to \code{x}.
 #' @examples
-#' 
+#'
 #' x <- 0
 #' plap(x)
 #' @rdname plap
@@ -174,7 +205,7 @@ qlap <- function(p, mu=0, b=1) {
 
 
 #' Sign function
-#' 
+#'
 #' Function to determine what the sign of the passed values should be.
 #'
 #' @param x numeric, value or vector or values

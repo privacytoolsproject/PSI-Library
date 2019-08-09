@@ -1,0 +1,3 @@
+crlibm
+numpy
+gmpy2

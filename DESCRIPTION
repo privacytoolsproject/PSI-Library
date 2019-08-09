@@ -11,7 +11,8 @@ Encoding: UTF-8
 Imports:
     jsonlite,
     methods,
-    openssl
+    openssl,
+    reticulate
 Description: This library allows researchers to access summary statistics of
     sensitive data that are generated using differential privacy.
 RoxygenNote: 6.1.1
@@ -19,7 +20,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Collate: 
+Collate:
     'CompositionTheorems.R'
     'createJSON.R'
     'datasets.R'
@@ -29,6 +30,7 @@ Collate:
     'mechanism-gaussian.R'
     'mechanism-laplace.R'
     'mechanism-objective.R'
+    'mechanism-snapping.R'
     'mechanism-stability.R'
     'statistic-covariance.R'
     'statistic-glm.R'
