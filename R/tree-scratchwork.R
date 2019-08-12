@@ -1,492 +1,457 @@
-#' Node class
-#'
-#' @field index numeric. Index of node in tree structure. Tree is indexed from top to bottom, left to right.
-#' @field parent Node object. Points to parent node of given node.
-#' @field leftChild Node object. Points to left child of given node.
-#' @field rightChild Node object. Points to right child of given node.
-#' @field weight numeric. Numeric weight of a given node. E.g. if tree used to
-#'  bin points into set ranges, how many points are in the range spanned by that node.
-#' @field depth numeric. Numeric depth of the node within tree structure.
-#' @field range ANY. Numeric array c(min,max) indicating range represented by the node, where min is minimum of range and
-#' max is maximum of range. 
-#'
-#' @return Node object.
-#'
-#' @examples
-Node <- setRefClass(
-
- Class = 'Node',
-  fields = list(
-    index = 'numeric',
-    parent = 'ANY',
-    leftChild = 'ANY',
-    rightChild = 'ANY',
-    weight = 'numeric',
-    depth = 'numeric',
-    range = 'ANY'
-  ))
- 
- Node$methods(
-   initialize = function(parent=NULL, depth=0, index=0, range=NULL){
-     .self$index <- index
-     .self$parent <- parent
-     .self$depth <- depth
-     .self$leftChild <- NULL
-     .self$rightChild <- NULL
-     .self$weight <- 0
-     .self$range <- range
-   }
- )
-
- Node$methods(
-#' Increment weight of node by 1
-#'
-#' @return NULL
-   incrementWeight = function(){
-     .self$weight <- weight + 1
-   }
- )
- 
- Node$methods(
-#' Add child node to .self
-#'
-#' @param isLeftChild Boolean, TRUE if child to add is left child, FALSE if child to add is right child.
-   addChild=function(isLeftChild=TRUE){
-     indx <- calculateIndex(isLeftChild)
-     rng <- calculateRange(isLeftChild)
-     dpth <- .self$depth + 1
-     child = Node$new(parent=.self, depth=dpth, index=indx, range=rng)
-     if(isLeftChild){
-       .self$leftChild <- child
-     }
-     else{
-       .self$rightChild <- child
-     }
-    }
- )
-   
- Node$methods(
-#' Calculate index of a node given its parent node.
-#'
-#' @param isLeftChild Boolean. TRUE if finding index of left child, FALSE if finding index of right child.
-#'
-#' @return Numeric index of child node.
-   calculateIndex = function(isLeftChild){
-     parentIndex <- .self$index
-     if (isLeftChild){
-       return(2*parentIndex)
-     }
-     else{
-       return(2*parentIndex+1)
-     }
-   }
- )
-  
- Node$methods(
-#' Calculate range
+#' #' Function to evaluate weights from the noise variance and standard errors in child nodes for the 
+#' #'  node of a differentially private binary tree
+#' #'
+#' #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param idx Index of the node for which the weight is evaluated
+#' #' @return Weight
 #' 
-#' Calculates range of child node given range of parent node. Returned range will be half of parent range;
-#' if left child will be bottom half, if right child will be upper half of parent range.
-#'
-#' @param isLeftChild Boolean. TRUE if finding range of left child, FALSE if finding range of right child.
-#'
-#' @return Numeric of length 2; c(min,max) where min is minumum of child range and max is maximum of child range.
-   calculateRange = function(isLeftChild){
-     if (!is.null(.self$range)){
-       parentMin <- .self$range[1]
-       parentMax <- .self$range[2]
-       midPoint <- parentMin + (parentMax-parentMin)/2
-       
-       if (isLeftChild){
-         min <- parentMin
-         max <- midPoint
-       }
-       else{
-         min <- midPoint
-         max <- parentMax
-       }
-       return(c(min,max))
-     }
-     else{
-       warning(sprintf("Parent node with index %s has unspecified range. Defaulting to range NULL", .self$index))
-       return(NULL)
-     }
-   }
- )
-
-
-Tree <- setRefClass(
-  Class = 'tree',
-  fields = list(
-    range = 'numeric',
-    nLeaves = 'numeric',
-    treeDepth = 'numeric',
-    head = 'ANY'
-  ))
-
-Tree$methods(
-  #' Binary Tree Creation
-  #'
-  #' Creates a weighted binary tree. Each node is a bucket over some data range, and its weight
-  #' will be incremented by 1 for every data point that is within this range. This initialization
-  #' only initializes the tree structure itself, given the total range \code{range} of the data that
-  #' will be inserted and \code{nLeaves}, the number of leaf nodes to bucket the data in.
-  #'
-  #' E.g. given range \code{range = c(0,4)} and \code{nLeaves=2}, the tree will be of depth 2 and
-  #' have 2 leaves, with one bucketing data between \eqn{[0,2)}
-  #' and one bucketing data between \eqn{[2,4)}.
-  #'
-  #' If a parent node has a left child with range \eqn{[min1, max1)} and a right child with range
-  #' \eqn{[min2, max2)}, then the parent node will have range \eqn{[min1, max2)}.
-  #' As currently instantiated, nLeaves is required to be a power of 2 (i.e. the constructed tree is a
-  #' perfect binary tree).
-  #'
-  #' @param range Range: An array of two numeric values that indicate the range of data that will be bucketed
-  #'  in the tree structure. The first value should be the minimum (inclusive) and the second should be the
-  #'  maximum (exclusive).
-  #' @param nLeaves Number of leaves: A whole, positive number, indicating the number of leaves the tree should have.
-  #'
-  #' @return
-  #' @export
-  #'
-  #' @examples
-  initialize = function(range, nLeaves){
-    checkNLeaves(nLeaves)
-    checkRange(range)
-    
-    .self$range <- range
-    .self$nLeaves <- nLeaves
-    .self$treeDepth <- calculateDepth(.self$nLeaves)
-    
-    .self$head <- NULL
-    
-    buildTree()
-  }
-)
-
-Tree$methods(
-#' Checks if number of leaves is a power of two or not
-#'
-#' @param nLeaves Numeric value indicating the number of leaves in a tree object.
-#'
-#' @return Boolean value. TRUE if nLeaves is a power of two. Stops and returns error otherwise.
-  checkNLeaves = function(nLeaves){
-  if (log2(nLeaves)%%1 == 0){
-    return(TRUE)
-  }
-  else{
-    stop("Number of leaves specified is not a power of two")
-  }
-})
-
-Tree$methods( 
-#' Calculates depth of tree given number of leaves nLeaves.
-#'
-#' Assumes that tree is perfect; i.e. has leaves filled in to complete depth.
-#' Assumes that a tree with only a single root node has depth 1. 
+#' wBelow <- function(inv.sigma.sq, tree, idx) {
+#'   left.idx <- 2 * idx
+#'   right.idx <- left.idx + 1
+#'   w <- inv.sigma.sq / (inv.sigma.sq + 1 / (tree$se.below[left.idx]^2 + tree$se.below[right.idx]^2))
+#'   return(w)
+#' }
 #' 
-#' @param nLeaves Numeric value indicating the number of leaves in a tree object.
-#'
-#' @return Numeric value of depth of tree. 
-  calculateDepth = function(nLeaves){
-  return(log2(nLeaves)+1)
-})
-
-Tree$methods(
-  #ToDo: write method that calculates size of subtree at node
-  # should store this at nodes for ease
-  # note this is trivial here since trees are perfect;
-  # would otherwise need to be a recursive method.
-  calculateSize = function(currNode=.self$head){
-    print("blah")
-  }
-)
-
-Tree$methods(
-#' Insert a child node directly under a specified parent node. If
-#' parent node has no children, will insert a left child. If there
-#' already is a left child, a right child will be inserted where possible,
-#' or an error is raised.
-#'
-#' @param parent Node object.
-  insertChild = function(parent){
-    if (is.null(parent$leftChild)){
-      parent$addChild(isLeftChild=TRUE)
-    }
-    else if (is.null(parent$rightChild)) {
-      parent$addChild(isLeftChild=FALSE)
-    }
-    else{
-      stop("Parent node already has two children; cannot insert child.")
-    }
-  }
-)
-
-Tree$methods(
-#' Insert two children beneath a specified parent node.
-#'
-#' @param parent Node object.
-  insertChildren = function(parent){
-    insertChild(parent)
-    insertChild(parent)
-  }
-)
-
-Tree$methods(
-  #' Recursively build tree object up to .self$depth
-  #'
-  #' @param currNode Current node, used for recursive call. 
-  buildTree = function(currNode=NULL){
-    # If no currNode, this means we are beginning tree construction.
-    if (is.null(currNode)){
-      # Create head of tree and set currNode to head. 
-      .self$head <- Node$new(depth=1, index=1, range=.self$range)
-      currNode <- .self$head
-    }
-    # If tree depth greater than current node depth, insert children and recursively build the tree.
-    if (.self$treeDepth > currNode$depth){
-      insertChildren(currNode)
-      buildTree(currNode=currNode$leftChild)
-      buildTree(currNode=currNode$rightChild)
-    }
-    else{
-      return(NULL)
-    }
-  }
-)
-
-Tree$methods(
-  #ToDo: update this so it's just a formatting function so it can be easily called with callSuper
-#' Simple print function to print tree structure for debugging.. Recurses through the nodes of the tree and prints 
-#' information associated with each node.
-#'
-#' @param currNode Node object, defaults to the head of the tree. 
-  printTree = function(currNode=.self$head){
-    if (identical(currNode,.self$head)){
-      print("")
-      print("Index, Left Child,  Right Child, Range, weight")
-    }
-    if (!is.null(currNode)){
-      print(c(currNode$index, currNode$leftChild$index, currNode$rightChild$index, currNode$range, currNode$weight))
-      printTree(currNode=currNode$leftChild)
-      printTree(currNode=currNode$rightChild)
-    }
-    else{
-      return(NULL)
-    }
-  }
-)
-
-Tree$methods(
-#' Add values to the weights of nodes in Tree object.
 #' 
-#' The nth item in itemsToAdd is added to the weight of the node with index n.
-#' @param itemsToAdd Array of numeric values.
-#'
-#' @examples 
-#' t <- Tree$new(c(0,4),2) # this will be a tree with 2 leaves and 3 total nodes including the root
-#' t$addItems(c(1,3,7)) # this will add weight 1 to the root, weight 3 to the node with index 2, and weight 7 to the node with index 3.
-#' t$printTree() 
-  addItems = function(itemsToAdd){
-    for(i in 1:length(itemsToAdd)){
-      print(i)
-      print(itemsToAdd[i])
-      addItem(itemsToAdd[i],i)
-    }
-  }
-)
-
-Tree$methods(
-#' Add numeric value itemtoAdd to node's weight. 
-#'
-#' @param itemToAdd Numeric value
-#' @param targetNodeIndex Integer, target index of the node whose weight is to be added to.
-  addItem = function(itemToAdd, targetNodeIndex){
-    currNode <- .self$head
-    addHelper(itemToAdd, currNode, targetNodeIndex)
-    }
-)
-
-Tree$methods(
-  addHelper = function(itemToAdd, currNode, targetNodeIndex){
-    #If target node is currentNode, add itemtoAdd to the currentNode
-    if (targetNodeIndex == currNode$index){
-      currNode$weight <- currNode$weight + itemToAdd;
-    }
-    #Otherwise, determine whether or not to traverse the tree to the left or right
-    #and then recurse on that subtree.
-    else{
-      if (traverseLeft(currNode$index, targetNodeIndex)){
-        currNode <- currNode$leftChild
-      }
-      else{
-        currNode <- currNode$rightChild
-      }
-      addHelper(itemToAdd, currNode, targetNodeIndex)
-    }
-  }
-)
-
-Tree$methods(
-#' Determine whether or not the targetNode is to the left of the
-#' current node (currNode) in the tree, assuming the targetNode is beneath the
-#' current node.
-#'
-#' @param currNodeIndex Positive integer, index of current node in tree.
-#' @param targetNodeIndex Positive integer, index of target node in tree.
-#'
-#' @return Boolean. TRUE if targetNode is to the left of currNode, FALSE otherwise.
-  traverseLeft = function(currNodeIndex, targetNodeIndex){
-    isPositiveInteger <- (currNodeIndex%%1==0) && (targetNodeIndex%%1==0) && (currNodeIndex > 0) && (targetNodeIndex >0)
-    isProperlyOrdered <- targetNodeIndex > currNodeIndex
-    if (isPositiveInteger && isProperlyOrdered){
-      #determine depth of targetNode and currNode (note that we start depth at 1 not 0, hence the addition of the 1)
-      targetNodeDepth <- floor(log2(targetNodeIndex))+1
-      currNodeDepth <- floor(log2(currNodeIndex))+1
-      
-      #difference in depth between targetNode and currNode
-      depthDiff <- targetNodeDepth - currNodeDepth
-
-      #the left-most index of the subtree that has currNode at its head and leaves at the depth of targetNode
-      leftMostIndex <- currNodeIndex * 2**depthDiff
-
-      #width of this subtree
-      subtreeWidth <- 2**depthDiff
-      
-      #cut-off value for leaves of this subtree that are reachable by traversing from currNode left rather than right down the tree.
-      cutOff <- leftMostIndex + subtreeWidth/2
-
-      if(targetNodeIndex < cutOff){
-        return(TRUE)
-      }
-      else{
-        return(FALSE)
-      }
-    }
-  else{
-    if (!isPositiveInteger){
-      stop("Inputs must be positive integers.")
-    }
-    if (!isProperlyOrdered){
-      stop("currNodeIndex must be smaller than targetNodeIndex.")
-    }
-  }  
-  }
-)
-
-
-publicTreeStatistic <- setRefClass(
-  Class = 'publicTreeStatistic',
-  contains = 'tree',
-  fields = list(
-    data = 'ANY'
-  ))
-
-publicTreeStatistic$methods(
-  initialize = function(data, range, nLeaves){
-    callSuper(range, nLeaves)
-    .self$data = data
-    binData()
-  }
-)
-
-publicTreeStatistic$methods(
-  binData = function(){
-    for (x in data){
-      binDataPoint(x, .self$head)
-    }
-  }
-)
-
-publicTreeStatistic$methods(
-  binDataPoint = function(x, currNode){
-    if (!is.null(currNode)){
-      currNode$incrementWeight()
-      #print(traverseLeft(x, currNode))
-      if (traverseLeft(x, currNode)){
-        binDataPoint(x, currNode$leftChild)
-      }
-      else{
-        binDataPoint(x, currNode$rightChild)
-      }
-    }
-    else{
-      return(NULL)
-    }
-  }
-)
-
-publicTreeStatistic$methods(
-  traverseLeft = function(x, currNode){
-    if (!is.null(currNode$leftChild)){
-      min <- currNode$leftChild$range[1]
-      max <- currNode$leftChild$range[2]
-      if (x >= min && x < max){
-        return(TRUE)
-      }
-      else{
-        return(FALSE)
-      }
-    }
-    #if null, doesn't matter which direction traversal happens.
-    return(TRUE) 
-  }
-)
-
-
-
-# efficientTree <- setRefClass(
-#   Class = 'efficientTree'
-# )
-
-# ToDo: add accuracy stuff, data imputation, percentiles, alpha
-# ToDo: n.bins needs to be changed to nBins.
-dpTreeStatistic <- setRefClass(
-  Class = 'dpTreeStatistic',
-  contains = 'mechanismLaplace',
-  methods = list(
-    initialize = function(variable, n.bins, rng, epsilon=NULL, impute.rng=NULL){
-      .self$name <- 'differentially private binary tree'
-      .self$mechanism <- 'mechanismLaplace'
-      .self$variable <- variable
-      .self$n.bins <- n.bins
-      .self$rng <- rng
-      .self$accuracy <- accuracy
-    },
-    release = function(data){
-      x <- data[,variable]
-    }
-  )
-)
-
-#' Generalized Laplace mechanism
+#' #' Function to evaluate weights from the noise variance and standard errors in a parent and adjacent 
+#' #'  nodes for the node of a differentially private binary tree
+#' #'
+#' #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param parent Index of the parnet node
+#' #' @param adjacent Index of the adjacent node
+#' #' @return Weight
 #' 
-#' Laplace mechanism as applied to a generic object which has a specified
-#' add() function that describes how the noise should be added. 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-mechanismGenLaplace <- setRefClass(
-  Class = 'GenLaplace',
-  contains = 'mechanism'
-)
+#' wAbove <- function(inv.sigma.sq, tree, parent, adjacent) {
+#'   w <- inv.sigma.sq / (inv.sigma.sq + 1 / (tree$se.above[parent]^2 + tree$se.below[adjacent]^2))
+#'   return(w)
+#' }
+#' 
+#' 
+#' #' Function to evaluate weights efficiently using the noise variance and standard errors in parent and adjacent 
+#' #'  nodes as well child nodes for the node of a differentially private binary tree
+#' #'
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param idx Index of the node for which the weight is evaluated
+#' #' @param parent Index of the parnet node
+#' #' @param adjacent Index of the adjacent node
+#' #' @return Weight
+#' 
+#' wEfficient <- function(tree, idx, parent, adjacent) {
+#'   w <- tree$se.below[idx]^(-2) / (tree$se.below[idx]^(-2) + (1 / (tree$se.above[parent]^2 + tree$se.below[adjacent]^2)))
+#'   return(w)
+#' }
+#' 
+#' 
+#' #' Function to estimate the nodes of a tree using noisy child nodes
+#' #'
+#' #' @param w Weight used construct the estimate
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param idx Index of the node for which the estimate is evaluated
+#' #' @return Noisy node estimate
+#' 
+#' estBelow <- function(w, tree, idx) {
+#'   left.idx <- 2 * idx
+#'   right.idx <- left.idx + 1
+#'   est <- w * tree$noisy[idx] + (1 - w) * (tree$est.below[left.idx] + tree$est.below[right.idx])
+#'   return(est)
+#' }
+#' 
+#' 
+#' #' Function to estimate the nodes of a tree using noisy parent and adjacent nodes
+#' #'
+#' #' @param w Weight used construct the estimate
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param idx Index of the node for which the estimate is evaluated
+#' #' @param parent Index of the parnet node
+#' #' @param adjacent Index of the adjacent node
+#' #' @return Noisy node estimate
+#' 
+#' estAbove <- function(w, tree, idx, parent, adjacent) {
+#'   est <- w * tree$noisy[idx] + (1 - w) * (tree$est.above[parent] - tree$est.below[adjacent])
+#'   return(est)
+#' }
+#' 
+#' 
+#' #' Function to efficiently estimate the nodes of a tree using all available information in the tree
+#' #'
+#' #' @param w Weight used construct the estimate
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param idx Index of the node for which the estimate is evaluated
+#' #' @param parent Index of the parnet node
+#' #' @param adjacent Index of the adjacent node
+#' #' @return Efficient noisy node estimate
+#' 
+#' estEfficient <- function(w, tree, idx, parent, adjacent) {
+#'   est <- w * tree$est.below[idx] + (1 - w) * (tree$est.above[parent] - tree$est.below[adjacent])
+#'   return(est)
+#' }
+#' 
+#' 
+#' #' Function to evaluate the standard error of a node estimate given a weight and the standard
+#' #'  deviation of the noise used to perturb the nodes
+#' #'
+#' #' @param w Weight used construct the estimate
+#' #' @param sigma Standard deviation of the noise used to perturb the estimates
+#' #' @return Standard error of the node estimate
+#' 
+#' stErr <- function(w, sigma) {
+#'   return(sigma * sqrt(w))
+#' }
+#' 
+#' 
+#' #' Function to estimate a noisy binary tree from the terminal nodes
+#' #'
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param terminal.level.idx Index of the first terminal leaf node
+#' #' @param n.nodes Number of nodes in the binary tree
+#' #' @param sigma Standard deviation of the noise used to perturb the estimates
+#' #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' #' @return Bottom-up estimate of noisy binary tree in vector form
+#' 
+#' estBottomUp <- function(tree, terminal.level.idx, n.nodes, sigma, inv.sigma.sq) {
+#'   tree$est.below <- c(rep(NA, (terminal.level.idx - 1)), tree$noisy[terminal.level.idx:nrow(tree)])
+#'   tree$se.below <- c(rep(NA, (terminal.level.idx - 1)), rep(sigma, n.nodes - (terminal.level.idx - 1)))
+#'   tree$w.below <- rep(NA, n.nodes)
+#'   for (i in (terminal.level.idx - 1):2) {
+#'     tree$w.below[i] <- wBelow(inv.sigma.sq, tree, i)
+#'     tree$est.below[i] <- estBelow(tree$w.below[i], tree, i)
+#'     tree$se.below[i] <- stErr(tree$w.below[i], sigma)
+#'   }
+#'   tree$est.below[tree$est.below < 0] <- 0
+#'   return(tree)
+#' }
+#' 
+#' 
+#' #' Function to estimate a noisy binary tree from the top down
+#' #'
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param n Number of observations in the vector represented by the binary tree
+#' #' @param n.nodes Number of nodes in the binary tree
+#' #' @param sigma Standard deviation of the noise used to perturb the estimates
+#' #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' #' @return Top-down estimate of noisy binary tree in vector form
+#' 
+#' estTopDown <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
+#'   tree$est.above <- c(n, rep(NA, (n.nodes - 1)))
+#'   tree$se.above <- c(0, rep(NA, (n.nodes - 1)))
+#'   tree$w.above <- rep(NA, n.nodes)
+#'   for (i in 2:n.nodes) {
+#'     tree$w.above[i] <- wAbove(inv.sigma.sq, tree, tree$parent[i], tree$adjacent[i])
+#'     tree$est.above[i] <- estAbove(tree$w.above[i], tree, i, tree$parent[i], tree$adjacent[i])
+#'     tree$se.above[i] <- stErr(tree$w.above[i], sigma)
+#'   }
+#'   tree$est.above[tree$est.above < 0] <- 0
+#'   return(tree)
+#' }
+#' 
+#' 
+#' #' Function to estimate a noisy binary tree efficiently using all available information in the tree
+#' #'
+#' #' @param tree Data frame with binary tree attributes and node values
+#' #' @param n Number of observations in the vector represented by the binary tree
+#' #' @param n.nodes Number of nodes in the binary tree
+#' #' @param sigma Standard deviation of the noise used to perturb the estimates
+#' #' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' #' @return Efficient estimate of noisy binary tree in vector form
+#' 
+#' estEfficiently <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
+#'   tree$est.efficient <- c(n, rep(NA, (n.nodes - 1)))
+#'   tree$se.efficient <- rep(NA, n.nodes)
+#'   tree$w.efficient <- rep(NA, n.nodes)
+#'   for (i in 2:n.nodes) {
+#'     tree$w.efficient[i] <- wEfficient(tree, i, tree$parent[i], tree$adjacent[i])
+#'     tree$est.efficient[i] <- estEfficient(tree$w.efficient[i], tree, i, tree$parent[i], tree$adjacent[i])
+#'     tree$se.efficient[i] <- stErr(tree$w.efficient[i], sigma)
+#'   }
+#'   tree$est.efficient[tree$est.efficient < 0] <- 0
+#'   return(tree)
+#' }
+#' 
+#' 
+#' #' Function to evaluate a binary tree
+#' #'
+#' #' @param x Numeric vector to be represented as a binary tree in vector form
+#' #' @param n Number of observations in \code{x}
+#' #' @param rng An a priori estimate of the range of \code{x}
+#' #' @param gran The granularity at which \code{x} is represented in the tree
+#' #' @param universe.size Difference in the range of \code{x} over the granularity, plus 1
+#' #' @param depth The depth of the binary tree
+#' #' @return A binary tree in vector form
+#' 
+#' binaryTree <- function(x, n, rng, gran, universe.size, depth) {
+#'   tree <- rep(0, times = (2 ^ depth + universe.size))
+#'   for (i in 1:n) {
+#'     idx <- ((x[i] - rng[1]) / gran) + 2^depth
+#'     tree[idx] <- tree[idx] + 1
+#'   }
+#'   d <- c()
+#'   for (i in seq(2^depth, 2^depth - 1 + universe.size, 2)) {
+#'     tree[i / 2] <- tree[i] + tree[i + 1]
+#'     d <- c(d, depth)
+#'   }
+#'   depth.counter <- depth - 1
+#'   while (depth.counter > 0) {
+#'     for (i in seq(2^depth.counter, 2^(depth.counter + 1) - 1, 2)) {
+#'       tree[i / 2] <- tree[i] + tree[i + 1]
+#'       d <- c(d, depth.counter)
+#'     }
+#'     depth.counter <- depth.counter - 1
+#'   } 
+#'   tree <- data.frame(tree[1:(2^depth - 1)])
+#'   names(tree) <- 'count'
+#'   r <- c(0, rep(c(1, -1), nrow(tree) - 1))
+#'   tree$depth <- 1
+#'   tree$parent <- NA
+#'   tree$adjacent <- NA
+#'   for(i in 2:nrow(tree)) {
+#'     tree$parent[i] <- trunc(i/2)
+#'     tree$depth[i] <- trunc(log2(i)) + 1
+#'     tree$adjacent[i] <- i + r[i]
+#'   }
+#'   return(tree)
+#' }
+#' 
 
-mechanismGenLaplace$methods(
-  evaluate = function(fun, x, sens, postFun, ...) {
-    x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
-    fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    input.vals <- c(list(x=x), fun.args)
-    true.val <- do.call(fun, input.vals)
-    scale <- sens / .self$epsilon
-    release <- true.val$add(dpNoise(n=length(true.val), scale=scale, dist='laplace'))
-    out <- list('release' = release)
-    out <- postFun(out, ...)
-    return(out)
-  }
-)
+#' #' Accuracy for a differentially private binary tree
+#' #'
+#' #' @param epsilon Numeric differential privacy parameter
+#' #' @param rng Numeric a priori estimate of the variable range
+#' #' @param gran Numeric granularity
+#' #' @param alpha Numeric level of statistical significance, default 0.05
+#' #' @return Accuracy guarantee for the tree given epsilon
+#' #' @export tree.getAccuracy
+#' #' @rdname tree.getAccuracy
+#' 
+#' tree.getAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
+#'     universe.size <- diff(rng) / gran + 1
+#'     accuracy <- (2 * sqrt(2) / epsilon) * sqrt(log(2 / alpha)) * log2(universe.size)^(1.5)
+#'     return(accuracy)
+#' }
+#' 
+#' 
+#' #' Epsilon for a differentially private binary tree
+#' #'
+#' #' @param accuracy Numeric accuracy needed
+#' #' @param rng Numeric a priori estimate of the variable range
+#' #' @param gran Numeric granularity
+#' #' @param alpha Numeric level of statistical significance, default 0.05
+#' #' @return Epsilon necessary to guarantee the given accuracy
+#' #' @export tree.getParameters
+#' #' @rdname tree.getParameters
+#' 
+#' tree.getParameters <- function(accuracy, rng, gran, alpha=0.05) {
+#'     universe.size <- diff(rng) / gran + 1
+#'     epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universe.size)^(1.5)
+#'     return(epsilon)
+#' }
+#' 
+#' 
+#' #' Function to truncate negative noisy node counts at zero
+#' #'
+#' #' @param release The differentially private noisy binary tree
+#' #' @return Noisy binary tree truncated at zero
+#' 
+#' tree.postFormatRelease <- function(release) {
+#'     release <- round(release)
+#'     release[release < 0] <- 0
+#'     return(release)
+#' }
+#' 
+#' 
+#' #' Function to derive CDF from efficient terminal node counts
+#' #'
+#' #' @param release Efficient differentially private binary tree
+#' #' @param rng An a priori estimate of the range of the vector
+#' #'      being represented as a binary tree
+#' #' @param terminal.index Vector of indices corresponding to the terminal
+#' #'      leaf nodes of the binary tree
+#' #' @return Differentially private estimate of the empirical cumulative
+#' #'      distribution function
+#' 
+#' tree.postCDF <- function(release, rng, terminal.index) {
+#'     terminal <- release[terminal.index]
+#'     step.size <- diff(rng) / length(terminal)
+#'     cdf.steps <- seq(rng[1], rng[2], step.size)
+#'     cdf <- c(0, cumsum(terminal) / sum(terminal))
+#'     cdf <- data.frame(list('val' = cdf.steps, 'cdf' = cdf))
+#'     return(cdf)
+#' }
+#' 
+#' 
+#' #' Function to evaluate the mean using the DP CDF
+#' #'
+#' #' @param cdf Differentially private estimate of the empirical cumulative
+#' #'      distribution function
+#' #' @param rng Numeric a priori estimate of the range
+#' #' @param gran Granularity
+#' #' @return Differentially private estimate of the mean
+#' 
+#' tree.postMean <- function(cdf, rng) {
+#'     ecdf <- cdf$cdf
+#'     pdf <- sapply(2:length(ecdf), function(i) ecdf[i] - ecdf[i - 1])
+#'     p <- c(ecdf[1], pdf) * cdf$val
+#'     return(sum(p))
+#' }
+#' 
+#' 
+#' #' Function to evaluate the median using the DP CDF
+#' #'
+#' #' @param cdf Differentially private estimate of the empirical cumulative
+#' #'      distribution function
+#' #' @return Differentially private estimate of the median
+#' 
+#' tree.postMedian <- function(cdf) {
+#'     out.median <- tree.postPercentiles(cdf, 0.5)$value
+#'     return(out.median)
+#' }
+#' 
+#' 
+#' #' Quantile function using the DP CDF
+#' #'
+#' #' @param cdf Differentially private estimate of the empirical cumulative
+#' #'      distribution function
+#' #' @param percentiles Vector of probabilities given to the quantile function
+#' #' @return Differnetially private estimate of the values corresponding to
+#' #'      the provided probabilities
+#' 
+#' tree.postPercentiles <- function(cdf, percentiles) {
+#'     absArgMin <- function(q, cdf) {
+#'         target <- abs(q - cdf$cdf)
+#'         out <- cdf$val[which(target == min(target))]
+#'         return(c(q, mean(out)))
+#'     }
+#'     out.values <- lapply(percentiles, absArgMin, cdf)
+#'     out.values <- data.frame(do.call(rbind, out.values))
+#'     names(out.values) <- c('percentile', 'value')
+#'     return(out.values)
+#' }
+#' 
+#' 
+#' #' Function to efficiently estimate noisy node counts
+#' #'
+#' #' @param release The truncated differentially private noisy binary tree
+#' #'      in vector form
+#' #' @param tree.data Data frame with binary tree attributes, including depth
+#' #'      and indicators of parent and adjacent nodes. Note that
+#' #'      \code{nrow(tree.data) == length(release)}
+#' #' @param n Number of observations
+#' #' @param n.nodes Number of nodes in the binary tree, also \code{length(release)}
+#' #' @param variance The variance of the noise used to perturb tree nodes
+#' #' @param terminal.index Vector of indices corresponding to the terminal
+#' #'      leaf nodes of the binary tree
+#' #' @return Efficient differentially private binary tree
+#' 
+#' tree.postEfficient <- function(release, tree.data, n, variance, terminal.index) {
+#'     n.nodes <- length(release)
+#'     sigma <- sqrt(variance)
+#'     inv.sigma.sq <- 1 / variance
+#'     tree <- cbind(tree.data, release)
+#'     names(tree)[ncol(tree)] <- 'noisy'
+#'     tree <- estBottomUp(tree, min(terminal.index), n.nodes, sigma, inv.sigma.sq)
+#'     tree <- estTopDown(tree, n, n.nodes, sigma, inv.sigma.sq)
+#'     tree <- estEfficiently(tree, n, n.nodes, sigma, inv.sigma.sq)
+#'     return(round(tree$est.efficient))
+#' }
+#' 
+#' 
+#' #' Differentially private binary tree
+#' #'
+#' #' @param mechanism Character, the privacy mechanism.
+#' #' @param var.type Character, the R variable type. One of \code{'numeric'} or
+#' #'   \code{'integer'}.
+#' #' @param Variable Character, variable name.
+#' #' @param n Integer, number of observations.
+#' #' @param rng Numeric, a priori estimate of the range.
+#' #' @param gran Numeric, the granularity of the variable.
+#' #' @param epsilon Numeric, privacy cost parameter.
+#' #' @param accuracy Numeric, accuracy guarantee given \code{epsilon}.
+#' #' @param impute.rng Numeric, range within which missing values are imputed. If \code{NULL},
+#' #'   the range provided in \code{rng} is used.
+#' #' @param percentiles Numeric, the percentiles to evaluate in post-processing. Optional, 
+#' #'    default \code{NULL}.
+#' #' @param alpha Numeric, the level of statistical significance. Default 0.05.
+#' #'
+#' #' @import methods
+#' #' @export dpTree
+#' #' @exportClass dpTree
+#' #'
+#' #' @include mechanism.R
+#' #' @include mechanism-laplace.R
+#' 
+#' dpTree <- setRefClass(
+#'     Class = 'dpTree',
+#'     contains = 'mechanismLaplace'
+#' )
+#' 
+#' dpTree$methods(
+#'     initialize = function(mechanism, var.type, variable, n, rng, gran, epsilon=NULL,
+#'                           accuracy=NULL, impute.rng=NULL, percentiles=NULL, alpha=0.05, ...) {
+#'         .self$name <- 'Differentially private binary tree'
+#'         .self$mechanism <- mechanism
+#'         .self$var.type <- var.type
+#'         .self$variable <- variable
+#'         .self$n <- n
+#'         .self$rng <- rng
+#'         .self$gran <- gran
+#'         .self$alpha <- alpha
+#'         if (is.null(epsilon)) {
+#'             .self$accuracy <- accuracy
+#'             .self$epsilon <- tree.getParameters(accuracy, rng, gran, alpha)
+#'         } else {
+#'             .self$epsilon <- epsilon
+#'             .self$accuracy <- tree.getAccuracy(epsilon, rng, gran, alpha)
+#'         }
+#'         if (is.null(impute.rng)) {
+#'             .self$impute.rng <- rng
+#'         } else {
+#'             .self$impute.rng <- impute.rng
+#'         }
+#'         .self$percentiles <- percentiles
+#' })
+#' 
+#' dpTree$methods(
+#'     release = function(data) {
+#'         x <- data[, variable]
+#'         sens <- 2 * log2(diff(rng) / gran + 1)
+#'         variance <- 2 * sens / epsilon
+#'         universe.size <- floor(diff(rng) / gran + 1)
+#'         depth <- ceiling(log2(universe.size))
+#'         terminal.index <- seq(2^(depth - 1), 2^depth - 1)
+#'         .self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
+#'                                                    variance=variance, universe.size=universe.size, 
+#'                                                    depth=depth, terminal.index=terminal.index, self=.self)
+#' })
+#' 
+#' dpTree$methods(
+#'     treeFun = function(x, universe.size, depth) {
+#'         tree <- binaryTree(x, n, rng, gran, universe.size, depth)
+#'         .self$tree.data <- tree[, which(names(tree) != 'count')]
+#'         return(tree$count)
+#' })
+#' 
+#' dpTree$methods(
+#'     postProcess = function(out, ...) {
+#'         out$variable <- variable
+#'         out$release <- tree.postFormatRelease(out$release)
+#'         ellipsis.vals <- getFuncArgs(list(...), tree.postEfficient)
+#'         out$release <- do.call(tree.postEfficient, c(list(release=out$release, tree.data=tree.data, n=n), ellipsis.vals))
+#'         ellipsis.vals <- getFuncArgs(list(...), tree.postCDF)
+#'         out$cdf <- do.call(tree.postCDF, c(list(release=out$release, rng=rng), ellipsis.vals))
+#'         out$mean <- tree.postMean(out$cdf, rng)
+#'         out$median <- tree.postMedian(out$cdf)
+#'         out$accuracy <- .self$accuracy
+#'         out$epsilon <- .self$epsilon
+#'         if (!is.null(percentiles)) {
+#'             out$percentiles <- tree.postPercentiles(out$cdf, percentiles)
+#'         }
+#'         return(out)
+#' })
+
+
+
+
 
 
 

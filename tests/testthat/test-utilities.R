@@ -122,3 +122,34 @@ test_that('fillMissing as expected', {
   
   expect_equal(sum(is.na(df_imputed)), 0)
 })
+
+############################## isMethodDefined Tests ###################################
+
+test_that('isMethodDefined outputs properly with S4 objects as input', {
+  Foo <- setRefClass(
+    Class = 'Foo',
+    fields = list(
+      index = 'numeric'
+    ),
+    methods = list(
+      initialize = function(){
+        .self$index <- 1
+      },
+      incrementIndex = function(n){
+        .self$index <- .self$index + n
+      }
+    ) 
+  )
+  
+  foo <- Foo$new()
+  
+  expect_true(isMethodDefined(foo, 'incrementIndex'))
+  expect_false(isMethodDefined(foo, 'blah'))
+})
+
+test_that('isMethodDefined outputs FALSE on non-S4 data types',{
+  expect_false(isMethodDefined(5, ''))
+  expect_false(isMethodDefined(TRUE, ''))
+  expect_false(isMethodDefined(c(1,2,3), ''))
+  expect_false(isMethodDefined("bloop", ''))
+})

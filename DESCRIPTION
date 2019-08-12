@@ -27,6 +27,7 @@ Collate:
     'mechanism-bootstrap.R'
     'mechanism-exponential.R'
     'mechanism-gaussian.R'
+    'mechanism-generalized-laplace.R'
     'mechanism-laplace.R'
     'mechanism-objective.R'
     'statistic-covariance.R'

@@ -860,3 +860,51 @@ release2json <- function(release, nameslist){
     return(result)
 
 }
+
+#' Check if a method is defined for a given object.
+#'
+#' @param object Reference class object.
+#' @param methodName String. Name of method sought.
+#'
+#' @return Boolean. TRUE if methodName is a method associated with the object, FALSE otherwise.
+#'
+#' @examples
+#' Foo <- setRefClass(
+#'    Class='Foo',
+#'    fields = list(
+#'        index = 'numeric'
+#'    ),
+#'    methods = list(
+#'        initialize = function(){
+#'            .self$bar = 1
+#'        }
+#'    )
+#' )
+#' 
+#' foo <- Foo$new()
+#' isMethodDefined(foo, 'initialize')     # returns TRUE
+#' isMethodDefined(foo, 'add')            # returns FALSE
+#' isMethodDefined(5, 'add')              # returns FALSE
+#' 
+isMethodDefined = function(object, methodName){
+  if(typeof(object) == "S4"){
+    # retrieve class name of object as a string
+    classStr <- class(object)[1]
+    # convert class name to variable from string
+    classVar <- eval(parse(text=classStr))
+    #check if methodName is the name of a method in the class
+    if (methodName %in% classVar$methods()){
+      return(TRUE)
+    }
+    else {
+      return(FALSE)
+    }
+  }
+  else{
+    return(FALSE)
+  }
+}
+
+foo = function(){
+  print(my_var)
+}

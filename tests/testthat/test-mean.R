@@ -19,3 +19,4 @@ test_that('range checks throw correct warning', {
   expect_equal(dp.mean$epsilon, my_epsilon)
   expect_equal(length(dp.mean$result$interval), 2)
 })
+
