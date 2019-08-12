@@ -4,17 +4,11 @@
 \alias{histogram.getEpsilon}
 \title{Histogram epsilon}
 \usage{
-histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta = 10^-6,
-  alpha = 0.05, sensitivity)
+histogram.getEpsilon(mechanism, accuracy, delta = 10^-6, alpha = 0.05,
+  sensitivity)
 }
 \arguments{
 \item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
-
-\item{n.bins}{A numeric vector of length one specifying the number of cells 
-in which to tabulate values.}
-
-\item{n}{A numeric vector of length one specifying the number of
-observations in the data.}
 
 \item{accuracy}{A numeric vector representing the accuracy needed to 
 guarantee (percent).}

@@ -4,17 +4,11 @@
 \alias{histogram.getAccuracy}
 \title{Histogram accuracy}
 \usage{
-histogram.getAccuracy(mechanism, n.bins, n, epsilon, delta = 10^-6,
-  alpha = 0.05, sensitivity)
+histogram.getAccuracy(mechanism, epsilon, delta = 2^-30, alpha = 0.05,
+  sensitivity)
 }
 \arguments{
 \item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
-
-\item{n.bins}{A numeric vector of length one specifying the number of cells 
-in which to tabulate values.}
-
-\item{n}{A numeric vector of length one specifying the number of
-observations in the data.}
 
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}

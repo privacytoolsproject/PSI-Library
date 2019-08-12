@@ -46,5 +46,4 @@ Collate:
     'utilities-objective.R'
     'utilities-postprocessing.R'
     'utilities-tree.R'
-    'utilities.R'
 VignetteBuilder: knitr

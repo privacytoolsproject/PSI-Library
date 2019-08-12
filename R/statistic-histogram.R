@@ -34,10 +34,6 @@
 #' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
 #'
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
-#' @param n.bins A numeric vector of length one specifying the number of cells 
-#'    in which to tabulate values.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the data.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
 #' @param delta The probability of an arbitrary leakage of information from 
@@ -50,10 +46,10 @@
 #' @return Accuracy guarantee for histogram release, given epsilon.
 #' @rdname histogram.getAccuracy
 
-histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, alpha=0.05, sensitivity) {
+histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, sensitivity) {
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
-		acc <- (2*log(2/(alpha*delta)) /epsilon) + 1
+	    acc <- stability.getAccuracy(sensitivity, epsilon, delta, alpha)
 	}
 	else{
 	    acc <- laplace.getAccuracy(sensitivity, epsilon, alpha)
@@ -72,10 +68,6 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' @seealso \code{\link{histogram.getAccuracy}} for accuracy derivation
 #' 
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
-#' @param n.bins A numeric vector of length one specifying the number of cells 
-#'    in which to tabulate values.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the data.
 #' @param accuracy A numeric vector representing the accuracy needed to 
 #'    guarantee (percent).
 #' @param delta The probability of an arbitrary leakage of information from 
@@ -88,10 +80,10 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
 #' @return Differential privacy parameter epsilon
 #' @rdname histogram.getEpsilon
 
-histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
+histogram.getEpsilon <- function(mechanism, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
-		eps <- 2*log(2/(alpha*delta)) /accuracy
+	    eps <- stability.getEpsilon(sensitivity, accuracy, delta, alpha)
 	}
 	else{
 	    eps <- laplace.getEpsilon(sensitivity, accuracy, alpha)
@@ -114,14 +106,12 @@ histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, al
 #' @param release A numeric vector with a noisy estimate of bin counts.
 #' @param n.bins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in in the data.
 #' @param accuracy A numeric vector representing the accuracy guarantee.
 #'    
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
 
-histogram.getCI <- function(release, n.bins, n, accuracy) {
+histogram.getCI <- function(release, n.bins, accuracy) {
     release_asNumeric <- as.numeric(release)
     out <- list()
     for (k in 1:n.bins) {
@@ -780,10 +770,10 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta, alpha, .self$sens)
+            .self$epsilon <- histogram.getEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- histogram.getAccuracy(mechanism, .self$n.bins, n, epsilon, delta, alpha, .self$sens)
+            .self$accuracy <- histogram.getAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
         }
         
         # get the delta parameter (will be NULL unless stability mechanism is being used)
@@ -813,7 +803,7 @@ dpHistogram$methods(
         if (mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
             if (mechanism == 'mechanismLaplace') {
-                out$intervals <- histogram.getCI(out$release, n.bins, n, out$accuracy)
+                out$intervals <- histogram.getCI(out$release, n.bins, out$accuracy)
             }
         }
         if (var.type %in% c('factor', 'character')) {
