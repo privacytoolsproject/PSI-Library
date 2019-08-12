@@ -66,25 +66,25 @@ mechanismStability$methods(
         numHistogramBins <- NULL
         imputationRange <- NULL
         histogramBins <- NULL
-        if (.self$var.type %in% c('numeric', 'integer')) {
+        if (.self$varType %in% c('numeric', 'integer')) {
             dataRange <- range(x)
-            numHistogramBins <- ifelse(is.null(.self$n.bins), .self$n / .self$granularity, .self$n.bins)
+            numHistogramBins <- ifelse(is.null(.self$nBins), .self$n / .self$granularity, .self$nBins)
             histogramBins <- seq(dataRange[1], dataRange[2], length.out=(numHistogramBins + 1))
             # set the imputation range to the detected data range to maintain privacy
             imputationRange <- dataRange
         }
         
-        x <- censorData(x, .self$var.type, dataRange, histogramBins)
-        x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
+        x <- censorData(x, .self$varType, dataRange, histogramBins)
+        x <- fillMissing(x, .self$varType, impute.rng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
         fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
-        input.vals <- c(list(x=x), fun.args)
-        true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+        inputVals <- c(list(x=x), fun.args)
+        trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
         
         # remove empty bins before noise is added (per definition of stability mechanism)
-        true.val <- true.val[true.val > 0]
+        trueVal <- trueVal[trueVal > 0]
         
         scale <- sens / .self$epsilon
-        release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
+        release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
         
         # calculate the accuracy threshold, below which histogram buckets should be removed
         accuracyThreshold <- 1+2*log(2/delta)/epsilon

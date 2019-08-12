@@ -42,11 +42,11 @@
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
 #' 
-#' @export histogram.getAccuracy
+#' @export histogramGetAccuracy
 #' @return Accuracy guarantee for histogram release, given epsilon.
-#' @rdname histogram.getAccuracy
+#' @rdname histogramGetAccuracy
 
-histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, sensitivity) {
+histogramGetAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, sensitivity) {
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
 	    acc <- stabilityGetAccuracy(sensitivity, epsilon, delta, alpha)
@@ -63,9 +63,9 @@ histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, s
 #' Function to find the epsilon value necessary to meet a desired level of accuracy for the
 #' differentially private histogram release.
 #' 
-#' This calculation is the inverse of the calculation for `histogram.getAccuracy`.
+#' This calculation is the inverse of the calculation for `histogramGetAccuracy`.
 #' 
-#' @seealso \code{\link{histogram.getAccuracy}} for accuracy derivation
+#' @seealso \code{\link{histogramGetAccuracy}} for accuracy derivation
 #' 
 #' @param mechanism A string indicating the mechanism that will be used to construct the histogram
 #' @param accuracy A numeric vector representing the accuracy needed to 
@@ -76,11 +76,11 @@ histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, s
 #' @param alpha A numeric vector of length one specifying the numeric 
 #'    statistical significance level. Default to 0.05.
 #' 
-#' @export histogram.getEpsilon
+#' @export histogramGetEpsilon
 #' @return Differential privacy parameter epsilon
-#' @rdname histogram.getEpsilon
+#' @rdname histogramGetEpsilon
 
-histogram.getEpsilon <- function(mechanism, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
+histogramGetEpsilon <- function(mechanism, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
 	    eps <- stabilityGetEpsilon(sensitivity, accuracy, delta, alpha)
@@ -104,22 +104,22 @@ histogram.getEpsilon <- function(mechanism, accuracy, delta=10^-6, alpha=0.05, s
 #' the true count of this histogram bin is between 3 and 7."
 #'
 #' @param release A numeric vector with a noisy estimate of bin counts.
-#' @param n.bins A numeric vector of length one specifying the number of cells 
+#' @param nBins A numeric vector of length one specifying the number of cells 
 #'    in which to tabulate values.
 #' @param accuracy A numeric vector representing the accuracy guarantee.
 #'    
 #' @return Confidence interval for the noisy counts in each bin.
 #' @rdname histogram.getCI
 
-histogram.getCI <- function(release, n.bins, accuracy) {
+histogram.getCI <- function(release, nBins, accuracy) {
     release_asNumeric <- as.numeric(release)
     out <- list()
-    for (k in 1:n.bins) {
-        bin.count <- release_asNumeric[k]
-        if (bin.count == 0) {
+    for (k in 1:nBins) {
+        binCount <- release_asNumeric[k]
+        if (binCount == 0) {
             out[[k]] <- c(0, accuracy)
         } else {
-            out[[k]] <- c(max(0, bin.count - accuracy), accuracy + bin.count)
+            out[[k]] <- c(max(0, binCount - accuracy), accuracy + binCount)
         }
     }
     out <- data.frame(do.call(rbind, out))
@@ -135,27 +135,27 @@ histogram.getCI <- function(release, n.bins, accuracy) {
 #' While converting, the normalizeHistogram method is called, which normalizes
 #' the private histogram so that the sum of the bin counts is equal to n.
 #'
-#' @param release Table, the result of \code{fun.hist}
+#' @param release Table, the result of \code{funHist}
 #' @param n Sample size
 #' @return Data frame
 
 normalizeReleaseAndConvertToDataFrame <- function(release, n) {
     if (is(release, 'matrix')) {
-        bin.names <- rownames(release)
-        if (anyNA(bin.names)) { 
-            bin.names[is.na(bin.names)] <- 'NA' 
+        binNames <- rownames(release)
+        if (anyNA(binNames)) { 
+            binNames[is.na(binNames)] <- 'NA' 
         }
         release <- apply(release, 2, normalizeHistogram, n=n)
         release <- data.frame(t(release))
     } else {
-        bin.names <- names(release)
-        if (anyNA(bin.names)) { 
-            bin.names[is.na(bin.names)] <- 'NA'
+        binNames <- names(release)
+        if (anyNA(binNames)) { 
+            binNames[is.na(binNames)] <- 'NA'
         }
         release <- normalizeHistogram(release, n)
         release <- data.frame(matrix(release, ncol=length(release)))
     }
-    names(release) <- bin.names
+    names(release) <- binNames
     return(release)
 }
 
@@ -202,8 +202,8 @@ normalizeHistogram <- function(h, n) {
 #'    observations in in the data.
 #'    
 #' @return Herfindahl index.
-#' @rdname histogram.postHerfindahl
-histogram.postHerfindahl <- function(release, n) {
+#' @rdname histogramPostHerfindahl
+histogramPostHerfindahl <- function(release, n) {
     share <- release / n
     herfindahl <- sum(share^2)
     return(herfindahl)
@@ -218,8 +218,8 @@ histogram.postHerfindahl <- function(release, n) {
 #' to \code{TRUE}.
 #'
 #' @return JSON doc for histogram function.
-#' @rdname histogram.getJSON
-histogram.getJSON <- function(output.json=TRUE) {
+#' @rdname histogramGetJSON
+histogramGetJSON <- function(output.json=TRUE) {
     out <- list()
     out$statistic <- 'Histogram'
     out$description <- 'Differentially Private Histogram'
@@ -250,12 +250,12 @@ histogram.getJSON <- function(output.json=TRUE) {
 #' perturbation.
 #'
 #' @param x Vector of numeric or categorical type.
-#' @param var.type Character indicating the variable type.
+#' @param varType Character indicating the variable type.
 #' @param bins Vector indicating the bins into which \code{x} is partitioned.
 #' @return Histogram with counts for each level of \code{x}.
 
-fun.hist <- function(x, var.type, bins=NULL) {
-    if (var.type %in% c('numeric', 'integer')) {
+funHist <- function(x, varType, bins=NULL) {
+    if (varType %in% c('numeric', 'integer')) {
         histogram <- table(cut(x, breaks=bins, include.lowest=TRUE, right=TRUE))
     } else {
         histogram <- table(x, useNA='ifany')
@@ -269,12 +269,12 @@ fun.hist <- function(x, var.type, bins=NULL) {
 #' bootstrap mechanism.
 #'
 #' @param xi Bootstrapped vector of numeric or categorical type.
-#' @param var.type Character indicating the variable type.
+#' @param varType Character indicating the variable type.
 #' @param bins Vector indicating the bins into which \code{xi} is partitioned.
 #' @return Histogram with counts for each level of \code{xi}.
 
-boot.hist <- function(xi, var.type, bins=NULL) {
-    histogram <- fun.hist(xi, var.type, bins)
+bootHist <- function(xi, varType, bins=NULL) {
+    histogram <- funHist(xi, varType, bins)
     return(histogram)
 }
 
@@ -284,18 +284,18 @@ boot.hist <- function(xi, var.type, bins=NULL) {
 #' calculating the histogram (either the stability mechanism or the Laplace
 #' mechanism).
 #' 
-#' @param var.type Character, the variable type.
+#' @param varType Character, the variable type.
 #' @param rng Numeric, a priori estimate of the lower and upper bounds of a
 #'    variable taking numeric values. Ignored for categorical types. Maybe be 
 #'    null for numeric or integer types, in which case the stability mechanism is used.
 #' @param bins Character or numeric, the available bins or levels of a variable. 
 #'    Character for categorical variables, a vector of numbers for numeric variables.
-#' @param n.bins Integer, the number of bins to release.
+#' @param nBins Integer, the number of bins to release.
 #' @param granularity Numeric, the width of each histogram bin.
 #' 
 #' @return a string indicating the mechanism to use when constructing the differentially private histogram
 
-determineMechanism <- function(var.type, rng, bins, n.bins, granularity) {
+determineMechanism <- function(varType, rng, bins, nBins, granularity) {
     if (!is.null(bins)) {
         # if the bins are specified, then the user has previous knowledge
         # of the data, so the stability mechanism is not necessary
@@ -303,34 +303,34 @@ determineMechanism <- function(var.type, rng, bins, n.bins, granularity) {
     } else {
         # if the bins are not specified, then we need to look at the
         # variable type to determine which mechanism to use
-        return(determineMechanismByVariableType(var.type, rng, bins, n.bins, granularity))
+        return(determineMechanismByVariableType(varType, rng, bins, nBins, granularity))
     }
 }
 
 # only called by determineMechanism()
-determineMechanismByVariableType <- function(var.type, rng, bins, n.bins, granularity) {
-    if (var.type == 'logical') {
+determineMechanismByVariableType <- function(varType, rng, bins, nBins, granularity) {
+    if (varType == 'logical') {
         # if the variable type if logical, we will never use the
         # stability mechanism because the user already knows the
         # possible values of the data.
         return('mechanismLaplace')
-    } else if (var.type == 'categorical') {
+    } else if (varType == 'categorical') {
         # if we have reached this conditional statement, then we
         # already know that the bins have not been specified. If
         # the data is categorical and the bins are not specified,
         # then the mechanism must be the stability mechanism.
         return('mechanismStability')
-    } else if (var.type %in% c('numeric', 'integer')) {
+    } else if (varType %in% c('numeric', 'integer')) {
         # if the variable type is numeric or integer, then the user
         # must enter either the number of bins or the granularity
         # of the histogram bins. If neither is entered, then an
         # error must be thrown. Otherwise, we determine the mechanism
         # based on whether the user has prior knowledge of the range
         # of the data.
-        if (is.null(n.bins) & is.null(granularity)) {
+        if (is.null(nBins) & is.null(granularity)) {
             stop('number of bins or granularity must be specified')
         } else {
-            return(determineMechanismByRange(var.type, rng, bins, n.bins, granularity))
+            return(determineMechanismByRange(varType, rng, bins, nBins, granularity))
         }
     } else {
         # if the variable type is none of the above or it is null,
@@ -340,7 +340,7 @@ determineMechanismByVariableType <- function(var.type, rng, bins, n.bins, granul
 }
 
 # only called by determineMechansim()
-determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) {
+determineMechanismByRange <- function(varType, rng, bins, nBins, granularity) {
     if (is.null(rng)) {
         # if the range is null, then the user has no prior knowledge of the
         # range of the data. Thus the stability mechanism must be used,
@@ -370,13 +370,13 @@ determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) 
 #' that exists in the data, the existing value will be changed to `NA` in the call 
 #' to `censorData()` and will then be imputed as one of the input bins in `fillmissing()`.
 #' 
-#' @param var.type Character, the variable type.
+#' @param varType Character, the variable type.
 #' @param rng Numeric, a priori estimate of the lower and upper bounds of a
 #'    variable taking numeric values. Ignored for categorical types. Maybe be null for 
 #'    numeric or integer types, in which case the stability mechanism is used.
 #' @param bins Character or numeric, the available bins or levels of a variable. Character 
 #'    for categorical variables, a vector of numbers for numeric variables.
-#' @param n.bins Integer, the number of bins to release.
+#' @param nBins Integer, the number of bins to release.
 #' @param impute Boolean, if true then the mechanism should replace missing values with known 
 #'    values from the data.If false, the mechanism should leave missing values as `NA`
 #' @param granularity Numeric, the width of each histogram bin, or the number of observations in each bin
@@ -385,12 +385,12 @@ determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) 
 #' @return a vector of histogram bins. Character vector for categorical variables. Numeric 
 #'    vector for logical, numeric, and integer variables.
 
-determineBins <- function(var.type, rng, bins, n, n.bins, impute, granularity, object) {
+determineBins <- function(varType, rng, bins, n, nBins, impute, granularity, object) {
     if (!is.null(bins)) {
         # if the user passed in bins, then the passed bins are the histogram bins
         # check entered bins for errors. If there are not errors, entered bins will be assigned as histogram bins.
         # if there are errors, an error message will be returned to the user.
-        errorCheckBins(var.type, rng, bins)
+        errorCheckBins(varType, rng, bins)
         return(bins)
     } else {
         # if we have reached this condition, then the data is not categorical,
@@ -398,13 +398,13 @@ determineBins <- function(var.type, rng, bins, n, n.bins, impute, granularity, o
         # mechanism and the bins are not passed in by the user. If the variable is
         # categorical and the bins are not passed in, then the mechanism is the
         # stability mechanism. So we only need to check logical, numeric, and integer.
-        if (var.type == 'logical') {
+        if (varType == 'logical') {
             return(determineLogicalBins(impute, object))
         } else {
             # if we have reached this conditional statement, then the variable type can
             # only be numeric or integer, and the user must have entered the range and
             # either the number of bins or the granularity.
-            return(determineNumericIntegerBins(rng, n, n.bins, granularity))
+            return(determineNumericIntegerBins(rng, n, nBins, granularity))
         }
     }
 }
@@ -426,32 +426,32 @@ determineLogicalBins <- function(impute, object) {
 }
 
 # only called by determineBins()
-determineNumericIntegerBins <- function(rng, n, n.bins, granularity) {
-	# first check if n.bins is NULL, n.bins is considered the truth for the number
-	# of bins if the user has entered both n.bins and granularity.
-    if (is.null(n.bins)) {
-        # if the n.bins is null, then the the granularity
+determineNumericIntegerBins <- function(rng, n, nBins, granularity) {
+	# first check if nBins is NULL, nBins is considered the truth for the number
+	# of bins if the user has entered both nBins and granularity.
+    if (is.null(nBins)) {
+        # if the nBins is null, then the the granularity
         # must be entered
     	nBinsFromGranularity <- n / granularity # get the number of bins
     	return(seq(rng[1], rng[2], length.out=(nBinsFromGranularity + 1)))
     } else {
-        # if n.bins is not null, then we can use it to calculate
+        # if nBins is not null, then we can use it to calculate
         # the histogram bins
-    	return(seq(rng[1], rng[2], length.out=(n.bins + 1)))
+    	return(seq(rng[1], rng[2], length.out=(nBins + 1)))
     }
 }
 
 # only called by determineBins()
 # checks given bins (only if bins are not null) to confirm they are within range of given data
-errorCheckBins <- function(var.type, rng, bins) {
-    errorCheckBinVariableType(var.type, bins)
-    errorCheckBinRange(var.type, rng, bins)
+errorCheckBins <- function(varType, rng, bins) {
+    errorCheckBinVariableType(varType, bins)
+    errorCheckBinRange(varType, rng, bins)
 }
 
 # only called by erroCheckBins()
-errorCheckBinVariableType <- function(var.type, bins) {
+errorCheckBinVariableType <- function(varType, bins) {
     # if variable type if character (categorical), confirm that given bins are character
-    if (var.type == 'character') {
+    if (varType == 'character') {
         # loop through all bins entered
         for (enteredBin in bins) {
             # check that each bin is of type `character`
@@ -463,7 +463,7 @@ errorCheckBinVariableType <- function(var.type, bins) {
     }
     
     # if variable is numeric or integer, confirm that the given bins are numeric
-    if (var.type %in% c('numeric', 'integer')) {
+    if (varType %in% c('numeric', 'integer')) {
         # loop through all bins entered
         for (enteredBin in bins) {
             # check that each bin is of type `numeric` (integers are also numeric)
@@ -475,7 +475,7 @@ errorCheckBinVariableType <- function(var.type, bins) {
     }
     
     # if variable is logical, conform that bins are only 0, 1, or NA
-    if (var.type == 'logical') {
+    if (varType == 'logical') {
         # loop through all bins entered
         for (enteredBin in bins) {
             # check that each bins is only 0, 1, or NA
@@ -488,10 +488,10 @@ errorCheckBinVariableType <- function(var.type, bins) {
 }
 
 # only called by errorCheckBins()
-errorCheckBinRange <- function(var.type, rng, bins) {
+errorCheckBinRange <- function(varType, rng, bins) {
     # if the datatype is numeric or integer AND a range was entered,
     # check that each bin is within the range
-    if ((var.type %in% c('numeric', 'integer')) & (!is.null(rng))) {
+    if ((varType %in% c('numeric', 'integer')) & (!is.null(rng))) {
         # if the user user has both specified bins and entered a range,
         # show an error message, because we do not need both. Default to
         # the bins entered.
@@ -505,12 +505,12 @@ errorCheckBinRange <- function(var.type, rng, bins) {
 #' when the input variable type of 'logical' and impute == FALSE.
 #' 
 #' @param object The dpHistogram object for the histogram on the specific variable. The object
-#'   has a 'var.type' member that will be changed from 'logical' to 'factor'
+#'   has a 'varType' member that will be changed from 'logical' to 'factor'
 #' 
 #' @return No return value
 
 setVariableTypeAsFactor <- function(object) {
-    object$var.type <- 'factor'
+    object$varType <- 'factor'
 }
 
 #' Error check imputation bins for logical, factor, or character variables
@@ -524,11 +524,11 @@ setVariableTypeAsFactor <- function(object) {
 #' 
 #' @param imputationBins The imputation bins entered by the user
 #' @param rng The histogram bins entered by the user
-#' @param var.type The variable type for the histogram data
+#' @param varType The variable type for the histogram data
 #' 
 #' @return a list of the imputation bins that will be used for `fillMissing()`.
 
-checkImputationBins <- function(imputationBins, bins, var.type) {
+checkImputationBins <- function(imputationBins, bins, varType) {
     # if no imputation bins were entered, return the bins.
     # (Note:  bins may be NULL, in which case stability mechanism will be used.)
     if (is.null(imputationBins)) {
@@ -538,7 +538,7 @@ checkImputationBins <- function(imputationBins, bins, var.type) {
     # if imputation bins were entered, check that they are
     # within the list of bins. If not, do not use them in imputation.
     clippedBins <- c()
-    if (var.type %in% c('logical','factor','character')) {
+    if (varType %in% c('logical','factor','character')) {
         # Loop through each bin in the imputation bins given by the user and check 
         # that they are in the list of histogram bins
         for (b in imputationBins) {
@@ -622,12 +622,12 @@ checkDelta <- function(mechanism, delta) {
 #' @return The 2-tuple that will be used as the range for the histogram when 
 #' calculating sensitivity, censoring data, and imputing values.
 
-setHistogramRange <- function(rng, var.type, bins) {
-    if (var.type == 'logical') {
+setHistogramRange <- function(rng, varType, bins) {
+    if (varType == 'logical') {
         return(c(0,1))
-    } else if (var.type %in% c('numeric','integer') & !(is.null(bins))) {
-        bin_range = c(bins[1],bins[length(bins)])
-        return(bin_range)
+    } else if (varType %in% c('numeric','integer') & !(is.null(bins))) {
+        binRange = c(bins[1],bins[length(bins)])
+        return(binRange)
     } else {
         return(rng)
     }
@@ -638,11 +638,11 @@ setHistogramRange <- function(rng, var.type, bins) {
 #' The variable type for a histogram must be 'numeric', 'integer', 'logical', or 'character'.
 #' If it is not one of these, send an error message to the user.
 #' 
-#' @param var.type The variable type of the data that was entered by the user
+#' @param varType The variable type of the data that was entered by the user
 #' 
 #' @return No return value, will only send an error message if variable type is invalid.
-checkHistogramVariableType <- function(var.type) {
-    if (!(var.type %in% c("numeric", "integer", "logical", "character"))) {
+checkHistogramVariableType <- function(varType) {
+    if (!(varType %in% c("numeric", "integer", "logical", "character"))) {
         stop("Please enter a data type of 'numeric', 'integer', 'logical', or 'character'")
     }
 }
@@ -652,42 +652,42 @@ checkHistogramVariableType <- function(var.type) {
 #' Set the number of bins for the histogram, given either the entered number of bins,
 #' the entered granularity, or the vector of bins.
 #' 
-#' @param n.bins the number of bins entered by the user, may be null
+#' @param nBins the number of bins entered by the user, may be null
 #' @param granularity the number of items to be in each bin (i.e. the height of each bin), may be null
-#' @param var.type The variable type of the data that was entered by the user
+#' @param varType The variable type of the data that was entered by the user
 #' @param bins the bin vector either entered by the user or set by determineBins()
 #' 
 #' @return No return value, will only send an error message if variable tyep is invalid.
-setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
-    if (var.type %in% c('numeric', 'integer')) {
+setNumHistogramBins <- function(nBins, granularity, varType, bins) {
+    if (varType %in% c('numeric', 'integer')) {
         # if the variable type is numeric or integer, then the length of the bins vector will
         # be 1 larger than the number of bins. So if the user did not enter a number of bins,
         # calculate the number of bins by subtracting one from the length of the bins vector.
-        if (is.null(n.bins)) {
+        if (is.null(nBins)) {
             return(length(bins) - 1)
         } else {
-            return(n.bins)
+            return(nBins)
         }
     } else {
         # if the variable type is not numeric or integer, then the nuber of bins can either be entered
         # by the user, calculated from the granularity, or calculate the number of bins from the length
         # of the bin vector.
-        if (is.null(n.bins)) {
+        if (is.null(nBins)) {
             # if there is no input for number of bins, get it from from granularity or the list of bins
             if (!is.null(granularity)) {
-                .return(n / granularity)
+                return(n / granularity)
             } else {
                 return(length(bins))
             }
         } else {
-            return(n.bins)
+            return(nBins)
         }
     }
 }
 
 #' Differentially private histogram
 #'
-#' @param var.type Character, the variable type.
+#' @param varType Character, the variable type.
 #' @param variable Character, the variable name in the data frame.
 #' @param n Integer, the number of observations.
 #' @param epsilon Numeric, the privacy loss parameter.
@@ -695,19 +695,19 @@ setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
 #' @param rng Numeric, a priori estimate of the lower and upper bounds of a
 #'    variable taking numeric values. Ignored for categorical types.
 #' @param bins Character, the available bins or levels of a categorical variable.
-#' @param n.bins Integer, the number of bins to release.
-#' @param granularity Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
+#' @param nBins Integer, the number of bins to release.
+#' @param granularity Numeric, the width of each histogram bin (i.e. the inverse of `nBins`). Used 
 #'    to calculate histogram bins in comination with `rng`.
 #' @param alpha Numeric, level of statistical significance, default 0.05.
 #' @param delta Numeric, probability of privacy loss beyond \code{epsilon}.
-#' @param impute.rng Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
+#' @param imputeRng Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
 #'    values in numeric or integer-type variables should be imputed 
-#' @param impute.bins Character (or numeric for logical variables), a list of bins from which NA values
+#' @param imputeBins Character (or numeric for logical variables), a list of bins from which NA values
 #'    values in character-type variables should be imputed
 #' @param impute Boolean, a boolean value indicating if logical-type variables should have NA values
 #'    imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
 #'    histogram will have 3 bins: 0, 1, and NA.
-#' @param n.boot Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)
+#' @param nBoot Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)
 #' 
 #'
 #' @import methods
@@ -724,31 +724,31 @@ dpHistogram <- setRefClass(
 )
 
 dpHistogram$methods(
-    initialize = function(var.type, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
-                          bins=NULL, n.bins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
-                          impute.rng=NULL, impute.bins=NULL, impute=FALSE, n.boot=NULL, ...) {
+    initialize = function(varType, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
+                          bins=NULL, nBins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
+                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
         # check variable type, can only continue initialization for certain variable type: numeric, integer, logical, character
-        checkHistogramVariableType(var.type)
+        checkHistogramVariableType(varType)
         
         # determine  which mechanism to use based on inputs
-        .self$mechanism <- determineMechanism(var.type, rng, bins, n.bins, granularity)
+        .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
         
         # set parameters of the histogram
-        .self$var.type <- var.type
+        .self$varType <- varType
         .self$variable <- variable
         .self$n <- checkNValidity(n)
         .self$epsilon <- epsilon
         .self$accuracy <- accuracy
         .self$bins <- bins # may be null
-        .self$n.bins <- n.bins # may be null
+        .self$nBins <- checkHistogramNBins(nBins) # may be null
         .self$alpha <- alpha
-        .self$impute.rng <- impute.rng
+        .self$imputeRng <- imputeRng
         .self$impute <- impute
-        .self$n.boot <- n.boot
+        .self$nBoot <- nBoot
         .self$granularity <- granularity # may be null
-        .self$boot.fun <- boot.hist
+        .self$boot.fun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
         
         # if the mechanism used is NOT the stability mechanism:
@@ -757,39 +757,39 @@ dpHistogram$methods(
         #    the stability mechanism.)
         # 2) determine the number of bins from the input number of bins, the granularity, or the list of bins.
         if (.self$mechanism != 'mechanismStability') {
-            .self$bins <- determineBins(.self$var.type, rng, bins, .self$n, n.bins, impute, granularity, .self)
-            .self$n.bins <- setNumHistogramBins(n.bins, granularity, .self$var.type, .self$bins)
+            .self$bins <- determineBins(.self$varType, rng, bins, .self$n, .self$nBins, impute, granularity, .self)
+            .self$nBins <- setNumHistogramBins(.self$nBins, granularity, .self$varType, .self$bins)
         }
         
         # check the data range
         # if numeric bins have been entered, set the range to the range of the bins 
         # if logical variable is entered, set the range to c(0,1)
         # (may be NULL)
-        .self$rng <- setHistogramRange(rng, .self$var.type, bins)
+        .self$rng <- setHistogramRange(rng, .self$varType, bins)
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- histogram.getEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
+            .self$epsilon <- histogramGetEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- histogram.getAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
+            .self$accuracy <- histogramGetAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
         }
         
         # get the delta parameter (will be NULL unless stability mechanism is being used)
         .self$delta <- checkDelta(.self$mechanism, delta)
         
         # set the range for data imputation (will be null if no range entered)
-        .self$impute.rng <- checkImputationRange(impute.rng, rng, var.type)
+        .self$imputeRng <- checkImputationRange(imputeRng, rng, varType)
         
         # set the bins for data imputation (will be null if no bins entered)
-        .self$impute.bins <- checkImputationBins(impute.bins, bins, var.type)
+        .self$imputeBins <- checkImputationBins(imputeBins, bins, varType)
 })
 
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(fun.hist, x, .self$sens, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess)
         .self$result <- noisy
 })
 
@@ -803,13 +803,13 @@ dpHistogram$methods(
         if (mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
             if (mechanism == 'mechanismLaplace') {
-                out$intervals <- histogram.getCI(out$release, n.bins, out$accuracy)
+                out$intervals <- histogram.getCI(out$release, nBins, out$accuracy)
             }
         }
-        if (var.type %in% c('factor', 'character')) {
+        if (varType %in% c('factor', 'character')) {
             out$herfindahl <- sum((out$release / n)^2)
         }
-        if (var.type %in% c('logical', 'factor')) {
+        if (varType %in% c('logical', 'factor')) {
             temp.release <- out$release[na.omit(names(out$release))]
             out$mean <- as.numeric(temp.release[2] / sum(temp.release))
             out$median <- ifelse(out$mean < 0.5, 0, 1)

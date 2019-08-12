@@ -4,14 +4,14 @@
 \alias{createfields}
 \title{Create plot fields}
 \usage{
-createfields(v, r, varname)
+createfields(v, r, varName)
 }
 \arguments{
 \item{v}{an empty list needing initialization}
 
 \item{r}{a release object for that variable}
 
-\item{varname}{name of variable}
+\item{varName}{name of variable}
 }
 \description{
 Designate the plot type based on the variable type.

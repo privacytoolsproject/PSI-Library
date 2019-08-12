@@ -4,14 +4,14 @@
 \alias{checkImputationRange}
 \title{Error check imputation range for numeric or integer variables}
 \usage{
-checkImputationRange(imputationRange, rng, var.type)
+checkImputationRange(imputationRange, rng, varType)
 }
 \arguments{
 \item{imputationRange}{The imputation range entered by the user}
 
 \item{rng}{The data range entered by the user}
 
-\item{var.type}{The variable type for the histogram data}
+\item{varType}{The variable type for the histogram data}
 }
 \value{
 the imputation range that will be used for `fillMissing()`.

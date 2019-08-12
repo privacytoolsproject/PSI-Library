@@ -4,7 +4,7 @@
 \alias{setHistogramRange}
 \title{Set histogram range if bins are entered}
 \usage{
-setHistogramRange(rng, var.type, bins)
+setHistogramRange(rng, varType, bins)
 }
 \arguments{
 \item{rng}{The rng entered by the user, may be NULL}

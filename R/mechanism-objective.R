@@ -19,13 +19,13 @@ mechanismObjective$methods(
         x <- x[, cols]
 
         # censor & impute missing values
-        x <- censorData(x, .self$var.type, .self$rng, .self$bins)
-        x <- fillMissing(x, .self$var.type, impute.rng=.self$impute.rng)
+        x <- censorData(x, .self$varType, .self$rng, .self$bins)
+        x <- fillMissing(x, .self$varType, imputeRng=.self$imputeRng)
 
         # extract X and y
         y <- x[, cols[1]]
         X <- x[, cols[2:length(cols)], drop=FALSE]
-        X.names <- names(X)
+        xNames <- names(X)
 
         # scale inputs s.t. max Euclidean norm <= 1
         scaler <- mapMatrixUnit(X, p=2)
@@ -34,19 +34,19 @@ mechanismObjective$methods(
         # add intercept
         if (.self$intercept) {
             X <- cbind(1, X)
-            X.names <- c('intercept', X.names)
+            xNames <- c('intercept', xNames)
         }
 
         # set start params, adjust for ols
         if (.self$name == 'ols') {
-            start.params <- rep(0, ncol(X) + 1)
-            X.names <- c(X.names, 'variance')
-            y.scaler <- mapMatrixUnit(y, p=2)
-            y <- y.scaler$matrix
-            y.max.norm <- y.scaler$max.norm
+            startParams <- rep(0, ncol(X) + 1)
+            xNames <- c(xNames, 'variance')
+            yScaler <- mapMatrixUnit(y, p=2)
+            y <- yScaler$matrix
+            yMaxNorm <- yScaler$max.norm
         } else {
-            start.params <- rep(0, ncol(X))
-            y.max.norm <- NULL
+            startParams <- rep(0, ncol(X))
+            yMaxNorm <- NULL
         }
 		
 		# Set scalar c from [CMS11]
@@ -68,35 +68,35 @@ mechanismObjective$methods(
 
 		beta <- ep/2
         # fit
-        if (is.null(.self$n.boot)) {
+        if (is.null(.self$nBoot)) {
            # old noise draw based on gamma and laplace
-           # b.norm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(start.params))
-           # b <- dpNoise(n=length(start.params), scale=(-.self$epsilon * b.norm), dist='laplace')
+           # bNorm <- dpNoise(n=1, scale=(2 / .self$epsilon), dist='gamma', shape=length(startParams))
+           # b <- dpNoise(n=length(startParams), scale=(-.self$epsilon * bNorm), dist='laplace')
            
            # new noise draw based on exponential and uniform
-            b.norm <- dpNoise(n=1, scale=(1/beta), dist='gamma', shape=1)
-            random_vec <- dpNoise(n=length(start.params), scale=1, dist='gaussian')
-            random_vec_norm <- sqrt(sum(random_vec^2))
-            b <- random_vec*(b.norm/random_vec_norm)
+            bNorm <- dpNoise(n=1, scale=(1/beta), dist='gamma', shape=1)
+            randomVec <- dpNoise(n=length(startParams), scale=1, dist='gaussian')
+            randomVecNorm <- sqrt(sum(randomVec^2))
+            b <- randomVec*(bNorm/randomVecNorm)
             
-            estimates <- optim(par=start.params, fn=.self$objective, X=X, y=y, b=b, n=n, lambda=lambda)$par
-            release <- data.frame(scaleRelease(estimates, scaler$max.norm, y.max.norm))
+            estimates <- optim(par=startParams, fn=.self$objective, X=X, y=y, b=b, n=n, lambda=lambda)$par
+            release <- data.frame(scaleRelease(estimates, scaler$max.norm, yMaxNorm))
             names(release) <- 'estimate'
-            rownames(release) <- X.names
+            rownames(release) <- xNames
         } else {
-            local.epsilon <- .self$epsilon / .self$n.boot
-            release <- vector('list', .self$n.boot)
-            for (i in 1:.self$n.boot) {
+            localEpsilon <- .self$epsilon / .self$nBoot
+            release <- vector('list', .self$nBoot)
+            for (i in 1:.self$nBoot) {
                 index <- sample(1:.self$n, .self$n, replace=TRUE)
-                X.star <- X[index, ]
-                y.star <- y[index]
-                b.norm <- dpNoise(n=1, scale=(2 / local.epsilon), dist='gamma', shape=length(start.params))
-                b <- dpNoise(n=length(start.params), scale=(-local.epsilon * b.norm), dist='laplace')
-                estimates <- optim(par=start.params, fn=.self$objective, X=X.star, y=y.star, b=b, n=n)$par
-                release[[i]] <- scaleRelease(estimates, scaler$max.norm, y.max.norm)
+                xStar <- X[index, ]
+                yStar <- y[index]
+                bNorm <- dpNoise(n=1, scale=(2 / localEpsilon), dist='gamma', shape=length(startParams))
+                b <- dpNoise(n=length(startParams), scale=(-localEpsilon * bNorm), dist='laplace')
+                estimates <- optim(par=startParams, fn=.self$objective, X=xStar, y=yStar, b=b, n=n)$par
+                release[[i]] <- scaleRelease(estimates, scaler$max.norm, yMaxNorm)
             }
             release <- data.frame(do.call(rbind, release))
-            names(release) <- X.names
+            names(release) <- xNames
         }
 
         # format output

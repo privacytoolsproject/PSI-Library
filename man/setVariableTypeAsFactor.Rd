@@ -8,7 +8,7 @@ setVariableTypeAsFactor(object)
 }
 \arguments{
 \item{object}{The dpHistogram object for the histogram on the specific variable. The object
-has a 'var.type' member that will be changed from 'logical' to 'factor'}
+has a 'varType' member that will be changed from 'logical' to 'factor'}
 }
 \value{
 No return value

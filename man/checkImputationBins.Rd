@@ -4,12 +4,12 @@
 \alias{checkImputationBins}
 \title{Error check imputation bins for logical, factor, or character variables}
 \usage{
-checkImputationBins(imputationBins, bins, var.type)
+checkImputationBins(imputationBins, bins, varType)
 }
 \arguments{
 \item{imputationBins}{The imputation bins entered by the user}
 
-\item{var.type}{The variable type for the histogram data}
+\item{varType}{The variable type for the histogram data}
 
 \item{rng}{The histogram bins entered by the user}
 }

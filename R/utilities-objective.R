@@ -30,9 +30,9 @@ vectorNorm <- function(X, p=1, margin=1) {
 #'      observed p-norm
 
 mapMatrixUnit <- function(X, p=1) {
-    max.norm <- max(vectorNorm(X, p=p))
-    normed.matrix <- X / max.norm
-    return(list('matrix' = normed.matrix, 'max.norm' = max.norm))
+    maxNorm <- max(vectorNorm(X, p=p))
+    normed.matrix <- X / maxNorm
+    return(list('matrix' = normed.matrix, 'maxNorm' = maxNorm))
 }
 
 
@@ -41,16 +41,16 @@ mapMatrixUnit <- function(X, p=1) {
 #' This function puts coefficient estimates on the scale of the original features
 #'
 #' @param estimates Numeric, coefficient estimates vector.
-#' @param X.scaler Numeric, maximum norm from \code{mapMatrixUnit} fit on features.
-#' @param y.scaler Numeric, maximum norm from \code{mapMatrixUnit} fit on response,
+#' @param xScaler Numeric, maximum norm from \code{mapMatrixUnit} fit on features.
+#' @param yScaler Numeric, maximum norm from \code{mapMatrixUnit} fit on response,
 #'    default NULL.
 #' @return Transformed coefficients vector
 
-scaleRelease <- function(estimates, X.scaler, y.scaler=NULL) {
-    if (!is.null(y.scaler)) {
-        estimates <- estimates * y.scaler
+scaleRelease <- function(estimates, xScaler, yScaler=NULL) {
+    if (!is.null(yScaler)) {
+        estimates <- estimates * yScaler
     }
     p <- length(estimates)
-    estimates[2:p] <- estimates[2:p] / X.scaler
+    estimates[2:p] <- estimates[2:p] / xScaler
     return(estimates)
 }

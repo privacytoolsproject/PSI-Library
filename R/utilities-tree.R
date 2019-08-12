@@ -1,15 +1,15 @@
 #' Function to evaluate weights from the noise variance and standard errors in child nodes for the 
 #'  node of a differentially private binary tree
 #'
-#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param invSigmaSq Inverse variance of the noise used in perturbing nodes
 #' @param tree Data frame with binary tree attributes and node values
 #' @param idx Index of the node for which the weight is evaluated
 #' @return Weight
 
-wBelow <- function(inv.sigma.sq, tree, idx) {
-    left.idx <- 2 * idx
-    right.idx <- left.idx + 1
-    w <- inv.sigma.sq / (inv.sigma.sq + 1 / (tree$se.below[left.idx]^2 + tree$se.below[right.idx]^2))
+wBelow <- function(invSigmaSq, tree, idx) {
+    leftIndex <- 2 * idx
+    rightIndex <- leftIndex + 1
+    w <- invSigmaSq / (invSigmaSq + 1 / (tree$seBelow[leftIndex]^2 + tree$seBelow[rightIndex]^2))
     return(w)
 }
 
@@ -17,14 +17,14 @@ wBelow <- function(inv.sigma.sq, tree, idx) {
 #' Function to evaluate weights from the noise variance and standard errors in a parent and adjacent 
 #'  nodes for the node of a differentially private binary tree
 #'
-#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param invSigmaSq Inverse variance of the noise used in perturbing nodes
 #' @param tree Data frame with binary tree attributes and node values
 #' @param parent Index of the parnet node
 #' @param adjacent Index of the adjacent node
 #' @return Weight
 
-wAbove <- function(inv.sigma.sq, tree, parent, adjacent) {
-    w <- inv.sigma.sq / (inv.sigma.sq + 1 / (tree$se.above[parent]^2 + tree$se.below[adjacent]^2))
+wAbove <- function(invSigmaSq, tree, parent, adjacent) {
+    w <- invSigmaSq / (invSigmaSq + 1 / (tree$seAbove[parent]^2 + tree$seBelow[adjacent]^2))
     return(w)
 }
 
@@ -39,7 +39,7 @@ wAbove <- function(inv.sigma.sq, tree, parent, adjacent) {
 #' @return Weight
 
 wEfficient <- function(tree, idx, parent, adjacent) {
-    w <- tree$se.below[idx]^(-2) / (tree$se.below[idx]^(-2) + (1 / (tree$se.above[parent]^2 + tree$se.below[adjacent]^2)))
+    w <- tree$seBelow[idx]^(-2) / (tree$seBelow[idx]^(-2) + (1 / (tree$seAbove[parent]^2 + tree$seBelow[adjacent]^2)))
     return(w)
 }
 
@@ -52,9 +52,9 @@ wEfficient <- function(tree, idx, parent, adjacent) {
 #' @return Noisy node estimate
 
 estBelow <- function(w, tree, idx) {
-    left.idx <- 2 * idx
-    right.idx <- left.idx + 1
-    est <- w * tree$noisy[idx] + (1 - w) * (tree$est.below[left.idx] + tree$est.below[right.idx])
+    leftIndex <- 2 * idx
+    rightIndex <- leftIndex + 1
+    est <- w * tree$noisy[idx] + (1 - w) * (tree$estBelow[leftIndex] + tree$estBelow[rightIndex])
     return(est)
 }
 
@@ -69,7 +69,7 @@ estBelow <- function(w, tree, idx) {
 #' @return Noisy node estimate
 
 estAbove <- function(w, tree, idx, parent, adjacent) {
-    est <- w * tree$noisy[idx] + (1 - w) * (tree$est.above[parent] - tree$est.below[adjacent])
+    est <- w * tree$noisy[idx] + (1 - w) * (tree$estAbove[parent] - tree$estBelow[adjacent])
     return(est)
 }
 
@@ -84,7 +84,7 @@ estAbove <- function(w, tree, idx, parent, adjacent) {
 #' @return Efficient noisy node estimate
 
 estEfficient <- function(w, tree, idx, parent, adjacent) {
-    est <- w * tree$est.below[idx] + (1 - w) * (tree$est.above[parent] - tree$est.below[adjacent])
+    est <- w * tree$estBelow[idx] + (1 - w) * (tree$estAbove[parent] - tree$estBelow[adjacent])
     return(est)
 }
 
@@ -104,22 +104,22 @@ stErr <- function(w, sigma) {
 #' Function to estimate a noisy binary tree from the terminal nodes
 #'
 #' @param tree Data frame with binary tree attributes and node values
-#' @param terminal.level.idx Index of the first terminal leaf node
-#' @param n.nodes Number of nodes in the binary tree
+#' @param terminalLevelIndex Index of the first terminal leaf node
+#' @param nNodes Number of nodes in the binary tree
 #' @param sigma Standard deviation of the noise used to perturb the estimates
-#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param invSigmaSq Inverse variance of the noise used in perturbing nodes
 #' @return Bottom-up estimate of noisy binary tree in vector form
 
-estBottomUp <- function(tree, terminal.level.idx, n.nodes, sigma, inv.sigma.sq) {
-    tree$est.below <- c(rep(NA, (terminal.level.idx - 1)), tree$noisy[terminal.level.idx:nrow(tree)])
-    tree$se.below <- c(rep(NA, (terminal.level.idx - 1)), rep(sigma, n.nodes - (terminal.level.idx - 1)))
-    tree$w.below <- rep(NA, n.nodes)
-    for (i in (terminal.level.idx - 1):2) {
-        tree$w.below[i] <- wBelow(inv.sigma.sq, tree, i)
-        tree$est.below[i] <- estBelow(tree$w.below[i], tree, i)
-        tree$se.below[i] <- stErr(tree$w.below[i], sigma)
+estBottomUp <- function(tree, terminalLevelIndex, nNodes, sigma, invSigmaSq) {
+    tree$estBelow <- c(rep(NA, (terminalLevelIndex - 1)), tree$noisy[terminalLevelIndex:nrow(tree)])
+    tree$seBelow <- c(rep(NA, (terminalLevelIndex - 1)), rep(sigma, nNodes - (terminalLevelIndex - 1)))
+    tree$wBelow <- rep(NA, nNodes)
+    for (i in (terminalLevelIndex - 1):2) {
+        tree$wBelow[i] <- wBelow(invSigmaSq, tree, i)
+        tree$estBelow[i] <- estBelow(tree$wBelow[i], tree, i)
+        tree$seBelow[i] <- stErr(tree$wBelow[i], sigma)
     }
-    tree$est.below[tree$est.below < 0] <- 0
+    tree$estBelow[tree$estBelow < 0] <- 0
     return(tree)
 }
 
@@ -128,21 +128,21 @@ estBottomUp <- function(tree, terminal.level.idx, n.nodes, sigma, inv.sigma.sq) 
 #'
 #' @param tree Data frame with binary tree attributes and node values
 #' @param n Number of observations in the vector represented by the binary tree
-#' @param n.nodes Number of nodes in the binary tree
+#' @param nNodes Number of nodes in the binary tree
 #' @param sigma Standard deviation of the noise used to perturb the estimates
-#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param invSigmaSq Inverse variance of the noise used in perturbing nodes
 #' @return Top-down estimate of noisy binary tree in vector form
 
-estTopDown <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
-    tree$est.above <- c(n, rep(NA, (n.nodes - 1)))
-    tree$se.above <- c(0, rep(NA, (n.nodes - 1)))
-    tree$w.above <- rep(NA, n.nodes)
-    for (i in 2:n.nodes) {
-        tree$w.above[i] <- wAbove(inv.sigma.sq, tree, tree$parent[i], tree$adjacent[i])
-        tree$est.above[i] <- estAbove(tree$w.above[i], tree, i, tree$parent[i], tree$adjacent[i])
-        tree$se.above[i] <- stErr(tree$w.above[i], sigma)
+estTopDown <- function(tree, n, nNodes, sigma, invSigmaSq) {
+    tree$estAbove <- c(n, rep(NA, (nNodes - 1)))
+    tree$seAbove <- c(0, rep(NA, (nNodes - 1)))
+    tree$wAbove <- rep(NA, nNodes)
+    for (i in 2:nNodes) {
+        tree$wAbove[i] <- wAbove(invSigmaSq, tree, tree$parent[i], tree$adjacent[i])
+        tree$estAbove[i] <- estAbove(tree$wAbove[i], tree, i, tree$parent[i], tree$adjacent[i])
+        tree$seAbove[i] <- stErr(tree$wAbove[i], sigma)
     }
-    tree$est.above[tree$est.above < 0] <- 0
+    tree$estAbove[tree$estAbove < 0] <- 0
     return(tree)
 }
 
@@ -151,21 +151,21 @@ estTopDown <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
 #'
 #' @param tree Data frame with binary tree attributes and node values
 #' @param n Number of observations in the vector represented by the binary tree
-#' @param n.nodes Number of nodes in the binary tree
+#' @param nNodes Number of nodes in the binary tree
 #' @param sigma Standard deviation of the noise used to perturb the estimates
-#' @param inv.sigma.sq Inverse variance of the noise used in perturbing nodes
+#' @param invSigmaSq Inverse variance of the noise used in perturbing nodes
 #' @return Efficient estimate of noisy binary tree in vector form
 
-estEfficiently <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
-    tree$est.efficient <- c(n, rep(NA, (n.nodes - 1)))
-    tree$se.efficient <- rep(NA, n.nodes)
-    tree$w.efficient <- rep(NA, n.nodes)
-    for (i in 2:n.nodes) {
-        tree$w.efficient[i] <- wEfficient(tree, i, tree$parent[i], tree$adjacent[i])
-        tree$est.efficient[i] <- estEfficient(tree$w.efficient[i], tree, i, tree$parent[i], tree$adjacent[i])
-        tree$se.efficient[i] <- stErr(tree$w.efficient[i], sigma)
+estEfficiently <- function(tree, n, nNodes, sigma, invSigmaSq) {
+    tree$estEfficient <- c(n, rep(NA, (nNodes - 1)))
+    tree$seEfficient <- rep(NA, nNodes)
+    tree$wEfficient <- rep(NA, nNodes)
+    for (i in 2:nNodes) {
+        tree$wEfficient[i] <- wEfficient(tree, i, tree$parent[i], tree$adjacent[i])
+        tree$estEfficient[i] <- estEfficient(tree$wEfficient[i], tree, i, tree$parent[i], tree$adjacent[i])
+        tree$seEfficient[i] <- stErr(tree$wEfficient[i], sigma)
     }
-    tree$est.efficient[tree$est.efficient < 0] <- 0
+    tree$estEfficient[tree$estEfficient < 0] <- 0
     return(tree)
 }
 
@@ -176,28 +176,28 @@ estEfficiently <- function(tree, n, n.nodes, sigma, inv.sigma.sq) {
 #' @param n Number of observations in \code{x}
 #' @param rng An a priori estimate of the range of \code{x}
 #' @param gran The granularity at which \code{x} is represented in the tree
-#' @param universe.size Difference in the range of \code{x} over the granularity, plus 1
+#' @param universeSize Difference in the range of \code{x} over the granularity, plus 1
 #' @param depth The depth of the binary tree
 #' @return A binary tree in vector form
 
-binaryTree <- function(x, n, rng, gran, universe.size, depth) {
-    tree <- rep(0, times=(2^depth + universe.size))
+binaryTree <- function(x, n, rng, gran, universeSize, depth) {
+    tree <- rep(0, times=(2^depth + universeSize))
     for (i in 1:n) {
         idx <- ((x[i] - rng[1]) / gran) + 2^depth
         tree[idx] <- tree[idx] + 1
     }
     d <- c()
-    for (i in seq(2^depth, 2^depth - 1 + universe.size, 2)) {
+    for (i in seq(2^depth, 2^depth - 1 + universeSize, 2)) {
         tree[i / 2] <- tree[i] + tree[i + 1]
         d <- c(d, depth)
     }
-    depth.counter <- depth - 1
-    while (depth.counter > 0) {
-        for (i in seq(2^depth.counter, 2^(depth.counter + 1) - 1, 2)) {
+    depthCounter <- depth - 1
+    while (depthCounter > 0) {
+        for (i in seq(2^depthCounter, 2^(depthCounter + 1) - 1, 2)) {
             tree[i / 2] <- tree[i] + tree[i + 1]
-            d <- c(d, depth.counter)
+            d <- c(d, depthCounter)
         }
-        depth.counter <- depth.counter - 1
+        depthCounter <- depthCounter - 1
     } 
     tree <- data.frame(tree[1:(2^depth - 1)])
     names(tree) <- 'count'

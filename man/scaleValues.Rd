@@ -4,13 +4,13 @@
 \alias{scaleValues}
 \title{Scaling helper function for fillMissing}
 \usage{
-scaleValues(vals, var.type, lower = NULL, upper = NULL,
+scaleValues(vals, varType, lower = NULL, upper = NULL,
   categories = NULL)
 }
 \arguments{
 \item{vals}{Input array of values to scale Type: numeric array}
 
-\item{var.type}{Variable type of input array to fillMissing function; affects how scaling occurs. 
+\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs. 
 Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.}
 
 \item{lower}{Lower bound for scaling. Type: numeric}
@@ -20,11 +20,11 @@ Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'nu
 \item{categories}{List of categories. Type: factor}
 }
 \value{
-Array of values, either characters, integers, logicals, numerics depending on var.type, scaled according to either the 
-number of categories if var.type='factor' or 'character', or based on lower and upper when var.type='logical','numeric', or 'integer'.
+Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the 
+number of categories if varType='factor' or 'character', or based on lower and upper when varType='logical','numeric', or 'integer'.
 }
 \description{
 Takes input array and scales to upper and lower bounds, which are either defined by lower and upper or calculated depending on
-the type of variable. (Note that input array will always be numeric; var.type refers to the variable type of the input array in
+the type of variable. (Note that input array will always be numeric; varType refers to the variable type of the input array in
 the fillMissing function.)
 }

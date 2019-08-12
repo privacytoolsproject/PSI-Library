@@ -7,7 +7,7 @@
 normalizeReleaseAndConvertToDataFrame(release, n)
 }
 \arguments{
-\item{release}{Table, the result of \code{fun.hist}}
+\item{release}{Table, the result of \code{funHist}}
 
 \item{n}{Sample size}
 }

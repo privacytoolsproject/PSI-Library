@@ -369,3 +369,22 @@ test_that('error thrown when n not positive or whole number', {
     expect_error(dpHistogram$new(var.type='numeric', variable="educ", n=0.5, epsilon=my_epsilon, granularity=my_granularity, rng=c(0,16)),
                  "n must be a positive whole number")
 })
+
+# make sure correct errors are thrown with incorrect values of nBins
+test_that('errors thrown for incorrect values of nBins', {
+    data(PUMS5extract10000, package = "PSIlence")
+    
+    my_n <- 10000
+    my_epsilon <- 0.1
+    my_delta <- 10^-6
+    
+    # expect warning and number of bins set to next-highest integer if user enters non-integer value
+    my_n.bins <- 16.5
+    expect_warning(dp.histogram <- dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, rng=c(0,16)), 'non-integer value for number of bins converted to next highest integer value')
+    dp.histogram$release(PUMS5extract10000)
+    expect_equal(length(dp.histogram$result$release), 17)
+    
+    # expect error if number of bins is less than 2
+    my_n.bins <- 1
+    expect_error(dpHistogram$new(var.type='numeric', variable="educ", n=my_n, epsilon=my_epsilon, n.bins=my_n.bins, rng=c(0,16)), 'number of bins must be at least 2')
+})

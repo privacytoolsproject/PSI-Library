@@ -19,17 +19,17 @@ linearReg <- function(formula, release, n, intercept) {
         coefs <- "The input matrix is not invertible"
         return(coefs)
     } else {
-        xy.locs <- extract.indices(as.formula(formula), release, intercept)
-        x.loc <- xy.locs$x.loc
-        y.loc <- xy.locs$y.loc
-        loc.vec <- rep(TRUE, (length(x.loc) + 1))
-        loc.vec[y.loc] <- FALSE
-        sweep <- amsweep((as.matrix(release) / n), loc.vec)
-        coefs <- sweep[y.loc, x.loc]
-        se <- sqrt(sweep[y.loc, y.loc] * diag(solve(release[x.loc, x.loc])))
+        xyLocs <- extract.indices(as.formula(formula), release, intercept)
+        xLoc <- xyLocs$xLoc
+        yLoc <- xyLocs$yLoc
+        locVec <- rep(TRUE, (length(xLoc) + 1))
+        locVec[yLoc] <- FALSE
+        sweep <- amsweep((as.matrix(release) / n), locVec)
+        coefs <- sweep[yLoc, xLoc]
+        se <- sqrt(sweep[yLoc, yLoc] * diag(solve(release[xLoc, xLoc])))
         coefs <- data.frame(cbind(coefs, se))
         coefs <- format(round(coefs, 5), nsmall=5)
-        rownames(coefs) <- xy.locs$x.label
+        rownames(coefs) <- xyLocs$x.label
         names(coefs) <- c('Estimate', 'Std. Error')
         return(coefs)
     }

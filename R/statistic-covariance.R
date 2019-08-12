@@ -9,7 +9,7 @@
 #' @param n Integer, indicating number of observations
 #' @export
 
-coefficient.release <- function(formula, release, n) {
+coefficientRelease <- function(formula, release, n) {
   intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
   coefficients <- linearReg(formula, release, n, intercept)
   release <- list(name='Linear regression', 
@@ -30,7 +30,7 @@ coefficient.release <- function(formula, release, n) {
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
-covariance.sensitivity <- function(n, rng, intercept) {
+covarianceSensitivity <- function(n, rng, intercept) {
   diffs <- apply(rng, 1, diff)
   if (intercept) { diffs <- c(1, diffs) }
   sensitivity <- c()
@@ -54,12 +54,12 @@ covariance.sensitivity <- function(n, rng, intercept) {
 #' @return A symmetric differentially private covariance matrix.
 #'
 #' This function is used by the mechanism in post-processing and not intended for interactive post-processing
-covariance.formatRelease <- function(release, columns) {
-  out.dim <- length(columns)
-  out.matrix <- matrix(0, nrow=out.dim, ncol=out.dim)
-  out.matrix[lower.tri(out.matrix, diag=TRUE)] <- release
-  out.matrix[upper.tri(out.matrix, diag=FALSE)] <- t(out.matrix)[upper.tri(out.matrix, diag=FALSE)]
-  release <- data.frame(out.matrix)
+covarianceFormatRelease <- function(release, columns) {
+  outDim <- length(columns)
+  outMatrix <- matrix(0, nrow=outDim, ncol=outDim)
+  outMatrix[lower.tri(outMatrix, diag=TRUE)] <- release
+  outMatrix[upper.tri(outMatrix, diag=FALSE)] <- t(outMatrix)[upper.tri(outMatrix, diag=FALSE)]
+  release <- data.frame(outMatrix)
   rownames(release) <- names(release) <- columns
   return(release)
 }
@@ -77,12 +77,12 @@ covariance.formatRelease <- function(release, columns) {
 #'    covariance matrix.
 #' @return Linear regression coefficients and standard errors for all specified
 #'    \code{formula}.
-covariance.postLinearRegression <- function(release, n, intercept, formula) {
-  out.summaries <- vector('list', length(formula))
+covariancePostLinearRegression <- function(release, n, intercept, formula) {
+  outSummaries <- vector('list', length(formula))
   for (f in 1:length(formula)) {
-    out.summaries[[f]] <- linearReg(formula[[f]], release, n, intercept)
+    outSummaries[[f]] <- linearReg(formula[[f]], release, n, intercept)
   }
-  return(out.summaries)
+  return(outSummaries)
 }
 
 
@@ -95,7 +95,7 @@ covariance.postLinearRegression <- function(release, n, intercept, formula) {
 #' @param columns Columns to include in output
 #' @param intercept Logical, should the intercept be included?
 
-fun.covar <- function(x, intercept) {
+funCovar <- function(x, intercept) {
   if (intercept) { x <- cbind(1, x) }
   covariance <- t(as.matrix(x)) %*% as.matrix(x)
   lower <- lower.tri(covariance, diag=TRUE)
@@ -119,22 +119,23 @@ dpCovariance <- setRefClass(
 )
 
 dpCovariance$methods(
-  initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL, 
+  initialize = function(mechanism, varType, n, epsilon, columns, rng, imputeRng=NULL, 
                         intercept=FALSE, formula=NULL, delta=1e-5) {
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism
-    .self$var.type <- var.type
+    .self$varType <- varType
     .self$n <- checkNValidity(n)
     .self$epsilon <- epsilon
     .self$delta <- delta
     .self$rng <- rng
+    .self$sens <- covarianceSensitivity(n, rng, intercept)
     
     checkEpsilon(epsilon)
     
-    if (is.null(impute.rng)) {
-      .self$impute.rng <- rng
+    if (is.null(imputeRng)) {
+      .self$imputeRng <- rng
     } else {
-      .self$impute.rng <- impute.rng
+      .self$imputeRng <- imputeRng
     }
     .self$formula <- formula
     .self$intercept <- intercept
@@ -148,18 +149,17 @@ dpCovariance$methods(
 dpCovariance$methods(
   release = function(data) {
     x <- data[columns];
-    sens <- covariance.sensitivity(n, rng, intercept)
-    .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess,
+    .self$result <- export(mechanism)$evaluate(fun=funCovar, x=x, sens=sens, postFun=.self$postProcess,
                                                formula=formula, columns=columns, intercept=intercept)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
     
-    out$release <- covariance.formatRelease(out$release, columns)
+    out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {
-      out$linearRegression <- covariance.postLinearRegression(out$release, n, intercept, formula)
+      out$linearRegression <- covariancePostLinearRegression(out$release, n, intercept, formula)
     }
     return(out)
   })
