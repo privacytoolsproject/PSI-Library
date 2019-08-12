@@ -179,7 +179,7 @@ character_histogram$release(esoph)
 print(character_histogram$result)
 ```
 
-Notice that the sample size in this example is only 88 observations, so to preserve accuracy we are forced to increase the epsilon and delta parameters. In some cases, increasing the privacy budget may not be a viable option (the data be sensitive and the user cannot risk leaking data with a low level of priacy), so the user would be forced to use noisier data (i.e. keep using a small value for epsilon to maintain privacy, but get a less accurate differentially private estimate).
+Notice that the sample size in this example is only 88 observations, so to preserve accuracy we are forced to increase the epsilon and delta parameters. In some cases, increasing the privacy budget may not be a viable option (the data may be sensitive and the user cannot risk leaking data with a low level of privacy), so the user would be forced to use noisier data (i.e. keep using a small value for epsilon to maintain privacy, but get a less accurate differentially private estimate).
 
 Similar to numeric variables, you can enter a specific vector of bins for the histogram for a character variable if you have prior knowledge of the data. In this case, the resulting histogram will have each bin entered in the `bins` vector, even if the bin would be empty in the underlying data:
 
@@ -224,7 +224,7 @@ numeric_histogram$release(PUMS5extract10000)
 print(numeric_histogram$result)
 ```
 
-A delta value was entered in the character stability example above, and was not entered for the numeric stability example. The library has a default delta value of $2^-30$, so it is not necessary to entere one unless you are comfortable with differential privacy concepts.
+A delta value was entered in the character stability example above, and was not entered for the numeric stability example. The library has a default delta value of $2^{^-30}$, so it is not necessary to entere one unless you are comfortable with differential privacy concepts.
 
 &nbsp;
 

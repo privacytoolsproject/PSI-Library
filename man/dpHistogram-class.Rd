@@ -34,7 +34,7 @@ to calculate histogram bins in comination with `rng`.}
 values in numeric or integer-type variables should be imputed}
 
 \item{impute.bins}{Character (or numeric for logical variables), a list of bins from which NA values
-values in character or logical-type variables should be imputed}
+values in character-type variables should be imputed}
 
 \item{impute}{Boolean, a boolean value indicating if logical-type variables should have NA values
 imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the

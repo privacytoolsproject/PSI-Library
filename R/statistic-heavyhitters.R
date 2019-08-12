@@ -89,8 +89,8 @@ dpHeavyHitters$methods(
         .self$name <- 'Differentially private heavy hitters'
         .self$mechanism <- mechanism
         .self$variable <- variable
-        .self$var.type <- check_variable_type(var.type, in_types=c('character', 'factor'))
-        .self$n <- check_n_validity(n)
+        .self$var.type <- checkVariableType(var.type, in_types=c('character', 'factor'))
+        .self$n <- checkNValidity(n)
         .self$epsilon <- epsilon
         .self$k <- k
         .self$bins <- bins

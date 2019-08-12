@@ -19,7 +19,7 @@ mechanismObjective$methods(
         x <- x[, cols]
 
         # censor & impute missing values
-        x <- censordata(x, .self$var.type, .self$rng, .self$bins)
+        x <- censorData(x, .self$var.type, .self$rng, .self$bins)
         x <- fillMissing(x, .self$var.type, impute.rng=.self$impute.rng)
 
         # extract X and y

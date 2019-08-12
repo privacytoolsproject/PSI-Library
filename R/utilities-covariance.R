@@ -13,8 +13,8 @@
 #'    
 #' @return A numeric vector of regression coefficients corresponding 
 #'    to \code{formula}.
-#' @rdname linear.reg
-linear.reg <- function(formula, release, n, intercept) {
+#' @rdname linearReg
+linearReg <- function(formula, release, n, intercept) {
     if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
         coefs <- "The input matrix is not invertible"
         return(coefs)

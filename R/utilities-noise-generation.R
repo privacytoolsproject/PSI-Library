@@ -10,7 +10,7 @@
 #' 
 #' @return Accuracy guarantee for statistic release given epsilon.
 
-laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
+laplaceGetAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
     accuracy <- log(1 / alpha) * (sensitivity / epsilon)
     return(accuracy)
 }
@@ -28,7 +28,7 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 #' 
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 
-laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
+laplaceGetEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
     epsilon <- log(1 / alpha) * (sensitivity / accuracy)
     return(epsilon)
 }

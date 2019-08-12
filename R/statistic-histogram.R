@@ -49,10 +49,10 @@
 histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, sensitivity) {
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
-	    acc <- stability.getAccuracy(sensitivity, epsilon, delta, alpha)
+	    acc <- stabilityGetAccuracy(sensitivity, epsilon, delta, alpha)
 	}
 	else{
-	    acc <- laplace.getAccuracy(sensitivity, epsilon, alpha)
+	    acc <- laplaceGetAccuracy(sensitivity, epsilon, alpha)
 	}
 	return(acc)
 }
@@ -83,10 +83,10 @@ histogram.getAccuracy <- function(mechanism, epsilon, delta=2^-30, alpha=0.05, s
 histogram.getEpsilon <- function(mechanism, accuracy, delta=10^-6, alpha=0.05, sensitivity) {
 	eps <- NULL
 	if(mechanism == 'mechanismStability'){
-	    eps <- stability.getEpsilon(sensitivity, accuracy, delta, alpha)
+	    eps <- stabilityGetEpsilon(sensitivity, accuracy, delta, alpha)
 	}
 	else{
-	    eps <- laplace.getEpsilon(sensitivity, accuracy, alpha)
+	    eps <- laplaceGetEpsilon(sensitivity, accuracy, alpha)
 	}
 	return(eps)
 }
@@ -368,7 +368,7 @@ determineMechanismByRange <- function(var.type, rng, bins, n.bins, granularity) 
 #' will still have a count, because it will be an option during data imputation in 
 #' the call to `fillmissing()`. If the input list of bins does not include a value 
 #' that exists in the data, the existing value will be changed to `NA` in the call 
-#' to `censordata()` and will then be imputed as one of the input bins in `fillmissing()`.
+#' to `censorData()` and will then be imputed as one of the input bins in `fillmissing()`.
 #' 
 #' @param var.type Character, the variable type.
 #' @param rng Numeric, a priori estimate of the lower and upper bounds of a
@@ -703,7 +703,7 @@ setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
 #' @param impute.rng Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
 #'    values in numeric or integer-type variables should be imputed 
 #' @param impute.bins Character (or numeric for logical variables), a list of bins from which NA values
-#'    values in character or logical-type variables should be imputed
+#'    values in character-type variables should be imputed
 #' @param impute Boolean, a boolean value indicating if logical-type variables should have NA values
 #'    imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
 #'    histogram will have 3 bins: 0, 1, and NA.
@@ -738,7 +738,7 @@ dpHistogram$methods(
         # set parameters of the histogram
         .self$var.type <- var.type
         .self$variable <- variable
-        .self$n <- check_n_validity(n)
+        .self$n <- checkNValidity(n)
         .self$epsilon <- epsilon
         .self$accuracy <- accuracy
         .self$bins <- bins # may be null

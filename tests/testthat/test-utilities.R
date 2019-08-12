@@ -13,25 +13,25 @@ test_that('Uniform distribution drawing functions as expected', {
   expect_equal(sum(uniform_list>0), n)
 })
 
-test_that('checkrange is as expected', {
+test_that('checkRange is as expected', {
   rng1 = c(0,1)
   rng2 = c(0,1,2)
   rng3 = c(1)
   
-  expect_equal(checkrange(rng1, "numeric"),rng1)
-  expect_warning(checkrange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
-  expect_equal(checkrange(rng2, "numeric"), c(0,2))
-  expect_error(checkrange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
+  expect_equal(checkRange(rng1, "numeric"),rng1)
+  expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_equal(checkRange(rng2, "numeric"), c(0,2))
+  expect_error(checkRange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
 })
 
-test_that('censordata is as expected', {
+test_that('censorData is as expected', {
   residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
   chars = c('a', 'b', 'c', 'c', 'd')
   nums = 1:10
   
-  residence_out = censordata(x=residence, var_type='factor', levels=c("OR"))
-  chars_out = censordata(x=chars, var_type='character', levels=c('a', 'b', 'c'))
-  nums_out = censordata(x=nums, var_type='integer', rng=c(2.5, 7))
+  residence_out = censorData(x=residence, var_type='factor', levels=c("OR"))
+  chars_out = censorData(x=chars, var_type='character', levels=c('a', 'b', 'c'))
+  nums_out = censorData(x=nums, var_type='integer', rng=c(2.5, 7))
   
   expect_equal(residence_out, factor(c(NA,"OR","OR","OR",NA,NA)))
   expect_equal(chars_out, factor(c('a','b','c','c',NA)))

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities-noise-generation.R
 \name{plap}
 \alias{plap}
-\title{LaPlace Cumulative Distribution Function}
+\title{Laplace Cumulative Distribution Function}
 \usage{
 plap(x, mu = 0, b = 1)
 }

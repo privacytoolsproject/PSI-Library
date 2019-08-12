@@ -13,7 +13,7 @@ mechanismExponential <- setRefClass(
 
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, rng=.self$rng, levels=.self$bins)
+        x <- censorData(x, .self$var.type, rng=.self$rng, levels=.self$bins)
         x <- fillMissing(x, .self$var.type, rng=.self$rng, categories=.self$bins)
         fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
         input.vals = c(list(x=x), fun.args)

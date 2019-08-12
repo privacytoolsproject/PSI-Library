@@ -59,7 +59,7 @@ mechanismBootstrap$methods(
 
 mechanismBootstrap$methods(
     evaluate = function(fun, x, sens, postFun) {
-        x <- censordata(x, .self$var.type, .self$rng)
+        x <- censorData(x, .self$var.type, .self$rng)
         x <- fillMissing(x, .self$var.type, .self$impute.rng[0], .self$impute.rng[1])
         epsilon.part <- epsilon / .self$n.boot
         release <- replicate(.self$n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=.self$bootStatEval))

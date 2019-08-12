@@ -13,7 +13,7 @@
 #' 
 #' @return Accuracy guarantee for statistic release given epsilon.
 
-stability.getAccuracy <- function(sensitivity, epsilon, delta = 2^-30, alpha=0.05) {
+stabilityGetAccuracy <- function(sensitivity, epsilon, delta = 2^-30, alpha=0.05) {
     accuracy <- (sensitivity/epsilon) * log(2/(alpha*delta)) + 1
     return(accuracy)
 }
@@ -34,27 +34,9 @@ stability.getAccuracy <- function(sensitivity, epsilon, delta = 2^-30, alpha=0.0
 #' 
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 
-stability.getEpsilon <- function(sensitivity, accuracy, delta = 2^-30, alpha=0.05) {
+stabilityGetEpsilon <- function(sensitivity, accuracy, delta = 2^-30, alpha=0.05) {
     epsilon <- sensitivity * log(2/(alpha*delta)) / (accuracy - 1)
     return(epsilon)
-}
-
-#' Utility function to verify the type of histogram mechanism
-#'
-#' @param mechanism Character string specifying the mechanism
-#' 
-#' Verifies that the mechanism is one of `noisy`, `stability`, or `random` and returns 
-#' the mechanism if so, else throws an error 
-#' 
-#' @examples
-#' 
-#' check_histogram_mechanism('stability')
-#' @export
-check_histogram_mechanism <- function(mechanism) { 
-    if (!(is.null(mechanism)) && !(mechanism %in% c('noisy', 'stability', 'random'))) { 
-        stop('`mechanism` must be one of `noisy`, `stability`, `random`')
-    } 
-    return(mechanism)
 }
 
 

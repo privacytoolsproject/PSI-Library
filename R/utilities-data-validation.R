@@ -77,7 +77,7 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
 #' 
 #' @return n, if n is a positive whole number
 
-check_n_validity <- function(n) {
+checkNValidity <- function(n) {
     if ((n > 0) & (n%%1 == 0)) {
         return(n)
     } else {
@@ -98,12 +98,12 @@ check_n_validity <- function(n) {
 #' @return An ordered pair.
 #' @examples
 #'
-#' checkrange(c(1,3))
-#' checkrange(1:3)
-#' \dontrun{checkrange(1)}
-#' @rdname checkrange
+#' checkRange(c(1,3))
+#' checkRange(1:3)
+#' \dontrun{checkRange(1)}
+#' @rdname checkRange
 #' @export
-checkrange <- function(rng, var.type) {
+checkRange <- function(rng, var.type) {
     if (NCOL(rng) > 1) {
         for (i in 1:nrow(rng)) {
             rng[i, ] <- sort(rng[i, ])
@@ -135,12 +135,12 @@ checkrange <- function(rng, var.type) {
 #'
 #' @examples
 #' 
-#' checkepsilon(0.1)
-#' \dontrun{checkepsilon(-2)}
-#' \dontrun{checkepsilon(c(0.1,0.5))}
-#' @rdname checkepsilon
+#' checkEpsilon(0.1)
+#' \dontrun{checkEpsilon(-2)}
+#' \dontrun{checkEpsilon(c(0.1,0.5))}
+#' @rdname checkEpsilon
 #' @export
-checkepsilon <- function(epsilon) {
+checkEpsilon <- function(epsilon) {
     if (epsilon <= 0) {
         stop("Privacy parameter epsilon must be a value greater than zero.")
     }
@@ -169,11 +169,11 @@ checkepsilon <- function(epsilon) {
 #' @return Original vector with values outside the bounds censored to the bounds.
 #' @examples
 #' 
-#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
-#' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
-#' @rdname censordata
+#' censorData(x=1:10, var_type='integer', rng=c(2.5, 7))
+#' censorData(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
+#' @rdname censorData
 #' @export
-censordata <- function(x, var_type, rng=NULL, levels=NULL) {
+censorData <- function(x, var_type, rng=NULL, levels=NULL) {
     if (var_type %in% c('character', 'factor')) {
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
@@ -186,12 +186,12 @@ censordata <- function(x, var_type, rng=NULL, levels=NULL) {
         }
         if (NCOL(x) > 1) {
             for (j in 1:ncol(x)) {
-                rng[j, ] <- checkrange(rng[j, ], var_type)
+                rng[j, ] <- checkRange(rng[j, ], var_type)
                 x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
                 x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
             }
         } else {
-            rng <- checkrange(rng, var_type)
+            rng <- checkRange(rng, var_type)
             x[x < rng[1]] <- rng[1]
             x[x > rng[2]] <- rng[2]
         }
@@ -210,10 +210,10 @@ censordata <- function(x, var_type, rng=NULL, levels=NULL) {
 #' @return The original character string indicating the variable type.
 #' @examples 
 #' 
-#' check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
-#' @rdname check_variable_type
+#' checkVariableType(type='Numeric', in_types=c('Numeric', 'Factor'))
+#' @rdname checkVariableType
 #' @export
-check_variable_type <- function(type, in_types) { 
+checkVariableType <- function(type, in_types) { 
     if (!(type %in% in_types)) {
         stop(paste('Variable type', type, 'should be one of', paste(in_types, collapse = ', ')))
     } 
@@ -236,12 +236,12 @@ check_variable_type <- function(type, in_types) {
 #' @return Logical form of \code{x} coded 0-1.
 #' @examples
 #' 
-#' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
-#' make_logical(sample(c(0, 1), size=8, replace=TRUE))
-#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
-#' @rdname make_logical
+#' makeLogical(sample(c('cat', 'dog'), size=8, replace=TRUE))
+#' makeLogical(sample(c(0, 1), size=8, replace=TRUE))
+#' makeLogical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
+#' @rdname makeLogical
 #' @export
-make_logical <- function(x) {
+makeLogical <- function(x) {
     if (!length(unique(x)) <= 2) { # how to handle if contains 1 value only?
         stop('Variable has more than two values')
     }

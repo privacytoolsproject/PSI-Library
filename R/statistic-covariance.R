@@ -11,7 +11,7 @@
 
 coefficient.release <- function(formula, release, n) {
   intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
-  coefficients <- linear.reg(formula, release, n, intercept)
+  coefficients <- linearReg(formula, release, n, intercept)
   release <- list(name='Linear regression', 
                   n=n, 
                   formula=formula, 
@@ -80,7 +80,7 @@ covariance.formatRelease <- function(release, columns) {
 covariance.postLinearRegression <- function(release, n, intercept, formula) {
   out.summaries <- vector('list', length(formula))
   for (f in 1:length(formula)) {
-    out.summaries[[f]] <- linear.reg(formula[[f]], release, n, intercept)
+    out.summaries[[f]] <- linearReg(formula[[f]], release, n, intercept)
   }
   return(out.summaries)
 }
@@ -124,12 +124,12 @@ dpCovariance$methods(
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism
     .self$var.type <- var.type
-    .self$n <- check_n_validity(n)
+    .self$n <- checkNValidity(n)
     .self$epsilon <- epsilon
     .self$delta <- delta
     .self$rng <- rng
     
-    checkepsilon(epsilon)
+    checkEpsilon(epsilon)
     
     if (is.null(impute.rng)) {
       .self$impute.rng <- rng
@@ -159,7 +159,7 @@ dpCovariance$methods(
     out$release <- covariance.formatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {
-      out$linear.regression <- covariance.postLinearRegression(out$release, n, intercept, formula)
+      out$linearRegression <- covariance.postLinearRegression(out$release, n, intercept, formula)
     }
     return(out)
   })

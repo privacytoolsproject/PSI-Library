@@ -156,18 +156,18 @@ dpMean$methods(
         .self$mechanism <- mechanism
         .self$var.type <- var.type
         .self$variable <- variable
-        .self$n <- check_n_validity(n)
+        .self$n <- checkNValidity(n)
         .self$alpha <- alpha
-        .self$rng <- checkrange(rng, var.type)
+        .self$rng <- checkRange(rng, var.type)
         .self$sens <- diff(.self$rng) / n
         
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
+            .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
-            checkepsilon(epsilon)
+            checkEpsilon(epsilon)
             .self$epsilon <- epsilon
-            .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
+            .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
         
         if (is.null(impute.rng)) {

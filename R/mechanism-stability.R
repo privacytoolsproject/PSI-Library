@@ -74,7 +74,7 @@ mechanismStability$methods(
             imputationRange <- dataRange
         }
         
-        x <- censordata(x, .self$var.type, dataRange, histogramBins)
+        x <- censorData(x, .self$var.type, dataRange, histogramBins)
         x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
         fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
         input.vals <- c(list(x=x), fun.args)
