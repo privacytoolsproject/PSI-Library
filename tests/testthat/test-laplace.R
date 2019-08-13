@@ -26,8 +26,8 @@ test_that('Laplace mechanism truncates to inputted range', {
 
 test_that('Laplace mechanism correctly imputes data', {
   x <- c(0,1,2,3,NA)
-  imputtedMech <- mechanismLaplace$new(epsilon=1, varType='integer', rng=c(0,5))
-  out <- imputtedMech$evaluate(identityFun, x, sens, post)
+  imputedMech <- mechanismLaplace$new(epsilon=1, varType='integer', rng=c(0,5))
+  out <- imputedMech$evaluate(identityFun, x, sens, post)
   expect_length(out$release, length(x))
 })
 
