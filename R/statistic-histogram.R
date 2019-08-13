@@ -748,7 +748,7 @@ dpHistogram$methods(
         .self$impute <- impute
         .self$nBoot <- nBoot
         .self$granularity <- granularity # may be null
-        .self$boot.fun <- bootHist
+        .self$bootFun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
         
         # if the mechanism used is NOT the stability mechanism:

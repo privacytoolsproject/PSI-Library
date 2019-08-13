@@ -43,7 +43,7 @@ mechanismObjective$methods(
             xNames <- c(xNames, 'variance')
             yScaler <- mapMatrixUnit(y, p=2)
             y <- yScaler$matrix
-            yMaxNorm <- yScaler$max.norm
+            yMaxNorm <- yScaler$maxNorm
         } else {
             startParams <- rep(0, ncol(X))
             yMaxNorm <- NULL
@@ -80,7 +80,7 @@ mechanismObjective$methods(
             b <- randomVec*(bNorm/randomVecNorm)
             
             estimates <- optim(par=startParams, fn=.self$objective, X=X, y=y, b=b, n=n, lambda=lambda)$par
-            release <- data.frame(scaleRelease(estimates, scaler$max.norm, yMaxNorm))
+            release <- data.frame(scaleRelease(estimates, scaler$maxNorm, yMaxNorm))
             names(release) <- 'estimate'
             rownames(release) <- xNames
         } else {
@@ -93,7 +93,7 @@ mechanismObjective$methods(
                 bNorm <- dpNoise(n=1, scale=(2 / localEpsilon), dist='gamma', shape=length(startParams))
                 b <- dpNoise(n=length(startParams), scale=(-localEpsilon * bNorm), dist='laplace')
                 estimates <- optim(par=startParams, fn=.self$objective, X=xStar, y=yStar, b=b, n=n)$par
-                release[[i]] <- scaleRelease(estimates, scaler$max.norm, yMaxNorm)
+                release[[i]] <- scaleRelease(estimates, scaler$maxNorm, yMaxNorm)
             }
             release <- data.frame(do.call(rbind, release))
             names(release) <- xNames

@@ -176,7 +176,7 @@ dpMean$methods(
             .self$imputeRng <- checkImputationRange(imputationRange=imputeRng, rng=.self$rng, varType=.self$varType)
         }
         
-        .self$boot.fun <- bootMean
+        .self$bootFun <- bootMean
         .self$nBoot <- nBoot
 })
 
@@ -197,12 +197,12 @@ dpMean$methods(
         } 
         if (varType == 'logical') {
             if (mechanism == 'mechanismBootstrap') {
-                bagged.estimate <- mean(out$release)
-                out$std.dev <- meanPostStandardDeviation(bagged.estimate)
-                out$median <- meanPostMedian(bagged.estimate)
-                out$histogram <- mean.postHistgram(bagged.estimate)
+                baggedEstimate <- mean(out$release)
+                out$stdDev <- meanPostStandardDeviation(baggedEstimate)
+                out$median <- meanPostMedian(baggedEstimate)
+                out$histogram <- meanPostHistgram(baggedEstimate)
             } else {
-                out$std.dev <- meanPostStandardDeviation(out$release)
+                out$stdDev <- meanPostStandardDeviation(out$release)
                 out$median <- meanPostMedian(out$release)
                 out$histogram <- meanPostHistogram(out$release, n)
             }
