@@ -2,15 +2,15 @@ library(PSIlence)
 context("utilities")
 
 test_that('Uniform distribution drawing functions as expected', {
-  uniform_repeatable1 <- dpUnif(n=1, seed=75436)
-  uniform_repeatable2 <- dpUnif(n=1, seed=75436)
-  expect_equal(uniform_repeatable1, uniform_repeatable2)
+  uniformRepeatable1 <- dpUnif(n=1, seed=75436)
+  uniformRepeatable2 <- dpUnif(n=1, seed=75436)
+  expect_equal(uniformRepeatable1, uniformRepeatable2)
   
   n <- 5
-  uniform_list <- dpUnif(n=n)
-  expect_length(uniform_list, n)
-  expect_equal(sum(uniform_list<1), n)
-  expect_equal(sum(uniform_list>0), n)
+  uniformList <- dpUnif(n=n)
+  expect_length(uniformList, n)
+  expect_equal(sum(uniformList<1), n)
+  expect_equal(sum(uniformList>0), n)
 })
 
 test_that('checkRange is as expected', {
@@ -29,13 +29,13 @@ test_that('censorData is as expected', {
   chars = c('a', 'b', 'c', 'c', 'd')
   nums = 1:10
   
-  residence_out = censorData(x=residence, varType='factor', levels=c("OR"))
-  chars_out = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
-  nums_out = censorData(x=nums, varType='integer', rng=c(2.5, 7))
+  residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
+  charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
+  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
   
-  expect_equal(residence_out, factor(c(NA,"OR","OR","OR",NA,NA)))
-  expect_equal(chars_out, factor(c('a','b','c','c',NA)))
-  expect_equal(nums_out, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
+  expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
+  expect_equal(charsOut, factor(c('a','b','c','c',NA)))
+  expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
 })
 
 test_that('getFuncArgs performs as expected', {
@@ -101,16 +101,16 @@ test_that('fillMissing as expected', {
   
   y <- rnorm(100)
   y[sample(1:100, size=10)] <- NA
-  y_imputed <- fillMissing(x=y, varType='numeric', imputeRng=c(-1,1))
+  yImputed <- fillMissing(x=y, varType='numeric', imputeRng=c(-1,1))
   
-  expect_equal(sum(is.na(y_imputed)), 0)
+  expect_equal(sum(is.na(yImputed)), 0)
   
   s <- sample(animals, size=100, replace=TRUE)
   s[sample(1:100, size=10)] <- NA
-  s_imputed <- fillMissing(x=s, varType='factor', categories=animals)
+  sImputed <- fillMissing(x=s, varType='factor', categories=animals)
   
-  expect_equal(sum(is.na(s_imputed)), 0)
-  expect_true(is.factor(s_imputed))
+  expect_equal(sum(is.na(sImputed)), 0)
+  expect_true(is.factor(sImputed))
   
   N <- 100
   x1 <- x2 <- rnorm(N)
@@ -118,7 +118,7 @@ test_that('fillMissing as expected', {
   x2[sample(1:N, size=10)] <- NA
   impRng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
   df <- data.frame(x1, x2)
-  df_imputed <- fillMissing(x=df, varType='numeric', imputeRng=impRng)
+  dfImputed <- fillMissing(x=df, varType='numeric', imputeRng=impRng)
   
-  expect_equal(sum(is.na(df_imputed)), 0)
+  expect_equal(sum(is.na(dfImputed)), 0)
 })
