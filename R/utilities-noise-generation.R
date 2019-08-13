@@ -88,7 +88,7 @@ dpUnif <- function(n, seed=NULL) {
 dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
-        return(qlap(u, b=scale))
+        return(qLap(u, b=scale))
     } else if (dist == 'gaussian') {
         return(qnorm(u, sd=scale))
     } else if (dist == 'gamma') {
@@ -108,9 +108,9 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @return Random draws from Laplace distribution
 #' @examples
 #' 
-#' rlap(size=1000)
+#' rLap(size=1000)
 #' @export
-rlap = function(mu=0, b=1, size=1) {
+rLap = function(mu=0, b=1, size=1) {
     p <- runif(size) - 0.5
     draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
     return(draws)
@@ -127,9 +127,9 @@ rlap = function(mu=0, b=1, size=1) {
 #' @examples
 #' 
 #' x <- seq(-3, 3, length.out=61)
-#' dlap(x)
+#' dLap(x)
 #' @export
-dlap <- function(x, mu=0, b=1) {
+dLap <- function(x, mu=0, b=1) {
     dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
 }
@@ -148,10 +148,10 @@ dlap <- function(x, mu=0, b=1) {
 #' @examples
 #' 
 #' x <- 0
-#' plap(x)
-#' @rdname plap
+#' pLap(x)
+#' @rdname pLap
 #' @export
-plap <- function(x, mu=0, b=1) {
+pLap <- function(x, mu=0, b=1) {
     cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
     return(cdf)
 }
@@ -165,9 +165,9 @@ plap <- function(x, mu=0, b=1) {
 #' @return Quantile function
 #' @examples
 #' probs <- c(0.05, 0.50, 0.95)
-#' qlap(probs)
+#' qLap(probs)
 #' @export
-qlap <- function(p, mu=0, b=1) {
+qLap <- function(p, mu=0, b=1) {
     q <- ifelse(p < 0.5, mu + b * log(2 * p), mu - b * log(2 - 2 * p))
     return(q)
 }
