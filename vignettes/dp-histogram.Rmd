@@ -44,12 +44,12 @@ library(PSIlence)
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 data <- data.frame(x1)
 
-example_dpHistogram <- dpHistogram$new(var.type = 'numeric', variable = 'x1', n = 10, epsilon=1, 
-                                       rng=c(3,70), n.bins=3, delta=10^-3)
+dpHistogramExample <- dpHistogram$new(varType = 'numeric', variable = 'x1', n = 10, epsilon=1, 
+                                       rng=c(3,70), nBins=3, delta=10^-3)
 
-example_dpHistogram$release(data)
+dpHistogramExample$release(data)
 
-print(example_dpHistogram$result)
+print(dpHistogramExample$result)
 ```
 
 Arguments
@@ -57,7 +57,7 @@ Arguments
 
 In typical usage, there are two methods to the `dpHistogram` class. The `new` method, creates an object of the class and accepts the following arguments:
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
+* `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
 
 * `variable` \ Character, the name of the variable in the data for which to calculate the histogram.
 
@@ -69,9 +69,9 @@ In typical usage, there are two methods to the `dpHistogram` class. The `new` me
 
 * `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. In other words, it should be a list of the form: in the form c(data minimum, data maximum). Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
 
-* `bins` \ Numeric or character (must match the variable type in `var.type`), a vector of bins for the histogram, as chosen by the user. Optional, default `NULL`. If `NULL`, bins are detected by the histogram statistic. If `NULL` for `'character'` type variables, the detected bins will only be the variables present in the data, and the stability mechanism will be used to calculate the histogram. If `NULL` for `'numeric'` or `'integer'` type variables, the detected bins will be of equal width.
+* `bins` \ Numeric or character (must match the variable type in `varType`), a vector of bins for the histogram, as chosen by the user. Optional, default `NULL`. If `NULL`, bins are detected by the histogram statistic. If `NULL` for `'character'` type variables, the detected bins will only be the variables present in the data, and the stability mechanism will be used to calculate the histogram. If `NULL` for `'numeric'` or `'integer'` type variables, the detected bins will be of equal width.
 
-* `n.bins` \ Numeric, the number of bins for the histogram. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `'NULL'` for `numeric` and `integer` types, `granularity` must be entered.
+* `nBins` \ Numeric, the number of bins for the histogram. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `'NULL'` for `numeric` and `integer` types, `granularity` must be entered.
 
 * `granularity` \ Numeric, the number of items per histogram bin. Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `'NULL'` for `numeric` and `integer` types, `granularity` must be entered.
 
@@ -81,13 +81,13 @@ In typical usage, there are two methods to the `dpHistogram` class. The `new` me
 
 * `error` \ Numeric, the error term of the statistical significance level. Default is $10^{-9}$.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the numeric vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. Ignored for `character` and `logical` types. See Notes below for more information.
+* `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the numeric vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. Ignored for `character` and `logical` types. See Notes below for more information.
 
-* `impute.bins` \ Character (or numeric for logical variables), a list of bins from which missing (or NA) values of character or logical-type variables will be imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the histogram bins. Ignored for `numeric` and `integer` types.
+* `imputeBins` \ Character (or numeric for logical variables), a list of bins from which missing (or NA) values of character or logical-type variables will be imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the histogram bins. Ignored for `numeric` and `integer` types.
 
 * `impute` \ Boolean, if true then the mechanism should replace missing values with known values from the data. If false, the mechanism should leave missing values as `NA`
 
-* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
+* `nBoot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `nBoot` replications and the estimates for each are returned.
 
 &nbsp; 
 
@@ -115,10 +115,10 @@ __Numeric Examples__
 To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
 
 ```{r}
-numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, 
-                                     rng=c(0, 750000), n.bins = 5)
-numeric_histogram$release(PUMS5extract10000)
-print(numeric_histogram$result)
+numericHistogram <- dpHistogram$new(varType='numeric', variable='income', n=10000, epsilon=0.1, 
+                                     rng=c(0, 750000), nBins = 5)
+numericHistogram$release(PUMS5extract10000)
+print(numericHistogram$result)
 ```
 
 In the numeric example above, the histogram statistic detects the buckets for the histogram by creating 5 equal-width buckets for the range of the data. But in the result, we can see that a disproportional number of the data points are in the first bucket. This makes sense, as this is income data, and a large portion of people have an income less than \$150,000 dollars (the range of the first bucket). If we have prior knowledge of the data, we can enter specific buckets for the histogram in the `bins` parameter instead of entering a range. For example, let's say we want a histogram of incomes less than or equal to \$50,000; \$50,000 - \$100,000; \$100,000 - \$200,000; \$200,000 - \$300,000; \$300,000 - \$400,000; and > \$400,000:
@@ -137,10 +137,10 @@ incomeBins <- c(0,50000, 100000, 200000, 300000, 400000, 750000)
 # where min = the minimum of the dataset = 0
 # and max = the maximum of the dataset = 750000
 
-numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, 
-                                     n.bins=6, bins=incomeBins)
-numeric_histogram$release(PUMS5extract10000)
-print(numeric_histogram$result)
+numericHistogram <- dpHistogram$new(varType='numeric', variable='income', n=10000, epsilon=0.1, 
+                                     nBins=6, bins=incomeBins)
+numericHistogram$release(PUMS5extract10000)
+print(numericHistogram$result)
 ```
 
 Note: entering bins is completely optional and should only be done if you have prior knowledge of the data.
@@ -149,20 +149,20 @@ Note: entering bins is completely optional and should only be done if you have p
 
 __Logical Examples__
 
-To calculate the histogram of a logical variable, input a logical vector into `variable` and update `var.type` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
+To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
 
 ```{r}
-logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
-logical_histogram$release(PUMS5extract10000)
-print(logical_histogram$result)
+logicalHistogram <- dpHistogram$new(varType='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
+logicalHistogram$release(PUMS5extract10000)
+print(logicalHistogram$result)
 ```
 
 In the example above, we set the `impute` parameter equal to `TRUE`, meaning that any `NA` (empty) values would be randomly assigned 0 or 1 so no values in the data set are empty, and there is no `NA` bucket in the histogram. By default `impute = FALSE`, so if we do not specify a value for `impute`, then there will be an `NA` bucket in the histogram release:
 
 ```{r}
-logical_histogram <- dpHistogram$new(var.type='logical', variable='married', n=10000, epsilon=0.1)
-logical_histogram$release(PUMS5extract10000)
-print(logical_histogram$result)
+logicalHistogram <- dpHistogram$new(varType='logical', variable='married', n=10000, epsilon=0.1)
+logicalHistogram$release(PUMS5extract10000)
+print(logicalHistogram$result)
 ```
 
 For logical variables, it is never necessary to enter a vector of bins, you just need to specify whether to impute empty values or not. It is also not necessary to enter a range for logical variables, because the range of a logical variable is known to be c(0,1).
@@ -171,12 +171,12 @@ For logical variables, it is never necessary to enter a vector of bins, you just
 
 __Character (or Categorical) Examples__
 
-To calculate the histogram of a categorical (or 'character') variable, input a character variable name into `variable` and update `var.type` to 'character'.
+To calculate the histogram of a categorical (or 'character') variable, input a character variable name into `variable` and update `varType` to 'character'.
 
 ```{r}
-character_histogram <- dpHistogram(var.type='character', variable='tobgp', n=88, epsilon=1.5, delta=10^-4)
-character_histogram$release(esoph)
-print(character_histogram$result)
+characterHistogram <- dpHistogram(varType='character', variable='tobgp', n=88, epsilon=1.5, delta=10^-4)
+characterHistogram$release(esoph)
+print(characterHistogram$result)
 ```
 
 Notice that the sample size in this example is only 88 observations, so to preserve accuracy we are forced to increase the epsilon and delta parameters. In some cases, increasing the privacy budget may not be a viable option (the data may be sensitive and the user cannot risk leaking data with a low level of privacy), so the user would be forced to use noisier data (i.e. keep using a small value for epsilon to maintain privacy, but get a less accurate differentially private estimate).
@@ -184,19 +184,19 @@ Notice that the sample size in this example is only 88 observations, so to prese
 Similar to numeric variables, you can enter a specific vector of bins for the histogram for a character variable if you have prior knowledge of the data. In this case, the resulting histogram will have each bin entered in the `bins` vector, even if the bin would be empty in the underlying data:
 
 ```{r}
-character_histogram <- dpHistogram(var.type='character', variable="Employee.Status", n=469, epsilon=0.5,
+characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5,
                                    bins=c("Detailee","Employee","Employee (part-time)"))
-character_histogram$release(SocrataWhiteHouseEmployeeSalaries)
-print(character_histogram$result)
+characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
+print(characterHistogram$result)
 ```
 
-If you would like NA (empty or unknown) values to be imputed (or replaced) by a specific subset of input bins, you can specify the imputation bins with `impute.bins`. You may want to do this if you know the underlying data is skewed, meaning an unkown value is more likely to be of a certain value as opposed to others. Specifying `impute.bins` is optional, and if it is not specified the NA values ill be imputed using a uniform distribution on all imput bins (i.e. NA values will be replaced with any known value with equal probability).
+If you would like NA (empty or unknown) values to be imputed (or replaced) by a specific subset of input bins, you can specify the imputation bins with `imputeBins`. You may want to do this if you know the underlying data is skewed, meaning an unkown value is more likely to be of a certain value as opposed to others. Specifying `imputeBins` is optional, and if it is not specified the NA values ill be imputed using a uniform distribution on all imput bins (i.e. NA values will be replaced with any known value with equal probability).
 
 ```{r}
-character_histogram <- dpHistogram(var.type='character', variable="Employee.Status", n=469, epsilon=0.5,
-                                   bins=c("Detailee","Employee","Employee (part-time)"), impute.bins=c("Detailee","Employee"))
-character_histogram$release(SocrataWhiteHouseEmployeeSalaries)
-print(character_histogram$result)
+characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5,
+                                   bins=c("Detailee","Employee","Employee (part-time)"), imputeBins=c("Detailee","Employee"))
+characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
+print(characterHistogram$result)
 ```
 
 &nbsp;
@@ -211,17 +211,17 @@ If you enter a list of bins for any type of variable, the Laplace mechanism will
 If you do not enter bins for categorical variables, the stability mechanism will be used. The stability mechanism wil determine appropriate bins for the histogram, and will remove any bins with too low of a count, which may breach privacy. The example below is the same as the character histogram with the bins entered above, except the bins are removed and a delta value is entered. Notice how the result is different because the stability mechanism is used:
 
 ```{r}
-character_histogram <- dpHistogram(var.type='character', variable="Employee.Status", n=469, epsilon=0.5, delta=10^-6)
-character_histogram$release(SocrataWhiteHouseEmployeeSalaries)
-print(character_histogram$result)
+characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5, delta=10^-6)
+characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
+print(characterHistogram$result)
 ```
 
 If a data range is not entered for a numeric variable, the stability mechanism will be used. A user might use this feature for one of two reasons: either they are querying an unfamiliar dataset and they do not know the data range, or they are releasing a histogram with a sensitive data range and  they only want to reveal the data range in a stable way. Below is the same numeric histogram as the first numeric example above, except the range is not entered. Notice how the result is different because the stability mechanism is used:
 
 ```{r}
-numeric_histogram <- dpHistogram$new(var.type='numeric', variable='income', n=10000, epsilon=0.1, n.bins = 5)
-numeric_histogram$release(PUMS5extract10000)
-print(numeric_histogram$result)
+numericHistogram <- dpHistogram$new(varType='numeric', variable='income', n=10000, epsilon=0.1, nBins = 5)
+numericHistogram$release(PUMS5extract10000)
+print(numericHistogram$result)
 ```
 
 A delta value was entered in the character stability example above, and was not entered for the numeric stability example. The library has a default delta value of $2^{^-30}$, so it is not necessary to entere one unless you are comfortable with differential privacy concepts.
@@ -249,8 +249,8 @@ The list in the `result` attribute has the following values.
 * `mean` \ The mean of the noisy data. Only available for logical vectors.
 * `median` \ The median of the noisy data. Only available for logical vectors.
 * `variance` \ The variance of the noise dat. Only available for logical vectors.
-* `std.dev` \ The standard deviation of the noise dat. Only available for logical vectors.
+* `stdDev` \ The standard deviation of the noise dat. Only available for logical vectors.
 
 Notes
 ------
-* For the `impute.rng` argument, the imputation strategy is to use a Uniform distribution to choose any value in the imputation range with equal probability.
+* For the `imputeRng` argument, the imputation strategy is to use a Uniform distribution to choose any value in the imputation range with equal probability.
