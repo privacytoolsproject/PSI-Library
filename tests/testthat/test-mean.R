@@ -24,9 +24,9 @@ test_that('range checks throw correct warning', {
 test_that('error thrown when n not positive or whole number', {
     epsilonTest <- 0.1
     deltaTest <- 10^-6
-    expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=-1, epsilon=epsilonTest, rng=c(100)),
+    expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=-1, epsilon=epsilonTest, rng=c(0,100)),
                  "n must be a positive whole number")
-    expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=0.5, epsilon=epsilonTest, rng=c(-10,0,100)),
+    expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=0.5, epsilon=epsilonTest, rng=c(0,100)),
                  "n must be a positive whole number")
 })
 
@@ -44,6 +44,7 @@ test_that('range checks throw correct warning', {
     expect_equal(length(dpMeanTest$result$release), 1)
     expect_equal(dpMeanTest$epsilon, epsilonTest)
     expect_equal(length(dpMeanTest$result$interval), 2)
+    expect_equal(length(dpMeanTest$result$histogram), 2)
 })
 
 # test accuracy and epsilon calculations 

@@ -39,5 +39,5 @@ will still be released in the result. It is possible that this non-existent bin
 will still have a count, because it will be an option during data imputation in 
 the call to `fillmissing()`. If the input list of bins does not include a value 
 that exists in the data, the existing value will be changed to `NA` in the call 
-to `censorData()` and will then be imputed as one of the input bins in `fillmissing()`.
+to `censorData()` and will then be imputed as one of the input bins in `fillMissing()`.
 }
