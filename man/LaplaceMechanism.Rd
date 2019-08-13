@@ -22,6 +22,34 @@ result of post-processing on input function "fun" evaluated on database "x", ass
 Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
 "x" using the Laplace mechanism.
 }
+\examples{
+# histogram example
+
+# the function in `statistic-histogram.R` that creates a histogram from input data
+histogram_function <- fun.hist 
+# the data frame that holds the data we want to analyze, in this case the data is called "PUMS5extract10000"
+data <- data(PUMS5extract10000) 
+# the variable for which we want a histogram
+variable <- "age"
+# the sensitivity for the histogram, the default sensitivity for histograms is 2 
+sens <- 2 
+# the post-processing function to use to format the histogram release correctly
+post_processing_function <- dpHistogram$postProcess 
+
+laplace_histogram <- mechanismLaplace$evaluate(histogram_function, data[, variable], sens, post_processing_function)
+
+# mean example
+
+mean_function <- mean
+# the sensitivity for a differntially private mean in calculated as the difference in the data range divided by the number of data points
+sens <- diff(rng) / n 
+# the post-processing function to use to format the mean release correctly
+post_processing_function <- dpMean$postProcess 
+# `data` and `variable` same as above
+
+laplace_mean <- mechanismLaplace$evaluate(mean_function, data[, variable], sens, post_processing_function)
+
+}
 \references{
 C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
 }

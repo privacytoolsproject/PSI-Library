@@ -7,9 +7,9 @@
 #'    variable.
 #'    
 #' @return Standard deviation of the logical variable
-#' @rdname mean.postStandardDeviation
+#' @rdname meanPostStandardDeviation
 
-mean.postStandardDeviation <- function(release) {
+meanPostStandardDeviation <- function(release) {
     sd <- sqrt(release * (1 - release))
     return(sd)
 }
@@ -24,9 +24,9 @@ mean.postStandardDeviation <- function(release) {
 #'    variable.
 #'
 #' @return Median of the logical variable
-#' @rdname mean.postMedian
+#' @rdname meanPostMedian
 
-mean.postMedian <- function(release) {
+meanPostMedian <- function(release) {
     m <- ifelse(release < 0.5, 0, 1)
     return(m)
 }
@@ -40,61 +40,14 @@ mean.postMedian <- function(release) {
 #' @param n Integer indicating number of observations
 #'
 #' @return Data frame, histogram of the logical variable
-#' @rdname mean.postHistogram
+#' @rdname meanPostHistogram
 
-mean.postHistogram <- function(release, n) {
+meanPostHistogram <- function(release, n) {
     ones <- round(release * n)
     histogram <- data.frame(matrix(c(n - ones, ones), ncol=2))
     names(histogram) <- c(0, 1)
     return(histogram)
 }
-
-
-#' Mean accuracy
-#' 
-#' Function to find the accuracy guarantee of a mean release at a given epsilon 
-#' value. 
-#'    
-#' @param epsilon A numeric vector representing the epsilon privacy parameter.
-#'    Should be of length one and should be between zero and one.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the vector calculating the mean for.
-#' @param rng Numeric a priori estimate of the range
-#' @param alpha A numeric vector specifying the statistical significance level.
-#' @return Accuracy guarantee for mean release given epsilon.
-#' 
-#' @export mean.getAccuracy
-#' @rdname mean.getAccuracy
-
-mean.getAccuracy <- function(epsilon, n, rng, alpha=0.05) {
-    rng <- checkrange(rng)
-    accuracy <- log(1 / alpha) * diff(rng) / (n * epsilon)
-    return(accuracy)
-}
-
-
-#' Mean epsilon
-#' 
-#' Function to find the epsilon value necessary to meet a desired level of 
-#' accuracy for a mean release.
-#'
-#' @param accuracy A numeric vector representing the accuracy needed to 
-#'    guarantee (percent).
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the vector calculating the mean for.
-#' @param rng Numeric a priori estimate of the range
-#' @param alpha A numeric vector specifying the statistical significance level.
-#' @return The scalar epsilon necessary to guarantee the needed accuracy.
-#' 
-#' @export mean.getParameters
-#' @rdname mean.getParameters
-
-mean.getParameters <- function(accuracy, n, rng, alpha=0.05) {
-    rng <- checkrange(rng)
-    epsilon <- log(1 / alpha) * diff(rng) / (n * accuracy)
-    return(epsilon)
-}
-
 
 #' Mean confidence interval
 #' 
@@ -109,10 +62,10 @@ mean.getParameters <- function(accuracy, n, rng, alpha=0.05) {
 #' @param alpha A numeric vector specifying the statistical significance level.
 #' @return Confidence bounds for differentially private mean release.
 #'
-#' @export mean.getCI
-#' @rdname mean.getCI
+#' @export meanGetCI
+#' @rdname meanGetCI
 
-mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
+meanGetCI <- function(release, epsilon, sensitivity, alpha=0.05) {
     z <- qlap((1 - (alpha / 2)), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
@@ -123,13 +76,13 @@ mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
 #' 
 #' Produce a JSON doc for differentially private means.
 #' 
-#' @param output.json Should the output be converted to JSON format. Default
+#' @param outputJSON Should the output be converted to JSON format. Default
 #' to \code{TRUE}.
 #'
 #' @return JSON for mean function
-#' @rdname mean.getJSON
+#' @rdname meanGetJSON
 
-mean.getJSON <- function(output.json=TRUE) {
+meanGetJSON <- function(outputJSON=TRUE) {
     out <- list()
     out$statistic <- 'Mean'
     out$description <- 'Differentially Private Mean'
@@ -145,7 +98,7 @@ mean.getJSON <- function(output.json=TRUE) {
         'n' = 'Number of observations',
         'range' = 'Should be (0, 1)'
     )
-    if (output.json) {
+    if (outputJSON) {
         out <- jsonlite::toJSON(out, pretty=TRUE)
     }
     return(out)
@@ -161,7 +114,7 @@ mean.getJSON <- function(output.json=TRUE) {
 #' @param n Number of observations
 #' @return Mean
 
-boot.mean <- function(xi, n) {
+bootMean <- function(xi, n) {
     return(sum(xi) / n)
 }
 
@@ -170,17 +123,17 @@ boot.mean <- function(xi, n) {
 #'
 #' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
 #'   of \code{c('mechanismLaplace', 'mechanismBootstrap')}.
-#' @param var.type Character, the R variable type. One of \code{c('numeric',
+#' @param varType Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
 #' @param Variable Character, variable name.
 #' @param n Integer, number of observations
 #' @param rng Numeric, a priori estimate of the range
 #' @param epsilon Numeric, privacy cost parameter
 #' @param accuracy Numeric, accuracy guarantee given \code{epsilon}
-#' @param impute.rng Numeric, range within which missing values are imputed. If \code{NULL},
+#' @param imputeRng Numeric, range within which missing values are imputed. If \code{NULL},
 #'   the range provided in \code{rng} is used.
 #' @param alpha Numeric, the level of statistical significance. Default 0.05.
-#' @param n.boot Integer, the number of bootstrap replications if using the bootstrap
+#' @param nBoot Integer, the number of bootstrap replications if using the bootstrap
 #'   bootstrap mechanism, ignored otherwise. Default 20.
 #'
 #' @import methods
@@ -197,37 +150,41 @@ dpMean <- setRefClass(
 )
 
 dpMean$methods(
-    initialize = function(mechanism, var.type, variable, n, rng, epsilon=NULL,
-                          accuracy=NULL, impute.rng=NULL, alpha=0.05, n.boot=20, ...) {
+    initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL,
+                          accuracy=NULL, imputeRng=NULL, alpha=0.05, nBoot=20, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
-        .self$var.type <- var.type
+        .self$varType <- varType
         .self$variable <- variable
-        .self$n <- n
+        .self$n <- checkNValidity(n)
         .self$alpha <- alpha
-        .self$rng <- rng
+        .self$rng <- checkRange(rng, varType)
+        .self$sens <- diff(.self$rng) / n
+        
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- mean.getParameters(accuracy, n, rng, alpha)
+            .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
+            checkEpsilon(epsilon)
             .self$epsilon <- epsilon
-            .self$accuracy <- mean.getAccuracy(epsilon, n, rng, alpha)
+            .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
-        if (is.null(impute.rng)) {
-            .self$impute.rng <- rng
+        
+        if (is.null(imputeRng)) {
+            .self$imputeRng <- .self$rng
         } else {
-            .self$impute.rng <- impute.rng
+            .self$imputeRng <- checkImputationRange(imputationRange=imputeRng, rng=.self$rng, varType=.self$varType)
         }
-        .self$boot.fun <- boot.mean
-        .self$n.boot <- n.boot
+        
+        .self$bootFun <- bootMean
+        .self$nBoot <- nBoot
 })
 
 
 dpMean$methods(
     release = function(data, ...) {
         x <- data[, variable]
-        sens <- diff(rng) / n
-        .self$result <- export(mechanism)$evaluate(mean, x, sens, .self$postProcess, ...)
+        .self$result <- export(mechanism)$evaluate(mean, x, .self$sens, .self$postProcess, ...)
 })
 
 dpMean$methods(
@@ -236,18 +193,18 @@ dpMean$methods(
         if (mechanism == 'mechanismLaplace') {
             out$accuracy <- accuracy
             out$epsilon <- epsilon
-            out$interval <- mean.getCI(out$release, epsilon, (diff(rng) / n), alpha)
+            out$interval <- meanGetCI(out$release, epsilon, .self$sens, alpha)
         } 
-        if (var.type == 'logical') {
+        if (varType == 'logical') {
             if (mechanism == 'mechanismBootstrap') {
-                bagged.estimate <- mean(out$release)
-                out$std.dev <- mean.postStandardDeviation(bagged.estimate)
-                out$median <- mean.postMedian(bagged.estimate)
-                out$histogram <- mean.postHistgram(bagged.estimate)
+                baggedEstimate <- mean(out$release)
+                out$stdDev <- meanPostStandardDeviation(baggedEstimate)
+                out$median <- meanPostMedian(baggedEstimate)
+                out$histogram <- meanPostHistgram(baggedEstimate)
             } else {
-                out$std.dev <- mean.postStandardDeviation(out$release)
-                out$median <- mean.postMedian(out$release)
-                out$histogram <- mean.postHistogram(out$release, n)
+                out$stdDev <- meanPostStandardDeviation(out$release)
+                out$median <- meanPostMedian(out$release)
+                out$histogram <- meanPostHistogram(out$release, n)
             }
         }
         return(out)

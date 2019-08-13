@@ -4,15 +4,15 @@ context("covariance")
 data(PUMS5extract10000)
 
 test_that('epsilon checks throw correct warning', {
-  range.income <- c(-10000, 713000)
-  range.education <- c(1, 16)
-  range <- rbind(range.income, range.education)
+  rangeIncome <- c(-10000, 713000)
+  rangeEducation <- c(1, 16)
+  range <- rbind(rangeIncome, rangeEducation)
   
-  expect_error(dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000, 
+  expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000, 
                                 epsilon = -0.1, columns = c("income", "education"), rng = range),
                "Privacy parameter epsilon must be a value greater than zero.")
   
-  expect_error(dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000, 
+  expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000, 
                                 epsilon = c(0.1, 0.5), columns = c("income", "education"), rng = range),
                "Privacy parameter epsilon must be a single value, but is currently a vector of length 2")
 })
@@ -23,7 +23,7 @@ test_that('range checks throw correct warning', {
                                 rng=c(100)),
                "range argument in error: requires upper and lower values as vector of length 2.")
   
-  expect_warning(dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric', n=10000,
+  expect_warning(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n=10000,
                                   epsilon=0.1, columns = c("income", "education"),
                                   rng=c(-10,0,100)),
                  "range argument supplied has more than two values.  Will proceed using min and max values as range.")
@@ -105,4 +105,14 @@ test_that('coefficient release function is correct', {
   output <- as.numeric(coeffs$coefficients[[1]][1]) #extracts coefficient from output
   expectedOutput <- as.numeric(linreg[[1]][2])
   expect_equal(floor(output), floor(expectedOutput)) #check floor of values due to fact that there is some noise added here
+})
+
+# make sure error thrown when n not positive or a whole number
+test_that('make sure error thrown when n not positive or a whole number',{
+  expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = -1, 
+                                epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
+               "n must be a positive whole number")
+  expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 0.5, 
+                                epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
+               "n must be a positive whole number")
 })

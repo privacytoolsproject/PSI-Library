@@ -44,7 +44,7 @@ epsilon <- 0.5
 form <- 'income ~ age + sex'
 rng <- matrix(c(0, 200000, 18, 80, 0, 1), ncol=2, byrow=TRUE)
 mechanism <- 'mechanismObjective'
-var.type <- 'numeric'
+varType <- 'numeric'
 objective <- 'ols'
 ```
 
@@ -53,7 +53,7 @@ objective <- 'ols'
 Next, instantiate a `dpGLM` object using the metadata above.
 
 ```{r, eval = FALSE}
-model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
+model <- dpGLM$new(mechanism=mechanism, varType=varType, n=n, epsilon=epsilon, 
                    formula=form, rng=rng, objective=objective)
 ```
 
@@ -96,7 +96,7 @@ In typical usage, there are two methods to the `dpGLM` class. The `new` method, 
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate. For `dpGLM`, this is always `'mechanismObjective'`.
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. For `dpGLM`, the subset of columns in the data frame to be used in the model fit must be numeric types, and thus this argument should always be `'numeric'`.
+* `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. For `dpGLM`, the subset of columns in the data frame to be used in the model fit must be numeric types, and thus this argument should always be `'numeric'`.
 
 * `n` \ Integer, the number of observations, or rows, in the data frame.
 
@@ -110,9 +110,9 @@ In typical usage, there are two methods to the `dpGLM` class. The `new` method, 
 
 * `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
 
-* `impute.rng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving a range within which missing values of the $p^{\text{th}}$ variable in the data frame are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the matrix provided in `rng`.
+* `imputeRng` \ Numeric, a $p \times 2$ matrix where each row is a 2-tuple giving a range within which missing values of the $p^{\text{th}}$ variable in the data frame are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the matrix provided in `rng`.
 
-* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
+* `nBoot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `nBoot` replications and the estimates for each are returned.
 
 * `intercept` \ Logical, whether to include the intercept in the model. Optional, default `TRUE`.
 
@@ -139,7 +139,7 @@ The list in the `result` attribute has the following values.
 * `release` \ Vector of coefficient estimates. If the objective is `'ols'`, this also includes an estimate of the variance.
 * `accuracy` \ The accuracy guarantee of the release given `epsilon`
 * `epsilon` \ The privacy cost required to guarantee `accuracy`
-* `summary` \ A summary data frame including the vector of coefficient estimates, standard error estimates, and a 95% confidence interval. The summary is only produced if the bootstrap option is used, meaning `n.boot` is not `NULL`.
+* `summary` \ A summary data frame including the vector of coefficient estimates, standard error estimates, and a 95% confidence interval. The summary is only produced if the bootstrap option is used, meaning `nBoot` is not `NULL`.
 
 
 
@@ -153,8 +153,8 @@ library(PSIlence)
 data(PUMS5extract10000)
 
 form <- 'income ~ age + sex'
-true.fit <- lm(form, data=PUMS5extract10000)
-print(coef(true.fit))
+trueFit <- lm(form, data=PUMS5extract10000)
+print(coef(trueFit))
 ```
 
 &nbsp;
@@ -166,10 +166,10 @@ n <- 10000
 epsilon <- 0.5
 rng <- matrix(c(0, 200000, 18, 80, 0, 1), ncol=2, byrow=TRUE)
 mechanism <- 'mechanismObjective'
-var.type <- 'numeric'
+varType <- 'numeric'
 objective <- 'ols'
 
-model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
+model <- dpGLM$new(mechanism=mechanism, varType=varType, n=n, epsilon=epsilon, 
                    formula=form, rng=rng, objective=objective)
 model$release(PUMS5extract10000)
 print(model$result)
@@ -180,11 +180,11 @@ print(model$result)
 Alternatively, use the bootstrap, in which case the release returns a data frame with each row corresponding to a single bootstrap replication, and a separate summary is provided.
 
 ```{r}
-n.boot <- 20
-boot.model <- dpGLM$new(mechanism=mechanism, var.type=var.type, n=n, epsilon=epsilon, 
-                   formula=form, rng=rng, objective=objective, n.boot=n.boot)
-boot.model$release(PUMS5extract10000)
-print(boot.model$result)
+nBoot <- 20
+bootModel <- dpGLM$new(mechanism=mechanism, varType=varType, n=n, epsilon=epsilon, 
+                   formula=form, rng=rng, objective=objective, nBoot=nBoot)
+bootModel$release(PUMS5extract10000)
+print(bootModel$result)
 ```
 
 <!--
