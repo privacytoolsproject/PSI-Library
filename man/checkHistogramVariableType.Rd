@@ -4,10 +4,10 @@
 \alias{checkHistogramVariableType}
 \title{Check the histogram variable type entered by the user}
 \usage{
-checkHistogramVariableType(var.type)
+checkHistogramVariableType(varType)
 }
 \arguments{
-\item{var.type}{The variable type of the data that was entered by the user}
+\item{varType}{The variable type of the data that was entered by the user}
 }
 \value{
 No return value, will only send an error message if variable type is invalid.

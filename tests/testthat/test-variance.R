@@ -16,7 +16,7 @@ test_that('range checks throw correct warning', {
     
     my_n <- 10000
     myEpsilon <- 0.1
-    
+
     dpVar <- dpVariance$new(mechanism='mechanismLaplace', variable='sex', varType='logical', n=my_n, epsilon=myEpsilon)
     dpVar$release(PUMS5extract10000)
     
@@ -30,7 +30,7 @@ test_that('range checks throw correct warning', {
     
     my_n <- 10000
     myEpsilon <- 0.1
-    
+
     expect_error(dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=my_n, epsilon=myEpsilon, rng=c(100)), 
                  "range argument in error: requires upper and lower values as vector of length 2.")
     
@@ -38,6 +38,12 @@ test_that('range checks throw correct warning', {
     dpVar$release(PUMS5extract10000)
     expect_equal(length(dpVar$result$release), 1)
     expect_equal(dpVar$epsilon, myEpsilon)
+})
+
+# test sensitivity function
+test_that('sensitivity function is consistent with intended implementation', {
+  #REWRITE WITH NEW IMPLEMENTATION  
+  fail()
 })
 
 # check for correct errors when imputation range is outside of entered range

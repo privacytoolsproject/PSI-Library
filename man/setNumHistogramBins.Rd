@@ -4,14 +4,14 @@
 \alias{setNumHistogramBins}
 \title{Set the number of histogram bins}
 \usage{
-setNumHistogramBins(n.bins, granularity, var.type, bins)
+setNumHistogramBins(nBins, granularity, varType, bins)
 }
 \arguments{
-\item{n.bins}{the number of bins entered by the user, may be null}
+\item{nBins}{the number of bins entered by the user, may be null}
 
 \item{granularity}{the number of items to be in each bin (i.e. the height of each bin), may be null}
 
-\item{var.type}{The variable type of the data that was entered by the user}
+\item{varType}{The variable type of the data that was entered by the user}
 
 \item{bins}{the bin vector either entered by the user or set by determineBins()}
 }

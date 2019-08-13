@@ -29,9 +29,9 @@ test_that('censorData is as expected', {
   chars = c('a', 'b', 'c', 'c', 'd')
   nums = 1:10
   
-  residence_out = censorData(x=residence, var_type='factor', levels=c("OR"))
-  chars_out = censorData(x=chars, var_type='character', levels=c('a', 'b', 'c'))
-  nums_out = censorData(x=nums, var_type='integer', rng=c(2.5, 7))
+  residence_out = censorData(x=residence, varType='factor', levels=c("OR"))
+  chars_out = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
+  nums_out = censorData(x=nums, varType='integer', rng=c(2.5, 7))
   
   expect_equal(residence_out, factor(c(NA,"OR","OR","OR",NA,NA)))
   expect_equal(chars_out, factor(c('a','b','c','c',NA)))
@@ -101,13 +101,13 @@ test_that('fillMissing as expected', {
   
   y <- rnorm(100)
   y[sample(1:100, size=10)] <- NA
-  y_imputed <- fillMissing(x=y, var.type='numeric', impute.rng=c(-1,1))
+  y_imputed <- fillMissing(x=y, varType='numeric', imputeRng=c(-1,1))
   
   expect_equal(sum(is.na(y_imputed)), 0)
   
   s <- sample(animals, size=100, replace=TRUE)
   s[sample(1:100, size=10)] <- NA
-  s_imputed <- fillMissing(x=s, var.type='factor', categories=animals)
+  s_imputed <- fillMissing(x=s, varType='factor', categories=animals)
   
   expect_equal(sum(is.na(s_imputed)), 0)
   expect_true(is.factor(s_imputed))
@@ -116,9 +116,9 @@ test_that('fillMissing as expected', {
   x1 <- x2 <- rnorm(N)
   x1[sample(1:N, size=10)] <- NA
   x2[sample(1:N, size=10)] <- NA
-  imp.rng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
+  impRng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
   df <- data.frame(x1, x2)
-  df_imputed <- fillMissing(x=df, var.type='numeric', impute.rng=imp.rng)
+  df_imputed <- fillMissing(x=df, varType='numeric', imputeRng=impRng)
   
   expect_equal(sum(is.na(df_imputed)), 0)
 })

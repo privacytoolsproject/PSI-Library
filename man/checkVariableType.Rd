@@ -4,12 +4,12 @@
 \alias{checkVariableType}
 \title{Checking variable types}
 \usage{
-checkVariableType(type, in_types)
+checkVariableType(type, inTypes)
 }
 \arguments{
 \item{type}{A character specifying the type of the variable.}
 
-\item{in_types}{A vector of acceptable types of variables.}
+\item{inTypes}{A vector of acceptable types of variables.}
 }
 \value{
 The original character string indicating the variable type.
@@ -19,5 +19,5 @@ Verifies that the variable is an element in the set of acceptable types.
 }
 \examples{
 
-checkVariableType(type='Numeric', in_types=c('Numeric', 'Factor'))
+checkVariableType(type='Numeric', inTypes=c('Numeric', 'Factor'))
 }

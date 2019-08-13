@@ -7,22 +7,22 @@
 #' 
 #' @param v an empty list needing initialization
 #' @param r a release object for that variable
-#' @param varname name of variable 
+#' @param varName name of variable 
 
-createfields <- function(v,r, varname){
+createfields <- function(v,r, varName){
     
-    if(r$var.type %in% c('factor', 'character')){
+    if(r$varType %in% c('factor', 'character')){
         v$plottype <- "continuous"
-        v$varnamesSumStat <- varname
+        v$varNamesSumStat <- varName
         
-    } else if (r$var.type == "logical"){
+    } else if (r$varType == "logical"){
         v$plottype <- "bar"
-        v$varnamesSumStat <- varname
+        v$varNamesSumStat <- varName
         v$uniques <- 2
         
-    } else if (r$var.type %in% c('factor', 'character')){
+    } else if (r$varType %in% c('factor', 'character')){
         v$plottype <- "bar"
-        v$varnamesSumStat <- varname
+        v$varNamesSumStat <- varName
     }
     return(v)
 }
@@ -57,11 +57,11 @@ makeDummies <- function(df) {
     factors <- sapply(df, class) == 'factor'
     factors <- names(df)[factors]
     for (col in factors) {
-        col.levels <- levels(df[, col])
-        dummy.list <- lapply(col.levels, function(x) as.numeric(df[, col] == x))
-        dummy.df <- data.frame(dummy.list)
-        names(dummy.df) <- sapply(col.levels, function(x) paste(col, x, sep='_'))
-        df <- cbind(df, dummy.df[, 2:length(col.levels)])  # drop first level
+        colLevels <- levels(df[, col])
+        dummyList <- lapply(colLevels, function(x) as.numeric(df[, col] == x))
+        dummyDF <- data.frame(dummyList)
+        names(dummyDF) <- sapply(colLevels, function(x) paste(col, x, sep='_'))
+        df <- cbind(df, dummyDF[, 2:length(colLevels)])  # drop first level
     }
     df <- df[, !(names(df) %in% factors)]
     return(list('data' = df, 'names' = names(df)))

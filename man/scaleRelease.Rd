@@ -4,14 +4,14 @@
 \alias{scaleRelease}
 \title{Scale coefficient estimates}
 \usage{
-scaleRelease(estimates, X.scaler, y.scaler = NULL)
+scaleRelease(estimates, xScaler, yScaler = NULL)
 }
 \arguments{
 \item{estimates}{Numeric, coefficient estimates vector.}
 
-\item{X.scaler}{Numeric, maximum norm from \code{mapMatrixUnit} fit on features.}
+\item{xScaler}{Numeric, maximum norm from \code{mapMatrixUnit} fit on features.}
 
-\item{y.scaler}{Numeric, maximum norm from \code{mapMatrixUnit} fit on response,
+\item{yScaler}{Numeric, maximum norm from \code{mapMatrixUnit} fit on response,
 default NULL.}
 }
 \value{

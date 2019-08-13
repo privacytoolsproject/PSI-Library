@@ -4,7 +4,7 @@
 \alias{binaryTree}
 \title{Function to evaluate a binary tree}
 \usage{
-binaryTree(x, n, rng, gran, universe.size, depth)
+binaryTree(x, n, rng, gran, universeSize, depth)
 }
 \arguments{
 \item{x}{Numeric vector to be represented as a binary tree in vector form}
@@ -15,7 +15,7 @@ binaryTree(x, n, rng, gran, universe.size, depth)
 
 \item{gran}{The granularity at which \code{x} is represented in the tree}
 
-\item{universe.size}{Difference in the range of \code{x} over the granularity, plus 1}
+\item{universeSize}{Difference in the range of \code{x} over the granularity, plus 1}
 
 \item{depth}{The depth of the binary tree}
 }

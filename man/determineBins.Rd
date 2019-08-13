@@ -4,10 +4,10 @@
 \alias{determineBins}
 \title{Determine Bins}
 \usage{
-determineBins(var.type, rng, bins, n, n.bins, impute, granularity, object)
+determineBins(varType, rng, bins, n, nBins, impute, granularity, object)
 }
 \arguments{
-\item{var.type}{Character, the variable type.}
+\item{varType}{Character, the variable type.}
 
 \item{rng}{Numeric, a priori estimate of the lower and upper bounds of a
 variable taking numeric values. Ignored for categorical types. Maybe be null for 
@@ -16,7 +16,7 @@ numeric or integer types, in which case the stability mechanism is used.}
 \item{bins}{Character or numeric, the available bins or levels of a variable. Character 
 for categorical variables, a vector of numbers for numeric variables.}
 
-\item{n.bins}{Integer, the number of bins to release.}
+\item{nBins}{Integer, the number of bins to release.}
 
 \item{impute}{Boolean, if true then the mechanism should replace missing values with known 
 values from the data.If false, the mechanism should leave missing values as `NA`}

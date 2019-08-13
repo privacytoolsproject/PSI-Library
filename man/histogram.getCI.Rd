@@ -4,12 +4,12 @@
 \alias{histogram.getCI}
 \title{Histogram confidence intervals}
 \usage{
-histogram.getCI(release, n.bins, accuracy)
+histogram.getCI(release, nBins, accuracy)
 }
 \arguments{
 \item{release}{A numeric vector with a noisy estimate of bin counts.}
 
-\item{n.bins}{A numeric vector of length one specifying the number of cells 
+\item{nBins}{A numeric vector of length one specifying the number of cells 
 in which to tabulate values.}
 
 \item{accuracy}{A numeric vector representing the accuracy guarantee.}

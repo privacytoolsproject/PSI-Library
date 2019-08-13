@@ -13,20 +13,20 @@ post = function(out){
 }
 
 test_that('Laplace mechanism outputs unperturbed values when sensitivity artificially set to zero', {
-  mech = mechanismLaplace$new(epsilon=1, var.type='numeric', rng=c(0,5))
+  mech = mechanismLaplace$new(epsilon=1, varType='numeric', rng=c(0,5))
   out = mech$evaluate(identityFun, x, sens, post)
   expect_equal(out$release, x)
 })
 
 test_that('Laplace mechanism truncates to inputted range', {
-  trimmedMech = mechanismLaplace$new(epsilon=1, var.type='numeric', rng=c(0,3))
+  trimmedMech = mechanismLaplace$new(epsilon=1, varType='numeric', rng=c(0,3))
   out = trimmedMech$evaluate(identityFun, x, sens, post)
   expect_equal(out$release, c(0,1,2,3,3))
 })
 
 test_that('Laplace mechanism correctly imputes data', {
   x <- c(0,1,2,3,NA)
-  imputtedMech <- mechanismLaplace$new(epsilon=1, var.type='integer', rng=c(0,5))
+  imputtedMech <- mechanismLaplace$new(epsilon=1, varType='integer', rng=c(0,5))
   out <- imputtedMech$evaluate(identityFun, x, sens, post)
   expect_length(out$release, length(x))
 })

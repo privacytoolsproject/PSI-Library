@@ -4,7 +4,7 @@
 \alias{release2json}
 \title{Create json file of metadata from list of release objects}
 \usage{
-release2json(release, nameslist)
+release2json(release, namesList)
 }
 \arguments{
 \item{release}{a list of release objects}
