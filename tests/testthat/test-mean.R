@@ -1,6 +1,7 @@
 library(PSIlence)
 context("mean")
 
+# make sure range checks throw correct warning
 test_that('range checks throw correct warning', {
   data(PUMS5extract10000, package = "PSIlence")
 

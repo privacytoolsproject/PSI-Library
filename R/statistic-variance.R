@@ -40,7 +40,7 @@ dpVariance <- setRefClass(
 )
 
 dpVariance$methods(
-    initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon,
+    initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL, accuracy=NULL,
                           imputeRng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
         .self$mechanism <- mechanism
@@ -52,7 +52,7 @@ dpVariance$methods(
         
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
+            .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
             checkEpsilon(epsilon)
             .self$epsilon <- epsilon
@@ -78,5 +78,7 @@ dpVariance$methods(
     postProcess = function(out) {
         out$variable <- variable
         out$std <- sqrt(out$release)
+        out$epsilon <- .self$epsilon
+        out$accuracy <- .self$accuracy
         return(out)
 })
