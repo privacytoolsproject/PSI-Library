@@ -170,13 +170,13 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
-    initialize = function(mechanism, varType, variable, n, rng, gran, epsilon=NULL,
+    initialize = function(mechanism, varType, variable, n, rng=NULL, gran, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
         .self$mechanism <- mechanism
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- n
+        .self$n <- checkNValidity(n)
         .self$rng <- rng
         .self$gran <- gran
         .self$alpha <- alpha
