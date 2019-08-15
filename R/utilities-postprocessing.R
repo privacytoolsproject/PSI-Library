@@ -51,7 +51,10 @@ createJSON <- function() {
     )
     
     statJSON <- function(stat) {
-        func <- match.fun(paste0(stat, '.getJSON'))
+func <- list(
+  histogram=histogramGetJSON,
+  mean=meanGetJSON
+)[[stat]]
         out <- list() 
         out[[stat]] <- func(output.json=FALSE) 
         return(out)
