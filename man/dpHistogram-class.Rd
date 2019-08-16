@@ -6,7 +6,7 @@
 \alias{dpHistogram}
 \title{Differentially private histogram}
 \arguments{
-\item{var.type}{Character, the variable type.}
+\item{varType}{Character, the variable type.}
 
 \item{variable}{Character, the variable name in the data frame.}
 
@@ -21,26 +21,26 @@ variable taking numeric values. Ignored for categorical types.}
 
 \item{bins}{Character, the available bins or levels of a categorical variable.}
 
-\item{n.bins}{Integer, the number of bins to release.}
+\item{nBins}{Integer, the number of bins to release.}
 
-\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
+\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `nBins`). Used 
 to calculate histogram bins in comination with `rng`.}
 
 \item{alpha}{Numeric, level of statistical significance, default 0.05.}
 
 \item{delta}{Numeric, probability of privacy loss beyond \code{epsilon}.}
 
-\item{impute.rng}{Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
+\item{imputeRng}{Numeric, a 2-tuple indicating the lower and upper bounds of the range from which NA
 values in numeric or integer-type variables should be imputed}
 
-\item{impute.bins}{Character (or numeric for logical variables), a list of bins from which NA values
-values in character or logical-type variables should be imputed}
+\item{imputeBins}{Character (or numeric for logical variables), a list of bins from which NA values
+values in character-type variables should be imputed}
 
 \item{impute}{Boolean, a boolean value indicating if logical-type variables should have NA values
 imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
 histogram will have 3 bins: 0, 1, and NA.}
 
-\item{n.boot}{Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)}
+\item{nBoot}{Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)}
 }
 \description{
 Differentially private histogram

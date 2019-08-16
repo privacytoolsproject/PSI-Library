@@ -8,10 +8,10 @@
 #' @param alpha Numeric specifying the statistical significance level.
 #'
 #' @return Accuracy guarantee for GLM release
-#' @rdname glm.getAccuracy
+#' @rdname glmGetAccuracy
 #' @export
 
-glm.getAccuracy <- function(epsilon, n, alpha) {
+glmGetAccuracy <- function(epsilon, n, alpha) {
     accuracy <- log(1 / alpha) / (n * epsilon)
     return(accuracy)
 }
@@ -27,10 +27,10 @@ glm.getAccuracy <- function(epsilon, n, alpha) {
 #' @param alpha Numeric specifying the statistical significance level.
 #' 
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
-#' @rdname glm.getParameters
+#' @rdname glmGetParameters
 #' @export
 
-glm.getParameters <- function(accuracy, n, alpha) {
+glmGetParameters <- function(accuracy, n, alpha) {
     epsilon <- log(1 / alpha) / (n * accuracy)
     return(epsilon)
 }
@@ -44,22 +44,22 @@ glm.getParameters <- function(accuracy, n, alpha) {
 #'      least and greatest \code{alpha / 2} are trimmed
 #' @return Data frame summary statistics, including estimates and standard errors
 
-glm.postSummary <- function(release, n, model, alpha) {
-    trimmed.release <- apply(release, 2, trimVector, alpha=alpha)
-    estimate <- apply(trimmed.release, 2, mean)
-    std.error <- apply(trimmed.release, 2, sd)
-    lower <- apply(trimmed.release, 2, quantile, 0.025)
-    upper <- apply(trimmed.release, 2, quantile, 0.975)
-    dp.summary <- data.frame(estimate, std.error, upper, lower)
-    names(dp.summary) <- c('Estimate', 'Std. Error', 'CI95 Lower', 'CI95 Upper')
-    rownames(dp.summary) <- names(release)
+glmPostSummary <- function(release, n, model, alpha) {
+    trimmedRelease <- apply(release, 2, trimVector, alpha=alpha)
+    estimate <- apply(trimmedRelease, 2, mean)
+    stdError <- apply(trimmedRelease, 2, sd)
+    lower <- apply(trimmedRelease, 2, quantile, 0.025)
+    upper <- apply(trimmedRelease, 2, quantile, 0.975)
+    dpSummary <- data.frame(estimate, stdError, upper, lower)
+    names(dpSummary) <- c('Estimate', 'Std. Error', 'CI95 Lower', 'CI95 Upper')
+    rownames(dpSummary) <- names(release)
     if (model == 'ols') {
-        variance <- as.numeric(dp.summary[nrow(dp.summary), 'Estimate'])
-        coefficients <- dp.summary[1:(nrow(dp.summary) - 1), ]
+        variance <- as.numeric(dpSummary[nrow(dpSummary), 'Estimate'])
+        coefficients <- dpSummary[1:(nrow(dpSummary) - 1), ]
         variance <- variance
         return(list('coefficients' = coefficients, 'variance' = variance))
     } else {
-        return(dp.summary)
+        return(dpSummary)
     }
 }
 
@@ -69,15 +69,15 @@ glm.postSummary <- function(release, n, model, alpha) {
 #' @return List with the name and objective function
 # old dp Logit code blocked out below. 
 # dpLogit <- function() {
-    # objective.logit <- function(theta, X, y, b, n) {
+    # objectiveLogit <- function(theta, X, y, b, n) {
         # xb <- as.matrix(X) %*% as.matrix(theta)
         # p <- as.numeric(1 / (1 + exp(-1 * xb)))
         # noise <- (b %*% as.matrix(theta)) / n
         # llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-        # llik.noisy <- noise + llik
-        # return(-llik.noisy)
+        # llikNoisy <- noise + llik
+        # return(-llikNoisy)
     # }
-    # return(list('name' = 'logit', 'objective' = objective.logit))
+    # return(list('name' = 'logit', 'objective' = objectiveLogit))
 # }
 
 #' Differentially private objective function for Probit regression
@@ -89,17 +89,17 @@ glm.postSummary <- function(release, n, model, alpha) {
 #' @return List with the name and objective function
 # new dp logit including regularization below
 dpLogit <- function() {
-    objective.logit <- function(theta, X, y, b, n, lambda) {
+    objectiveLogit <- function(theta, X, y, b, n, lambda) {
     	theta <- as.matrix(theta)
         xb <- as.matrix(X) %*% theta
         p <- as.numeric(1 / (1 + exp(-1 * xb)))
         noise <- (b %*% theta) / n
         regularizer <- (lambda/2)* t(theta)%*%theta
         llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-        llik.noisy <- noise + llik - regularizer # double check that subtracting regularizer here is correct (as opposed to adding)
-        return(-llik.noisy)
+        llikNoisy <- noise + llik - regularizer # double check that subtracting regularizer here is correct (as opposed to adding)
+        return(-llikNoisy)
     }
-    return(list('name' = 'logit', 'objective' = objective.logit))
+    return(list('name' = 'logit', 'objective' = objectiveLogit))
 }
 
 # ' Differentially private objective function for Probit regression
@@ -112,15 +112,15 @@ dpLogit <- function() {
 
 
 dpProbit <- function() {
-    objective.probit <- function(theta, X, y, b, n) {
+    objectiveProbit <- function(theta, X, y, b, n) {
         xb <- as.matrix(X) %*% as.matrix(theta)
         p <- pnorm(xb)
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum(y * log(p) + ((1 - y) * log(1 - p))) / n
-        llik.noisy <- noise + llik
-        return(-llik.noisy)
+        llikNoisy <- noise + llik
+        return(-llikNoisy)
     }
-    return(list('name' = 'probit', 'objective' = objective.probit))
+    return(list('name' = 'probit', 'objective' = objectiveProbit))
 }
 
 #' Differentially private objective function for Poisson regression
@@ -128,14 +128,14 @@ dpProbit <- function() {
 #' @return List with the name and objective function
 
 dpPoisson <- function() {
-    objective.poisson <- function(theta, X, y, b, n) {
+    objectivePoisson <- function(theta, X, y, b, n) {
         lp <- as.matrix(X) %*% as.matrix(theta)
         noise <- (b %*% as.matrix(theta)) / n
         llik <- sum((y * lp) - exp(lp)) / n
-        llik.noisy <- noise + llik
-        return(-llik.noisy)
+        llikNoisy <- noise + llik
+        return(-llikNoisy)
     }
-    return(list('name' = 'poisson', 'objective' = objective.poisson))
+    return(list('name' = 'poisson', 'objective' = objectivePoisson))
 }
 
 #' Differentially private objective function for linear regression
@@ -143,16 +143,16 @@ dpPoisson <- function() {
 #' @return List with the name and objective function
 
 dpOLS <- function() {
-    objective.ols <- function(theta, X, y, b, n, lambda) {
+    objectiveOLS <- function(theta, X, y, b, n, lambda) {
         s <- exp(theta[length(theta)])
         beta <- theta[1:(length(theta) - 1)]
         xb <- as.matrix(X) %*% as.matrix(beta) 
         noise <- (b %*% as.matrix(theta)) / n
         llik <- ((-n / 2) * log(2 * pi) - n * log(s) - (0.5 / s^2) * sum((y - xb)^2)) / n
-        llik.noisy <- noise + llik
-        return(-llik.noisy)
+        llikNoisy <- noise + llik
+        return(-llikNoisy)
     }
-    return(list('name' = 'ols', 'objective' = objective.ols))
+    return(list('name' = 'ols', 'objective' = objectiveOLS))
 }
 
 #' Objective functions
@@ -184,7 +184,7 @@ glmObjectives = list(
 #' rng <- matrix(c(0, 150000, 1, 16, 0, 1), ncol=2, byrow=TRUE)
 #' form <- 'income ~ educ + sex'
 #'
-#' model <- dpGLM$new(mechanism='mechanismObjective', var.type='numeric',
+#' model <- dpGLM$new(mechanism='mechanismObjective', varType='numeric',
 #'                    n=n, rng=rng, epsilon=epsilon, formula=form, objective='ols')
 #' model$release(PUMS5extract10000)
 #' print(model$result)
@@ -195,30 +195,30 @@ dpGLM <- setRefClass(
 )
 
 dpGLM$methods(
-    initialize = function(mechanism, var.type, n, rng, formula, objective, epsilon=NULL,
-                          accuracy=NULL, impute.rng=NULL, n.boot=NULL, intercept=TRUE, 
+    initialize = function(mechanism, varType, n, rng=NULL, formula, objective, epsilon=NULL,
+                          accuracy=NULL, imputeRng=NULL, nBoot=NULL, intercept=TRUE, 
                           alpha=0.05) {
         fn <- glmObjectives[[objective]]()
         .self$name <- fn$name
         .self$objective <- fn$objective
         .self$mechanism <- mechanism
-        .self$var.type <- var.type
-        .self$n <- n
-        .self$rng <- rng
+        .self$varType <- varType
+        .self$n <- checkNValidity(n)
+        .self$rng <- checkRange(rng, varType)
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- glm.getParameters(accuracy, n, alpha)
+            .self$epsilon <- glmGetParameters(accuracy, n, alpha)
         } else {
             .self$epsilon <- epsilon
-            .self$accuracy <- glm.getAccuracy(epsilon, n, alpha)
+            .self$accuracy <- glmGetAccuracy(epsilon, n, alpha)
         }
-        if (is.null(impute.rng)) {
-            .self$impute.rng <- rng
+        if (is.null(imputeRng)) {
+            .self$imputeRng <- rng
         } else {
-            .self$impute.rng <- impute.rng
+            .self$imputeRng <- checkImputationRange(imputeRng)
         }
         .self$formula <- formula
-        .self$n.boot <- n.boot
+        .self$nBoot <- nBoot
         .self$intercept <- intercept
         .self$alpha <- alpha
 })
@@ -233,8 +233,8 @@ dpGLM$methods(
         out$variable <- all.vars(as.formula(formula))
         out$accuracy <- accuracy
         out$epsilon <- epsilon
-        if (!is.null(n.boot)) {
-            out$summary <- glm.postSummary(out$release, n, name, alpha)
+        if (!is.null(nBoot)) {
+            out$summary <- glmPostSummary(out$release, n, name, alpha)
         }
         return(out)
 })

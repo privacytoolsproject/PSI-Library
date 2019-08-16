@@ -57,13 +57,13 @@ mechanismLaplace$methods(
   #' laplace_mean <- mechanismLaplace$evaluate(mean_function, data[, variable], sens, post_processing_function)
   #' 
   evaluate = function(fun, x, sens, postFun, ...) {
-    x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$impute.bins)
+    x <- censorData(x, .self$varType, .self$rng, .self$bins)
+    x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    input.vals = c(list(x=x), fun.args)
-    true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+    inputVals = c(list(x=x), fun.args)
+    trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
     scale <- sens / .self$epsilon
-    release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
+    release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
     out <- list('release' = release)
     out <- postFun(out, ...)
     return(out)

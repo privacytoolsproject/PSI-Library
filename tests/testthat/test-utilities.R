@@ -2,40 +2,40 @@ library(PSIlence)
 context("utilities")
 
 test_that('Uniform distribution drawing functions as expected', {
-  uniform_repeatable1 <- dpUnif(n=1, seed=75436)
-  uniform_repeatable2 <- dpUnif(n=1, seed=75436)
-  expect_equal(uniform_repeatable1, uniform_repeatable2)
+  uniformRepeatable1 <- dpUnif(n=1, seed=75436)
+  uniformRepeatable2 <- dpUnif(n=1, seed=75436)
+  expect_equal(uniformRepeatable1, uniformRepeatable2)
   
   n <- 5
-  uniform_list <- dpUnif(n=n)
-  expect_length(uniform_list, n)
-  expect_equal(sum(uniform_list<1), n)
-  expect_equal(sum(uniform_list>0), n)
+  uniformList <- dpUnif(n=n)
+  expect_length(uniformList, n)
+  expect_equal(sum(uniformList<1), n)
+  expect_equal(sum(uniformList>0), n)
 })
 
-test_that('checkrange is as expected', {
+test_that('checkRange is as expected', {
   rng1 = c(0,1)
   rng2 = c(0,1,2)
   rng3 = c(1)
   
-  expect_equal(checkrange(rng1),rng1)
-  expect_warning(checkrange(rng2),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
-  expect_equal(checkrange(rng2), c(0,2))
-  expect_error(checkrange(rng3),"range argument in error: requires upper and lower values as vector of length 2.")
+  expect_equal(checkRange(rng1, "numeric"),rng1)
+  expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_equal(checkRange(rng2, "numeric"), c(0,2))
+  expect_error(checkRange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
 })
 
-test_that('censordata is as expected', {
+test_that('censorData is as expected', {
   residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
   chars = c('a', 'b', 'c', 'c', 'd')
   nums = 1:10
   
-  residence_out = censordata(x=residence, var_type='factor', levels=c("OR"))
-  chars_out = censordata(x=chars, var_type='character', levels=c('a', 'b', 'c'))
-  nums_out = censordata(x=nums, var_type='integer', rng=c(2.5, 7))
+  residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
+  charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
+  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
   
-  expect_equal(residence_out, factor(c(NA,"OR","OR","OR",NA,NA)))
-  expect_equal(chars_out, factor(c('a','b','c','c',NA)))
-  expect_equal(nums_out, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
+  expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
+  expect_equal(charsOut, factor(c('a','b','c','c',NA)))
+  expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
 })
 
 test_that('getFuncArgs performs as expected', {
@@ -101,24 +101,24 @@ test_that('fillMissing as expected', {
   
   y <- rnorm(100)
   y[sample(1:100, size=10)] <- NA
-  y_imputed <- fillMissing(x=y, var.type='numeric', impute.rng=c(-1,1))
+  yImputed <- fillMissing(x=y, varType='numeric', imputeRng=c(-1,1))
   
-  expect_equal(sum(is.na(y_imputed)), 0)
+  expect_equal(sum(is.na(yImputed)), 0)
   
   s <- sample(animals, size=100, replace=TRUE)
   s[sample(1:100, size=10)] <- NA
-  s_imputed <- fillMissing(x=s, var.type='factor', categories=animals)
+  sImputed <- fillMissing(x=s, varType='factor', categories=animals)
   
-  expect_equal(sum(is.na(s_imputed)), 0)
-  expect_true(is.factor(s_imputed))
+  expect_equal(sum(is.na(sImputed)), 0)
+  expect_true(is.factor(sImputed))
   
   N <- 100
   x1 <- x2 <- rnorm(N)
   x1[sample(1:N, size=10)] <- NA
   x2[sample(1:N, size=10)] <- NA
-  imp.rng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
+  impRng <- matrix(c(-3, 3, -2, 2), ncol=2, byrow=TRUE)
   df <- data.frame(x1, x2)
-  df_imputed <- fillMissing(x=df, var.type='numeric', impute.rng=imp.rng)
+  dfImputed <- fillMissing(x=df, varType='numeric', imputeRng=impRng)
   
-  expect_equal(sum(is.na(df_imputed)), 0)
+  expect_equal(sum(is.na(dfImputed)), 0)
 })
