@@ -25,8 +25,6 @@ class Snapping_Mechanism:
     manipulation, wrote the first implementation of it, and was very helpful in general with ideas and feedback on various
     piece of the implementation.
 
-    Note that the privacy guarantee holds only if lambda < B < lambda*2^46.
-
     Attributes:
         mechanism_input (numeric): Raw (non-private) value of statistic for which you want a private release
         sensitivity (numeric): Sensitivity of function generating mechanism input
@@ -205,6 +203,31 @@ class Snapping_Mechanism:
         sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
         return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
 
+    def _sample_from_uniform(self, secure_random):
+        """
+        Sample from uniform (0,1) as described by Mironov.
+        Meant to sample floating points proportional to their unit of least precision
+
+        Parameters:
+            secure_random (random.SystemRandom()): Instance of the random.SystemRandom class
+
+        Return:
+            numeric: sample from Unif(0,1)
+        """
+        sign = gmpy2.mpfr(secure_random.sample(population = [-1,1], k = 1)[0]) # using mpfr precision here, even though it's an integer, so that the
+                                                                               # precision carries through in later steps
+        '''
+        Looking for more elegant way to sample from geometric
+        '''
+        geom = 1
+        while (secure_random.sample(population = [0,1], k = 1)[0] == 0):
+            geom += 1
+        u_star_exponent = bin(-geom + 1023)[2:]
+        # u_star_exponent = bin(-np.random.geometric(p = 0.5) + 1023)[2:]
+        u_star_mantissa = ''.join([str(secure_random.sample(population = [0,1], k = 1)[0]) for i in range(52)])
+        u_star_sample = self._bin_to_double('0' + str(u_star_exponent) + str(u_star_mantissa))
+        return(u_star_sample)
+
     def _redefine_epsilon(self, epsilon, B, precision):
         """
         Note:
@@ -261,11 +284,7 @@ class Snapping_Mechanism:
         '''
         # instantiate instance of cryptographically secure random class and generate random sign and draw from Unif(0,1)
         secure_random = random.SystemRandom()
-        sign = gmpy2.mpfr(secure_random.sample(population = [-1,1], k = 1)[0]) # using mpfr precision here, even though it's an integer, so that the
-                                                                               # precision carries through in later steps
-        u_star_exponent = bin(-np.random.geometric(p = 0.5) + 1023)[2:]
-        u_star_mantissa = ''.join([str(secure_random.sample(population = [0,1], k = 1)[0]) for i in range(52)])
-        u_star_sample = self._bin_to_double('0' + str(u_star_exponent) + str(u_star_mantissa))
+        u_star_sample = self._sample_from_uniform(secure_random)
         epsilon_prime = self._redefine_epsilon(self.epsilon, B_scaled, precision)
         inner_result = self._clamp(mechanism_input_scaled, B_scaled) + (sign * 1/epsilon_prime * crlibm.log_rn(u_star_sample))
 
