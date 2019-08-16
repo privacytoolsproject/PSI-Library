@@ -427,10 +427,16 @@ determineMechanismByRange <- function(varType, rng, bins, nBins, granularity) {
 #'    vector for logical, numeric, and integer variables.
 
 determineBins <- function(varType, rng, bins, n, nBins, impute, granularity, object) {
-    if (!is.null(bins)) {
-        # if the user passed in bins, then the passed bins are the histogram bins
-        # check entered bins for errors. If there are not errors, entered bins will be assigned as histogram bins.
-        # if there are errors, an error message will be returned to the user.
+    if (varType == 'logical') {
+        # first check if the variable is logical, because the built-in functions should
+        # determine the bins of a logical variable, regardless of if the user entered bins
+        # or not.
+        return(determineLogicalBins(impute, object))
+    } else if (!is.null(bins)) {
+        # if the user passed in bins, then the passed bins are the histogram bins.
+        # check entered bins for errors. If there are not errors, entered bins 
+        # will be assigned as histogram bins. if there are errors, an error
+        # message will be returned to the user.
         errorCheckBins(varType, rng, bins)
         return(bins)
     } else {
@@ -438,15 +444,10 @@ determineBins <- function(varType, rng, bins, n, nBins, impute, granularity, obj
         # because we only call this function if the mechanism is not the stability
         # mechanism and the bins are not passed in by the user. If the variable is
         # categorical and the bins are not passed in, then the mechanism is the
-        # stability mechanism. So we only need to check logical, numeric, and integer.
-        if (varType == 'logical') {
-            return(determineLogicalBins(impute, object))
-        } else {
-            # if we have reached this conditional statement, then the variable type can
-            # only be numeric or integer, and the user must have entered the range and
-            # either the number of bins or the granularity.
-            return(determineNumericIntegerBins(rng, n, nBins, granularity))
-        }
+        # stability mechanism. So we only need to check numeric and integer,
+        # and the user must have entered the range and either the number of bins 
+        # or the granularity.
+        return(determineNumericIntegerBins(rng, n, nBins, granularity))
     }
 }
 
