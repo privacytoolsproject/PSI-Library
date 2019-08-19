@@ -85,44 +85,62 @@ checkNValidity <- function(n) {
     }
 }
 
-
-#' Range Parameter Check
+#' One-Dimensional Range Parameter Check
 #' 
-#' Checks if a supplied range is an ordered pair. Coerces any vector of length 
-#'    two or greater into an ordered pair, and issues an error for
-#'    shorter vectors.
-#'    
-#' @param rng A numeric vector of length two, that ought to be an 
-#'    ordered pair.
+#' Helper function for checkRange. Checks if a supplied range is an ordered pair.
+#' Coerces any vector of length two or greater into an ordered pair, and issues 
+#' an error for shorter vectors.
 #' 
-#' @return An ordered pair.
-#' @examples
+#' @param rng Range. A numeric vector that ought to be an ordered pair.
+#' @param varType 
 #'
-#' checkRange(c(1,3))
-#' checkRange(1:3)
-#' \dontrun{checkRange(1)}
-#' @rdname checkRange
+#' @return
 #' @export
-checkRange <- function(rng, varType) {
-    if (NCOL(rng) > 1) {
-        for (i in 1:nrow(rng)) {
-            rng[i, ] <- sort(rng[i, ])
-        }
+#'
+#' @examples
+checkRange1D <- function(rng, varType) {
+  if (varType == 'logical') {
+    rng <- c(0,1)
+    } else if (length(rng) < 2) {
+      stop("range argument in error: requires upper and lower values as vector of length 2.")
+    } else if (length(rng) > 2) {
+      warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
+      rng <- c(min(rng), max(rng))
     } else {
-        if (varType == 'logical') {
-            rng <- c(0,1)
-        } else if (length(rng) < 2) {
-            stop("range argument in error: requires upper and lower values as vector of length 2.")
-        } else if (length(rng) > 2) {
-            warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
-            rng <- c(min(rng), max(rng))
-        } else {
-            rng <- sort(rng)
-        }
+      rng <- sort(rng)
     }
     return(rng)
 }
 
+#' Range Parameter Check
+#' 
+#' Checks if a supplied range is an ordered pair.
+#'    
+#' @param rng Range. A numeric vector of one of two formats:
+#'   1. Of length two, that ought to be an ordered pair, representing 
+#'   the maximum and minimum bounds on the data
+#'   2. A sequence of ordered pairs in columns, where each row represents
+#'    the maximum and minimum bounds on some subsets of the data (e.g. of different data columns)
+#' @param varType The variable type; e.g. 'logical', 'integer', 'numeric', 'character'.
+#' @return An ordered pair.
+#' @examples
+#'
+#' checkRange(c(1,3))
+#' checkRange(1:3)s
+#' \dontrun{checkRange(1)}
+#' @rdname checkRange
+#' @export
+checkRange <- function(rng, varType) {
+  if (NCOL(rng) > 1){
+    for (i in 1:nrow(rng)) {
+      rng[i,] <- checkRange1D(rngs[i,], varType)
+    }
+  }
+  else{
+    rng <- checkRange1D(rng, varType)
+  }
+  return(rng)
+}
 
 #' Epsilon Parameter Check
 #' 

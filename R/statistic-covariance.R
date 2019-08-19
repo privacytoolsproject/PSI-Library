@@ -179,8 +179,11 @@ dpCovariance$methods(
     .self$n <- checkNValidity(n)
     .self$epsilon <- epsilon
     .self$delta <- delta
-    .self$rng <- rng
-    .self$sens <- covarianceSensitivity(n, rng, intercept)
+    .self$formula <- formula
+    .self$intercept <- intercept
+    
+    .self$rng <- checkRange(rng, .self$varType)
+    .self$sens <- covarianceSensitivity(.self$n, .self$rng, .self$intercept)
     
     checkEpsilon(epsilon)
     
@@ -189,8 +192,7 @@ dpCovariance$methods(
     } else {
       .self$imputeRng <- imputeRng
     }
-    .self$formula <- formula
-    .self$intercept <- intercept
+    
 
     if (.self$intercept) { 
       .self$columns <- c('intercept', columns)

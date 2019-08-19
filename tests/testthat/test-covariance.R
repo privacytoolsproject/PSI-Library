@@ -18,7 +18,7 @@ test_that('epsilon checks throw correct warning', {
 })
 
 test_that('range checks throw correct warning', {
-  expect_error(dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric', n= 10000,
+  expect_error(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n= 10000,
                                 epsilon = 0.1, columns = c("income", "education"),
                                 rng=c(100)),
                "range argument in error: requires upper and lower values as vector of length 2.")
@@ -52,7 +52,7 @@ test_that('linear regression post-processing function is correct for 2x2 covaria
   covar <- covar(data, intercept=FALSE)
 
   formattedCovar <- covarianceFormatRelease(covar, columns)
-  postLnReg <- covariance.postLinearRegression(formattedCovar, n, intercept, formula)
+  postLnReg <- covariancePostLinearRegression(formattedCovar, n, intercept, formula)
   output <- as.numeric(postLnReg[[1]][1]) #extracts coefficient from output
   trueLinearReg <- lm(formula, data=PUMS5extract10000)
   expectedOutput <- as.numeric(trueLinearReg[[1]][2]) #extracts coefficient from output
@@ -69,7 +69,7 @@ test_that('linear regression post-processing function is correct for 3x3 covaria
   covarMatrix <- covar(data, intercept=FALSE)
   
   formattedCovar <- covarianceFormatRelease(covarMatrix, columns)
-  postLnReg <- covariance.postLinearRegression(formattedCovar, n, intercept, formula)
+  postLnReg <- covariancePostLinearRegression(formattedCovar, n, intercept, formula)
   output <- as.numeric(postLnReg[[1]][1]) #extracts coefficient from output
   
   trueLinearReg <- lm(formula, data=PUMS5extract10000)
@@ -83,7 +83,7 @@ test_that('DP covariance workflow runs', {
   range.age <- range(PUMS5extract10000['age'])
   range <- rbind(range.income, range.education, range.age)
 
-  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000,
+  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                             epsilon = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
   out <- dpCov$release(PUMS5extract10000)
   expect_equal(length(out),3)
@@ -95,10 +95,10 @@ test_that('coefficient release function is correct', {
   range.age <- range(PUMS5extract10000['age'])
   range <- rbind(range.income, range.education, range.age)
   
-  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",var.type = 'numeric', n = 10000,
+  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                             epsilon = 10000000000, columns = c("income", "educ", "age"), rng = range, formula='income~educ')
   out <- dpCov$release(PUMS5extract10000)
-  coeffs <- coefficient.release('income~age', out$release, n=10000)
+  coeffs <- coefficientRelease('income~age', out$release, n=10000)
   expect_equal(length(coeffs), 4)
   linreg <- lm(income~age, data=PUMS5extract10000)
   

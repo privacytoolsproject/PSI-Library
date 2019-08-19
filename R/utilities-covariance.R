@@ -19,7 +19,7 @@ linearReg <- function(formula, release, n, intercept) {
         coefs <- "The input matrix is not invertible"
         return(coefs)
     } else {
-        xyLocs <- extract.indices(as.formula(formula), release, intercept)
+        xyLocs <- extractIndices(as.formula(formula), release, intercept)
         xLoc <- xyLocs$xLoc
         yLoc <- xyLocs$yLoc
         locVec <- rep(TRUE, (length(xLoc) + 1))
@@ -29,7 +29,7 @@ linearReg <- function(formula, release, n, intercept) {
         se <- sqrt(sweep[yLoc, yLoc] * diag(solve(release[xLoc, xLoc])))
         coefs <- data.frame(cbind(coefs, se))
         coefs <- format(round(coefs, 5), nsmall=5)
-        rownames(coefs) <- xyLocs$x.label
+        rownames(coefs) <- xyLocs$xLabel
         names(coefs) <- c('Estimate', 'Std. Error')
         return(coefs)
     }
@@ -111,4 +111,41 @@ amsweep <- function(g, m, reverse=FALSE) {
         }
         return(h)
     }
+}
+
+#' Extract regression indices
+#' 
+#' Function to obtain indices in data frame for dependent & independent variables from a formula.
+#'
+#' @param formula An object of class 'formula' containing the desired 
+#'    regression formula.
+#' @param data A numeric data frame with at least two columns.
+#' @param intercept A logical vector indicating whether the intercept is 
+#'    included in \code{formula}.
+#' 
+#' @return A named list with names corresponding to labels and locations 
+#'    (i.e., columns) for variables in the specification.
+#' @examples
+#'
+#' y <- rnorm(100) * 2
+#' x <- (y + rnorm(100)) > 0
+#' data <- data.frame(cbind(y, x))
+#' f <- as.formula('y ~ x')
+#' extractIndices(f, data, FALSE)
+#' @rdname extractIndices
+#' @export
+extractIndices <- function(formula, data, intercept) {
+  t <- terms(formula, data=data)
+  yLoc <- attr(t, 'response')
+  xLoc <- which(names(data) %in% attr(t, 'term.labels'))
+  xLabel <- names(data)[xLoc]
+  if (intercept) {
+    interceptLoc <- which(names(data) == 'intercept')
+    xLoc <- c(interceptLoc, xLoc)
+    xLabel <- append(xLabel, 'Intercept', after=(interceptLoc - 1))
+    if (interceptLoc <= yLoc) { yLoc <- yLoc + 1 }
+  }
+  return(list('yLoc' = yLoc,
+              'xLoc' = xLoc,
+              'xLabel' = xLabel))
 }
