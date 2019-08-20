@@ -71,14 +71,21 @@ dpHistogram$methods(
         # 2) determine the number of bins from the input number of bins, the granularity, or the list of bins.
         if (.self$mechanism != 'mechanismStability') {
             .self$bins <- determineBins(.self$varType, rng, bins, .self$n, .self$nBins, impute, granularity, .self)
-            .self$nBins <- setNumHistogramBins(.self$nBins, granularity, .self$varType, .self$bins)
+            # if impute = False and the variable is of character type, add an NA bin to the list of bins.
+            # Check if variable is of character type because NA bins are only need to be specifcally added for
+            # character type variables. Logical variables already have NA bin added, and numeric variables do
+            # not have NA bin.
+            if (!.self$impute & .self$varType == "character") {
+                .self$bins <- c(.self$bins, NA)
+            }
+            .self$nBins <- setNumHistogramBins(.self$nBins, granularity, .self$n, .self$varType, .self$bins)
         }
         
         # check the data range
         # if numeric bins have been entered, set the range to the range of the bins 
         # if logical variable is entered, set the range to c(0,1)
         # (may be NULL)
-        .self$rng <- setHistogramRange(rng, .self$varType, bins)
+        .self$rng <- setHistogramRange(rng, .self$varType, .self$bins)
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
@@ -96,7 +103,7 @@ dpHistogram$methods(
         .self$imputeRng <- checkImputationRange(imputeRng, rng, varType)
         
         # set the bins for data imputation (will be null if no bins entered)
-        .self$imputeBins <- checkImputationBins(imputeBins, bins, varType)
+        .self$imputeBins <- checkImputationBins(imputeBins, .self$bins, varType)
 })
 
 dpHistogram$methods(

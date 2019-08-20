@@ -238,18 +238,11 @@ test_that('test on determineBins - get error when you enter numeric bins for cha
                  'Bins must be of type `character` for a variable of type `character`')
 })
 
-# expect error saying logical bins must be 0,1,NA
-test_that('test on determineBins - get error when you enter incorrect bins for logical variable', {
-    data(PUMS5extract10000, package = "PSIlence")
-    
-    binsTest <- c("wrong", "bins")
-    
-    nTest <- 10000
-    epsilonTest <- 0.1
-    
-    expect_error(dpHistogram$new(varType='logical', variable="sex", n=nTest, epsilon=epsilonTest, bins=binsTest), 
-                 'Histogram bins for a logical variable may only be 0, 1, or NA')
-})
+# NOTE: no test needed to ceck if incorrect logical bins are entered, because the flow of determineBins()
+# checks if the ariable is logical, and immediately sets the bins automatically based on the value of
+# the impute parameter, regardless of if the user entered bins or not.
+
+
 
 # 3. enter both bins and a range
 # expect an error that says you entered both, and the code is defaulting to the bins entered
@@ -387,4 +380,35 @@ test_that('errors thrown for incorrect values of nBins', {
     # expect error if number of bins is less than 2
     nBinsTest <- 1
     expect_error(dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, nBins=nBinsTest, rng=c(0,16)), 'number of bins must be at least 2')
+})
+
+
+# make sure NA bin added when impute = False for character variable
+test_that('histogram on categorical data with bins entered and impute = False', {
+    library(datasets)
+    data(esoph)
+    
+    nTest <- 88
+    epsilonTest <- 1
+    binsTest <- c("0-9g/day", "10-19", "20-29")
+    
+    catHistogram <- dpHistogram(varType='character', variable='tobgp', n=nTest, epsilon=epsilonTest, bins=binsTest)
+    catHistogram$release(esoph)
+    
+    expect_equal(length(catHistogram$result$release), 4)
+})
+
+# make sure NA bin NOT added when impute = TRUE for character variable
+test_that('histogram on categorical data with bins entered and impute = False', {
+    library(datasets)
+    data(esoph)
+    
+    nTest <- 88
+    epsilonTest <- 1
+    binsTest <- c("0-9g/day", "10-19", "20-29")
+    
+    catHistogram <- dpHistogram(varType='character', variable='tobgp', n=nTest, epsilon=epsilonTest, bins=binsTest, impute=TRUE)
+    catHistogram$release(esoph)
+    
+    expect_equal(length(catHistogram$result$release), 3)
 })

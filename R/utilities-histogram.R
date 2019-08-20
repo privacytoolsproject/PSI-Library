@@ -153,10 +153,10 @@ stabilityGetEpsilon <- function(sensitivity, accuracy, delta = 2^-30, alpha=0.05
 #' @rdname histogramGetCI
 
 histogramGetCI <- function(release, nBins, accuracy) {
-    release_asNumeric <- as.numeric(release)
+    releaseAsNumeric <- as.numeric(release)
     out <- list()
     for (k in 1:nBins) {
-        binCount <- release_asNumeric[k]
+        binCount <- releaseAsNumeric[k]
         if (binCount == 0) {
             out[[k]] <- c(0, accuracy)
         } else {
@@ -696,34 +696,30 @@ checkHistogramVariableType <- function(varType) {
 #' 
 #' @param nBins the number of bins entered by the user, may be null
 #' @param granularity the number of items to be in each bin (i.e. the height of each bin), may be null
+#' @param n the size of the database
 #' @param varType The variable type of the data that was entered by the user
 #' @param bins the bin vector either entered by the user or set by determineBins()
 #' 
 #' @return No return value, will only send an error message if variable tyep is invalid.
-setNumHistogramBins <- function(nBins, granularity, varType, bins) {
+setNumHistogramBins <- function(nBins, granularity, n, varType, bins) {
     if (varType %in% c('numeric', 'integer')) {
         # if the variable type is numeric or integer, then the length of the bins vector will
-        # be 1 larger than the number of bins. So if the user did not enter a number of bins,
+        # be 1 larger than the number of bins. So if the user did not enter a number of bins or granularity,
         # calculate the number of bins by subtracting one from the length of the bins vector.
         if (is.null(nBins)) {
-            return(length(bins) - 1)
-        } else {
-            return(nBins)
-        }
-    } else {
-        # if the variable type is not numeric or integer, then the nuber of bins can either be entered
-        # by the user, calculated from the granularity, or calculate the number of bins from the length
-        # of the bin vector.
-        if (is.null(nBins)) {
-            # if there is no input for number of bins, get it from from granularity or the list of bins
             if (!is.null(granularity)) {
                 return(n / granularity)
             } else {
-                return(length(bins))
+                return(length(bins) - 1)
             }
         } else {
             return(nBins)
         }
+    } else {
+        # if the variable type is not numeric or integer, then the number of bins
+        # should be calculated from the length of the bin vector, because an NA
+        # may have been added
+        return(length(bins))
     }
 }
 

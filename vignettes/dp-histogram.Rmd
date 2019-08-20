@@ -52,7 +52,7 @@ dpHistogramExample$release(data)
 print(dpHistogramExample$result)
 ```
 
-Arguments
+Input Parameters
 ---------
 
 In typical usage, there are two methods to the `dpHistogram` class. The `new` method, creates an object of the class and accepts the following arguments:
@@ -190,11 +190,21 @@ characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
 print(characterHistogram$result)
 ```
 
+Similar to logical variables, you can specify whether or not you would like NA values in the data to be imputed, using the `impute` parameter. If `impute = FALSE` and there are `NA` values in the underlying data, then an `NA` bin will be added to the histogram. This can be seen above, because __the default value for `impute` is `FALSE`__. If `impute = TRUE`, then there will not be an `NA` bucket in the final histogram, and any existing `NA` values will be replaced by values in the data.
+
+```{r}
+characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5,
+                                   bins=c("Detailee","Employee","Employee (part-time)"), impute = TRUE)
+characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
+print(characterHistogram$result)
+```
+
 If you would like NA (empty or unknown) values to be imputed (or replaced) by a specific subset of input bins, you can specify the imputation bins with `imputeBins`. You may want to do this if you know the underlying data is skewed, meaning an unkown value is more likely to be of a certain value as opposed to others. Specifying `imputeBins` is optional, and if it is not specified the NA values ill be imputed using a uniform distribution on all imput bins (i.e. NA values will be replaced with any known value with equal probability).
 
 ```{r}
 characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5,
-                                   bins=c("Detailee","Employee","Employee (part-time)"), imputeBins=c("Detailee","Employee"))
+                                  bins=c("Detailee","Employee","Employee (part-time)"),
+                                  imputeBins=c("Detailee","Employee"), impute = TRUE)
 characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
 print(characterHistogram$result)
 ```
@@ -228,7 +238,7 @@ A delta value was entered in the character stability example above, and was not 
 
 &nbsp;
 
-Values
+Output Values
 ------
 
 The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
@@ -248,8 +258,8 @@ The list in the `result` attribute has the following values.
 * `herfindahl` \ The differentially private Herfindal index (the sum of the squares of the percentage of data points in each bin). Only available for categorical and logical vectors.
 * `mean` \ The mean of the noisy data. Only available for logical vectors.
 * `median` \ The median of the noisy data. Only available for logical vectors.
-* `variance` \ The variance of the noise dat. Only available for logical vectors.
-* `stdDev` \ The standard deviation of the noise dat. Only available for logical vectors.
+* `variance` \ The variance of the noisy data. Only available for logical vectors.
+* `stdDev` \ The standard deviation of the noisy data. Only available for logical vectors.
 
 Notes
 ------
