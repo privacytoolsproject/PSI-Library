@@ -23,9 +23,10 @@ test_that('range checks throw correct warning', {
                                 rng=c(100)),
                "range argument in error: requires upper and lower values as vector of length 2.")
   
+  
   expect_warning(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n=10000,
                                   epsilon=0.1, columns = c("income", "education"),
-                                  rng=c(-10,0,100)),
+                                  rng=matrix(c(-10,0,100), nrow=1)),
                  "range argument supplied has more than two values.  Will proceed using min and max values as range.")
 })
 

@@ -99,12 +99,15 @@ checkNValidity <- function(n) {
 #'
 #' @examples
 checkRange1D <- function(rng, varType) {
+  rngStr <- paste('c(',toString(rng),')')
   if (varType == 'logical') {
     rng <- c(0,1)
     } else if (length(rng) < 2) {
-      stop("range argument in error: requires upper and lower values as vector of length 2.")
+      errorStr <- paste('Error in range argument provided,', rngStr, ': requires upper and lower values as vector of length 2.')
+      stop(errorStr)
     } else if (length(rng) > 2) {
-      warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
+      warningStr <- paste('Range argument of', rngStr, 'has more than two values.  Will proceed using min and max values as range.')
+      warning(warningStr)
       rng <- c(min(rng), max(rng))
     } else {
       rng <- sort(rng)
@@ -132,14 +135,16 @@ checkRange1D <- function(rng, varType) {
 #' @export
 checkRange <- function(rng, varType) {
   if (NCOL(rng) > 1){
+    newRng <- matrix(NA, nrow(rng), 2)
     for (i in 1:nrow(rng)) {
-      rng[i,] <- checkRange1D(rngs[i,], varType)
+      newRng[i,] <- checkRange1D(rng[i,], varType)
     }
+    return(newRng)
   }
   else{
     rng <- checkRange1D(rng, varType)
+    return(rng)
   }
-  return(rng)
 }
 
 #' Epsilon Parameter Check
