@@ -1,3 +1,18 @@
+#' Sensitivity of mean
+#'
+#' For a detailed derivation of the sensitivity, see /extra_docs/mean_sensitivity.pdf
+#' 
+#' @param rng Numeric vector of length two; first entry is minimal bound on the database entries, second is maximal bound on the database entries.
+#' @param n Numeric vector of length one; the number of datapoints in the database.
+#'
+#' @return Numeric vector of length one; a maximal bound on the sensitivity of the population variance.
+#'
+#' @examples
+#' meanSensitivity(c(0,10),5) #should return 2
+meanSensitivity <- function(rng, n){
+  return(diff(rng)/n)
+}
+
 #' Postprocessed standard deviation for logical variables 
 #' 
 #' Calculates the standard deviation of the differentially private mean from a 
@@ -118,17 +133,4 @@ bootMean <- function(xi, n) {
     return(sum(xi) / n)
 }
 
-#' Sensitivity of mean
-#'
-#' For a detailed derivation of the sensitivity, see /extra_docs/mean_sensitivity.pdf
-#' 
-#' @param rng Numeric vector of length two; first entry is minimal bound on the database entries, second is maximal bound on the database entries.
-#' @param n Numeric vector of length one; the number of datapoints in the database.
-#'
-#' @return Numeric vector of length one; a maximal bound on the sensitivity of the population variance.
-#'
-#' @examples
-#' meanSensitivity(5, c(0,10)) #should return 2
-meanSensitivity <- function(rng, n){
-  return(diff(rng)/n)
-}
+
