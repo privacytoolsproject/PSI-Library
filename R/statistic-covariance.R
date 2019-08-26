@@ -31,6 +31,7 @@ coefficientRelease <- function(formula, release, n) {
 
 
 #' Function to get the sensitivity of the covariance matrix
+#' FIX THIS
 #'
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
@@ -139,7 +140,6 @@ covariancePostLinearRegression <- function(release, n, intercept, formula) {
 
 covar <- function(x, intercept) {
   if (intercept) { x <- cbind(1, x) }
-  #covariance <- t(as.matrix(x)) %*% as.matrix(x)
   covariance <- cov(x)
   lower <- lower.tri(covariance, diag=TRUE)
   covariance <- covariance[lower]
@@ -193,7 +193,6 @@ dpCovariance$methods(
       .self$imputeRng <- imputeRng
     }
     
-
     if (.self$intercept) { 
       .self$columns <- c('intercept', columns)
     } else {

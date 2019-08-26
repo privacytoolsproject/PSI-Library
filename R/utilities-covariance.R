@@ -15,15 +15,19 @@
 #'    to \code{formula}.
 #' @rdname linearReg
 linearReg <- function(formula, release, n, intercept) {
-    if (!all(eigen(release)$values > 0)) {  # could do is.positive.definite() but that requires matrixcalc package
+  eigenvals <- eigen(release)$values
+  if (!all(eigenvals != 0)) {  # could do is.positive.definite() but that requires matrixcalc package
         coefs <- "The input matrix is not invertible"
         return(coefs)
-    } else {
+  } else if (!all(eigenvals > 0)){
+        coefs <- "The input covariance matrix is not positive definite due to noise addition so linear regression will not be run."
+        return(coefs)
+  } else {
         xyLocs <- extractIndices(as.formula(formula), release, intercept)
         xLoc <- xyLocs$xLoc
         yLoc <- xyLocs$yLoc
-        locVec <- rep(TRUE, (length(xLoc) + 1))
-        locVec[yLoc] <- FALSE
+        locVec <- rep(FALSE, length(release))
+        locVec[xLoc] <- TRUE
         sweep <- amsweep((as.matrix(release) / n), locVec)
         coefs <- sweep[yLoc, xLoc]
         se <- sqrt(sweep[yLoc, yLoc] * diag(solve(release[xLoc, xLoc])))
