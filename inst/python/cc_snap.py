@@ -1,7 +1,7 @@
 import crlibm
 import struct
 import math
-import random
+import secrets
 import numpy as np
 import gmpy2
 
@@ -203,28 +203,23 @@ class Snapping_Mechanism:
         sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
         return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
 
-    def _sample_from_uniform(self, secure_random):
+    def _sample_from_uniform(self):
         """
         Sample from uniform (0,1) as described by Mironov.
         Meant to sample floating points proportional to their unit of least precision
 
-        Parameters:
-            secure_random (random.SystemRandom()): Instance of the random.SystemRandom class
-
         Return:
             numeric: sample from Unif(0,1)
         """
-        sign = gmpy2.mpfr(secure_random.sample(population = [-1,1], k = 1)[0]) # using mpfr precision here, even though it's an integer, so that the
-                                                                               # precision carries through in later steps
+
         '''
         Looking for more elegant way to sample from geometric
         '''
         geom = 1
-        while (secure_random.sample(population = [0,1], k = 1)[0] == 0):
+        while (secrets.randbits(1) == 0):
             geom += 1
         u_star_exponent = bin(-geom + 1023)[2:]
-        # u_star_exponent = bin(-np.random.geometric(p = 0.5) + 1023)[2:]
-        u_star_mantissa = ''.join([str(secure_random.sample(population = [0,1], k = 1)[0]) for i in range(52)])
+        u_star_mantissa = ''.join([str(secrets.randbits(1)) for i in range(52)])
         u_star_sample = self._bin_to_double('0' + str(u_star_exponent) + str(u_star_mantissa))
         return(u_star_sample)
 
@@ -282,9 +277,10 @@ class Snapping_Mechanism:
 
         See section 5.2 of Mironov (2012) for the definition of the snapping mechanism implemented below.
         '''
-        # instantiate instance of cryptographically secure random class and generate random sign and draw from Unif(0,1)
-        secure_random = random.SystemRandom()
-        u_star_sample = self._sample_from_uniform(secure_random)
+        # generate random sign and draw from Unif(0,1)
+        sign = gmpy2.mpfr(2*secrets.randbits(1) - 1) # using mpfr precision here, even though it's an integer, so that the
+                                                                               # precision carries through in later steps
+        u_star_sample = self._sample_from_uniform()
         epsilon_prime = self._redefine_epsilon(self.epsilon, B_scaled, precision)
         inner_result = self._clamp(mechanism_input_scaled, B_scaled) + (sign * 1/epsilon_prime * crlibm.log_rn(u_star_sample))
 
