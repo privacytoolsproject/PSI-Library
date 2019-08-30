@@ -13,5 +13,5 @@ checkAccuracy(accuracy)
 accuracy or errors.
 }
 \description{
-Verifies accuracy is greater than 0.
+Verifies accuracy is greater than 0 and is a single value.
 }

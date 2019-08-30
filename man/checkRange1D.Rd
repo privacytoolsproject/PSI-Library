@@ -9,7 +9,7 @@ checkRange1D(rng, varType)
 \arguments{
 \item{rng}{Range. A numeric vector that ought to be an ordered pair.}
 
-\item{varType}{}
+\item{varType}{String describing the variable type. One of 'logical' or 'numeric'.}
 }
 \description{
 Helper function for checkRange. Checks if a supplied range is an ordered pair.

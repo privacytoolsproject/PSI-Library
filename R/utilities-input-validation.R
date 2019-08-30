@@ -155,7 +155,9 @@ checkAccuracy <- function(accuracy){
 #' 
 #' checkVariableType(type='Numeric', inTypes=c('Numeric', 'Factor'))
 #' @rdname checkVariableType
-checkVariableType <- function(type, inTypes) { 
+checkVariableType <- function(type, inTypes) {
+  type <- tolower(type)
+  inTypes <- tolower(inTypes)
   if (!(type %in% inTypes)) {
     stop(paste('Variable type', type, 'should be one of', paste(inTypes, collapse = ', ')))
   } 
@@ -193,6 +195,10 @@ checkImputationRange <- function(imputationRange, rng, varType) {
   if (varType %in% c('numeric', 'integer')) {
     
     checkNumeric(imputationRange)
+    
+    if (length(imputationRange)!=2){
+      stop("Imputation range must have length 2.")
+    }
     
     lowerBound <- NULL
     upperBound <- NULL
