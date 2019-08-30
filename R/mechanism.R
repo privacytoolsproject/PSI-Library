@@ -24,7 +24,6 @@
 #' @field bootFun Function passed to the bootstrap mechanism
 #' @field imputeRng The range from which to impute missing values
 #' @field impute Logical, impute categorical types?
-#' @field formula R formula for regression models
 #' @field columns Vector of column names
 #' @field intercept Logical, is the intercept included?
 #' @field stability Logical, use stability histogram
@@ -57,7 +56,6 @@ mechanism <- setRefClass(
         imputeRng = 'ANY',
         imputeBins = 'ANY',
         impute = 'logical',
-        formula = 'ANY',
         columns = 'ANY',
         intercept = 'logical', 
         stability = 'logical',

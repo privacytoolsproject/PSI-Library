@@ -51,8 +51,6 @@ Base mechanism class
 
 \item{\code{impute}}{Logical, impute categorical types?}
 
-\item{\code{formula}}{R formula for regression models}
-
 \item{\code{columns}}{Vector of column names}
 
 \item{\code{intercept}}{Logical, is the intercept included?}

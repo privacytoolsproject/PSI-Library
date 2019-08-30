@@ -9,9 +9,9 @@ test_that('range checks throw correct warning', {
   deltaTest <- 10^-6
 
   expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(100)), 
-               "range argument in error: requires upper and lower values as vector of length 2.")
+               "Error in range argument provided, c( 100 ) : requires upper and lower values as vector of length 2.", fixed=TRUE)
   expect_warning(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(-10,0,100)), 
-                 "range argument supplied has more than two values.  Will proceed using min and max values as range.")
+              "Range argument of c( -10, 0, 100 ) has more than two values.  Will proceed using min and max values as range.", fixed=TRUE)
 
   dpMeanTest <- dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, delta=deltaTest, rng=c(0,100))
   dpMeanTest$release(PUMS5extract10000)

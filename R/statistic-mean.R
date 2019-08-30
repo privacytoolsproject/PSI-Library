@@ -66,7 +66,7 @@ meanPostHistogram <- function(release, n) {
 #' @rdname meanGetCI
 
 meanGetCI <- function(release, epsilon, sensitivity, alpha=0.05) {
-    z <- qlap((1 - (alpha / 2)), b=(sensitivity / epsilon))
+    z <- qLap((1 - (alpha / 2)), b=(sensitivity / epsilon))
     interval <- c(release - z, release + z)
     return(interval)
 }
@@ -156,7 +156,7 @@ dpMean$methods(
         .self$mechanism <- mechanism
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$alpha <- alpha
         .self$rng <- checkRange(rng, varType)
         .self$sens <- diff(.self$rng) / n
