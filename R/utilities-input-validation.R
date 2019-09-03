@@ -1,3 +1,22 @@
+
+#' Check if input is numeric type
+#' 
+#' Helper function that generates error message if non-numeric typed value \code{n}
+#' is passed as input, and otherwise returns \code{n}.
+#'
+#' @param n Input value of arbitrary type.
+#'
+#' @return n or errors.
+checkNumeric <- function(n){
+  if (!is.numeric(n)){
+    errorStr <- paste("Input value of ", toString(n), "is not of type numeric.")
+    stop(errorStr)
+  }
+  else{
+    return(n)
+  }
+}
+
 #' Check validity of n
 #' 
 #' n should always be a positive whole number, check the user's input
@@ -143,6 +162,7 @@ checkRange <- function(rng, varType) {
 #' @rdname checkEpsilon
 #' @export
 checkEpsilon <- function(epsilon) {
+  checkNumeric(epsilon)
   if (epsilon <= 0) {
     stop("Privacy parameter epsilon must be a value greater than zero.")
   }

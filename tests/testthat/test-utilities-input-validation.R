@@ -1,5 +1,10 @@
 context('utilities-input-validation')
 
+test_that('checkNumeric raises proper warnings and errors', {
+  expect_error(checkNumeric('foo'))
+  expect_equal(checkNumeric(15.5), 15.5)
+})
+
 test_that('checkN raises proper warnings and errors',{
   expect_error(checkN(-1))
   expect_error(checkN(1.5))
