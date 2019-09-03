@@ -55,9 +55,26 @@ checkN <- function(n) {
 #' 
 #' @return the imputation range that will be used for `fillMissing()`.
 
+#' Error check imputation range for numeric or integer variables
+#' 
+#' Check that the entered imputation range is within the entered data range. If yes, return
+#' the entered imputation range, which will be used as the imputation range for the call
+#' to the utility function `fillMissing()`. If not, return the data range. 
+#' If the imputation range is NULL, default to the data range.
+#' 
+#' We check if the imputation range is within the data range because it is a privacy concern.
+#' If the imputation range is outside of the data range, NA values will be replaced with values 
+#' outside of the data range, which will show that there are NA values in the data or skew the 
+#' result when the differentially private estimate is released.
+#' 
+#' @param imputationRange The imputation range entered by the user
+#' @param rng The data range entered by the user
+#' @param varType The variable type for the histogram data
+#' 
+#' @return the imputation range that will be used for `fillMissing()`.
+
 checkImputationRange <- function(imputationRange, rng, varType) {
   # if no imputation range was entered, return the data range.
-  # (Note: rng may be NULL, in which case stability mechanism will be used)
   if (is.null(imputationRange)) {
     return(rng)
   }
@@ -67,6 +84,13 @@ checkImputationRange <- function(imputationRange, rng, varType) {
   # if an imputation range was entered, check that it is
   # within the data range. If it is not, clip it to be within the data range
   if (varType %in% c('numeric', 'integer')) {
+    
+    checkNumeric(imputationRange)
+    
+    if (length(imputationRange)!=2){
+      stop("Imputation range must have length 2.")
+    }
+    
     lowerBound <- NULL
     upperBound <- NULL
     
@@ -106,7 +130,6 @@ checkImputationRange <- function(imputationRange, rng, varType) {
     return(rng)
   }
 }
-
 #' Range Parameter Check
 #' 
 #' Checks if a supplied range is an ordered pair. Coerces any vector of length 

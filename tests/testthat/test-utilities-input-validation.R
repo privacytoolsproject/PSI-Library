@@ -64,3 +64,22 @@ test_that('checkVariableType raises proper warnings and errors', {
   
   expect_error(checkVariableType('Numeric', c('Factor', 'Integer')))
 })
+
+test_that('checkImputationRange raises proper warnings and errors', {
+  expect_equal(checkImputationRange(c(1,2),c(0,3),'numeric'), c(1,2))
+  expect_equal(checkImputationRange(c(1,2),c(0,3), 'integer'), c(1,2))
+  expect_equal(checkImputationRange(c(1,2), c(1,2), 'numeric'), c(1,2))
+  
+  #To Do: Discuss this case with Megan
+  expect_warning(expect_equal(checkImputationRange(c('cat','dog'),c('cat','dog','mouse'), 'character'), 
+                              c('cat','dog','mouse')))
+  
+  expect_error(checkImputationRange(c('cat','dog'),c(1,5),'numeric'))
+  expect_error(checkImputationRange(1,c(1,5),'numeric'))
+  expect_error(checkImputationRange(c(1,2,5), 'numeric'))
+  
+  expect_warning(expect_equal(checkImputationRange(c(0,3),c(1,2),'numeric'), c(1,2)))
+  expect_warning(expect_equal(checkImputationRange(c(1.5,3), c(1,2),'numeric'), c(1.5,2)))
+  expect_warning(expect_equal(checkImputationRange(c(0.5,1.5),c(1,2), 'numeric'),c(1,1.5)))
+  
+})
