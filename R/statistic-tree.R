@@ -176,7 +176,7 @@ dpTree$methods(
         .self$mechanism <- mechanism
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$rng <- rng
         .self$gran <- gran
         .self$alpha <- alpha

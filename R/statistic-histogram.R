@@ -51,7 +51,7 @@ dpHistogram$methods(
         # set parameters of the histogram
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$epsilon <- epsilon
         .self$accuracy <- accuracy
         .self$bins <- bins # may be null

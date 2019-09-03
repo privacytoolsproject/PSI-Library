@@ -35,7 +35,7 @@ dpMean$methods(
         .self$mechanism <- mechanism
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$alpha <- alpha
         .self$rng <- checkRange(rng, varType)
         .self$sens <- diff(.self$rng) / n
