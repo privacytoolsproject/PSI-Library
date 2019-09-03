@@ -57,3 +57,10 @@ test_that('censorData is as expected', {
   expect_equal(charsOut, factor(c('a','b','c','c',NA)))
   expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
 })
+
+test_that('checkVariableType raises proper warnings and errors', {
+  expect_equal(checkVariableType('Numeric', c('Numeric', 'Factor')), 'numeric')
+  expect_equal(checkVariableType('numeric', c('Numeric', 'Integer')), 'numeric')
+  
+  expect_error(checkVariableType('Numeric', c('Factor', 'Integer')))
+})

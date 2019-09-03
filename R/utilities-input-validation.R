@@ -209,6 +209,8 @@ checkAccuracy <- function(accuracy){
 #' @rdname checkVariableType
 #' @export
 checkVariableType <- function(type, inTypes) { 
+  type <- tolower(type)
+  inTypes <- tolower(inTypes)
   if (!(type %in% inTypes)) {
     stop(paste('Variable type', type, 'should be one of', paste(inTypes, collapse = ', ')))
   } 
