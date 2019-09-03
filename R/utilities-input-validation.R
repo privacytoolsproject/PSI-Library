@@ -149,25 +149,33 @@ checkRange <- function(rng, varType) {
 #' 
 #' Utility function for checking that epsilon is acceptably defined.
 #'
-#' @param epsilon A vector, that ought to be positive and of length one.
+#' @param epsilon A vector, that ought to be positive.
+#' @param multipleEps A boolean value. If TRUE, multiple epsilon paramaters may be defined. Default to FALSE.
+#' @param expectedLength Integer value. Specifies how long the output ought to be.
 #' 
 #' @return The supplied epsilon if acceptable, otherwise an error 
 #'    message interupts.
-#'
-#' @examples
-#' 
-#' checkEpsilon(0.1)
-#' \dontrun{checkEpsilon(-2)}
-#' \dontrun{checkEpsilon(c(0.1,0.5))}
-#' @rdname checkEpsilon
-#' @export
-checkEpsilon <- function(epsilon) {
+#'    
+checkEpsilon <- function(epsilon, multipleEps=FALSE, expectedLength=1) {
   checkNumeric(epsilon)
-  if (epsilon <= 0) {
-    stop("Privacy parameter epsilon must be a value greater than zero.")
-  }
-  if (length(epsilon) > 1) {
+  if (length(epsilon) > 1 && !multipleEps) {
     stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
+  }
+  for (eps in epsilon){
+    if (eps <= 0) {
+      stop("Privacy parameter epsilon must be a value greater than zero.")
+    }
+    if (eps >= 3){
+      strEps <- toString(eps)
+      warningStr <- paste('Epsilon value of ', strEps, ' is in use. This is a higher global value than recommended for most cases.')
+      warning(warningStr)
+    }
+  }
+  actualLength <- length(epsilon)
+  if (actualLength != expectedLength) {
+    errorStr = paste("Epsilon parameter has improper length. Actual length is ", toString(actualLength),
+                     " while expected length is ", toString(expectedLength),".")
+    stop(errorStr)
   }
   return(epsilon)
 }

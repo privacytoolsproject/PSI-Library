@@ -13,6 +13,20 @@ test_that('checkN raises proper warnings and errors',{
   expect_error(checkN('foo'))
 })
 
+test_that('checkEpsilon raises proper warnings and errors', {
+  expect_equal(checkEpsilon(1), 1)
+  expect_equal(checkEpsilon(c(1,0.1), multipleEps=TRUE, expectedLength=2), c(1,0.1))
+  
+  expect_error(checkEpsilon(c(1,0.1)))
+  expect_error(checkEpsilon(-1))
+  expect_error(checkEpsilon(c(1,-0.1), multipleEps=TRUE))
+  expect_error(checkEpsilon(c(1,2), multupleEps=TRUE, expectedLength=5))
+  expect_error(checkEpsilon('foo'))
+  
+  expect_warning(checkEpsilon(4))
+  expect_warning(checkEpsilon(c(1,4), multipleEps=TRUE, expectedLength=2))
+})
+
 test_that('checkRange is as expected', {
   rng1 = c(0,1)
   rng2 = c(0,1,2)
