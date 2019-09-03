@@ -27,6 +27,12 @@ test_that('checkEpsilon raises proper warnings and errors', {
   expect_warning(checkEpsilon(c(1,4), multipleEps=TRUE, expectedLength=2))
 })
 
+test_that('checkAccuracy raises proper warnings and errors', {
+  expect_error(checkAccuracy(-1))
+  expect_equal(checkAccuracy(5),5)
+  expect_error(checkAccuracy('foo'))
+})
+
 test_that('checkRange is as expected', {
   rng1 = c(0,1)
   rng2 = c(0,1,2)

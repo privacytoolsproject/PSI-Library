@@ -180,6 +180,21 @@ checkEpsilon <- function(epsilon, multipleEps=FALSE, expectedLength=1) {
   return(epsilon)
 }
 
+#' Utility function for checking that accuracy is acceptably defined.
+#' 
+#' Verifies accuracy is greater than 0 and is a single value.
+#'
+#' @param accuracy 
+#'
+#' @return accuracy or errors.
+checkAccuracy <- function(accuracy){
+  checkNumeric(accuracy)
+  if (!all(accuracy > 0)){
+    stop("Accuracy must be greater than 0.")
+  }
+  return(accuracy)
+}
+
 #' Checking variable types
 #' 
 #' Verifies that the variable is an element in the set of acceptable types.
