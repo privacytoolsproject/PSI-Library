@@ -232,6 +232,42 @@ class Snapping_Mechanism:
         eta = gmpy2.mpfr(2**-precision)
         return((epsilon - 2*eta) / (1 + 12*B*eta))
 
+    def _get_laplace_CDF(self, x, _lambda):
+        """
+        Gets P(Laplace(_lambda) <= x) for mean 0 Laplace
+
+        Parameters:
+            x (numeric): Number for which we want the area to the left
+            _lambda (numeric): Scale parameter for Laplace distribution
+
+        Return:
+            numeric: P(Y <= x) where Y ~ Laplace(_lambda)
+        """
+        if x <= 0:
+            return( (1/2) * math.e**(x/_lambda) )
+        else:
+            return(1 - (1/2) * math.e**(-x/_lambda) )
+
+    def _F_Z_plus(self, z, _lambda):
+        """
+        """
+        return(1 - math.e**(-1/_lambda * z + 1/2))
+
+    def _F_Z_minus(self, z, _lambda):
+        """
+        """
+        return(1 - math.e**(-1/_lambda * z + 1))
+
+    def _get_accuracy(self, f_D, B, P_l_plus, P_u_minus, _lambda, alpha):
+        if P_l_plus >= alpha:
+            return(B + f_D)
+        elif self._F_Z_minus(B - f_D, _lambda) >= 1 + P_l_plus - alpha:
+            return(_lambda * (1 - math.log(alpha - P_l_plus)))
+        elif self._F_Z_minus(B - f_D, _lambda) + P_u_minus >= 1 + P_l_plus - alpha:
+            return(B - f_D)
+        else:
+            return(_lambda * (1 - math.log(alpha - P_l_plus + P_u_minus)))
+
     def get_snapped_noise(self):
         """
         Generates noise for Snapping Mechanism
@@ -289,7 +325,23 @@ class Snapping_Mechanism:
         Lambda, m = self._get_smallest_greater_power_of_two(1/epsilon_prime)
 
         inner_result_rounded = self._get_closest_multiple_of_Lambda(inner_result, m)
-        private_estimate = self._clamp(self.sensitivity * inner_result_rounded, self.B)
+        private_estimate = self._clamp(self.sensitivity * inner_result_rounded, self.B) # put private estimate back on original scale
         snapped_noise = private_estimate - self.mechanism_input
 
-        return(snapped_noise)
+        # calculate extra quantities needed for accuracy guarantee
+        # see snapping_implementation_notes.pdf for explanation
+        lambda_prime = self.sensitivity / epsilon_prime
+        P_l_plus = self._get_laplace_CDF(x = -self.B - private_estimate + lambda_prime, _lambda = lambda_prime)
+        P_u_minus = 1 - self._get_laplace_CDF(x = self.B - private_estimate - lambda_prime, _lambda = lambda_prime)
+
+        # TODO: just testing this below -- not sure if correct and will likely need to define outside
+        #       of this function to allow user to set alpha
+        accuracy = self._get_accuracy(f_D = private_estimate,
+                                      B = self.B,
+                                      P_l_plus = P_l_plus,
+                                      P_u_minus = P_u_minus,
+                                      _lambda = lambda_prime,
+                                      alpha = 0.05)
+
+
+        return(snapped_noise, self.epsilon, accuracy)
