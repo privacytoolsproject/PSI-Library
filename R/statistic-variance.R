@@ -46,7 +46,7 @@ dpVariance$methods(
         .self$mechanism <- mechanism
         .self$varType <- varType
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$rng <- checkRange(rng, varType)
         .self$sens <- (n - 1) / n^2 * diff(.self$rng)^2
         
