@@ -344,4 +344,4 @@ class Snapping_Mechanism:
                                       alpha = 0.05)
 
 
-        return(snapped_noise, self.epsilon, accuracy)
+        return(snapped_noise, self.epsilon, float(accuracy))
