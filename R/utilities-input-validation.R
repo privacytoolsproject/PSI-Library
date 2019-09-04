@@ -11,9 +11,25 @@ checkNumeric <- function(n){
   if (!is.numeric(n)){
     errorStr <- paste("Input value of ", toString(n), "is not of type numeric.")
     stop(errorStr)
-  }
-  else{
+  } else{
     return(n)
+  }
+}
+
+#' Check if input xs has length n
+#' 
+#' @param xs A vector, factor, or object for which length is defined.
+#' @param n A numeric value of length 1. The expected length of xs.
+#'
+#' @return xs or error.
+checkLength <- function(xs, n){
+  len <- length(xs)
+  if (len == n){
+    return(xs)
+  }
+  else {
+    errorStr <- paste("Input was expected to be of length ", toString(n), " but is instead of length ", toString(len))
+    stop(errorStr)
   }
 }
 
@@ -137,17 +153,48 @@ checkImputationRange <- function(imputationRange, rng, varType) {
 #' Coerces any vector of length two or greater into an ordered pair, and issues 
 #' an error for shorter vectors.
 #' 
+#' If varType is 'logical', range is coerced to c(0,1).
+#' 
+#' If emptyOkay, no error will be raised if the input range is null or NA, and an NA value will be returned.
+#' 
 #' @param rng Range. A numeric vector that ought to be an ordered pair.
 #' @param varType String describing the variable type. One of 'logical' or 'numeric'.
-#' 
-checkRange1D <- function(rng, varType) {
-  rngStr <- paste('c(',toString(rng),')')
+#' @param emptyOkay Boolean. TRUE if a null or NA range is allowed, default to FALSE.
+#' @return Vector of length 2 or NULL
+checkRange1D <- function(rng, varType, emptyOkay=FALSE) {
+  
+  #Special case for logical variables.
   if (varType == 'logical') {
     rng <- c(0,1)
-  } else if (length(rng) < 2) {
+    return(rng)
+  } 
+  
+  # Check for null or NA range
+  lengthRng <- length(rng)
+  emptyFlag <- is.null(rng) || (is.na(rng) && lengthRng <=1)
+  if (emptyFlag && !emptyOkay){
+    stop("Input range may not be empty.")
+  } else if (emptyFlag){
+    return(NULL)
+  }
+  
+  rngStr <- paste('c(',toString(rng),')')
+  
+  # Check for NA values within range
+  naFlag <- NA %in% rng
+  if (naFlag && emptyOkay){
+    warningStr <- paste('Range argument provided', rngStr,'has NA value. Setting range to NULL.')
+    warning(warningStr)
+    return(NULL)
+  }else if (naFlag){
+    stop("Input range may not contain NA values.")
+  }
+  
+  # Range validation
+  if (lengthRng < 2) {
     errorStr <- paste('Error in range argument provided,', rngStr, ': requires upper and lower values as vector of length 2.')
     stop(errorStr)
-  } else if (length(rng) > 2) {
+  } else if (lengthRng > 2) {
     warningStr <- paste('Range argument of', rngStr, 'has more than two values.  Will proceed using min and max values as range.')
     warning(warningStr)
     rng <- c(min(rng), max(rng))
@@ -159,36 +206,75 @@ checkRange1D <- function(rng, varType) {
 
 #' Range Parameter Check
 #' 
-#' Checks if a supplied range is an ordered pair.
-#'    
+#' Checks if a supplied range(s) is(are) an ordered pair(s).
+#' 
+#' If emptyOkay, no error will be raised if the input range(s) is(are) null or NA. Ranges that
+#' were input as NULL will be output as NULL.
+#' 
+#' In order to handle potential of some rows with different lengths when some rows contain NULL
+#' or NA values, a rng input of 
+#' 
 #' @param rng Range. A numeric vector of one of two formats:
-#'   1. Of length two, that ought to be an ordered pair, representing 
-#'   the maximum and minimum bounds on the data
-#'   2. A sequence of ordered pairs in columns, where each row represents
+#'   1. A vector of length two, that ought to be an atomic ordered pair, representing 
+#'   the maximum and minimum bounds on the data.
+#'   2. A sequence of ordered pairs as a matrix or as a list, where each row represents
 #'    the maximum and minimum bounds on some subsets of the data (e.g. of different data columns)
+#'    Matrix and list types are supported. Internally, matrices are coerced to lists to allow 
+#'    varying dimensions across rows.
 #' @param varType The variable type; e.g. 'logical', 'integer', 'numeric', 'character'.
-#' @return An ordered pair.
+#' @param formatType One of 'vector' or 'list', describing which of the two the input range should be, where 'vector' returns to an atomic vector.
+#'    Since matrices are coerced to lists within the function, when using a matrix as range input, `format type = 'list'` should be specified. 
+#' @param expectedLength Integer value. Specifies how long the output ought to be. Defaults to NULL and only used on list or matrix inputs.
+#' @param emptyOkay Boolean. TRUE if a null or NA range is allowed. Defaults to FALSE.
+#' @return An ordered pair, a list of ordered pairs, or NULL.
+#' 
+#' Note that you can input a single ordered pair as a first element of a list, e.g. \code{rng = list(c(1,2))},
+#' but performance will be slightly worse.
+#' 
 #' @examples
 #'
 #' checkRange(c(1,3))
 #' checkRange(1:3)s
 #' \dontrun{checkRange(1)}
 #' @rdname checkRange
-checkRange <- function(rng, varType) {
-  if (NCOL(rng) > 1){
-    newRng <- matrix(NA, nrow(rng), 2)
-    for (i in 1:nrow(rng)) {
-      newRng[i,] <- checkRange1D(rng[i,], varType)
+checkRange <- function(rng, varType, formatType, expectedLength=NULL, emptyOkay=FALSE) {
+  # If input is matrix, coerce to a list. 
+  if (is.matrix(rng)) {
+    if (is.matrix(rng)){
+      rng <- matrixToList(rng)
+      formatType <- "list"
     }
-    return(newRng)
   }
-  else{
-    rng <- checkRange1D(rng, varType)
+  
+  # If input is just an atomic vector, just run validation checks on that.
+  if ((isVector(rng) && formatType == "vector") || is.null(rng)) {
+    rng <- checkRange1D(rng, varType, emptyOkay)
     return(rng)
   }
+  
+  else if ((is.list(rng)) && formatType == "list"){
+    
+    checkLength(rng, expectedLength)
+    
+    # Run validation on each tuple input in list
+    newRngs <- rep(list(NA), length(rng)) #initialization
+    
+    for (i in 1:length(rng)) {
+      newRngVal <- checkRange1D(rng[[i]], varType, emptyOkay)
+      # If newRngVal is NULL, have to do some weird massaging to add it to the list.
+      if (is.null(newRngVal)){
+        newRngs[i] <- list(NULL)
+      } else{
+        newRngs[[i]] <- newRngVal
+      }
+    }
+    return(newRngs)
+  }
+  else{
+    stop("Input rng is not of expected format.")
+  }
 }
-
-
+  
 #' Epsilon Parameter Check
 #' 
 #' Utility function for checking that epsilon is acceptably defined.
@@ -259,4 +345,31 @@ checkVariableType <- function(type, inTypes) {
     stop(paste('Variable type', type, 'should be one of', paste(inTypes, collapse = ', ')))
   } 
   return(type)
+}
+
+#' Helper function that converts a matrix to a list, s.t. each element of the list is a row of the matrix.
+#'
+#' @param m An arbitrary matrix
+#'
+#' @return List form of m, where ith element of list is the ith row of the matrix m.
+matrixToList <- function(m){
+  getRow <- function(i){
+    return(m[i,])
+  }
+  outList <- lapply(1:nrow(m), getRow)
+  return(outList)
+}
+
+#' Checks if input value is an atomic vector (rather than a list).
+#'
+#' @param x arbitrary input
+#'
+#' @return TRUE if x is an atomic vector, FALSE otherwise.
+isVector <- function(x){
+  if (is.vector(x) && !is.list(x)){
+    return(TRUE)
+  }
+  else{
+    return(FALSE)
+  }
 }
