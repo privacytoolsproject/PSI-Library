@@ -50,20 +50,6 @@ test_that('checkRange raises proper warnings and errors on 1D input', {
   expect_error(checkRange(rng3, "numeric"), expectedError, fixed=TRUE)
 })
 
-test_that('censorData is as expected', {
-  residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
-  chars = c('a', 'b', 'c', 'c', 'd')
-  nums = 1:10
-  
-  residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
-  charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
-  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
-  
-  expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
-  expect_equal(charsOut, factor(c('a','b','c','c',NA)))
-  expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
-})
-
 test_that('checkVariableType raises proper warnings and errors', {
   expect_equal(checkVariableType('Numeric', c('Numeric', 'Factor')), 'numeric')
   expect_equal(checkVariableType('numeric', c('Numeric', 'Integer')), 'numeric')

@@ -97,3 +97,17 @@ test_that('fillMissing as expected', {
   
   expect_equal(sum(is.na(dfImputed)), 0)
 })
+
+test_that('censorData is as expected', {
+  residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
+  chars = c('a', 'b', 'c', 'c', 'd')
+  nums = 1:10
+  
+  residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
+  charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
+  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
+  
+  expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
+  expect_equal(charsOut, factor(c('a','b','c','c',NA)))
+  expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
+})
