@@ -43,12 +43,10 @@ checkLength <- function(xs, n){
 
 checkN <- function(n) {
   checkNumeric(n)
+  checkLength(n,1)
   if ((n <= 0) || (n%%1 != 0)) {
     stop("n must be a positive whole number.")
-  } else if (length(n) > 1) {
-    stop("n must be of length 1.")
-  }
-  else {
+  } else {
     return(n)
   }
 }
@@ -288,6 +286,7 @@ checkRange <- function(rng, varType, formatType, expectedLength=NULL, emptyOkay=
 #'    
 checkEpsilon <- function(epsilon, multipleEps=FALSE, expectedLength=1) {
   checkNumeric(epsilon)
+  
   if (length(epsilon) > 1 && !multipleEps) {
     stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
   }
