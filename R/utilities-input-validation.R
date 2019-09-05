@@ -284,10 +284,10 @@ checkRange <- function(rng, varType, formatType, expectedLength=NULL, emptyOkay=
 #' @return The supplied epsilon if acceptable, otherwise an error 
 #'    message interupts.
 #'    
-checkEpsilon <- function(epsilon, multipleEps=FALSE, expectedLength=1) {
+checkEpsilon <- function(epsilon, expectedLength=1) {
   checkNumeric(epsilon)
   
-  if (length(epsilon) > 1 && !multipleEps) {
+  if (length(epsilon) > 1 && expectedLength<=1) {
     stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
   }
   for (eps in epsilon){
