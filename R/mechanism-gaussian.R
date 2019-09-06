@@ -13,13 +13,13 @@ mechanismGaussian <- setRefClass(
 
 mechanismGaussian$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, .self$rng)
-        x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$bins)
-        fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-        input.vals = c(list(x=x), fun.args)
-        true.val <- do.call(fun, input.vals)
+        x <- censorData(x, .self$varType, .self$rng)
+        x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$bins)
+        funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+        inputVals = c(list(x=x), funArgs)
+        trueVal <- do.call(fun, inputVals)
         scale <- sens * sqrt(2 * log(1.25 / .self$delta)) / .self$epsilon
-        release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='gaussian')
+        release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='gaussian')
         out <- list('release' = release)
         out <- postFun(out, ...)
         return(out)

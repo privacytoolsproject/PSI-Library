@@ -17,9 +17,9 @@ Base mechanism class
 
 \item{\code{variable}}{Name of the variable}
 
-\item{\code{var.type}}{Variable type}
+\item{\code{varType}}{Variable type}
 
-\item{\code{var.type.orig}}{Variable type at instantiation}
+\item{\code{varTypeOrig}}{Variable type at instantiation}
 
 \item{\code{n}}{Number of observations}
 
@@ -37,17 +37,17 @@ Base mechanism class
 
 \item{\code{bins}}{Bins}
 
-\item{\code{n.bins}}{Number of bins}
+\item{\code{nBins}}{Number of bins}
 
 \item{\code{k}}{Number of bins desired for the release}
 
 \item{\code{error}}{Error}
 
-\item{\code{n.boot}}{Number of bootstrap replications}
+\item{\code{nBoot}}{Number of bootstrap replications}
 
-\item{\code{boot.fun}}{Function passed to the bootstrap mechanism}
+\item{\code{bootFun}}{Function passed to the bootstrap mechanism}
 
-\item{\code{impute.rng}}{The range from which to impute missing values}
+\item{\code{imputeRng}}{The range from which to impute missing values}
 
 \item{\code{impute}}{Logical, impute categorical types?}
 
@@ -61,11 +61,11 @@ Base mechanism class
 
 \item{\code{objective}}{Objective function for regression models}
 
-\item{\code{gran}}{Granularity}
+\item{\code{granularity}}{Granularity}
 
 \item{\code{percentiles}}{Percentiles evaluated by binary tree}
 
-\item{\code{tree.data}}{Binary tree attributes needed for efficient estimation}
+\item{\code{treeData}}{Binary tree attributes needed for efficient estimation}
 }}
 
 

@@ -2,10 +2,8 @@
 *.Rproj
 .Rhistory
 .RData
-.Ruserdata
+*.Ruserdata
 vignettes/*.html
 vignettes/*.pdf
-vignettes/*.R
-inst/doc
-debug.log
+*.Rproj
 .Rbuildignore

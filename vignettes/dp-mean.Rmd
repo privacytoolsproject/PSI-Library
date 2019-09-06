@@ -40,15 +40,13 @@ x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
-dp.mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
-                      variable='x1', epsilon=10, n=10, rng=c(0, 70))
-out1 <- dp.mean$release(data)
-print(out1)
+dpMeanExample <- dpMean$new(mechanism='mechanismLaplace', varType='numeric', 
+                      variable='x1', epsilon=0.1, n=10, rng=c(0, 70))
+dpMeanExample$release(data)
 
-dp.mean2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+dpMeanExample2 <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
-out2 <- dp.mean2$release(data)
-print(out2)
+dpMeanExample2$release(data)
 ```
 
 Arguments
@@ -58,7 +56,7 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
+* `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
 * `variable` \ Character, the name of the variable in the data for which to calculate the mean.
 
@@ -70,9 +68,9 @@ In typical usage, there are two methods to the `dpMean` class. The `new` method,
 
 * `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+* `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
 
-* `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
+* `nBoot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `nBoot` replications and the estimates for each are returned.
 
 * `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
 
@@ -98,21 +96,22 @@ data(PUMS5extract10000)
 Calculate a private mean of a numeric vector with `dpMean` using the Laplace mechanism:
 
 ```{r}
-numeric_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='numeric', 
+numericMean <- dpMean$new(mechanism='mechanismLaplace', varType='numeric', 
                            variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
-numeric_mean$release(PUMS5extract10000)
-print(numeric_mean$result)
+numericMean$release(PUMS5extract10000)
+print(numericMean$result)
 ```
 
 &nbsp;
 
-To calculate the mean of a logical vector instead, input a logical vector into `variable` and update `var.type` and `rng` appropriately:
+To calculate the mean of a logical vector instead, input a logical vector into `x` and update `varType` and `rng` appropriately:
 
 ```{r}
-logical_mean <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+logicalMean <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
                            variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
-logical_mean$release(PUMS5extract10000)
-print(logical_mean$result)
+
+logicalMean$release(PUMS5extract10000)
+print(logicalMean$result)
 ```
 
 &nbsp;
@@ -128,7 +127,7 @@ The `release` method makes a call to the mechanism, which generates a list of st
 
 The list in the `result` attribute has the following values.
 
-* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e., vector of length `n.boot`).
+* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e., vector of length `nBoot`).
 * `accuracy` \ The accuracy guarantee of the release given `epsilon`.
 * `epsilon` \ The privacy cost required to guarantee `accuracy`.
 * `interval` \ Confidence interval of the private estimate given `accuracy`.
