@@ -20,8 +20,10 @@ test_that('checkRange is as expected', {
   
   expect_equal(checkRange(rng1, "numeric"),rng1)
   expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
-  expect_equal(checkRange(rng2, "numeric"), c(0,2))
   expect_error(checkRange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
+  # make sure that after the warning is thrown for a range argument is too long, the correct value is returned
+  rangeTest <- expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_equal(rangeTest, c(0,2))
 })
 
 test_that('censorData is as expected', {
