@@ -1,8 +1,28 @@
 context('utilities-input-validation')
 
+test_that('checkEmpty raises proper errors', {
+  expect_equal(checkEmpty(15.5), 15.5)
+  expect_equal(checkEmpty(c(1,4)), c(1,4))
+  expect_equal(checkEmpty(0), 0)
+  expect_equal(checkEmpty(NULL, emptyOkay=TRUE), NULL) 
+  expect_equal(checkEmpty(NA, emptyOkay=TRUE), NA)
+  
+  expect_error(checkEmpty(NULL))
+  expect_error(checkEmpty(NA))
+})
+
 test_that('checkNumeric raises proper errors', {
   expect_error(checkNumeric('foo'))
   expect_equal(checkNumeric(15.5), 15.5)
+  expect_equal(checkNumeric(c(15.5, 17)), c(15.5, 17))
+  
+  expect_error(checkNumeric(NA))
+  expect_error(checkNumeric(NULL))
+  expect_error(checkNumeric(c(1, NA)))
+  
+  expect_equal(checkNumeric(NULL, emptyOkay=TRUE), NULL)
+  expect_equal(checkNumeric(NA, emptyOkay=TRUE), NA)
+  expect_equal(checkNumeric(c(2, NA), emptyOkay=TRUE), c(2,NA))
 })
 
 test_that('checkLength raises proper warnings and errors', {
@@ -22,20 +42,38 @@ test_that('checkN raises proper warnings and errors',{
   expect_error(checkN(-1.5))
   expect_error(checkN(c(1,2)))
   expect_error(checkN('foo'))
+
+  expect_equal(checkN(c(1,2,3), expectedLength=3), c(1,2,3))
+  expect_error(checkN(1, expectedLength=4))
+  expect_error(checkN(c(1,-1,3), expectedLength=3))
+  expect_error(checkN(c(1, 1.5, 4)))
+  
+  expect_equal(checkN(NA, emptyOkay=TRUE), NA)
+  expect_equal(checkN(NULL, emptyOkay=TRUE, expectedLength=0), NULL)
+  expect_error(checkN(NA), "Input n may not be NA or NULL.")
+  expect_error(checkN(NULL, expectedLength=0), "Input n may not be NA or NULL.")
+  
+  expect_equal(checkN(c(1,NA,2), expectedLength=3, emptyOkay=TRUE), c(1,NA,2))
+  expect_error(checkN(c(1,NA,2), expectedLength=3))
+  expect_error(checkN(c(1,NA, 2.4), expectedLength=3))
 })
 
 test_that('checkEpsilon raises proper warnings and errors', {
   expect_equal(checkEpsilon(1), 1)
-  expect_equal(checkEpsilon(c(1,0.1), multipleEps=TRUE, expectedLength=2), c(1,0.1))
+  expect_equal(checkEpsilon(c(1,0.1), expectedLength=2), c(1,0.1))
   
   expect_error(checkEpsilon(c(1,0.1)))
   expect_error(checkEpsilon(-1))
-  expect_error(checkEpsilon(c(1,-0.1), multipleEps=TRUE))
-  expect_error(checkEpsilon(c(1,2), multupleEps=TRUE, expectedLength=5))
+  expect_error(checkEpsilon(c(1,-0.1)))
+  expect_error(checkEpsilon(c(1,2), expectedLength=5))
   expect_error(checkEpsilon('foo'))
   
   expect_warning(checkEpsilon(4))
-  expect_warning(checkEpsilon(c(1,4), multipleEps=TRUE, expectedLength=2))
+  expect_warning(checkEpsilon(c(1,4), expectedLength=2))
+  
+  expect_error(checkEpsilon(NULL))
+  expect_error(checkEpsilon(NA))
+  expect_error(checkEpsilon(c(1,NA), expectedLength=2))
 })
 
 test_that('checkAccuracy raises proper warnings and errors', {
@@ -136,6 +174,16 @@ test_that('checkImputationRange raises proper warnings and errors', {
   expect_warning(expect_equal(checkImputationRange(c(0,3),c(1,2),'numeric'), c(1,2)))
   expect_warning(expect_equal(checkImputationRange(c(1.5,3), c(1,2),'numeric'), c(1.5,2)))
   expect_warning(expect_equal(checkImputationRange(c(0.5,1.5),c(1,2), 'numeric'),c(1,1.5)))
+  
+})
+
+test_that('checkMechanism raises proper warnings and errors', {
+  ls <- c('foo', 'bar')
+  expect_equal(checkMechanism('foo', c('Foo', 'Bar')), 'Foo')
+  expect_error(checkMechanism(NA, ls), "Input may not be NA or NULL.")
+  expect_error(checkMechanism(NULL, ls))
+  expect_error(checkMechanism(ls, ls))
+  expect_error(checkMechanism('fooo', ls))
   
 })
 

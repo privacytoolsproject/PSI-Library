@@ -1,19 +1,38 @@
-
-#' Check if input is numeric type
-#' 
-#' Helper function that generates error message if non-numeric typed value \code{n}
-#' is passed as input, and otherwise returns \code{n}.
-#'
-#' @param n Input value of arbitrary type.
-#'
-#' @return n or errors.
-checkNumeric <- function(n){
-  if (!is.numeric(n)){
-    errorStr <- paste("Input value of ", toString(n), "is not of type numeric.")
-    stop(errorStr)
-  } else{
+checkEmpty <- function(n, emptyOkay=FALSE){
+  isEmpty <- is.null(n) || is.na(n)
+  if (isEmpty && !emptyOkay){
+    stop("Input may not be NA or NULL.")
+  }
+  else{
     return(n)
   }
+}
+
+checkNumeric1D <- function(n, emptyOkay=FALSE){
+  checkEmpty(n, emptyOkay)
+  if (is.numeric(n) || is.null(n) || is.na(n)){
+    return(n)
+  } else{
+    errorStr <- paste("Input value of ", toString(n), "is not of type numeric.")
+    stop(errorStr)
+  }
+}
+
+#' Helper function that generates error message if non-numeric typed value \code{n}
+#' is passed as input, and otherwise returns \code{n}.
+#' 
+#' If \code{emptyOkay=TRUE}, NA or NULL values are allowed in n. Otherwise, they will
+#' raise an error. 
+#'
+#' @param n Input value of arbitrary type.
+#' @param A boolean. True if NA or NULL values are allowed, FALSE otherwise.
+#'
+#' @return n or errors.
+checkNumeric <- function(n, emptyOkay=FALSE){
+  for(i in 1:length(n)){
+    checkNumeric1D(n[i], emptyOkay)
+  }
+  return(n)
 }
 
 #' Check if input xs has length n
@@ -33,22 +52,46 @@ checkLength <- function(xs, n){
   }
 }
 
-#' Check validity of n
+#' Helper function for helpN
 #' 
-#' n should always be a positive whole number, check the user's input
+#' Checks that n is always a positive whole number; n may be NA or NULL only if emptyOkay=TRUE.
 #' 
-#' @param n the input n from the user
+#' @param n the input n (often number of data points in data set) from the user
+#' @param emptyOkay A boolean. True if NA or NULL values are allowed, FALSE otherwise.
 #' 
-#' @return n, if n is a positive whole number
-
-checkN <- function(n) {
+#' @return n, if n is a series of positive integers with expected length and only containing NAs or NULL values if allowed.
+checkN1D <- function(n, emptyOkay=FALSE){
+  isEmpty <- is.null(n) || is.na(n)
+  if (emptyOkay && isEmpty){
+    return(n)
+  } else if (isEmpty){
+    stop("Input n may not be NA or NULL.")
+  }
+  
   checkNumeric(n)
-  checkLength(n,1)
-  if ((n <= 0) || (n%%1 != 0)) {
+  if (!all(n > 0) || (n%%1 != 0)) {
     stop("n must be a positive whole number.")
   } else {
     return(n)
   }
+}
+
+#' Check validity of n
+#' 
+#' n(s) should always be a positive whole number, check the user's input
+#' 
+#' @param n the input n (often number of data points in data set) from the user, or an array of n's from the user
+#' @param expectedLength Positive integer. The expected length of n.
+#' @param emptyOkay A boolean. True if NA or NULL values are allowed, FALSE otherwise.
+#' 
+#' @return n, if n is a series of positive integers with expected length and only containing NAs or NULL values if allowed.
+
+checkN <- function(n, expectedLength=1, emptyOkay=FALSE) {
+  checkLength(n, expectedLength)
+  for (i in 1:length(n)) {
+    checkN1D(n[i], emptyOkay) 
+  }
+  return(n)
 }
 
 #' Error check imputation range for numeric or integer variables
@@ -344,6 +387,20 @@ checkVariableType <- function(type, inTypes) {
     stop(paste('Variable type', type, 'should be one of', paste(inTypes, collapse = ', ')))
   } 
   return(type)
+}
+
+checkMechanism <- function(inMech, allowedMechs) {
+  checkLength(inMech, 1)
+  checkEmpty(inMech)
+  checkVariableType(typeof('inMech'), 'character')
+  
+  mech <- tolower(inMech)
+  indexMech <- match(mech, tolower(allowedMechs)) #get index of mech in allowedMechs.
+  # match returns NA if mech not in tolower(allowedMechs).
+  if (is.na(indexMech)){
+    stop(paste('Input mechanism', mech, 'should be one of', paste(allowedMechs, collapse = ', ')))
+  }
+  return(allowedMechs[indexMech])
 }
 
 #' Helper function that converts a matrix to a list, s.t. each element of the list is a row of the matrix.
