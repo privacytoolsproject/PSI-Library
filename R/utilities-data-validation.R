@@ -168,7 +168,7 @@ checkEpsilon <- function(epsilon) {
 #' 
 #' @return The value that will be used as the delta value for the statistic, may be NULL.
 
-checkDelta <- function(mechanism, delta) {
+checkDelta <- function(mechanism, delta=NULL) {
     # If a mechanism that uses a delta value is NOT being used, set delta to 0.
     # If a mechanism that uses a delta value is being used, return the entered value.
     # If the user did not enter a value, return the default value.
