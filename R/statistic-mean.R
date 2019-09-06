@@ -32,20 +32,22 @@ dpMean$methods(
     initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, alpha=0.05, nBoot=20, ...) {
         .self$name <- 'Differentially private mean'
-        .self$mechanism <- mechanism
-        .self$varType <- varType
+        .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismBootstrap'))
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical'))
+        checkVariableType(typeof(variable), c('character'))
         .self$variable <- variable
         .self$n <- checkN(n)
-        .self$alpha <- alpha
-        .self$rng <- checkRange(rng, varType)
+        .self$alpha <- checkNumeric(alpha)
+        .self$rngFormat <- 'vector'
+        .self$rng <- checkRange(rng, varType, 'vector', expectedLength=1)
         .self$sens <- diff(.self$rng) / n
         
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy, expectedLength=1)
             .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
             checkEpsilon(epsilon)
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon, expectedLength=1)
             .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
         

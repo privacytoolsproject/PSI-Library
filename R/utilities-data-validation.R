@@ -20,7 +20,7 @@
 #' censorData(x=c('a', 'b', 'c', 'd'), varType='character', levels=c('a', 'b', 'c'))
 #' @rdname censorData
 #' @export
-censorData <- function(x, varType, rng=NULL, levels=NULL) {
+censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
     if (varType %in% c('character', 'factor')) {
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
@@ -33,12 +33,12 @@ censorData <- function(x, varType, rng=NULL, levels=NULL) {
         }
         if (NCOL(x) > 1) {
             for (j in 1:ncol(x)) {
-                rng[j, ] <- checkRange(rng[j, ], varType)
+                rng[j, ] <- checkRange(rng[j, ], varType, rngFormat)
                 x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
                 x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
             }
         } else {
-            rng <- checkRange(rng, varType)
+            rng <- checkRange(rng, varType, rngFormat)
             x[x < rng[1]] <- rng[1]
             x[x > rng[2]] <- rng[2]
         }

@@ -46,6 +46,7 @@ mechanism <- setRefClass(
         epsilon = 'numeric',
         delta = 'ANY', # not 'numeric' because it can be NULL if the Stability mechanism is not being used
         rng = 'ANY', # not 'numeric' because it can be NULL (if the Stability mechanism is being used, or the variable is logical)
+        rngFormat = 'character',
         result = 'ANY',
         alpha = 'numeric',
         accuracy = 'ANY', # not 'numeric' because can be NULL if epsilon is given
