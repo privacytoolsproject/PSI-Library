@@ -64,6 +64,8 @@ dpHistogram$methods(
         .self$bootFun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
         
+        .self$rngFormat <- 'vector' #if range is specified, should always be a vector of two values.
+        
         # if the mechanism used is NOT the stability mechanism:
         # 1) determine the bins of the histogram. (If the mechanism is 
         #    the stability mechanism, then the bins will be determined in 
