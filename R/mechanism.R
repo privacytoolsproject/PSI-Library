@@ -12,7 +12,8 @@
 #' @field n Number of observations
 #' @field epsilon Differential privacy parameter
 #' @field delta Differential privacy parameter
-#' @field rng A priori estimate of the variable range
+#' @field rng A priori estimate of the variable range(s).
+#' @field rngFormat One of 'vector' (for single rng input) or 'list' (for multiple rng inputs)
 #' @field result List with statistical output
 #' @field alpha Level of statistical signficance
 #' @field accuracy Accuracy guarantee of the estimate
