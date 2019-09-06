@@ -169,14 +169,6 @@ checkImputationRange <- function(imputationRange, rng, varType) {
       upperBound <- imputationRange[2]
     }
     
-    for (entry in imputationRange) {
-      if (!is.numeric(entry)) {
-        warning('Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
-        lowerBound <- rng[1]
-        upperBound <- rng[2]
-      }
-    }
-    
     # return the (potentially clipped) imputation range
     return(c(lowerBound,upperBound))
     
