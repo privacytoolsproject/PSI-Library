@@ -359,8 +359,9 @@ checkEpsilon <- function(epsilon, expectedLength=1) {
 #' @param accuracy 
 #'
 #' @return accuracy or errors.
-checkAccuracy <- function(accuracy){
+checkAccuracy <- function(accuracy, expectedLength=1){
   checkNumeric(accuracy)
+  checkLength(accuracy, expectedLength)
   if (!all(accuracy > 0)){
     stop("Accuracy must be greater than 0.")
   }

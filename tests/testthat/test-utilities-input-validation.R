@@ -80,6 +80,9 @@ test_that('checkAccuracy raises proper warnings and errors', {
   expect_error(checkAccuracy(-1))
   expect_equal(checkAccuracy(5),5)
   expect_error(checkAccuracy('foo'))
+  
+  expect_equal(checkAccuracy(c(1,5), expectedLength=2), c(1,5))
+  expect_error(checkAccuracy(c(1,5)))
 })
 
 test_that('checkRange raises proper warnings and errors on 1D input', {
