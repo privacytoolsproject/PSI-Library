@@ -49,7 +49,7 @@ test_that('checkN raises proper warnings and errors',{
   expect_error(checkN(c(1, 1.5, 4)))
   
   expect_equal(checkN(NA, emptyOkay=TRUE), NA)
-  expect_equal(checkN(NULL, emptyOkay=TRUE, expectedLength=0), NULL)
+  expect_equal(checkN(NULL, emptyOkay=TRUE), NULL)
   expect_error(checkN(NA), "Input n may not be NA or NULL.")
   expect_error(checkN(NULL, expectedLength=0), "Input n may not be NA or NULL.")
   
@@ -159,6 +159,10 @@ test_that('checkVariableType raises proper warnings and errors', {
   expect_equal(checkVariableType('numeric', c('Numeric', 'Integer')), 'numeric')
   
   expect_error(checkVariableType('Numeric', c('Factor', 'Integer')))
+  
+  expect_equal(checkVariableType(NULL, c('Factor', 'Integer'), emptyOkay=TRUE), NULL)
+  expect_equal(checkVariableType(NULL, 'Factor', emptyOkay=TRUE), NULL)
+  expect_error(checkVariableType(NULL, c('Factor', 'Integer')))
 })
 
 test_that('checkImputationRange raises proper warnings and errors', {

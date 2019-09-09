@@ -42,29 +42,27 @@ dpHistogram$methods(
                           imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
-        # check variable type, can only continue initialization for certain variable type: numeric, integer, logical, character
-        checkHistogramVariableType(varType)
-        
         # determine  which mechanism to use based on inputs
         .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
         
         # set parameters of the histogram
-        .self$varType <- varType
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
         .self$variable <- variable
         .self$n <- checkN(n)
-        .self$epsilon <- epsilon
-        .self$accuracy <- accuracy
         .self$bins <- bins # may be null
         .self$nBins <- checkHistogramNBins(nBins) # may be null
-        .self$alpha <- alpha
-        .self$imputeRng <- imputeRng
+        .self$alpha <- checkNumeric(alpha, expectedLength=1)
+        .self$imputeRng <- checkImputationRange(imputeRng, .self$rng, .self$varType)
         .self$impute <- impute
-        .self$nBoot <- nBoot
-        .self$granularity <- granularity # may be null
+        .self$nBoot <- checkN(nBoot, emptyOkay=TRUE)
+        .self$granularity <- checkNumeric(granularity, emptyOkay=TRUE) # may be null
         .self$bootFun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
-        
         .self$rngFormat <- 'vector' #if range is specified, should always be a vector of two values.
+        
+        checkVariableType(typeof(variable), 'character')
+        checkVariableType(typeof(bins), c('character', 'integer', 'double', 'numeric', 'logical'), emptyOkay=TRUE)
+        checkVariableType(typeof(impute), 'logical')
         
         # if the mechanism used is NOT the stability mechanism:
         # 1) determine the bins of the histogram. (If the mechanism is 
@@ -84,10 +82,10 @@ dpHistogram$methods(
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- histogramGetEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
         } else {
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- histogramGetAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
         }
         

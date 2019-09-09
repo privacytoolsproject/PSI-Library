@@ -1,5 +1,7 @@
 context("histogram")
 
+library(datasets)
+data(esoph)
 data(PUMS5extract10000, package = "PSIlence")
 
 # test accuracy and epsilon calculation for stability mechanism
@@ -18,9 +20,6 @@ test_that('histogram getAccuracy and getEpsilon return approximately correct val
 	expect_equal(val2, 12)
 })
 
-
-
-
 # enter a nonsense variable type and expect error
 test_that('expect stability mechanism for unknown variable type', {
     data(PUMS5extract10000, package = "PSIlence")
@@ -32,19 +31,13 @@ test_that('expect stability mechanism for unknown variable type', {
     
     expect_error(dpHistogram$new(varType='number data', variable="educ", n=nTest, epsilon=epsilonTest, 
                                  nBins=nBinsTest, delta=deltaTest, rng=c(0,16)), 
-                 "Please enter a data type of 'numeric', 'integer', 'logical', or 'character'")
+                 "Variable type number data should be one of numeric, integer, logical, character", fixed=TRUE)
 })
 
-
-
-
-
 # test determineMechanism
-# 1) if bines are entered, should be Laplace
+# 1) if bins are entered, should be Laplace
 test_that('histogram with bins entered', {
-    library(datasets)
-    data(esoph)
-    
+
     nTest <- 88
     epsilonTest <- 1
     binsTest <- c("0-9g/day", "10-19", "20-29", "30+")
@@ -59,8 +52,6 @@ test_that('histogram with bins entered', {
 
 # 2) if logical variable, should be Laplace
 test_that('histogram release has expected dimensions and accuracy for logical variable with impute = false (laplace mechanism)', {
-    data(PUMS5extract10000, package = "PSIlence")
-    
     nTest <- 10000
     epsilonTest <- 0.1
     deltaTest <- 10^-6
@@ -77,8 +68,6 @@ test_that('histogram release has expected dimensions and accuracy for logical va
 
 # 3) if character variable and no bins entered, should be Stability
 test_that('histogram on categorical data', {
-    library(datasets)
-    data(esoph)
     
     nTest <- 88
     epsilonTest <- 1
@@ -94,7 +83,6 @@ test_that('histogram on categorical data', {
 
 # 4) if numeric and number of bins and range entered, should be Laplace
 test_that('histogram releases have expected dimensions for Laplace mechanism', {
-    data(PUMS5extract10000, package = "PSIlence")
     
     nBinsTest <- 16
     nTest <- 10000
@@ -113,7 +101,7 @@ test_that('histogram releases have expected dimensions for Laplace mechanism', {
 
 # 5) if numeric and number of bins entered without a range, should be Stability
 test_that('histogram has expected accuracy for stability mechanism', {
-  
+
     nBinsTest <- 16
     nTest <- 10000
     epsilonTest <- 0.1
@@ -129,7 +117,6 @@ test_that('histogram has expected accuracy for stability mechanism', {
 
 # 6) If numeric and number of bins not entered, expect error
 test_that('histogram releases have expected dimensions for Laplace mechanism', {
-    
     nTest <- 10000
     epsilonTest <- 0.1
     deltaTest <- 10^-6
@@ -139,7 +126,6 @@ test_that('histogram releases have expected dimensions for Laplace mechanism', {
 
 # test on the stability mechanism: should return error if delta < 1/n^2
 test_that('stability mechanism returns error if delta is >= 1/n', {
-	
 	nBinsTest <- 16
 	nTest <- 10000
 	epsilonTest <- 0.1
@@ -162,7 +148,6 @@ test_that('stability mechanism returns error if delta is >= 1/n', {
 # expect the code to run and check the output
 # numeric
 test_that('test on determineBins - ensure correct number of bins when bins are entered correctly', {
-
     binsTest <- c(0,20,30,40,50,60,70,80,90,100)
     
     expectedNumberOfBins <- 9
@@ -182,8 +167,6 @@ test_that('test on determineBins - ensure correct number of bins when bins are e
 
 # character
 test_that('histogram on categorical data with bins entered', {
-    library(datasets)
-    data(esoph)
     
     nTest <- 88
     epsilonTest <- 1
@@ -200,7 +183,6 @@ test_that('histogram on categorical data with bins entered', {
 # 2. enter bins that are not of the correct variable type
 # expect error saying character bins cannot be entered for numeric variables
 test_that('test on determineBins - get error when you enter character bins for numeric variable', {
-    data(PUMS5extract10000, package = "PSIlence")
     
     binsTest <- c("should", "not", "be", "character", "bins")
     
@@ -215,8 +197,6 @@ test_that('test on determineBins - get error when you enter character bins for n
 
 # expect error saying numeric bins cannot be entered for character variables
 test_that('test on determineBins - get error when you enter numeric bins for character variable', {
-    library(datasets)
-    data(esoph)
     
     binsTest <- c(1,2,3,4,5)
     
@@ -229,7 +209,7 @@ test_that('test on determineBins - get error when you enter numeric bins for cha
 
 # expect error saying logical bins must be 0,1,NA
 test_that('test on determineBins - get error when you enter incorrect bins for logical variable', {
-    
+
     binsTest <- c("wrong", "bins")
     
     nTest <- 10000
@@ -242,7 +222,6 @@ test_that('test on determineBins - get error when you enter incorrect bins for l
 # 3. enter both bins and a range
 # expect an error that says you entered both, and the code is defaulting to the bins entered
 test_that('test on determineBins - get error when you enter both bins and a range', {
-    
     binsTest <- c(0,20,30,40,50,60,70,80,90,100)
     
     expectedNumberOfBins <- 9
@@ -256,7 +235,7 @@ test_that('test on determineBins - get error when you enter both bins and a rang
 # 4. get correct bins for logical variable with impute = true or false
 # no imputation
 test_that('histogram release has expected dimensions and accuracy for logical variable with impute = false (laplace mechanism)', {
-    
+
     nTest <- 10000
     epsilonTest <- 0.1
     deltaTest <- 10^-6
@@ -273,7 +252,7 @@ test_that('histogram release has expected dimensions and accuracy for logical va
 
 # with imputation
 test_that('histogram release has expected dimensions and accuracy for logical variable with impute = true (laplace mechanism)', {
-    
+
     nTest <- 10000
     epsilonTest <- 0.1
     deltaTest <- 10^-6
@@ -290,7 +269,7 @@ test_that('histogram release has expected dimensions and accuracy for logical va
 
 # with imputation and the variable has NA values
 test_that('histogram release has expected dimensions and accuracy for manually created logical variable with impute = true (laplace mechanism)', {
-   
+
     logicalVar_withNA <- c(1,0,1,1,1,0,1,0,0,NA,1,0,NA,1,0,0,1,NA,NA,1,1,0,1,0,1,0)
     dataLog <- data.frame(logicalVar_withNA)
     
@@ -311,7 +290,7 @@ test_that('histogram release has expected dimensions and accuracy for manually c
 # 5. get correct number of bins when numeric range and number of bins are entered, or granularity is entered
 # number of bins entered
 test_that('histogram releases have expected number of bins', {
-    
+
     nBinsTest <- 16
     nTest <- 10000
     epsilonTest <- 0.1
@@ -329,7 +308,7 @@ test_that('histogram releases have expected number of bins', {
 
 # granularity entered
 test_that('histogram releases have expected dimensions for Laplace mechanism', {
-    
+
     granularityTest <- 1000
     nTest <- 10000
     epsilonTest <- 0.1
@@ -346,6 +325,7 @@ test_that('histogram releases have expected dimensions for Laplace mechanism', {
 
 # make sure error thrown when n not positive or a whole number
 test_that('error thrown when n not positive or whole number', {
+
     granularityTest <- 1000
     epsilonTest <- 0.1
     expect_error(dpHistogram$new(varType='numeric', variable="educ", n=-1, epsilon=epsilonTest, granularity=granularityTest, rng=c(0,16)),
@@ -356,7 +336,7 @@ test_that('error thrown when n not positive or whole number', {
 
 # make sure correct errors are thrown with incorrect values of nBins
 test_that('errors thrown for incorrect values of nBins', {
-    
+  
     nTest <- 10000
     epsilonTest <- 0.1
     deltaTest <- 10^-6

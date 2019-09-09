@@ -28,7 +28,7 @@ checkNumeric1D <- function(n, emptyOkay=FALSE){
 #' @param A boolean. True if NA or NULL values are allowed, FALSE otherwise.
 #'
 #' @return n or errors.
-checkNumeric <- function(n, emptyOkay=FALSE){
+checkNumeric <- function(n, emptyOkay=FALSE, expectedLength=1){
   for(i in 1:length(n)){
     checkNumeric1D(n[i], emptyOkay)
   }
@@ -87,7 +87,11 @@ checkN1D <- function(n, emptyOkay=FALSE){
 #' @return n, if n is a series of positive integers with expected length and only containing NAs or NULL values if allowed.
 
 checkN <- function(n, expectedLength=1, emptyOkay=FALSE) {
-  checkLength(n, expectedLength)
+  
+  if (!is.null(n)){  # side case where you could have NULL value, and length(NULL)=0
+    checkLength(n, expectedLength)
+  }
+  
   for (i in 1:length(n)) {
     checkN1D(n[i], emptyOkay) 
   }
@@ -320,7 +324,7 @@ checkRange <- function(rng, varType, formatType, expectedLength=NULL, emptyOkay=
 #'    message interupts.
 #'    
 checkEpsilon <- function(epsilon, expectedLength=1) {
-  checkNumeric(epsilon)
+  checkNumeric(epsilon, expectedLength=expectedLength)
   
   if (length(epsilon) > 1 && expectedLength<=1) {
     stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
@@ -352,7 +356,7 @@ checkEpsilon <- function(epsilon, expectedLength=1) {
 #'
 #' @return accuracy or errors.
 checkAccuracy <- function(accuracy, expectedLength=1){
-  checkNumeric(accuracy)
+  checkNumeric(accuracy, expectedLength=expectedLength)
   checkLength(accuracy, expectedLength)
   if (!all(accuracy > 0)){
     stop("Accuracy must be greater than 0.")
@@ -371,9 +375,14 @@ checkAccuracy <- function(accuracy, expectedLength=1){
 #' @examples 
 #' 
 #' checkVariableType(type='Numeric', inTypes=c('Numeric', 'Factor'))
-#' @rdname checkVariableType
-#' @export
-checkVariableType <- function(type, inTypes) { 
+checkVariableType <- function(type, inTypes, emptyOkay=FALSE) {
+  
+  isEmpty <- type %in% c('logical', 'NULL') #logical since typeof(NA)="logical"
+  
+  if (emptyOkay && isEmpty){
+    return(type)
+  }
+  
   type <- tolower(type)
   inTypes <- tolower(inTypes)
   if (!(type %in% inTypes)) {
