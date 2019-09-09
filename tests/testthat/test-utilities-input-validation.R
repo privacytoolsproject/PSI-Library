@@ -1,6 +1,7 @@
 context('utilities-input-validation')
 
 test_that('checkEmpty raises proper errors', {
+  
   expect_equal(checkEmpty(15.5), 15.5)
   expect_equal(checkEmpty(c(1,4)), c(1,4))
   expect_equal(checkEmpty(0), 0)
@@ -12,6 +13,7 @@ test_that('checkEmpty raises proper errors', {
 })
 
 test_that('checkNumeric raises proper errors', {
+  
   expect_error(checkNumeric('foo'))
   expect_equal(checkNumeric(15.5), 15.5)
   expect_equal(checkNumeric(c(15.5, 17)), c(15.5, 17))
@@ -26,6 +28,7 @@ test_that('checkNumeric raises proper errors', {
 })
 
 test_that('checkLength raises proper warnings and errors', {
+  
   xs <- c(1,2,3)
   expect_equal(checkLength(xs,3), xs)
   expect_error(checkLength(xs,5))
@@ -36,6 +39,7 @@ test_that('checkLength raises proper warnings and errors', {
 })
 
 test_that('checkN raises proper warnings and errors',{
+  
   expect_equal(checkN(8),8)
   expect_error(checkN(-1))
   expect_error(checkN(1.5))
@@ -59,6 +63,7 @@ test_that('checkN raises proper warnings and errors',{
 })
 
 test_that('checkEpsilon raises proper warnings and errors', {
+  
   expect_equal(checkEpsilon(1), 1)
   expect_equal(checkEpsilon(c(1,0.1), expectedLength=2), c(1,0.1))
   
@@ -77,6 +82,7 @@ test_that('checkEpsilon raises proper warnings and errors', {
 })
 
 test_that('checkAccuracy raises proper warnings and errors', {
+  
   expect_error(checkAccuracy(-1))
   expect_equal(checkAccuracy(5),5)
   expect_error(checkAccuracy('foo'))
@@ -86,6 +92,7 @@ test_that('checkAccuracy raises proper warnings and errors', {
 })
 
 test_that('checkRange raises proper warnings and errors on 1D input', {
+  
   rng1 <- c(0,1)
   rng2 <- c(0,1,2)
   rng3 <- c(1)
@@ -117,7 +124,7 @@ test_that('checkRange raises proper warnings and errors on 1D input', {
 
 
 test_that('checkRange raises proper warnings and errors on list and matrix inputs', {
-  #skip("need to add expectedLength")
+  
   li <- list(c(1,4),c(2,5),c(3,6))
   m <- matrix(c(1,2,3,4,5,6), nrow = 3)
   expect_equal(checkRange(li, 'numeric', 'list', 3), li)
@@ -160,9 +167,9 @@ test_that('checkVariableType raises proper warnings and errors', {
   
   expect_error(checkVariableType('Numeric', c('Factor', 'Integer')))
   
-  expect_equal(checkVariableType(NULL, c('Factor', 'Integer'), emptyOkay=TRUE), NULL)
-  expect_equal(checkVariableType(NULL, 'Factor', emptyOkay=TRUE), NULL)
-  expect_error(checkVariableType(NULL, c('Factor', 'Integer')))
+  expect_equal(checkVariableType('NULL', c('Factor', 'Integer'), emptyOkay=TRUE), 'NULL')
+  expect_equal(checkVariableType('NULL', 'Factor', emptyOkay=TRUE), 'NULL')
+  expect_error(checkVariableType('NULL', c('Factor', 'Integer')))
 })
 
 test_that('checkImputationRange raises proper warnings and errors', {
@@ -185,6 +192,7 @@ test_that('checkImputationRange raises proper warnings and errors', {
 })
 
 test_that('checkMechanism raises proper warnings and errors', {
+  
   ls <- c('foo', 'bar')
   expect_equal(checkMechanism('foo', c('Foo', 'Bar')), 'Foo')
   expect_error(checkMechanism(NA, ls), "Input may not be NA or NULL.")
@@ -195,6 +203,7 @@ test_that('checkMechanism raises proper warnings and errors', {
 })
 
 test_that("Matrix to list conversion works", {
+  
   m <- matrix(c(1,2,3,4,5,6), nrow = 3)
   li <- list(c(1,4), c(2,5), c(3,6))
   
@@ -210,6 +219,7 @@ test_that("Matrix to list conversion works", {
 })
 
 test_that("isVector runs correctly", {
+  
   expect_true(isVector(c(1,2,3)))
   expect_true(isVector(1))
   expect_false(isVector(list(1,2)))

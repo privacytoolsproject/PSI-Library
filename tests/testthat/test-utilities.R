@@ -105,7 +105,7 @@ test_that('censorData is as expected', {
   
   residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
   charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
-  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
+  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7), rngFormat='vector')
   
   expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
   expect_equal(charsOut, factor(c('a','b','c','c',NA)))
