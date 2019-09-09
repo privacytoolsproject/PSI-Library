@@ -30,7 +30,7 @@ coefficientRelease <- function(formula, release, n) {
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
-covarianceSensitivity <- function(n, rng, intercept) {
+covarianceSensitivity <- function(n, rng, intercept) { # THIS IS INCORRECT
   diffs <- apply(rng, 1, diff)
   if (intercept) { diffs <- c(1, diffs) }
   sensitivity <- c()
@@ -120,25 +120,28 @@ dpCovariance <- setRefClass(
 
 dpCovariance$methods(
   initialize = function(mechanism, varType, n, epsilon, columns, rng=NULL, imputeRng=NULL, 
-                        intercept=FALSE, formula=NULL, delta=1e-5) {
+                        intercept=FALSE, formula=NULL) {
+    # NOTE THIS IS CURRENTLY NOTE SECURE DUE TO SENS AND EPSILON NOT DISTRIBUTED PROPERLY
     .self$name <- 'Differentially private covariance matrix'
-    .self$mechanism <- mechanism
-    .self$varType <- varType
-    .self$n <- checkN(n)
-    .self$epsilon <- epsilon
-    .self$delta <- delta
-    .self$rng <- rng
+    .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
+    .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES  
+    .self$n <- checkN(n)  #NEED TO ADD THING SAYING HOW THIS IS N PER COLUMN
+    .self$epsilon <- checkEpsilon(epsilon) #NEED TO CHANGE
+    .self$rng <- checkRange(rng, expectedLength=length(columns)) 
     .self$sens <- covarianceSensitivity(n, rng, intercept)
     
-    checkEpsilon(epsilon)
+    .self$formula <- formula
+    .self$intercept <- intercept
     
-    if (is.null(imputeRng)) {
+    checkVariableType(class(formula), "formula")
+    checkVariableType(typeof(intercept), "logical")
+    checkVariableType(typeof(columns), "character")
+    
+    if (is.null(imputeRng)) { # NEED TO ALLOW FOR IMPUTING ON ONLY SOME OF THE RANGES
       .self$imputeRng <- rng
     } else {
       .self$imputeRng <- imputeRng
     }
-    .self$formula <- formula
-    .self$intercept <- intercept
     if (.self$intercept) { 
       .self$columns <- c('intercept', columns)
     } else {
