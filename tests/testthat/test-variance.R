@@ -57,7 +57,12 @@ test_that('range checks throw correct warning', {
                  "Error in range argument provided, c( 100 ) : requires upper and lower values as vector of length 2.", fixed=TRUE)
     expect_warning(dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(-10,0,100)), 
                    "Range argument of c( -10, 0, 100 ) has more than two values.  Will proceed using min and max values as range.", fixed=TRUE)
+    expect_error(dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=NA))
+    expect_error(dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=NULL))
     
+    #shouldn't throw error for empty range if logical
+    dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='logical', n=nTest, epsilon=epsilonTest, rng=NULL)
+                 
     dpVar <- dpVariance$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(0,100))
     dpVar$release(PUMS5extract10000)
     expect_equal(length(dpVar$result$release), 1)

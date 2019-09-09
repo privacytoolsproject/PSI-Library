@@ -34,7 +34,8 @@ test_that('range checks throw correct warning', {
 
   expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(100)))
   expect_warning(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(-10,0,100)))
-
+  expect_error(dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=NULL))
+  
   dpMeanTest <- dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, delta=deltaTest, rng=c(0,100))
   dpMeanTest$release(PUMS5extract10000)
   expect_equal(length(dpMeanTest$result$release), 1)
