@@ -43,19 +43,24 @@ dpVariance$methods(
     initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL, accuracy=NULL,
                           imputeRng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
-        .self$mechanism <- mechanism
-        .self$varType <- varType
+        .self$mechanism <- checkMechanism(mechanism, 'mechanismLaplace')
+        .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))
         .self$variable <- variable
         .self$n <- checkN(n)
-        .self$rng <- checkRange(rng, varType)
+        
+        .self$rngFormat <- 'vector'
+        .self$rng <- checkRange(rng, .self$varType, .self$rngFormat)
+        
         .self$sens <- (n - 1) / n^2 * diff(.self$rng)^2
         
+        checkVariableType(typeof(variable), 'character')
+        
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
         } else {
             checkEpsilon(epsilon)
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
         
@@ -65,7 +70,7 @@ dpVariance$methods(
             .self$imputeRng <- checkImputationRange(imputeRng, .self$rng, .self$varType)
         }
         
-        .self$alpha <- alpha
+        .self$alpha <- checkNumeric(alpha)
 })
 
 dpVariance$methods(
