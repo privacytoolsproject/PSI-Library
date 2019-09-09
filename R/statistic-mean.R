@@ -34,13 +34,14 @@ dpMean$methods(
         .self$name <- 'Differentially private mean'
         .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismBootstrap'))
         .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical'))
-        checkVariableType(typeof(variable), c('character'))
         .self$variable <- variable
         .self$n <- checkN(n)
         .self$alpha <- checkNumeric(alpha)
         .self$rngFormat <- 'vector'
-        .self$rng <- checkRange(rng, varType, 'vector', expectedLength=1)
+        .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=1)
         .self$sens <- diff(.self$rng) / n
+        
+        checkVariableType(typeof(variable), c('character'))
         
         if (is.null(epsilon)) {
             .self$accuracy <- checkAccuracy(accuracy, expectedLength=1)
@@ -58,7 +59,7 @@ dpMean$methods(
         }
         
         .self$bootFun <- bootMean
-        .self$nBoot <- nBoot
+        .self$nBoot <- checkN(nBoot)
 })
 
 
