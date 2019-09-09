@@ -4,7 +4,7 @@
 \alias{censorData}
 \title{Censoring data}
 \usage{
-censorData(x, varType, rng = NULL, levels = NULL)
+censorData(x, varType, rng = NULL, levels = NULL, rngFormat = NULL)
 }
 \arguments{
 \item{x}{A vector of numeric or categorial values to censor.}

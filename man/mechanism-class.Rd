@@ -27,7 +27,9 @@ Base mechanism class
 
 \item{\code{delta}}{Differential privacy parameter}
 
-\item{\code{rng}}{A priori estimate of the variable range}
+\item{\code{rng}}{A priori estimate of the variable range(s).}
+
+\item{\code{rngFormat}}{One of 'vector' (for single rng input) or 'list' (for multiple rng inputs)}
 
 \item{\code{result}}{List with statistical output}
 
