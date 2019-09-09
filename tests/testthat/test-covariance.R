@@ -18,16 +18,14 @@ test_that('epsilon checks throw correct warning', {
 })
 
 test_that('range checks throw correct warning', {
-  skip("Skipping: range checks do not throw correct warning")
   expect_error(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n= 10000,
                                 epsilon = 0.1, columns = c("income", "education"),
-                                rng=c(100)),
-               "range argument in error: requires upper and lower values as vector of length 2.")
+                                rng=list(c(100))))
   
-  expect_warning(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n=10000,
-                                  epsilon=0.1, columns = c("income", "education"),
-                                  rng=c(-10,0,100)),
-                 "range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_error(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n=10000,
+                                 epsilon=0.1, columns = c("income", "education"),
+                                 rng=list(c(-10,0,100))),
+               "Input was expected to be of length  2  but is instead of length  1", fixed=TRUE)
 })
 
 test_that('covariance running as expected', {

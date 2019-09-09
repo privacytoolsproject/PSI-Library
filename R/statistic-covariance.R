@@ -127,7 +127,9 @@ dpCovariance$methods(
     .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES  
     .self$n <- checkN(n)  #NEED TO ADD THING SAYING HOW THIS IS N PER COLUMN
     .self$epsilon <- checkEpsilon(epsilon) #NEED TO CHANGE
-    .self$rng <- checkRange(rng, expectedLength=length(columns)) 
+    
+    .self$rngFormat <- 'list'
+    .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns)) 
     .self$sens <- covarianceSensitivity(n, rng, intercept)
     
     .self$formula <- formula
