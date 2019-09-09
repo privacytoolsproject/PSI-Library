@@ -13,7 +13,7 @@ mechanismGaussian <- setRefClass(
 
 mechanismGaussian$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censorData(x, .self$varType, .self$rng)
+        x <- censorData(x, .self$varType, .self$rng, rngFormat=.self$rngFormat)
         x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$bins)
         funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
         inputVals = c(list(x=x), funArgs)
