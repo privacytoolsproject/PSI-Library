@@ -170,22 +170,26 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
+    # DO NOT USE
     initialize = function(mechanism, varType, variable, n, rng=NULL, gran, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
-        .self$mechanism <- mechanism
-        .self$varType <- varType
+        .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
         .self$variable <- variable
         .self$n <- checkN(n)
-        .self$rng <- rng
-        .self$gran <- gran
-        .self$alpha <- alpha
+        .self$rng <- checkRange(rng) # CHANGE
+        .self$gran <- checkN(gran, emptyOkay=TRUE) #should be positive whole number
+        .self$alpha <- checkNumeric(alpha)
         .self$sens <- 2 * log2(diff(rng) / gran + 1)
+        
+        checkVariableType(variable, "character")
+        
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- treeGetParameters(accuracy, rng, gran, alpha)
         } else {
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- treeGetAccuracy(epsilon, rng, gran, alpha)
         }
         if (is.null(imputeRng)) {
