@@ -243,6 +243,7 @@ The list in the `result` attribute has the following values.
 * `variable` \ The variable for which the histogram was calculated.
 * `accuracy` \ The accuracy guarantee of the release, given `epsilon`.
 * `epsilon` \ The privacy cost required to guarantee `accuracy`.
+* `delta` \ The likelihood of a severe breach of privacy.
 * `mechanism` \ The mechanism used to create the histogram (either "mechanismLaplace", for the Laplace Mechanism, or "mechanismStability", for the Stability Mechanism)
 * `interval` \ Confidence interval of the private estimate of each bin, given `accuracy`.
 * `herfindahl` \ The differentially private Herfindal index (the sum of the squares of the percentage of data points in each bin). Only available for categorical and logical vectors.
