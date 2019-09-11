@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic-covariance.R
 \name{covarianceSensitivity}
 \alias{covarianceSensitivity}
-\title{Function to get the sensitivity of the covariance matrix}
+\title{Function to get the sensitivity of the lower triangle of the covariance matrix}
 \usage{
 covarianceSensitivity(n, rng, intercept)
 }
@@ -21,5 +21,5 @@ The sensitivity of the data frame for which the covariance matrix
   is being calculated.
 }
 \description{
-Function to get the sensitivity of the covariance matrix
+Function to get the sensitivity of the lower triangle of the covariance matrix
 }

@@ -1,5 +1,4 @@
-#' Function to get the sensitivity of the covariance matrix
-#'
+#' Function to get the sensitivity of the lower triangle of the covariance matrix
 #'
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
@@ -10,14 +9,16 @@
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
 #'   
+# ADD INFORMATION ABOUT DERIVATION/LINK TO IT
 covarianceSensitivity <- function(n, rng, intercept) {
-    diffs <- apply(rng, 1, diff)
+    diffs <- sapply(rng, diff)
     if (intercept) { diffs <- c(1, diffs) }
     sensitivity <- c()
+    c <- 2*(n-1)/n
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
-            s <- ((n - 1) / n) * diffs[i] * diffs[j]
-            sensitivity <- c(sensitivity, s)
+            s <- c * diffs[i] * diffs[j]
+            sensitivity <- append(sensitivity, s)
         }
     }
     return(sensitivity)
@@ -80,7 +81,7 @@ dpCovariance <- setRefClass(
     contains = 'mechanismLaplace',
     fields = list(
         epsilonDist = 'numeric',    
-        epsilonVals = 'numeric',
+        globalEps = 'numeric',
         accuracyVals = 'numeric',
         formula = 'ANY'
     )
@@ -90,7 +91,7 @@ dpCovariance$methods(
   initialize = function(mechanism, varType, n, columns, rng, epsilon=NULL, globalEps=NULL, epsilonDist= NULL,
                         accuracy=NULL, accuracyVals=NULL, imputeRng=NULL, intercept=FALSE, formula=NULL,
                         alpha=0.05) {
-    # NOTE THIS IS CURRENTLY NOTE SECURE DUE TO SENS AND EPSILON NOT DISTRIBUTED PROPERLY
+  
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
     .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES  
@@ -104,9 +105,9 @@ dpCovariance$methods(
     .self$rngFormat <- 'list'
     .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns)) 
     .self$sens <- covarianceSensitivity(n, rng, intercept)
+    print('line112')
     
-    
-    checkVariableType(class(formula), "formula")
+    checkVariableType(class(formula), c("formula", "character"), emptyOkay=TRUE)
     checkVariableType(typeof(intercept), "logical")
     checkVariableType(typeof(columns), "character")
     
@@ -125,7 +126,7 @@ dpCovariance$methods(
     outputLength <- lowerTriangleSize(.self$columns)
     # Option 1: Enter vector of epsilon values to be used for each covariance calculation in matrix.
     if (epsilon){
-        .self$epsilon <- checkEpsilon(epsilon, multipleEps=TRUE, length=outputLength)
+        .self$epsilon <- checkEpsilon(epsilon, expectedLength=outputLength)
         .self$globalEps <- sum(.self$epsilon)
     }
     # Option 2: Enter global epsilon value and vector of percentages specifying how to split global 
