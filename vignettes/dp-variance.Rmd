@@ -29,7 +29,9 @@ Differential privacy is a rigorous mathematical framework for making statistical
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
 
-It is noteworthy the user must manually specify the number of observations, variable type, and range of the data of interest; data will only be touched at the point the estimate to be released is actually computed, and only by the function computing that estimate. This structure decreases the possibility of an unauthorized release of information. Additional parameter specification includes the desired `epsilon` value and post-processing steps the user would like to perform on the released statistic. 
+There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `2^-30`, and never greater than `1/n^2` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
+
+The user must manually specify the number of observations, variable type, and range of the data of interest. 
 -->
 
 Syntax
