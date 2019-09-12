@@ -76,11 +76,11 @@ class Snapping_Mechanism:
         If abs(x) > abs(B), clamps x towards 0 such that abs(x) = abs(B).
 
         Parameters:
-            x (numeric): Number to be clamped.
-            B (numeric): Bounds to which x should be clamped.
+            x (numeric): Number to be clamped
+            B (numeric): Bounds to which x should be clamped
 
         Return:
-            numeric: Clamped version of x.
+            numeric: Clamped version of x
         """
         if (x < -abs(B)):
             return(-abs(B))
@@ -90,7 +90,7 @@ class Snapping_Mechanism:
 
     def _get_ieee_representation(self, binary):
         """
-        Get IEEE representation of floating point number from 64-bit binary representation
+        Get IEEE representation of floating point number from 64-bit binary representation.
         """
         sign = binary[0]
         exponent = binary[1:12]
@@ -99,10 +99,10 @@ class Snapping_Mechanism:
 
     def _get_smallest_greater_power_of_two(self, _lambda):
         """
-        Gets closest power of two that is >= _lambda
+        Gets closest power of two that is >= _lambda.
 
         Parameters:
-            _lambda (numeric): argument to laplace noise.
+            _lambda (numeric): Argument to laplace noise
 
         Return:
             numeric: Smallest power of two that is >= _lambda -- we call this Lambda
@@ -123,7 +123,7 @@ class Snapping_Mechanism:
 
     def _divide_by_power_of_two(self, sign, exponent, mantissa, power):
         """
-        Divide by power of two and return updated exponent
+        Divide by power of two and return updated exponent.
         """
         exponent_num = int(exponent, 2) - power
         exponent = bin(exponent_num)[2:].zfill(11) # use [2:] to remove 0b from beginning of binary representation
@@ -175,9 +175,45 @@ class Snapping_Mechanism:
 
         return(sign, exponent, mantissa)
 
+    def _round_up_to_nearest_int(self, sign, exponent, mantissa):
+        """
+        Round the IEEE representation up to the nearest integer.
+        """
+
+        # generate numeric version of unbiased exponent
+        unbiased_exponent_num = int(exponent, 2) - 1023
+
+        if unbiased_exponent_num >= 52:
+            return(sign, exponent, mantissa)
+        elif unbiased_exponent_num >= 0:
+            '''IEEE_rep >= Lambda'''
+            # get elements of mantissa that represent integers
+            # (after being multiplied by 2^unbiased_exponent_num)
+            mantissa_subset = mantissa[0:unbiased_exponent_num]
+
+            '''round mantissa up'''
+            # if integer part of mantissa is all 1s, rounding needs to be reflected
+            # in the exponent instead
+            if mantissa_subset == '1' * len(mantissa_subset):
+                mantissa = ''.ljust(52, '0')[0:52]
+                exponent_num = int(exponent, 2) + 1
+                exponent = bin(exponent_num)[2:].ljust(11, '0')
+            else:
+                # if integer part of mantissa not all 1s, just increment mantissa
+                mantissa_subset_inc = bin(int(mantissa_subset, 2) + 1)[2:].zfill(len(mantissa_subset))
+                mantissa = mantissa_subset_inc.ljust(52, '0')[0:52]
+
+        elif unbiased_exponent_num < 0:
+            '''IEEE_rep < Lambda'''
+            # round IEEE_rep to 1
+            mantissa = ''.ljust(52, '0')
+            exponent = '0'.ljust(11, '1')
+
+        return(sign, exponent, mantissa)
+
     def _multiply_by_power_of_two(self, sign, exponent, mantissa, power):
         """
-        Multiply by power of two and return updated exponent
+        Multiply by power of two and return updated exponent.
         """
         if exponent == '0'*len(exponent):
             return(sign, exponent, mantissa)
@@ -188,7 +224,7 @@ class Snapping_Mechanism:
 
     def _get_closest_multiple_of_Lambda(self, x, m):
         """
-        Rounds x to the closest multiple of Lambda, resolving ties toward positive infinity
+        Rounds x to the closest multiple of Lambda, resolving ties toward positive infinity.
 
         Parameters:
             x (numeric): Number to be rounded to closest multiple of Lambda
@@ -203,13 +239,30 @@ class Snapping_Mechanism:
         sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
         return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
 
-    def _sample_from_uniform(self):
+    def _get_closest_larger_multiple_of_Lambda(self, x, m):
         """
-        Sample from uniform (0,1) as described by Mironov.
-        Meant to sample floating points proportional to their unit of least precision
+        Rounds x to the closest larger multiple of Lambda.
+
+        Parameters:
+            x (numeric): Number to be rounded to closest larger multiple of Lambda
+            m (int): Integer such that Lambda = 2^m
 
         Return:
-            numeric: sample from Unif(0,1)
+            numeric: x rounded to nearest larger multiple of Lambda
+        """
+        sign, exponent, mantissa = self._get_ieee_representation(self._double_to_bin(x))
+        sign_a, exponent_a, mantissa_a = self._divide_by_power_of_two(sign, exponent, mantissa, m)
+        sign_b, exponent_b, mantissa_b = self._round_up_to_nearest_int(sign_a, exponent_a, mantissa_a)
+        sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
+        return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
+
+    def _sample_from_uniform(self):
+        """
+        Samples from uniform (0,1) as described by Mironov.
+        Meant to sample floating points proportional to their unit of least precision.
+
+        Return:
+            numeric: Sample from Unif(0,1)
         """
 
         '''
@@ -225,6 +278,9 @@ class Snapping_Mechanism:
 
     def _redefine_epsilon(self, epsilon, B, precision):
         """
+        Calculates epsilon for the Laplace inside the Snapping Mechanism such that the
+        Snapping Mechanism as a whole is (epsilon, 0)-DP.
+
         Note:
             This is a work in progress -- maybe could be improved
         """
@@ -250,15 +306,48 @@ class Snapping_Mechanism:
 
     def _F_Z_plus(self, z, _lambda):
         """
+        Gets upper bound on F_Z(z), where F_Z is the CDF of |Y'| + Lambda/2.
+        See section 6.2 of snapping_implementation_notes for explanation.
+
+        Parameters:
+            z (numeric): Number for which we want the area to the left
+            _lambda (numeric): Scale parameter for Laplace distribution (represented by Y')
+
+        Return:
+            numeric: Upper bound on P(Z <= z) where Z ~ |Laplace(_lambda)| + Lambda/2
         """
         return(1 - math.e**(-1/_lambda * z + 1/2))
 
     def _F_Z_minus(self, z, _lambda):
         """
+        Gets lower bound on F_Z(z), where F_Z is the CDF of |Y'| + Lambda/2.
+        See section 6.2 of snapping_implementation_notes for explanation.
+
+        Parameters:
+            z (numeric): Number for which we want the area to the left
+            _lambda (numeric): Scale parameter for Laplace distribution (represented by Y')
+
+        Return:
+            numeric: Lower bound on P(Z <= z) where Z ~ |Laplace(_lambda)| + Lambda/2
         """
         return(1 - math.e**(-1/_lambda * z + 1))
 
     def _get_accuracy(self, f_D, B, P_l_plus, P_u_minus, _lambda, alpha):
+        """
+        Gets upper bound on accuracy (lower accuracy number means more accurate estimate).
+        See section 6.2 of snapping_implementation_notes for explanation.
+
+        Parameters:
+            f_D (numeric): Private estimate (aka mechanism output)
+            B (numeric): Snapping Mechanism bound
+            P_l_plus (numeric): Upper bound on probability that lower snapping bound is binding
+            P_u_minus (numeric): Lower bound on probability that upper snapping bound is binding
+            _lambda (numeric): Scale parameter for Laplace distribution
+            alpha (numeric): Desired confidence level
+
+        Return:
+            numeric: Accuracy guarantee
+        """
         if P_l_plus >= alpha:
             return(B + f_D)
         elif self._F_Z_minus(B - f_D, _lambda) >= 1 + P_l_plus - alpha:
@@ -326,22 +415,22 @@ class Snapping_Mechanism:
 
         inner_result_rounded = self._get_closest_multiple_of_Lambda(inner_result, m)
         private_estimate = self._clamp(self.sensitivity * inner_result_rounded, self.B) # put private estimate back on original scale
-        snapped_noise = private_estimate - self.mechanism_input
+        # snapped_noise = private_estimate - self.mechanism_input
 
-        # calculate extra quantities needed for accuracy guarantee
-        # see snapping_implementation_notes.pdf for explanation
-        lambda_prime = self.sensitivity / epsilon_prime
-        P_l_plus = self._get_laplace_CDF(x = -self.B - private_estimate + lambda_prime, _lambda = lambda_prime)
-        P_u_minus = 1 - self._get_laplace_CDF(x = self.B - private_estimate - lambda_prime, _lambda = lambda_prime)
+        # # calculate extra quantities needed for accuracy guarantee
+        # # see snapping_implementation_notes.pdf for explanation
+        # lambda_prime = self.sensitivity / epsilon_prime
+        # P_l_plus = self._get_laplace_CDF(x = -self.B - private_estimate + lambda_prime, _lambda = lambda_prime)
+        # P_u_minus = 1 - self._get_laplace_CDF(x = self.B - private_estimate - lambda_prime, _lambda = lambda_prime)
 
-        # TODO: just testing this below -- not sure if correct and will likely need to define outside
-        #       of this function to allow user to set alpha
-        accuracy = self._get_accuracy(f_D = private_estimate,
-                                      B = self.B,
-                                      P_l_plus = P_l_plus,
-                                      P_u_minus = P_u_minus,
-                                      _lambda = lambda_prime,
-                                      alpha = 0.05)
+        # # TODO: just testing this below -- not sure if correct and will likely need to define outside
+        # #       of this function to allow user to set alpha
+        # accuracy = self._get_accuracy(f_D = private_estimate,
+        #                               B = self.B,
+        #                               P_l_plus = P_l_plus,
+        #                               P_u_minus = P_u_minus,
+        #                               _lambda = lambda_prime,
+        #                               alpha = 0.05)
 
 
-        return(snapped_noise, self.epsilon, float(accuracy))
+        return(private_estimate)
