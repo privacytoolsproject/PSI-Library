@@ -15,6 +15,22 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
     return(accuracy)
 }
 
+#' Get accuracy for Snapping statistics
+#'
+#' Function to find the accuracy guarantee of a statistic release at a given epsilon
+#' value.
+#'
+#' @param sensitivity the sensitivity of the statistic
+#' @param epsilon A numeric vector representing the epsilon privacy parameter.
+#'    Should be of length one and should be between zero and one.
+#' @param alpha A numeric vector specifying the statistical significance level.
+#'
+#' @return Accuracy guarantee for statistic release given epsilon.
+
+snapping.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
+    accuracy <- (1 + log(1 / alpha)) * (sensitivity / epsilon)
+    return(accuracy)
+}
 
 #' Get epsilon for Laplace statistics
 #'
@@ -33,6 +49,22 @@ laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
     return(epsilon)
 }
 
+#' Get epsilon for Snapping statistics
+#'
+#' Function to find the epsilon value necessary to meet a desired level of
+#' accuracy for a statistic release.
+#'
+#' @param sensitivity the sensitivity of the statistic
+#' @param accuracy A numeric vector representing the accuracy needed to
+#'    guarantee (percent).
+#' @param alpha A numeric vector specifying the statistical significance level.
+#'
+#' @return The scalar epsilon necessary to guarantee the needed accuracy.
+
+snapping.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
+    epsilon <- (1 + log(1 / alpha)) * (sensitivity / accuracy)
+    return(epsilon)
+}
 
 #' Differentially Private Uniform Draw
 #'
@@ -115,16 +147,19 @@ snappingNoise <- function(true_val, n, sens, epsilon, B) {
     # source snapping mechanism file
     reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
 
-    # intialize snapping mechanism object
-    snapping_mech <- Snapping_Mechanism(mechanism_input = true_val,
-                                                sensitivity = sens,
-                                                epsilon = epsilon,
-                                                B = B)
-
-    # calculate and return noise
+    # initialize noise vector
     noise <- c()
+
     for (i in 1:n) {
-        noise[i] <- snapping_mech$get_snapped_noise()
+        # intialize snapping mechanism object
+        # TODO: should sens, epsilon, B be able to vary by value of true_val?
+        snapping_mech <- Snapping_Mechanism(mechanism_input = true_val[[i]],
+                                            sensitivity = sens,
+                                            epsilon = epsilon,
+                                            B = B)
+
+        # calculate and return noise (as well as epsilon and accuracy)
+        noise[[i]] <- snapping_mech$get_snapped_noise()
     }
     return(noise)
 }
