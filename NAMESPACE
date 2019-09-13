@@ -2,9 +2,6 @@
 
 export(bootstrapReplication)
 export(censorData)
-export(checkEpsilon)
-export(checkRange)
-export(checkVariableType)
 export(coefficientRelease)
 export(dLap)
 export(dpCovariance)

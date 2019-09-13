@@ -4,7 +4,7 @@
 \alias{checkVariableType}
 \title{Checking variable types}
 \usage{
-checkVariableType(type, inTypes)
+checkVariableType(type, inTypes, emptyOkay = FALSE)
 }
 \arguments{
 \item{type}{A character specifying the type of the variable.}

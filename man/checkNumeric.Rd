@@ -2,17 +2,20 @@
 % Please edit documentation in R/utilities-input-validation.R
 \name{checkNumeric}
 \alias{checkNumeric}
-\title{Check if input is numeric type}
+\title{Helper function that generates error message if non-numeric typed value \code{n}
+is passed as input, and otherwise returns \code{n}.}
 \usage{
-checkNumeric(n)
+checkNumeric(n, emptyOkay = FALSE, expectedLength = 1)
 }
 \arguments{
 \item{n}{Input value of arbitrary type.}
+
+\item{A}{boolean. True if NA or NULL values are allowed, FALSE otherwise.}
 }
 \value{
 n or errors.
 }
 \description{
-Helper function that generates error message if non-numeric typed value \code{n}
-is passed as input, and otherwise returns \code{n}.
+If \code{emptyOkay=TRUE}, NA or NULL values are allowed in n. Otherwise, they will
+raise an error.
 }
