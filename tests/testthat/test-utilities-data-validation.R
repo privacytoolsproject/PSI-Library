@@ -3,16 +3,19 @@ context('utilities-data-validation')
 
 test_that('censorData is as expected', {
     residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
-    chars = c('a', 'b', 'c', 'c', 'd')
-    nums = 1:10
+    chars <- c('a', 'b', 'c', 'c', 'd')
+    nums <- 1:10
+    m <- matrix(1:10, ncol=2)
     
-    residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
-    charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
-    numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7))
+    residenceOut <- censorData(residence, varType='factor', levels=c("OR"))
+    charsOut <- censorData(chars, varType='character', levels=c('a', 'b', 'c'))
+    numsOut <- censorData(nums, varType='integer', rng=c(2.5, 7), rngFormat="vector")
+    mOut <- censorData(m, varType='integer', rng=list(c(1,5),c(7,9)), rngFormat="list")
     
     expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
     expect_equal(charsOut, factor(c('a','b','c','c',NA)))
     expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
+    expect_equal(mOut, matrix(c(1:5, 7,7,8,9,9), ncol=2))
 })
 
 test_that('fillMissing', {

@@ -28,26 +28,27 @@ censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
             x <- factor(x, levels=levels, exclude=NULL)
         }
     } else {
-        if (is.null(rng)) {
-            stop('range `rng` is required for numeric types')
-        }
         if (NCOL(x) > 1) {
-            for (j in 1:ncol(x)) {
-                rng[j, ] <- checkRange(rng[j, ], varType, rngFormat)
-                x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
-                x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
+            checkRange(rng, varType, rngFormat, expectedLength=ncol(x)) 
+            for(i in 1:NCOL(x)){
+                x[,i] <- censorData1D(x[,i], rng[[i]])
             }
+        } else if (rngFormat=="vector"){
+            checkRange(rng, varType, rngFormat)
+            x <- censorData1D(x,rng)
         } else {
-            rng <- checkRange(rng, varType, rngFormat)
-            x[x < rng[1]] <- rng[1]
-            x[x > rng[2]] <- rng[2]
+          stop("range Format (rngFormat) must be either 'list' or 'vector'.")
         }
     }
     return(x)
 }
 
 
-
+censorData1D <- function(x, rng){
+  x[x < rng[1]] <- rng[1]
+  x[x > rng[2]] <- rng[2]
+  return(x)
+}
 
 
 #' Logical variable check
