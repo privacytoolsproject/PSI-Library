@@ -91,31 +91,34 @@ dpCovariance$methods(
   initialize = function(mechanism, varType, n, columns, rng, epsilon=NULL, globalEps=NULL, epsilonDist= NULL,
                         accuracy=NULL, accuracyVals=NULL, imputeRng=NULL, intercept=FALSE, formula=NULL,
                         alpha=0.05) {
-  
+
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
     .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES  
     
-    
+
     .self$formula <- formula
     .self$intercept <- intercept
     .self$alpha <- alpha
     
+
     .self$n <- checkN(n)
     .self$rngFormat <- 'list'
     .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns)) 
     .self$sens <- covarianceSensitivity(n, rng, intercept)
-    print('line112')
     
+
     checkVariableType(class(formula), c("formula", "character"), emptyOkay=TRUE)
     checkVariableType(typeof(intercept), "logical")
     checkVariableType(typeof(columns), "character")
     
+
     if (is.null(imputeRng)) { # NEED TO ALLOW FOR IMPUTING ON ONLY SOME OF THE RANGES
       .self$imputeRng <- rng
     } else {
       .self$imputeRng <- imputeRng
     }
+
     if (.self$intercept) { 
       .self$columns <- c('intercept', columns)
     } else {
@@ -125,32 +128,32 @@ dpCovariance$methods(
     # Distribute epsilon across all covariances that will be calculated
     outputLength <- lowerTriangleSize(.self$columns)
     # Option 1: Enter vector of epsilon values to be used for each covariance calculation in matrix.
-    if (epsilon){
+    if (!is.null(epsilon)){
         .self$epsilon <- checkEpsilon(epsilon, expectedLength=outputLength)
         .self$globalEps <- sum(.self$epsilon)
     }
     # Option 2: Enter global epsilon value and vector of percentages specifying how to split global 
     # epsilon between covariance calculations.
-    else if (globalEps && epsilonDist){
+    else if (!is.null(globalEps) && !is.null(epsilonDist)){
         .self$globalEps <- checkEpsilon(globalEps)
         .self$epsilonDist <- checkEpsilonDist(epsilonDist, outputLength)
         .self$epsilon <- distributeEpsilon(.self$globalEps, epsilonDist=.self$epsilonDist)
         .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
     }
     # Option 3: Only enter global epsilon, and have it be split evenly between covariance calculations.
-    else if (globalEps){
+    else if (!is.null(globalEps)){
         .self$globalEps <- checkEpsilon(globalEps)
         .self$epsilon <- distributeEpsilon(globalEps, nCalcs=outputLength)
         .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
     }
     # Option 4: Enter an accuracy value instead of an epsilon, and calculate individual epsilons with this accuracy.
-    else if (accuracy){
+    else if (!is.null(accuracy)){
         .self$accuracy = checkAccuracy(accuracy)
         .self$epsilon = laplaceGetEpsilon(.self$sens, .self$accuracy, .self$alpha)
         .self$globalEps = sum(.self$epsilon)
     }
     # Option 5: Enter vector of accuracy values, and calculate ith epsilon value from ith accuracy value
-    else if (accuracyVals){
+    else if (!is.null(accuracyVals)){
         .self$accuracyVals = checkAccuracyVals(accuracyVals, outputLength)
         .self$epsilon = laplaceGetEpsilon(.self$sens, .self$accuracyVals, .self$alpha)
         .self$globalEps = sum(.self$epsilon)
