@@ -58,6 +58,7 @@ dpVariance <- setRefClass(
 )
 
 dpVariance$methods(
+
     initialize = function(varType, variable, n, rng=NULL, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
@@ -130,6 +131,8 @@ dpVariance$methods(
             out$epsilon <- epsilon
         }
         out$variable <- variable
-        out$stdDev <- postStandDev(out$release)
-      return(out)
+        out$std <- sqrt(out$release)
+        out$epsilon <- .self$epsilon
+        out$accuracy <- .self$accuracy
+        return(out)
 })

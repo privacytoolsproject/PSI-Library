@@ -119,7 +119,7 @@ dpCovariance <- setRefClass(
 )
 
 dpCovariance$methods(
-  initialize = function(mechanism, varType, n, epsilon, columns, rng, imputeRng=NULL, 
+  initialize = function(mechanism, varType, n, epsilon, columns, rng=NULL, imputeRng=NULL, 
                         intercept=FALSE, formula=NULL, delta=1e-5) {
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism

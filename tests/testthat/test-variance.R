@@ -9,6 +9,31 @@ test_that('sensitivity function is consistent with intended implementation', {
   expect_equal(varianceSensitivity(5, c(5,10)),5)
 })
 
+# test accuracy, epsilon, and sensitivity calculations 
+test_that('variancee getAccuracy and getEpsilon return approximately correct values for laplace mechanism', {
+    # test sensitivity and accuracy
+    nTest <- 10000
+    epsilonTest <- 0.1
+    
+    dpVar <- dpVariance$new(variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(0,100))
+    dpVar$release(PUMS5extract10000)
+    
+    sens <- round((dpVar$result$epsilon * dpVar$result$accuracy) / log(1/0.05))
+    acc <- round(dpVar$result$accuracy)
+
+    expect_equal(sens, 1)
+    expect_equal(acc, 30)
+    
+    # test accuracy
+    accuracyTest <- 30
+    
+    dpVar2 <- dpVariance$new(variable='age', varType='numeric', n=nTest, accuracy=accuracyTest, rng=c(0,100))
+    dpVar2$release(PUMS5extract10000)
+    
+    epsilon <- round(dpVar2$result$epsilon, digits = 1)
+    expect_equal(epsilon, 0.1)
+})
+
 # make sure error thrown when n not positive or a whole number
 test_that('error thrown when n not positive or whole number', {
     epsilonTest <- 0.1
@@ -41,6 +66,9 @@ test_that('range checks throw correct warning', {
     
     expect_error(dpVariance$new(variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(100)), 
                  "range argument in error: requires upper and lower values as vector of length 2.")
+
+    expect_warning(dpVariance$new(variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(-10,0,100)), 
+                   "range argument supplied has more than two values.  Will proceed using min and max values as range.")
     
     dpVar <- dpVariance$new(variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(0,100))
     dpVar$release(PUMS5extract10000)
