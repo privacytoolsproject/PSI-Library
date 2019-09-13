@@ -1,6 +1,6 @@
 #' Sensitivity of mean
 #'
-#' For a detailed derivation of the sensitivity, see /extra_docs/mean_sensitivity.pdf
+#' For a detailed derivation of the sensitivity, see /extra_docs/sensitivities/mean_sensitivity.pdf
 #' 
 #' @param rng Numeric vector of length two; first entry is minimal bound on the database entries, second is maximal bound on the database entries.
 #' @param n Numeric vector of length one; the number of datapoints in the database.
