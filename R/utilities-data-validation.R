@@ -21,24 +21,27 @@
 #' @rdname censorData
 #' @export
 censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
-    if (varType %in% c('character', 'factor')) {
+
+    if (varType %in% c('character', 'factor')){
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
         } else {
             x <- factor(x, levels=levels, exclude=NULL)
         }
-    } else {
-        if (NCOL(x) > 1) {
+    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical')) && sapply(x, is.numeric)) {
+        if (NCOL(x) > 1 && rngFormat=='list') {
             checkRange(rng, varType, rngFormat, expectedLength=ncol(x)) 
             for(i in 1:NCOL(x)){
                 x[,i] <- censorData1D(x[,i], rng[[i]])
             }
-        } else if (rngFormat=="vector"){
+        } else if (NCOL(x)==1 && rngFormat=="vector"){
             checkRange(rng, varType, rngFormat)
             x <- censorData1D(x,rng)
         } else {
-          stop("range Format (rngFormat) must be either 'list' or 'vector'.")
+          stop("range Format (rngFormat) must be either 'list' or 'vector'. If range is a tuple of multiple ranges, it must be formatted as a list.")
         }
+    } else{
+      stop("Input data x and varType do not match.")
     }
     return(x)
 }

@@ -1,7 +1,7 @@
 library(PSIlence)
 context('utilities-data-validation')
 
-test_that('censorData is as expected', {
+test_that('censorData runs as expected', {
     residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
     chars <- c('a', 'b', 'c', 'c', 'd')
     nums <- 1:10
@@ -16,6 +16,18 @@ test_that('censorData is as expected', {
     expect_equal(charsOut, factor(c('a','b','c','c',NA)))
     expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
     expect_equal(mOut, matrix(c(1:5, 7,7,8,9,9), ncol=2))
+})
+
+test_that('censorData throws expected errors', {
+    nums <- 1:10
+    m <- matrix(11:20, ncol=2)
+    
+    expect_error(censorData(nums, 'integer'))
+    expect_error(censorData(nums, 'integer', rng=c(1,10), rngFormat='list'))
+    expect_error(censorData(nums, 'integer', rng=list(c(1,10),c(1,5)), rngFormat='list'))
+    
+    expect_error(censorData(m, 'integer', rng=c(1,10), rngFormat='vector'))
+    expect_error(censorData(m, 'integer', rng=list(c(1,10),c(1,5)), rngFormat='vector'))
 })
 
 test_that('fillMissing', {

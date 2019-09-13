@@ -258,7 +258,7 @@ checkRange1D <- function(rng, varType, emptyOkay=FALSE) {
 #'    the maximum and minimum bounds on some subsets of the data (e.g. of different data columns)
 #'    Matrix and list types are supported. Internally, matrices are coerced to lists to allow 
 #'    varying dimensions across rows.
-#' @param varType The variable type; e.g. 'logical', 'integer', 'numeric', 'character'.
+#' @param varType The variable type; e.g. 'logical', 'integer', 'numeric'.
 #' @param formatType One of 'vector' or 'list', describing which of the two the input range should be, where 'vector' returns to an atomic vector.
 #'    Since matrices are coerced to lists within the function, when using a matrix as range input, `format type = 'list'` should be specified. 
 #' @param expectedLength Integer value. Specifies how long the output ought to be. Defaults to NULL and only used on list or matrix inputs.

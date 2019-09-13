@@ -33,6 +33,7 @@ test_that('range checks throw correct error', {
 
 # make sure error thrown when n not positive or a whole number
 test_that('make sure error thrown when n not positive or a whole number',{
+
     expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = -1,
                                   epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
                  "n must be a positive whole number")
