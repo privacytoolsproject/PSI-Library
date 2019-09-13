@@ -1,10 +1,10 @@
-#' Sensitivity of population variance
+#' Sensitivity of sample variance
 #' 
 #' For a detailed derivation of the sensitivity, see /extra_docs/variance_sensitivity.pdf.
 #' @name varianceSensitivity
 #' @param n Numeric vector of length one; the number of datapoints in the database.
 #' @param rng Numeric vector of length two; first entry is minimal bound on the database entries, second is maximal bound on the database entries.
-#' @return Numeric vector of length one; a maximal bound on the sensitivity of the population variance.
+#' @return Numeric vector of length one; a maximal bound on the sensitivity of the sample variance.
 #'
 #' @examples
 #' varianceSensitivity(2,c(0,10)) #should return 50

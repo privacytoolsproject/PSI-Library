@@ -15,20 +15,21 @@
 
 \begin{definition}
 Let variance be defined as 
-$$ \sigma^2 = \frac{1}{n-1} \sum_{i=1}^n (x_i - \mean)^2.$$
+$$ s^2 = \frac{1}{n-1} \sum_{i=1}^n (x_i - \mean)^2.$$
 \end{definition}
 
-\begin{lemma}
-$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2,$$
-i.e. the current implementation of sensitivity for variance in the PSI-library is incorrect.
-\end{lemma}
+%\begin{lemma}
+%$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2,$$
+%i.e. the current implementation of sensitivity for variance in the PSI-library is incorrect.
+%\end{lemma}
+%
+%\begin{proof}
+%Let $\x = \{0,100\}, \xprime = \{100,100\}$ be two neighboring databases. Note that $\sigma^2(\x) = 5000$ and $\sigma^2(\xprime)=0$, so variance has local sensitivity of 5000. Note that
+%$$\frac{n-1}{n^2}(M-m)^2 = 2500 < 5000.$$
+%Since global sensitivity of a function must be less than or equal to the local sensitivity for all neighboring databases, it holds that 
+%$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2.$$
+%\end{proof}
 
-\begin{proof}
-Let $\x = \{0,100\}, \xprime = \{100,100\}$ be two neighboring databases. Note that $\sigma^2(\x) = 5000$ and $\sigma^2(\xprime)=0$, so variance has local sensitivity of 5000. Note that
-$$\frac{n-1}{n^2}(M-m)^2 = 2500 < 5000.$$
-Since global sensitivity of a function must be less than or equal to the local sensitivity for all neighboring databases, it holds that 
-$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2.$$
-\end{proof}
 
 %\begin{lemma}
 %Perhaps the sensitivity of $\sigma^2$ in the PSI-library is just missing the term in the residual that is due to the actual point being changed, which has an additional affect on the sensitivity of $\sigma^2$ that is bounded above by $(M-m)/(n-1)$. However,
