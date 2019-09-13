@@ -9,7 +9,8 @@
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
 #'   
-# ADD INFORMATION ABOUT DERIVATION/LINK TO IT
+#  A complete derivation of the sensitivity of the covariance may be found in 
+#' /extra_docs/sensitivities/covariance_sensitivity.pdf
 covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- sapply(rng, diff)
     if (intercept) { diffs <- c(1, diffs) }
@@ -17,7 +18,11 @@ covarianceSensitivity <- function(n, rng, intercept) {
     c <- 2*(n-1)/n
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
-            s <- c * diffs[i] * diffs[j]
+            if (i==1 && intercept){  #any covariance with intercept column will have sensitivity 0
+              s <- 0
+            } else{
+              s <- c * diffs[i] * diffs[j]
+            }
             sensitivity <- append(sensitivity, s)
         }
     }
