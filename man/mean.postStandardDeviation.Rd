@@ -7,13 +7,13 @@
 \method{mean}{postStandardDeviation}(release)
 }
 \arguments{
-\item{release}{Differentially private release of a mean for a logical 
+\item{release}{Differentially private release of a mean for a logical
 variable.}
 }
 \value{
 Standard deviation of the logical variable
 }
 \description{
-Calculates the standard deviation of the differentially private mean from a 
+Calculates the standard deviation of the differentially private mean from a
 logical variable.
 }

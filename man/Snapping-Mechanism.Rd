@@ -10,8 +10,6 @@
 
 \item{sens}{sensitivity of fun. Sensitivity is defined in above citation.}
 
-\item{B}{bound such that the user is confident that fun(x) is in the interval [-B, B].}
-
 \item{postFun}{post-processing function. Takes differentially private release as input
 and returns some form of output in principal based on the differentially private release.}
 

@@ -1,0 +1,90 @@
+---
+title: "Snapping Mechanism"
+author: "Christian Covington"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dp-mean}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(
+        stop_on_error = 2L
+)
+knitr::opts_chunk$set(
+    fig.height = 7,
+    fig.width = 7
+)
+```
+
+Snapping Mechanism
+------------------
+The Snapping Mechanism is a bit of a departure from the other mechanisms included in the library, both in terms of purpose and implementation, so we explain here why and how one might want to use it.
+
+Background
+----------
+Part of the appeal of differential privacy as a privacy definition is that it allows for mathematical guarantees on the maximum privacy loss
+from the release of a statistic.
+For many mechanisms, these proofs of privacy loss bounds assume that the mechanism can sample random noise according to a probability distribution
+defined on the real numbers. In practice, computers cannot represent numbers with infinite precision and so real numbers must often be
+approximated in some way. We consider here the dominant means of doing so, the `floating-point number`.
+
+There is a great deal of literature on how the behavior of floating-point numbers (and arithmetic on them) depart from operations on the real numbers,
+but [Mironov (2012)](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.366.5957&rep=rep1&type=pdf) was the first to show that this had implications
+for the privacy guarantees of differentially private algorithms. Specifically, the paper demonstrated that standard implementations of the Laplace Mechanism
+did not satisfy the formal privacy guarantees because of error introduced by the floating-point implementation. We provude a high-level overview directly
+below, but the interested reader can consult the [Further Information on Vulnerability] section for a slightly more technical explanation.
+
+The Laplace Mechanism is theoretically an $$(\epsilon, 0)$$-DP algorithm, but can become an $$(\epsilon', \delta)$$-DP algorithm
+in practice (when implemented in software) where we know $$\epsilon' > \epsilon$$ and $$\delta > 0$$, but don't have exact guarantees on either.
+This undermines the tenets of differential privacy, as we can no longer accurately bound privacy loss. The Snapping Mechanism provides real
+$$(\epsilon, 0)$$-DP, but does so at the cost of (typically) adding more noise than the Laplace Mechanism would for the same
+nominal privacy guarantee.
+
+Setup
+-----
+In order to use the `Snapping Mechanism`, you will need to have [python3](https://www.python.org/downloads/) installed,
+as well as have all libraries included in the `snapping_requirements.txt` document,
+which is located in the top-level directory of the `PSIlence` library.
+Furthermore, you should download the [reticulate](https://rstudio.github.io/reticulate/) library,
+which will allow R to call python code (and thus the `Snapping Mechanism`).
+
+Snapping Mechanism vs. Laplace Mechanism
+----------------------------------------
+
+Further Information on Vulnerability
+------------------------------------
+An algorithm, $A$ is $(\epsilon,0)$-differentially private if for all datasets $D_1, D_2$ that differ on a single element and for all $S \subseteq Im(A)$ (all subsets of possible output values):
+$$P[A(D_1) \in S] \leq e^{\epsilon} * P[A(D_2) \in S]$$
+$A$ is a randomized algorithm, so for a fixed input it produces a probability distribution over possible outputs.
+In order for $(\epsilon, 0)$-differential privacy to hold, it is necessary (though not sufficient) for the distributions of outputs
+for the datasets $D_1, D_2$ must have the same support. That is, if an output has non-zero probability
+under $D_2$, it must have non-zero probability under $D_1$ (and vice versa).
+This is always true when sampling Laplace noise from the real numbers, but is not necessarily true when sampling from floating-point numbers.
+
+Most uniform random number generators (which serve an important role in random noise generation) produce porous distributions
+(not every possible floating-point number is represented), which are typically made even more porous by performing floating-point arithmetic
+on the value (which is necessary to produce Laplace, rather than uniform, noise). This porousness can lead to our mechanism producing
+values that are possible under only one of the data sets $D_1, D_2$, thus violating the $(\epsilon, 0)$ privacy guarantee.
+
+Examples
+------
+
+```{r, eval = TRUE}
+library(PSIlence)
+data(PUMS5extract10000)
+
+# release mean on income
+dp.mean <- dpMean$new(mechanism='mechanismSnapping', var.type='numeric',
+                      variable='income', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 200000))
+dp.mean$release(PUMS5extract10000)
+print(dp.mean$result)
+
+# release mean on sex
+dp.mean2 <- dpMean$new(mechanism='mechanismSnapping', var.type='logical',
+                       variable='sex', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 1))
+dp.mean2$release(PUMS5extract10000)
+print(dp.mean2$result)
+```

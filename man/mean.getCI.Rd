@@ -12,7 +12,7 @@
 \item{epsilon}{A numeric vector representing the epsilon privacy parameter.
 Should be of length one and should be between zero and one.}
 
-\item{sensitivity}{The difference of the range of the data divided 
+\item{sensitivity}{The difference of the range of the data divided
 by \code{n}.}
 
 \item{alpha}{A numeric vector specifying the statistical significance level.}

@@ -7,7 +7,7 @@
 \title{Differentially private mean}
 \arguments{
 \item{mechanism}{Character, the privacy mechanism. For \code{dpMean}, one
-of \code{c('mechanismLaplace', 'mechanismBootstrap')}.}
+of \code{c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')}.}
 
 \item{var.type}{Character, the R variable type. One of \code{c('numeric',
 'integer', 'logical')}.}

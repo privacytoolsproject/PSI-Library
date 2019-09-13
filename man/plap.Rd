@@ -17,7 +17,7 @@ plap(x, mu = 0, b = 1)
 Probability the LaPlace draw is less than or equal to \code{x}.
 }
 \description{
-Determines the probability a draw from a LaPlace distribution is less than 
+Determines the probability a draw from a LaPlace distribution is less than
    or equal to the specified value.
 }
 \examples{

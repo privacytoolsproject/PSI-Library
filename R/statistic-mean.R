@@ -1,11 +1,11 @@
-#' Postprocessed standard deviation for logical variables 
-#' 
-#' Calculates the standard deviation of the differentially private mean from a 
+#' Postprocessed standard deviation for logical variables
+#'
+#' Calculates the standard deviation of the differentially private mean from a
 #' logical variable.
 #'
-#' @param release Differentially private release of a mean for a logical 
+#' @param release Differentially private release of a mean for a logical
 #'    variable.
-#'    
+#'
 #' @return Standard deviation of the logical variable
 #' @rdname mean.postStandardDeviation
 
@@ -17,10 +17,10 @@ mean.postStandardDeviation <- function(release) {
 
 #' Postprocessed median for logical variables
 #'
-#' Calculates the median of the differentially private mean from a 
+#' Calculates the median of the differentially private mean from a
 #' logical variable.
 #'
-#' @param release Differentially private release of a mean for a logical 
+#' @param release Differentially private release of a mean for a logical
 #'    variable.
 #'
 #' @return Median of the logical variable
@@ -50,14 +50,14 @@ mean.postHistogram <- function(release, n) {
 }
 
 #' Mean confidence interval
-#' 
+#'
 #' Return the confidence interval for the differentially private mean release given the
 #' accuracy.
 #'
 #' @param release Differentially private release of a mean.
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
-#' @param sensitivity The difference of the range of the data divided 
+#' @param sensitivity The difference of the range of the data divided
 #'    by \code{n}.
 #' @param alpha A numeric vector specifying the statistical significance level.
 #' @return Confidence bounds for differentially private mean release.
@@ -73,9 +73,9 @@ mean.getCI <- function(release, epsilon, sensitivity, alpha=0.05) {
 
 
 #' JSON doc for mean
-#' 
+#'
 #' Produce a JSON doc for differentially private means.
-#' 
+#'
 #' @param output.json Should the output be converted to JSON format. Default
 #' to \code{TRUE}.
 #'
@@ -122,7 +122,7 @@ boot.mean <- function(xi, n) {
 #' Differentially private mean
 #'
 #' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
-#'   of \code{c('mechanismLaplace', 'mechanismBootstrap')}.
+#'   of \code{c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')}.
 #' @param var.type Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
 #' @param Variable Character, variable name.
@@ -141,12 +141,13 @@ boot.mean <- function(xi, n) {
 #' @exportClass dpMean
 #'
 #' @include mechanism.R
+#' @include mechanism-snapping.R
 #' @include mechanism-laplace.R
 #' @include mechanism-bootstrap.R
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace', 'mechanismBootstrap')
+    contains = c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')
 )
 
 dpMean$methods(
@@ -160,22 +161,27 @@ dpMean$methods(
         .self$alpha <- alpha
         .self$rng <- checkrange(rng, var.type)
         .self$sens <- diff(.self$rng) / n
-        
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
-            .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
+            if (mechanism == 'mechanismLaplace'){
+                .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
+            } else if (mechanism == 'mechanismSnapping'){
+                .self$epsilon <- snapping.getEpsilon(.self$sens, .self$accuracy, alpha)
+            }
         } else {
             checkepsilon(epsilon)
             .self$epsilon <- epsilon
-            .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
+            if (mechanism == 'mechanismLaplace'){
+                .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
+            } else if (mechanism == 'mechanismSnapping'){
+                .self$accuracy <- snapping.getAccuracy(.self$sens, .self$epsilon, alpha)
+            }
         }
-        
         if (is.null(impute.rng)) {
             .self$impute.rng <- .self$rng
         } else {
             .self$impute.rng <- checkImputationRange(imputationRange=impute.rng, rng=.self$rng, var.type=.self$var.type)
         }
-        
         .self$boot.fun <- boot.mean
         .self$n.boot <- n.boot
 })
@@ -194,7 +200,10 @@ dpMean$methods(
             out$accuracy <- accuracy
             out$epsilon <- epsilon
             out$interval <- mean.getCI(out$release, epsilon, .self$sens, alpha)
-        } 
+        } else if (mechanism == 'mechanismSnapping') {
+            out$accuracy <- accuracy
+            out$epsilon <- epsilon
+        }
         if (var.type == 'logical') {
             if (mechanism == 'mechanismBootstrap') {
                 bagged.estimate <- mean(out$release)
