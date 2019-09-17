@@ -5,11 +5,9 @@
 #' @param sensitivity Sensitivity of the function
 #' @param epsilon Numeric differential privacy parameter
 #' @param fun Function to evaluate
-#' @param inputObject the Bootstrap mechanism object on which the input function will be evaluated
 #' @return Value of the function applied to one bootstrap sample
 #' @import stats
 #' @export
-
 
 bootstrapReplication <- function(x, n, sensitivity, epsilon, fun) {
     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
