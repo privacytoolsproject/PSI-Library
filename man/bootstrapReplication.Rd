@@ -16,6 +16,8 @@ bootstrapReplication(x, n, sensitivity, epsilon, fun)
 \item{epsilon}{Numeric differential privacy parameter}
 
 \item{fun}{Function to evaluate}
+
+\item{inputObject}{the Bootstrap mechanism object on which the input function will be evaluated}
 }
 \value{
 Value of the function applied to one bootstrap sample
