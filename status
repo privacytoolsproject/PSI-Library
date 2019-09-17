@@ -1,0 +1,22 @@
+Descriptions of status of the different components of the library
+Last updated: 9.12.19
+
+Mechanisms:
+
+1. Laplace: done
+2. Gaussian: done
+3. Stability: done, but only implemented for histogram
+4. Exponential: not ready; problem with quality metric.
+5. Objective: not ready; problem with loss function calculations
+6. Bootstrapping: done in PR (broken in develop)
+
+Statistics:
+
+1. Mean: done except input validation (PRs are open for this)
+2. Variance: done but need to merge in changes (PRs are open for this)
+3. Histogram: done except input validation (PRs are open for this)
+4. Covariance: in progress
+5. Tree: in progress
+6. GLM: dependent on fixing objective mech (Mike has possible fixes maybe?)
+7. Heavyhitters: blocked until exponential mechanism fixed; also not clear about utility of the statistic.
+
