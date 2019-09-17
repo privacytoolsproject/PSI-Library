@@ -40,17 +40,18 @@ Syntax
 ```{r, eval = FALSE}
 library(PSIlence)
 
+# example data
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
-# numeric variable
+# example on a numeric variable
 dpMeanExample <- dpMean$new(mechanism='mechanismLaplace', varType='numeric', 
                       variable='x1', epsilon=0.1, n=10, rng=c(0, 70))
 dpMeanExample$release(data)
 print(dpMeanExample$result)
 
-# logical variable
+# example on a logical variable
 dpMeanExample2 <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
 dpMeanExample2$release(data)
@@ -76,8 +77,6 @@ In typical usage, there are two methods to the `dpMean` class: the `new` method 
 
 * `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
 
-* `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. In other words, it should be a vector in the form: c(data minimum, data maximum).
-
 * `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. See Notes below for more information.
 
 * `nBoot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `nBoot` replications and the estimates for each are returned.
@@ -94,21 +93,18 @@ The `release` method calculates the mean of given data and accepts a single argu
 Examples
 ------
 
-Import the PSIlence library and the datasets library, and attach the sample datasets. The `library(datasets)` command is just for the examples in this document:
+Import the PSIlence library and attach the sample datasets:
 
 ```{r, eval = TRUE}
 library(PSIlence)
-library(datasets)
 data(PUMS5extract10000)
-data(SocrataWhiteHouseEmployeeSalaries)
-data(esoph)
 ```
 
 &nbsp;
 
 __Numeric Example__
 
-To calculate a private histogram of a numeric vector with `dpHistogram`, enter the mechanism (this will be the Laplace Mechanism, or 'mechanismLaplace'), the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the range:
+To calculate a private mean of a numeric vector with `dpMean`, enter the mechanism (this will be the Laplace Mechanism, or 'mechanismLaplace'), the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the range:
 
 ```{r}
 # create the mean statistic object
@@ -124,7 +120,7 @@ print(numericMean$result)
 
 __Logical Example__
 
-To calculate the histogram of a logical variable, input a the name of a logical vector into `variable` and update `varType` to 'logical'. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
+To calculate the mean of a logical variable, input a the name of a logical vector into `variable` and update `varType` to 'logical'. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
 
 ```{r}
 logicalMean <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
@@ -149,13 +145,12 @@ The list in the `result` attribute has the following values:
 
 * `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e. vector of length `nBoot`).
 * `variable` \ The variable (or the column of the dataframe) for which the mean was calculated.
-* `accuracy` \ The accuracy guarantee of the release given `epsilon`.
 * `epsilon` \ The privacy cost required to guarantee `accuracy`.
+* `accuracy` \ The accuracy guarantee of the release given `epsilon`.
 * `interval` \ Confidence interval of the private estimate given `accuracy`.
-* `std.dev` \ The standard deviation of the vector. Only available for logical vectors.
+* `stdDev` \ The standard deviation of the vector. Only available for logical vectors.
 * `median` \ The median of the vector. Only available for logical vectors.
 * `histogram` \ The histogram of the vector. Only available for logical vectors.
-* `std.error` \ Estimates of the standard error of the mean. Only available when the bootstrap mechanism is used.
 
 &nbsp;
 
