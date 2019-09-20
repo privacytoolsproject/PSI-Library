@@ -166,7 +166,11 @@ treePostEfficient <- function(release, treeData, n, variance, terminalIndex) {
 
 dpTree <- setRefClass(
     Class = 'dpTree',
-    contains = 'mechanismLaplace'
+    contains = 'mechanismLaplace',
+    fields = list(
+        treeData = 'ANY',
+        percentiles = 'ANY'
+    )
 )
 
 dpTree$methods(

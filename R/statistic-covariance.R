@@ -115,7 +115,10 @@ funCovar <- function(x, intercept) {
 
 dpCovariance <- setRefClass(
   Class = 'dpCovariance',
-  contains = 'mechanismLaplace'
+  contains = 'mechanismLaplace',
+  fields = list(
+      columns = 'ANY'
+  )
 )
 
 dpCovariance$methods(

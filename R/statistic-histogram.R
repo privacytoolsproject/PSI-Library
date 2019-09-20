@@ -33,7 +33,13 @@
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',
-    contains = c('mechanismLaplace', 'mechanismStability')
+    contains = c('mechanismLaplace', 'mechanismStability'),
+    fields = list(
+        bins = 'ANY',
+        nBins = 'ANY', # not 'numeric' because can be NULL if granularity given
+        imputeBins = 'ANY',
+        granularity = 'ANY' # not 'numeric' because can be NULL if nBins given
+    )
 )
 
 dpHistogram$methods(
