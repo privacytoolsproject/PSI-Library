@@ -191,7 +191,10 @@ glmObjectives = list(
 
 dpGLM <- setRefClass(
     Class = 'dpGLM',
-    contains = 'mechanismObjective'
+    contains = 'mechanismObjective',
+    fields = list(
+        objective = 'function'
+    )
 )
 
 dpGLM$methods(

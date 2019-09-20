@@ -38,7 +38,8 @@ dpHistogram <- setRefClass(
         bins = 'ANY',
         nBins = 'ANY', # not 'numeric' because can be NULL if granularity given
         imputeBins = 'ANY',
-        granularity = 'ANY' # not 'numeric' because can be NULL if nBins given
+        granularity = 'ANY', # not 'numeric' because can be NULL if nBins given 
+        stability = 'logical'
     )
 )
 
