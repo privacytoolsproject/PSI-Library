@@ -4,7 +4,7 @@ author: "Christian Covington"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{dp-mean}
+  %\VignetteIndexEntry{snapping-mechanism}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -50,9 +50,6 @@ as well as have all libraries included in the `snapping_requirements.txt` docume
 which is located in the top-level directory of the `PSIlence` library.
 Furthermore, you should download the [reticulate](https://rstudio.github.io/reticulate/) library,
 which will allow R to call python code (and thus the `Snapping Mechanism`).
-
-Snapping Mechanism vs. Laplace Mechanism
-----------------------------------------
 
 Further Information on Vulnerability
 ------------------------------------
