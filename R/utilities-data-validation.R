@@ -179,7 +179,7 @@ checkDelta <- function(mechanism, delta=NULL) {
         }
         return(0)
     } else {
-        # if the stability, gaussian, or exponential mechanism is being used, return the delta value
+        # if the stability or gaussian mechanism is being used, return the delta value
         if (is.null(delta)) {
             # default delta value
             return(2^-30)
