@@ -29,8 +29,6 @@ Differential privacy is a rigorous mathematical framework for making statistical
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
 
-There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `2^-30`, and never greater than `1/n^2` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
-
 The user must manually specify the number of observations, variable type, and range of the data of interest. 
 -->
 
@@ -61,7 +59,7 @@ print(dpMeanExample2$result)
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpMean` class: the `new` method and the `release` method. The `new` method creates an object of the class and accepts the following arguments:
+In typical usage, there are two methods to the `dpMean` class: the `new` method and the `release` method. The `new` method does not touch any data, it just creates an object that can calculate a differentially private covariance matrix. Only the `release` method touches data, and applies the functionality of the previously created object to the data.
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
 
@@ -89,6 +87,25 @@ The `release` method calculates the mean of given data and accepts a single argu
 
 * `data` \ Data frame containing numeric columns corresponding the name specified in `variable`.
 
+Values
+------
+
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. It also contains other elements reflecting variable post-processing of the release.
+
+&nbsp; 
+
+The list in the `result` attribute has the following values:
+
+* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e. vector of length `nBoot`).
+* `variable` \ The variable (or the column of the dataframe) for which the mean was calculated.
+* `accuracy` \ The accuracy guarantee of the release, given `epsilon`, if `epsilon` was entered. Otherwise, this is the accuracy value entered by the user.
+* `epsilon` \ The privacy cost required to guarantee `accuracy`, if `accuracy` was entered. Otherwise, this is the epsilon value entered by the user.
+* `interval` \ Confidence interval of the private estimate given `accuracy`.
+* `stdDev` \ The standard deviation of the vector. Only available for logical vectors.
+* `median` \ The median of the vector. Only available for logical vectors.
+* `histogram` \ The histogram of the vector. Only available for logical vectors.
 
 Examples
 ------
@@ -120,7 +137,7 @@ print(numericMean$result)
 
 __Logical Example__
 
-To calculate the mean of a logical variable, input a the name of a logical vector into `variable` and update `varType` to 'logical'. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
+To calculate the mean of a logical variable, input a the name of a logical vector into `variable` and update `varType` to 'logical'. Note: you do not need to enter a range for a logical variable (because the values of a logical variable are known to be {0,1}).
 
 ```{r}
 logicalMean <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
@@ -129,28 +146,6 @@ logicalMean <- dpMean$new(mechanism='mechanismLaplace', varType='logical',
 logicalMean$release(PUMS5extract10000)
 print(logicalMean$result)
 ```
-
-&nbsp;
-
-Values
-------
-
-The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
-
-* `result` List, contains the accuracy guarantee, privacy cost, and private release. It also contains other elements reflecting variable post-processing of the release.
-
-&nbsp; 
-
-The list in the `result` attribute has the following values:
-
-* `release` \ Differentially private estimate of the mean. If the bootstrap mechanism is used, one estimate for each bootstrap replication is provided (i.e. vector of length `nBoot`).
-* `variable` \ The variable (or the column of the dataframe) for which the mean was calculated.
-* `epsilon` \ The privacy cost required to guarantee `accuracy`.
-* `accuracy` \ The accuracy guarantee of the release given `epsilon`.
-* `interval` \ Confidence interval of the private estimate given `accuracy`.
-* `stdDev` \ The standard deviation of the vector. Only available for logical vectors.
-* `median` \ The median of the vector. Only available for logical vectors.
-* `histogram` \ The histogram of the vector. Only available for logical vectors.
 
 &nbsp;
 
