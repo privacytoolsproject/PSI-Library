@@ -1,33 +1,72 @@
-\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
-\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
-\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+\documentclass[11pt, oneside]{article}    % use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                        % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                        % ... or a4paper or a5paper or ...
 %\geometry{landscape}                		% Activate for rotated page geometry
 %\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
-\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
-								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{graphicx}                % Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+% TeX will automatically convert eps --> pdf in pdflatex
 \usepackage{amsmath, amsthm, amssymb}
 \usepackage{macros}
 
 \begin{document}
 
-\begin{definition}
-The sample mean of database $X$ of size $n$ is 
-$$\bar{X} = \frac{1}{n} \sum_{i=1}^n x_i $$
-\end{definition}
+    \begin{definition}
+        The sample mean of database $X$ of size $n$ is
+        $$\bar{X} = \frac{1}{n} \sum_{i=1}^n x_i $$
+    \end{definition}
 
-\begin{theorem}
-Say database $X$ has size $n$ and is bounded above by $M$ and bounded below by $m$. Then $\bar{X}$ has sensitivity bounded above by 
-$$ \frac{M-m}{n}.$$
-\end{theorem}
+    \begin{theorem}
+        Say database $X$ has size $n$ and is bounded above by $M$ and bounded below by $m$. Using the distance where two databases differ by the edit of one record, $\bar{X}$ has sensitivity bounded above by
+        $$ \frac{M-m}{n}.$$
+    \end{theorem}
 
-\begin{proof}
-Say $X$ and $X'$ are neighboring databases which differ at data-point $x_j$. Then
-\begin{align*}
-\Delta{\bar{X}} &= \max_{X,X'} \left\vert \bar{X} - \bar{X}' \right\vert \\
-	&=  \max_{X,X'} \frac{1}{n} \left\vert \left(\sum_{\{ i \in [n] \vert i \ne j\}} x_i\right) + x_j  - \left(\sum_{\{ i \in [n] \vert i \ne j\}} x_i'\right) + x_j'  \right\vert \\
-	&= \max_{X,X'} \frac{1}{n} \left\vert x_j - x_j' \right\vert \\
-	&\le \frac{M-m}{n}.
-\end{align*}
-\end{proof}
+    \begin{proof}
+        Say $X$ and $X'$ are neighboring databases which differ at data-point $x_j$. Then
+        \begin{align*}
+            \Delta{\bar{X}} &= \max_{X,X'} \left\vert \bar{X} - \bar{X}' \right\vert \\
+            &=  \max_{X,X'} \frac{1}{n} \left\vert \left(\sum_{\{ i \in [n] \vert i \ne j\}} x_i\right) + x_j - \left(\sum_{\{ i \in [n] \vert i \ne j\}} x_i'\right) + x_j'  \right\vert \\
+            &= \max_{X,X'} \frac{1}{n} \left\vert x_j - x_j' \right\vert \\
+            &\le \frac{M-m}{n}.
+        \end{align*}
+    \end{proof}
+
+    \begin{theorem}
+        Say database $X$ has size $n$ and is bounded above by $M$ and bounded below by $m$.
+        Using the distance where two databases differ by the addition or removal of one record, $\bar{X}$ has sensitivity bounded above by
+        $$ \frac{M-m}{n - 1}.$$
+    \end{theorem}
+
+    \begin{proof}
+		Say $X$ and $X'$ are neighboring databases where $X' = X \cup \{y\}$.
+
+        \begin{align*}
+            \Delta{\bar{X}} &= \max_{X,X'} \left\vert \bar{X} - \bar{X}' \right\vert \\
+            &=  \max_{X,X'} \left\vert \frac{1}{n} \sum^{n}_{i=1} x_i - \frac{1}{n + 1} \left(\sum^{n}_{i=1} x_i + y\right)  \right\vert \\
+            &=  \max_{X,X'} \left\vert \left(\frac{1}{n} \sum^{n}_{i=1} x_i - \frac{1}{n + 1} \sum^{n}_{i=1} x_i \right) - \frac{y}{n + 1}  \right\vert \\
+            &=  \max_{X,X'} \left\vert \frac{1}{(n + 1)n} \sum^{n}_{i=1} x_i - \frac{y}{n + 1}  \right\vert \\
+            &=  \frac{1}{n + 1} \max_{X,X'} \left\vert \frac{1}{n=1} \sum^{n}_{i=1} x_i - y  \right\vert \\
+            &=  \frac{1}{n + 1} \max_{X,X'} \left\vert \bar{X} - y  \right\vert \\
+            &\le \frac{M-m}{n + 1}.
+        \end{align*}
+
+        Say $X$ and $X'$ are neighboring databases where $y \in X$ and $X' = X \setminus \{y\}$.
+
+        \begin{align*}
+            \Delta{\bar{X}} &= \max_{X,X'} \left\vert \bar{X} - \bar{X}' \right\vert \\
+            &=  \max_{X,X'} \left\vert \frac{1}{n} \sum^{n}_{i=1} x_i - \frac{1}{n - 1} \left(\sum^{n}_{i=1} x_i - y\right)  \right\vert \\
+            &=  \max_{X,X'} \left\vert \left(\frac{1}{n} \sum^{n}_{i=1} x_i - \frac{1}{n - 1} \sum^{n}_{i=1} x_i \right) + \frac{y}{n - 1}  \right\vert \\
+            &=  \max_{X,X'} \left\vert \frac{-1}{(n - 1)n} \sum^{n}_{i=1} x_i + \frac{y}{n - 1}  \right\vert \\
+            &=  \frac{1}{n - 1} \max_{X,X'} \left\vert y - \frac{1}{n} \sum^{n}_{i=1} x_i  \right\vert \\
+            &=  \frac{1}{n - 1} \max_{X,X'} \left\vert y - \bar{X}  \right\vert \\
+            &\le \frac{M-m}{n - 1}.
+        \end{align*}
+
+        Say $X$ and $X'$ are neighboring databases that differ by the addition or removal of one record.
+        \begin{align*}
+            \Delta{\bar{X}} &\le \max \left( \frac{M - m}{n - 1}, \frac{M - m}{n + 1} \right) \\
+            &= \frac{M - m}{n - 1} \\
+        \end{align*}
+
+    \end{proof}
 
 \end{document}  
