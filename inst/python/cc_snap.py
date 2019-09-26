@@ -415,7 +415,7 @@ class Snapping_Mechanism:
 
         inner_result_rounded = self._get_closest_multiple_of_Lambda(inner_result, m)
         private_estimate = self._clamp(self.sensitivity * inner_result_rounded, self.B) # put private estimate back on original scale
-        # snapped_noise = private_estimate - self.mechanism_input
+        snapped_noise = private_estimate - self.mechanism_input
 
         # # calculate extra quantities needed for accuracy guarantee
         # # see snapping_implementation_notes.pdf for explanation
@@ -433,4 +433,4 @@ class Snapping_Mechanism:
         #                               alpha = 0.05)
 
 
-        return(private_estimate)
+        return(snapped_noise)
