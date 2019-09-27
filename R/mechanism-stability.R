@@ -99,7 +99,7 @@ mechanismStability$methods(
         release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
         
         # calculate the accuracy threshold, below which histogram buckets should be removed
-        accuracyThreshold <- 1+2*log(2/delta)/epsilon
+        accuracyThreshold <- 1+2*log(2/.self$delta)/.self$epsilon
         # remove buckets below the threshold
         release <- release[release > accuracyThreshold]
         

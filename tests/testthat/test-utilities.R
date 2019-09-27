@@ -20,8 +20,10 @@ test_that('checkRange is as expected', {
   
   expect_equal(checkRange(rng1, "numeric"),rng1)
   expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
-  expect_equal(checkRange(rng2, "numeric"), c(0,2))
   expect_error(checkRange(rng3, "numeric"),"range argument in error: requires upper and lower values as vector of length 2.")
+  # make sure that after the warning is thrown for a range argument is too long, the correct value is returned
+  rangeTest <- expect_warning(checkRange(rng2, "numeric"),"range argument supplied has more than two values.  Will proceed using min and max values as range.")
+  expect_equal(rangeTest, c(0,2))
 })
 
 test_that('censorData is as expected', {
@@ -121,4 +123,31 @@ test_that('fillMissing as expected', {
   dfImputed <- fillMissing(x=df, varType='numeric', imputeRng=impRng)
   
   expect_equal(sum(is.na(dfImputed)), 0)
+})
+
+
+# testing checkDelta() utility function
+test_that('testing checkDelta() function', {
+    expect_warning(checkDelta('mechanismLaplace', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+
+    delta2 <- checkDelta('mechanismLaplace')
+    expect_equal(delta2, 0)
+
+    delta3 <- checkDelta('mechanismExponential')
+    expect_equal(delta3, 0)
+
+    delta4 <- checkDelta('mechanismStability')
+    expect_equal(delta4, 2^-30)
+
+    delta5 <- checkDelta('mechanismGaussian')
+    expect_equal(delta5, 2^-30)
+
+    expect_warning(delta6 <- checkDelta('mechanismExponential', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+    expect_equal(delta6, 0)
+
+    delta7 <- checkDelta('mechanismStability', 10^-10)
+    expect_equal(delta7, 10^-10)
+
+    delta8 <- checkDelta('mechanismGaussian', 2^-15)
+    expect_equal(delta8, 2^-15)
 })

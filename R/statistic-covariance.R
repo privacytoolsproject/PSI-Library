@@ -120,13 +120,13 @@ dpCovariance <- setRefClass(
 
 dpCovariance$methods(
   initialize = function(mechanism, varType, n, epsilon, columns, rng=NULL, imputeRng=NULL, 
-                        intercept=FALSE, formula=NULL, delta=1e-5) {
+                        intercept=FALSE, formula=NULL, delta=NULL) {
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism
     .self$varType <- varType
     .self$n <- checkNValidity(n)
     .self$epsilon <- epsilon
-    .self$delta <- delta
+    .self$delta <- checkDelta(.self$mechanism, delta)
     .self$rng <- rng
     .self$sens <- covarianceSensitivity(n, rng, intercept)
     
@@ -158,6 +158,7 @@ dpCovariance$methods(
     
     out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
+    out$delta <- .self$delta
     if (!is.null(formula)) {
       out$linearRegression <- covariancePostLinearRegression(out$release, n, intercept, formula)
     }

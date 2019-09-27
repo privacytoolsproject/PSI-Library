@@ -151,6 +151,45 @@ checkEpsilon <- function(epsilon) {
 }
 
 
+#' Check delta parameter
+#' 
+#' This method is to send the user a warning message if they entered a delta value
+#' that will not be used.
+#' 
+#' If the mechanism is NOT a mechanism that uses a delta value and the user entered a delta value, 
+#' send a warning message saying the delta value with not be used and set the delta 
+#' value to 0. If a mechanism that uses a delta value is being used and the user entered a 
+#' delta value, set it as the delta value (the value of delta will be checked in the 
+#' mechanism). If a mechanism that uses a delta value is being used and the user did 
+#' not enter a delta value, set the delta to the default value (2^-30).
+#' 
+#' @param mechanism The mechanism chosen by determineMechanism
+#' @param delta The delta value entered by the user, may be NULL
+#' 
+#' @return The value that will be used as the delta value for the statistic
+
+checkDelta <- function(mechanism, delta=NULL) {
+    # If a mechanism that uses a delta value is NOT being used, set delta to 0.
+    # If a mechanism that uses a delta value is being used, return the entered value.
+    # If the user did not enter a value, return the default value.
+    # Throw an error if the user entered a value that will not be used.
+    if (!(mechanism %in% c('mechanismStability', 'mechanismGaussian'))) {
+        if (!is.null(delta)) {
+            warning('A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+        }
+        return(0)
+    } else {
+        # if the stability or gaussian mechanism is being used, return the delta value
+        if (is.null(delta)) {
+            # default delta value
+            return(2^-30)
+        } else {
+            return(delta)
+        }
+    }
+}
+
+
 #' Censoring data
 #' 
 #' For numeric types, checks if x is in rng = (min, max) and censors values to 
