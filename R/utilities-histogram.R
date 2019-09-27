@@ -9,7 +9,7 @@
 #' Where \eqn{\alpha} is the statistical significance level, \eqn{a} is the accuracy,
 #' and \eqn{Y} is a random  variable indicating the difference between the differentially 
 #' private noisy output and the true value. This equation is saying that with probability 
-#' \eqn{1-\alpha}, the count of a hisotgram bin will be within \eqn{a} of the true count. 
+#' \eqn{1-\alpha}, the count of a histogram bin will be within \eqn{a} of the true count. 
 #' 
 #' The equation for \eqn{Y} is:
 #' \deqn{Y = |X - \mu|}

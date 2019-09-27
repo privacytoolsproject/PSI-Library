@@ -41,6 +41,8 @@ Collate:
     'utilities-covariance.R'
     'utilities-data-validation.R'
     'utilities-histogram.R'
+    'utilities-input-validation.R'
+    'utilities-laplace.R'
     'utilities-mean.R'
     'utilities-noise-generation.R'
     'utilities-objective.R'

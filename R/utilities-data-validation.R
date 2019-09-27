@@ -189,7 +189,6 @@ checkDelta <- function(mechanism, delta=NULL) {
     }
 }
 
-
 #' Censoring data
 #' 
 #' For numeric types, checks if x is in rng = (min, max) and censors values to 
@@ -212,7 +211,7 @@ checkDelta <- function(mechanism, delta=NULL) {
 #' censorData(x=c('a', 'b', 'c', 'd'), varType='character', levels=c('a', 'b', 'c'))
 #' @rdname censorData
 #' @export
-censorData <- function(x, varType, rng=NULL, levels=NULL) {
+censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
     if (varType %in% c('character', 'factor')) {
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
@@ -225,12 +224,12 @@ censorData <- function(x, varType, rng=NULL, levels=NULL) {
         }
         if (NCOL(x) > 1) {
             for (j in 1:ncol(x)) {
-                rng[j, ] <- checkRange(rng[j, ], varType)
+                rng[j, ] <- checkRange(rng[j, ], varType, rngFormat)
                 x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
                 x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
             }
         } else {
-            rng <- checkRange(rng, varType)
+            rng <- checkRange(rng, varType, rngFormat)
             x[x < rng[1]] <- rng[1]
             x[x > rng[2]] <- rng[2]
         }
@@ -239,25 +238,7 @@ censorData <- function(x, varType, rng=NULL, levels=NULL) {
 }
 
 
-#' Checking variable types
-#' 
-#' Verifies that the variable is an element in the set of acceptable types.
-#' 
-#' @param type A character specifying the type of the variable.
-#' @param inTypes A vector of acceptable types of variables.
-#' 
-#' @return The original character string indicating the variable type.
-#' @examples 
-#' 
-#' checkVariableType(type='Numeric', inTypes=c('Numeric', 'Factor'))
-#' @rdname checkVariableType
-#' @export
-checkVariableType <- function(type, inTypes) { 
-    if (!(type %in% inTypes)) {
-        stop(paste('Variable type', type, 'should be one of', paste(inTypes, collapse = ', ')))
-    } 
-    return(type)
-}
+
 
 
 #' Logical variable check
@@ -293,7 +274,6 @@ makeLogical <- function(x) {
     }
     return(x)
 }
-
 
 #' Scaling helper function for fillMissing
 #' 
@@ -360,7 +340,6 @@ fillMissing1D <- function(x, varType, lower=NULL, upper=NULL, categories=NULL) {
     x[naIndices] <- scaledVals #assign to NAs in input array
     return(x)
 }
-
 
 #' Helper function for fillMissing. Fills missing values column-wise for matrix.
 #'
