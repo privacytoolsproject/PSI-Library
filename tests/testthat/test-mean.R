@@ -1,21 +1,25 @@
 library(PSIlence)
 context("mean")
 
+test_that('sensitivity calculation returns correct values and behaves as expectedly',{
+  expect_equal(meanSensitivity(c(0,10),5),2)
+})
+
 # test accuracy, epsilon, and sensitivity calculations 
-test_that('variancee getAccuracy and getEpsilon return approximately correct values for laplace mechanism', {
+test_that('mean getAccuracy and getEpsilon return approximately correct values for laplace mechanism', {
     # test sensitivity and accuracy
     nTest <- 10000
     epsilonTest <- 0.1
     
     dpMeanTest <- dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(0,100))
     dpMeanTest$release(PUMS5extract10000)
-    
-    sens <- 100 / nTest
+
+
     acc <- round(dpMeanTest$result$accuracy, digits = 1)
 
-    expect_equal(sens, 0.01)
+    expect_equal(dpMeanTest$sens, 0.01)
     expect_equal(acc, 0.3)
-    
+
     # test accuracy
     accuracyTest <- 0.3
 
