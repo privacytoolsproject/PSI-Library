@@ -6,12 +6,10 @@
 \alias{dpVariance}
 \title{Differentially private variance}
 \arguments{
-\item{mechanism}{Character, the privacy mechanism.}
-
 \item{varType}{Character, the R variable type. One of \code{c('numeric',
 'integer', 'logical')}.}
 
-\item{Variable}{Character, variable name.}
+\item{variable}{Character, variable name of the variable that you wish to find variance of.}
 
 \item{n}{Integer, number of observations}
 
