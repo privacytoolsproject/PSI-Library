@@ -351,3 +351,32 @@ test_that('errors thrown for incorrect values of nBins', {
     nBinsTest <- 1
     expect_error(dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, nBins=nBinsTest, rng=c(0,16)), 'number of bins must be at least 2')
 })
+
+# make sure delta value is correct, or correct error is thrown
+test_that('check delta', {
+    data(PUMS5extract10000, package = "PSIlence")
+    
+    granularityTest <- 1000
+    nTest <- 10000
+    epsilonTest <- 0.1
+    
+    # check that delta is set to 0 for histogram that uses laplace mechanism
+    dpHist <- dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, granularity=granularityTest, rng=c(0,16))
+    dpHist$release(PUMS5extract10000)
+    expect_equal(dpHist$result$delta, 0)
+    
+    # check that warning is thrown when user entere delta value for histogram that uses laplace mechanism
+    expect_warning(dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, granularity=granularityTest, rng=c(0,16), delta=10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+    
+    # check that default value of delta set when stability mechanism used and delta value not entered
+    nBinsTest <- 16
+    
+    dpHist2 <- dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, nBins=nBinsTest)
+    dpHist2$release(PUMS5extract10000)
+    expect_equal(dpHist2$result$delta, 2^-30)
+    
+    # check that the entered delta value is set as delta when stbaility mechanism used and delta value is entered
+    dpHist3 <- dpHistogram$new(varType='numeric', variable="educ", n=nTest, epsilon=epsilonTest, nBins=nBinsTest, delta=10^-10)
+    dpHist3$release(PUMS5extract10000)
+    expect_equal(dpHist3$result$delta, 10^-10)
+})

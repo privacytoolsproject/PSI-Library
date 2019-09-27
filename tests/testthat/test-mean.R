@@ -9,13 +9,13 @@ test_that('getAccuracy and getEpsilon return approximately correct values for la
     
     dpMeanTest <- dpMean$new(mechanism='mechanismLaplace', variable='age', varType='numeric', n=nTest, epsilon=epsilonTest, rng=c(0,100))
     dpMeanTest$release(PUMS5extract10000)
-    
-    sens <- 100 / nTest
+
+
     acc <- round(dpMeanTest$result$accuracy, digits = 1)
 
-    expect_equal(sens, 0.01)
+    expect_equal(dpMeanTest$sens, 0.01)
     expect_equal(acc, 0.3)
-    
+
     # test accuracy
     accuracyTest <- 0.3
 

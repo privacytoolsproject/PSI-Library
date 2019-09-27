@@ -98,16 +98,29 @@ test_that('fillMissing as expected', {
   expect_equal(sum(is.na(dfImputed)), 0)
 })
 
-test_that('censorData is as expected', {
-  residence <- factor(c("WA", "OR", "OR", "OR", "WA","CA"))
-  chars = c('a', 'b', 'c', 'c', 'd')
-  nums = 1:10
-  
-  residenceOut = censorData(x=residence, varType='factor', levels=c("OR"))
-  charsOut = censorData(x=chars, varType='character', levels=c('a', 'b', 'c'))
-  numsOut = censorData(x=nums, varType='integer', rng=c(2.5, 7), rngFormat='vector')
-  
-  expect_equal(residenceOut, factor(c(NA,"OR","OR","OR",NA,NA)))
-  expect_equal(charsOut, factor(c('a','b','c','c',NA)))
-  expect_equal(numsOut, c(2.5,2.5,3.0,4.0,5.0,6.0,7.0,7.0,7.0,7.0))
+
+# testing checkDelta() utility function
+test_that('testing checkDelta() function', {
+    expect_warning(checkDelta('mechanismLaplace', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+
+    delta2 <- checkDelta('mechanismLaplace')
+    expect_equal(delta2, 0)
+
+    delta3 <- checkDelta('mechanismExponential')
+    expect_equal(delta3, 0)
+
+    delta4 <- checkDelta('mechanismStability')
+    expect_equal(delta4, 2^-30)
+
+    delta5 <- checkDelta('mechanismGaussian')
+    expect_equal(delta5, 2^-30)
+
+    expect_warning(delta6 <- checkDelta('mechanismExponential', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+    expect_equal(delta6, 0)
+
+    delta7 <- checkDelta('mechanismStability', 10^-10)
+    expect_equal(delta7, 10^-10)
+
+    delta8 <- checkDelta('mechanismGaussian', 2^-15)
+    expect_equal(delta8, 2^-15)
 })
