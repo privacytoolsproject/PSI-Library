@@ -24,11 +24,13 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
 #'    Should be of length one and should be between zero and one.
 #' @param alpha A numeric vector specifying the statistical significance level.
+#' @param B The snapping bound for the snapping mechanism.
+#' @param eta An upper bound on the snapping mechanism precision.
 #'
 #' @return Accuracy guarantee for statistic release given epsilon.
 
-snapping.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
-    accuracy <- (1 + log(1 / alpha)) * (sensitivity / epsilon)
+snapping.getAccuracy <- function(sensitivity, epsilon, alpha=0.05, B, eta) {
+    accuracy <- ( (1+12*B*eta) / (epsilon-2*eta) ) * (1 + log(1 / alpha)) * (sensitivity)
     return(accuracy)
 }
 
@@ -58,11 +60,13 @@ laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
 #' @param accuracy A numeric vector representing the accuracy needed to
 #'    guarantee (percent).
 #' @param alpha A numeric vector specifying the statistical significance level.
+#' @param B The snapping bound for the snapping mechanism.
+#' @param eta An upper bound on the snapping mechanism precision.
 #'
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 
-snapping.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
-    epsilon <- (1 + log(1 / alpha)) * (sensitivity / accuracy)
+snapping.getEpsilon <- function(sensitivity, accuracy, alpha=0.05, B, eta) {
+    epsilon <- ( (1+12*B*eta) / (accuracy) ) * (1 + log(1 / alpha)) * (sensitivity) + 2*eta
     return(epsilon)
 }
 
