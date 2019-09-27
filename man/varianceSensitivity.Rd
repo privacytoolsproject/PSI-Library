@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic-variance.R
 \name{varianceSensitivity}
 \alias{varianceSensitivity}
-\title{Sensitivity of population variance}
+\title{Sensitivity of sample variance}
 \usage{
 varianceSensitivity(n, rng)
 }
@@ -12,7 +12,7 @@ varianceSensitivity(n, rng)
 \item{rng}{Numeric vector of length two; first entry is minimal bound on the database entries, second is maximal bound on the database entries.}
 }
 \value{
-Numeric vector of length one; a maximal bound on the sensitivity of the population variance.
+Numeric vector of length one; a maximal bound on the sensitivity of the sample variance.
 }
 \description{
 For a detailed derivation of the sensitivity, see /extra_docs/variance_sensitivity.pdf.

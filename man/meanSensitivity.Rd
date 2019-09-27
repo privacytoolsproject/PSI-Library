@@ -15,7 +15,7 @@ meanSensitivity(rng, n)
 Numeric vector of length one; a maximal bound on the sensitivity of the population variance.
 }
 \description{
-For a detailed derivation of the sensitivity, see /extra_docs/mean_sensitivity.pdf
+For a detailed derivation of the sensitivity, see /extra_docs/sensitivities/mean_sensitivity.pdf
 }
 \examples{
 meanSensitivity(c(0,10),5) #should return 2
