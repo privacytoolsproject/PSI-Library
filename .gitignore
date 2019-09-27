@@ -7,3 +7,6 @@ vignettes/*.pdf
 *.Rproj
 .Rbuildignore
 *.DS_Store
+*.aux
+*.log
+*.synctex.gz

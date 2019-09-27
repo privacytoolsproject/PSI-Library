@@ -173,7 +173,6 @@ dpCovariance$methods(
     
     out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
-    out$delta <- .self$delta
     if (!is.null(formula)) {
       out$linearRegression <- covariancePostLinearRegression(out$release, n, intercept, formula)
     }

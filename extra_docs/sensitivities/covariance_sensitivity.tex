@@ -13,9 +13,9 @@
 \begin{document}
 
 \begin{definition}
-Let $X$ and $Y$ be two column vectors of length n. Then the sample covariance between $X$ and $Y$, $\cov[X,Y]$, is defined to be 
-$$ \cov[X,Y] = \frac{1}{n-1} \sum_{i=1}^n (x_i - \mu_X)(y_i - \mu_Y),$$
-where $\mu_X$ is the mean of $X$ and $\mu_Y$ is the mean of $Y$.
+Let $A$ and $B$ be two column vectors of length n. Then the sample covariance between $A$ and $B$, $\cov[A,B]$, is defined to be 
+$$ \cov[A,B] = \frac{1}{n-1} \sum_{i=1}^n (a_i - \mu_A)(B_i - \mu_B),$$
+where $\mu_A$ is the mean of $A$ and $\mu_B$ is the mean of $B$.
 \end{definition}
 
 \begin{definition}
@@ -154,7 +154,7 @@ $$\frac{2(n-1)}{n}(M_i - m_i)(M_j - m_j)$$
 \end{theorem}
 
 \begin{proof}
-Let $X$ be defined as above and let $X'$ be defined as 
+Let $X'$ be defined as 
 $$ X' = 
 \begin{bmatrix}
 X_1' & \cdots & X_m' 
@@ -163,7 +163,10 @@ $$
 where
 $$ X_i' = X_i \cup \{y_i\}.$$
 I.e., each row $i$ has a single additional observation $y_i$ in $X'$ that it does not have in $X$.
-Let $Y$ be the vector of all these additional observations. Then,
+
+Let $X''$ be defined in the same way as $X'$, except with a different point $\{y_i'\}$ added to each row of X. This proof, which is essentially an extension of the proof of variance sensitivity, will use the definition of ``neighboring databases" in which databases are neighboring if they have a single point changed. I.e., $X'$ and $X''$ are neighboring databases. 
+
+It is first useful to determine how $f(X')$ compares to $f(X)$. Let $Y$ be the vector of all the $\{y_i\}$ observations in $X'$. Then,
 $$ F(X') =\sum (X_i - \mu')(X_i - \mu')^T + (Y-\mu')(Y-\mu')^T.$$
 
 The first of the sums inside this expression may be expanded to give
@@ -216,7 +219,7 @@ f_{ij}(X') &\le f_{ij}(X) + \frac{n}{(n+1)^2} (M_i-m_i)(M_j-m_j) + \frac{n^2}{(n
 &= f_{ij}(X) + \frac{n}{n+1}(M_i - m_i)(M_j - m_j).
 \end{align}
 
-Since we'd really like to consider the sensitivity of $X'$, it makes sense to redefine $n$ based on the size of $X'$ rather than of $X$, i.e. redefine $n$ to be $n+1$. Then,
+Since we'd really like to consider the sensitivity of $f(X')$, it makes sense to redefine $n$ based on the size of $X'$ rather than of $X$, i.e. redefine $n$ to be $n+1$. Then,
 
 \begin{equation}
 f_{ij}(X') = f_{ij}(X) + \frac{n-1}{n}(M_i - m_i)(M_j - m_j).
