@@ -225,3 +225,29 @@ test_that("isVector runs correctly", {
   expect_false(isVector(list(1,2)))
   expect_false(isVector(matrix(c(1,2,3,4))))
 })
+
+# testing checkDelta() utility function
+test_that('testing checkDelta() function', {
+  expect_warning(checkDelta('mechanismLaplace', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+  
+  delta2 <- checkDelta('mechanismLaplace')
+  expect_equal(delta2, 0)
+  
+  delta3 <- checkDelta('mechanismExponential')
+  expect_equal(delta3, 0)
+  
+  delta4 <- checkDelta('mechanismStability')
+  expect_equal(delta4, 2^-30)
+  
+  delta5 <- checkDelta('mechanismGaussian')
+  expect_equal(delta5, 2^-30)
+  
+  expect_warning(delta6 <- checkDelta('mechanismExponential', 10^-5), 'A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+  expect_equal(delta6, 0)
+  
+  delta7 <- checkDelta('mechanismStability', 10^-10)
+  expect_equal(delta7, 10^-10)
+  
+  delta8 <- checkDelta('mechanismGaussian', 2^-15)
+  expect_equal(delta8, 2^-15)
+})
