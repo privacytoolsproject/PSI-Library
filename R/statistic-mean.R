@@ -166,7 +166,9 @@ dpMean$methods(
             if (mechanism == 'mechanismLaplace'){
                 .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
             } else if (mechanism == 'mechanismSnapping'){
-                .self$epsilon <- snapping.getEpsilon(.self$sens, .self$accuracy, alpha)
+                B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
+                eta <- 2^-52
+                .self$epsilon <- snapping.getEpsilon(.self$sens, .self$accuracy, alpha, B, eta)
             }
         } else {
             checkepsilon(epsilon)
@@ -174,7 +176,9 @@ dpMean$methods(
             if (mechanism == 'mechanismLaplace'){
                 .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
             } else if (mechanism == 'mechanismSnapping'){
-                .self$accuracy <- snapping.getAccuracy(.self$sens, .self$epsilon, alpha)
+                B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
+                eta <- 2^-52
+                .self$accuracy <- snapping.getAccuracy(.self$sens, .self$epsilon, alpha, B, eta)
             }
         }
         if (is.null(impute.rng)) {
