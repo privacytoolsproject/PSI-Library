@@ -1,3 +1,11 @@
+tree <- function(x, depth){
+  i <- 0
+  while(i<=depth){
+    print(funHist(x, varType='numeric', bins=2^depth))
+    i <- i+1
+  }
+} 
+
 #' Accuracy for a differentially private binary tree
 #'
 #' @param epsilon Numeric differential privacy parameter
@@ -7,12 +15,12 @@
 #' @return Accuracy guarantee for the tree given epsilon
 #' @export treeGetAccuracy
 #' @rdname treeGetAccuracy
-
-treeGetAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
-    universeSize <- diff(rng) / gran + 1
-    accuracy <- (2 * sqrt(2) / epsilon) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
-    return(accuracy)
-}
+ 
+# treeGetAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
+#     universeSize <- diff(rng) / gran + 1
+#     accuracy <- (2 * sqrt(2) / epsilon) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
+#     return(accuracy)
+# }
 
 
 #' Epsilon for a differentially private binary tree
@@ -25,11 +33,11 @@ treeGetAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
 #' @export treeGetParameters
 #' @rdname treeGetParameters
 
-treeGetParameters <- function(accuracy, rng, gran, alpha=0.05) {
-    universeSize <- diff(rng) / gran + 1
-    epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
-    return(epsilon)
-}
+# treeGetParameters <- function(accuracy, rng, gran, alpha=0.05) {
+#     universeSize <- diff(rng) / gran + 1
+#     epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
+#     return(epsilon)
+# }
 
 
 #' Function to truncate negative noisy node counts at zero
@@ -37,11 +45,11 @@ treeGetParameters <- function(accuracy, rng, gran, alpha=0.05) {
 #' @param release The differentially private noisy binary tree
 #' @return Noisy binary tree truncated at zero
 
-treePostFormatRelease <- function(release) {
-    release <- round(release)
-    release[release < 0] <- 0
-    return(release)
-}
+# treePostFormatRelease <- function(release) {
+#     release <- round(release)
+#     release[release < 0] <- 0
+#     return(release)
+# }
 
 
 #' Function to derive CDF from efficient terminal node counts
@@ -166,11 +174,14 @@ treePostEfficient <- function(release, treeData, n, variance, terminalIndex) {
 
 dpTree <- setRefClass(
     Class = 'dpTree',
-    contains = 'mechanismLaplace'
+    contains = 'mechanismLaplace',
+    fields = list(
+      globalEps = 'numeric'
+    )
+    
 )
 
 dpTree$methods(
-    # DO NOT USE
     initialize = function(mechanism, varType, variable, n, rng=NULL, gran, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
@@ -181,7 +192,7 @@ dpTree$methods(
         .self$rng <- checkRange(rng) # CHANGE
         .self$gran <- checkN(gran, emptyOkay=TRUE) #should be positive whole number
         .self$alpha <- checkNumeric(alpha)
-        .self$sens <- 2 * log2(diff(rng) / gran + 1)
+        #.self$sens <- 2 * log2(diff(rng) / gran + 1)
         
         checkVariableType(variable, "character")
         
@@ -206,33 +217,37 @@ dpTree$methods(
         variance <- 2 * sens / epsilon
         universeSize <- floor(diff(rng) / gran + 1)
         depth <- ceiling(log2(universeSize))
-        terminalIndex <- seq(2^(depth - 1), 2^depth - 1)
-        .self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
-                                                   variance=variance, universeSize=universeSize, 
-                                                   depth=depth, terminalIndex=terminalIndex, self=.self)
+        # for (i in 1:depth){
+        #   export(mechanism)$evaluate(funHist, x, sens, (function(out) return(out))) #don't bother with post-processing for now
+        # }
+        #terminalIndex <- seq(2^(depth - 1), 2^depth - 1)
+        #.self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
+        #                                           variance=variance, universeSize=universeSize, 
+        #                                           depth=depth, terminalIndex=terminalIndex, self=.self)
 })
 
-dpTree$methods(
-    treeFun = function(x, universeSize, depth) {
-        tree <- binaryTree(x, n, rng, gran, universeSize, depth)
-        .self$treeData <- tree[, which(names(tree) != 'count')]
-        return(tree$count)
-})
+#dpTree$methods(
+    #treeFun = function(x, universeSize, depth) {
+        #tree <- binaryTree(x, n, rng, gran, universeSize, depth)
+        #.self$treeData <- tree[, which(names(tree) != 'count')]
+        #return(tree$count)
+        
+#})
 
 dpTree$methods(
     postProcess = function(out, ...) {
-        out$variable <- variable
-        out$release <- treePostFormatRelease(out$release)
-        ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
-        out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))
-        ellipsisVals <- getFuncArgs(list(...), treePostCDF)
-        out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))
-        out$mean <- treePostMean(out$cdf, rng)
-        out$median <- treePostMedian(out$cdf)
-        out$accuracy <- .self$accuracy
-        out$epsilon <- .self$epsilon
-        if (!is.null(percentiles)) {
-            out$percentiles <- treePostPercentiles(out$cdf, percentiles)
-        }
-        return(out)
+        # out$variable <- variable
+        # out$release <- treePostFormatRelease(out$release)
+        # ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
+        # out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))
+        # ellipsisVals <- getFuncArgs(list(...), treePostCDF)
+        # out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))
+        # out$mean <- treePostMean(out$cdf, rng)
+        # out$median <- treePostMedian(out$cdf)
+        # out$accuracy <- .self$accuracy
+        # out$epsilon <- .self$epsilon
+        # if (!is.null(percentiles)) {
+        #     out$percentiles <- treePostPercentiles(out$cdf, percentiles)
+        # }
+        # return(out)
 })
