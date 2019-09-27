@@ -13,16 +13,12 @@
 #' /extra_docs/sensitivities/covariance_sensitivity.pdf
 covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- sapply(rng, diff)
-    if (intercept) { diffs <- c(1, diffs) }
+    if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
-    c <- 2*(n-1)/n
+    const <- 2*(n-1)/n
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
-            if (i==1 && intercept){  #any covariance with intercept column will have sensitivity 0
-              s <- 0
-            } else{
-              s <- c * diffs[i] * diffs[j]
-            }
+            s <- const * diffs[i] * diffs[j]
             sensitivity <- append(sensitivity, s)
         }
     }
