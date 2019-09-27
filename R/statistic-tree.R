@@ -116,12 +116,12 @@ dpTree$methods(
           i <- i+1
         }
         #Note: postprocessing is called here instead of in the evaluate function
-        .self$result <- .self$postProcess(counts)
+        out <- list('release' = counts)
+        .self$result <- .self$postProcess(out)
 })
 
 dpTree$methods(
-    postProcess = function(counts, ...) {
-        out$counts <- counts
+    postProcess = function(out, counts) {
         out$epsilon <- .self$epsilon
         out$globalEps <- .self$globalEps
         out$accuracy <- .self$accuracy
