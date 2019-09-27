@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 Differentially Private Histogram with `dpHistogram`
 -----------------------------------------
 
-The `dpHistogram` class evaluates a privacy-preserving histogram of a vector of values. The class supports any vector type, meaning that it can handle the R types `numeric`, `integer`, `logical`, and `character`.
+The `dpHistogram` class evaluates a privacy-preserving histogram of a vector of values. The class supports any vector type, meaning that it can handle the R types `'numeric'`, `'integer'`, `'logical'`, and `'character'`.
 
 <!--
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
@@ -135,7 +135,7 @@ data(esoph)
 
 __Numeric Examples__
 
-To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
+To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type (`'numeric'`), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
 
 ```{r}
 # create the histogram object
@@ -175,7 +175,7 @@ Note: entering bins is completely optional and should only be done if you have p
 
 __Logical Examples__
 
-To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.) Note: you do not need to enter a range for a logial variable.
+To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to `'logical'`. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.) Note: you do not need to enter a range for a logial variable.
 
 ```{r}
 logicalHistogram <- dpHistogram$new(varType='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
@@ -197,7 +197,7 @@ For logical variables, it is never necessary to enter a vector of bins, you just
 
 __Character (or Categorical) Examples__
 
-To calculate the histogram of a categorical (or 'character') variable, input a character variable name into `variable` and update `varType` to 'character'.
+To calculate the histogram of a categorical (or `'character'`) variable, input a character variable name into `variable` and update `varType` to `'character'`.
 
 ```{r}
 characterHistogram <- dpHistogram(varType='character', variable='tobgp', n=88, epsilon=1.5, delta=10^-4)
