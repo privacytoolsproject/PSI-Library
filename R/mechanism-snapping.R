@@ -55,7 +55,7 @@ mechanismSnapping$methods(
         stop(paste0('The Snapping Mechanism does not support the ', fun, ' function.'))
     }
     n = length(true.val)
-    release <- snappingNoise(true.val, n, sens, .self$epsilon, B)
+    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, B)
     out <- list('release' = release)
     out <- postFun(out, ...)
     return(out)
