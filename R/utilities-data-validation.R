@@ -1,3 +1,194 @@
+#' Error check imputation range for numeric or integer variables
+#' 
+#' Check that the entered imputation range is within the entered data range. If yes, return
+#' the entered imputation range, which will be used as the imputation range for the call
+#' to the utility function `fillMissing()`. If not, return the data range. 
+#' If the imputation range is NULL, default to the data range.
+#' 
+#' We check if the imputation range is within the data range because it is a privacy concern.
+#' If the imputation range is outside of the data range, NA values will be replaced with values 
+#' outside of the data range, which will show that there are NA values in the data or skew the 
+#' result when the differentially private estimate is released.
+#' 
+#' @param imputationRange The imputation range entered by the user
+#' @param rng The data range entered by the user
+#' @param varType The variable type for the histogram data
+#' 
+#' @return the imputation range that will be used for `fillMissing()`.
+
+checkImputationRange <- function(imputationRange, rng, varType) {
+    # if no imputation range was entered, return the data range.
+    # (Note: rng may be NULL, in which case stability mechanism will be used)
+    if (is.null(imputationRange)) {
+        return(rng)
+    }
+    
+    # for numeric and integer variables, the imputation range should be a 2-tuple
+    # with the minimum and maximum of the imputation range.
+    # if an imputation range was entered, check that it is
+    # within the data range. If it is not, clip it to be within the data range
+    if (varType %in% c('numeric', 'integer')) {
+        lowerBound <- NULL
+        upperBound <- NULL
+        
+        # if the imputation range lower bound is below the data range lower bound,
+        # clip the lower bound to the data range
+        if (imputationRange[1] < rng[1]) {
+            warning('Lower bound of imputation range is outside of the data range. Setting lower bound of the imputation range to the lower bound of the data range.')
+            lowerBound <- rng[1]
+        } else {
+            lowerBound <- imputationRange[1]
+        }
+        
+        # if the imputation range upper bound is above the data range upper bound,
+        # clip the upper bound to the data range
+        if (imputationRange[2] > rng[2]) {
+            warning('Upper bound of imputation range is outside of the data range. Setting upper bound of the imputation range to the upper bound of the data range.')
+            upperBound <- rng[2]
+        } else {
+            upperBound <- imputationRange[2]
+        }
+        
+        for (entry in imputationRange) {
+            if (!is.numeric(entry)) {
+                warning('Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
+                lowerBound <- rng[1]
+                upperBound <- rng[2]
+            }
+        }
+        
+        # return the (potentially clipped) imputation range
+        return(c(lowerBound,upperBound))
+        
+    } else {
+        # if the variable type is something other than numeric or integer,
+        # default to the data range
+        warning('Imputation range entered for variable that is not of numeric or integer type. Setting imputation range to data range.')
+        return(rng)
+    }
+}
+
+
+#' Check validity of n
+#' 
+#' n should always be a positive whole number, check the user's input
+#' 
+#' @param n the input n from te user
+#' 
+#' @return n, if n is a positive whole number
+
+checkNValidity <- function(n) {
+    if ((n > 0) & (n%%1 == 0)) {
+        return(n)
+    } else {
+        stop("n must be a positive whole number")
+    }
+}
+
+
+#' Range Parameter Check
+#' 
+#' Checks if a supplied range is an ordered pair. Coerces any vector of length 
+#'    two or greater into an ordered pair, and issues an error for
+#'    shorter vectors.
+#'    
+#' @param rng A numeric vector of length two, that ought to be an 
+#'    ordered pair.
+#' 
+#' @return An ordered pair.
+#' @examples
+#'
+#' checkRange(c(1,3))
+#' checkRange(1:3)
+#' \dontrun{checkRange(1)}
+#' @rdname checkRange
+#' @export
+checkRange <- function(rng, varType) {
+    if (NCOL(rng) > 1) {
+        for (i in 1:nrow(rng)) {
+            rng[i, ] <- sort(rng[i, ])
+        }
+    } else {
+        if (varType == 'logical') {
+            rng <- c(0,1)
+        } else if (length(rng) < 2) {
+            stop("range argument in error: requires upper and lower values as vector of length 2.")
+        } else if (length(rng) > 2) {
+            warning("range argument supplied has more than two values.  Will proceed using min and max values as range.")
+            rng <- c(min(rng), max(rng))
+        } else {
+            rng <- sort(rng)
+        }
+    }
+    return(rng)
+}
+
+
+#' Epsilon Parameter Check
+#' 
+#' Utility function for checking that epsilon is acceptably defined.
+#'
+#' @param epsilon A vector, that ought to be positive and of length one.
+#' 
+#' @return The supplied epsilon if acceptable, otherwise an error 
+#'    message interupts.
+#'
+#' @examples
+#' 
+#' checkEpsilon(0.1)
+#' \dontrun{checkEpsilon(-2)}
+#' \dontrun{checkEpsilon(c(0.1,0.5))}
+#' @rdname checkEpsilon
+#' @export
+checkEpsilon <- function(epsilon) {
+    if (epsilon <= 0) {
+        stop("Privacy parameter epsilon must be a value greater than zero.")
+    }
+    if (length(epsilon) > 1) {
+        stop(paste("Privacy parameter epsilon must be a single value, but is currently a vector of length", length(epsilon)))
+    }
+    return(epsilon)
+}
+
+
+#' Check delta parameter
+#' 
+#' This method is to send the user a warning message if they entered a delta value
+#' that will not be used.
+#' 
+#' If the mechanism is NOT a mechanism that uses a delta value and the user entered a delta value, 
+#' send a warning message saying the delta value with not be used and set the delta 
+#' value to 0. If a mechanism that uses a delta value is being used and the user entered a 
+#' delta value, set it as the delta value (the value of delta will be checked in the 
+#' mechanism). If a mechanism that uses a delta value is being used and the user did 
+#' not enter a delta value, set the delta to the default value (2^-30).
+#' 
+#' @param mechanism The mechanism chosen by determineMechanism
+#' @param delta The delta value entered by the user, may be NULL
+#' 
+#' @return The value that will be used as the delta value for the statistic
+
+checkDelta <- function(mechanism, delta=NULL) {
+    # If a mechanism that uses a delta value is NOT being used, set delta to 0.
+    # If a mechanism that uses a delta value is being used, return the entered value.
+    # If the user did not enter a value, return the default value.
+    # Throw an error if the user entered a value that will not be used.
+    if (!(mechanism %in% c('mechanismStability', 'mechanismGaussian'))) {
+        if (!is.null(delta)) {
+            warning('A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+        }
+        return(0)
+    } else {
+        # if the stability or gaussian mechanism is being used, return the delta value
+        if (is.null(delta)) {
+            # default delta value
+            return(2^-30)
+        } else {
+            return(delta)
+        }
+    }
+}
+
 #' Censoring data
 #' 
 #' For numeric types, checks if x is in rng = (min, max) and censors values to 
@@ -7,11 +198,15 @@
 #' @param x A vector of numeric or categorial values to censor.
 #' @param varType Character indicating the variable type of \code{x}.
 #'    Possible values include: numeric, logical, ...
-#' @param rng For numeric vectors, a vector (min, max) of the bounds of the 
-#'    range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 
-#'    (min, max) bounds.
+#' @param rng For x that is a numeric vector, a vector (min, max) of the bounds of the 
+#'    range. For input x that is a numeric matrices or dataframe with n columns, a list of 
+#'    (min, max) bounds of length n.
 #' @param levels For categorical types, a vector containing the levels to 
 #'    be returned.
+#' @param rngFormat For numeric types, a string describing the format of the range input. One of either
+#'    'vector' for x that is a numeric vector and rng that is a (min, max) tuple, or 'list' for x that
+#'    is a numeric matrix or dataframe with n columns and rng that is a list of (min, max) bounds of
+#'    length n.
 #' 
 #' @return Original vector with values outside the bounds censored to the bounds.
 #' @examples
@@ -21,33 +216,52 @@
 #' @rdname censorData
 #' @export
 censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
-    if (varType %in% c('character', 'factor')) {
+
+    if (varType %in% c('character', 'factor')){
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
         } else {
             x <- factor(x, levels=levels, exclude=NULL)
         }
-    } else {
-        if (is.null(rng)) {
-            stop('range `rng` is required for numeric types')
-        }
-        if (NCOL(x) > 1) {
-            for (j in 1:ncol(x)) {
-                rng[j, ] <- checkRange(rng[j, ], varType, rngFormat)
-                x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
-                x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
+    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical')) && sapply(x, is.numeric)) {
+        if (NCOL(x) > 1 && rngFormat=='list') {
+            checkRange(rng, varType, rngFormat, expectedLength=ncol(x)) 
+            for(i in 1:NCOL(x)){
+                x[,i] <- censorData1D(x[,i], rng[[i]])
             }
+        } else if (NCOL(x)==1 && rngFormat=="vector"){
+            checkRange(rng, varType, rngFormat)
+            x <- censorData1D(x,rng)
         } else {
-            rng <- checkRange(rng, varType, rngFormat)
-            x[x < rng[1]] <- rng[1]
-            x[x > rng[2]] <- rng[2]
+          stop("range Format (rngFormat) must be either 'list' or 'vector'. If range is a tuple of multiple ranges, it must be formatted as a list.")
         }
+    } else{
+      stop("Input data x and varType do not match.")
     }
     return(x)
 }
 
 
-
+#' Helper function to censor data
+#' 
+#' Takes as input a numeric vector x of length n and replaces any values in x greater than max with max,
+#' and any values less than min with min
+#'
+#' @param x Numeric vector of length n
+#' @param rng Range of values allowed in x, as a single (min, max) tuple
+#'
+#' @return numeric vector of length n equal to x except with any values in x larger than max replaced with max
+#'  and any values in x smaller than min replaced with min.
+#'
+#' @examples
+#' censorData1D(1:7, (2,5))    #returns c(2,2,3,4,5,5,5)
+#' censorData1D(c(1,9,7,3,0), (2,5))     #returns(c(2,5,5,3,2))
+#' 
+censorData1D <- function(x, rng){
+  x[x < rng[1]] <- rng[1]
+  x[x > rng[2]] <- rng[2]
+  return(x)
+}
 
 
 #' Logical variable check

@@ -89,7 +89,7 @@ dpHistogram$methods(
             .self$accuracy <- histogramGetAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
         }
         
-        # get the delta parameter (will be NULL unless stability mechanism is being used)
+        # get the delta parameter (will be 0 unless stability mechanism is being used)
         .self$delta <- checkDelta(.self$mechanism, delta)
         
         # set the range for data imputation (will be null if no range entered)
@@ -110,8 +110,9 @@ dpHistogram$methods(
     postProcess = function(out) {
         out$variable <- variable
         out$release <- normalizeReleaseAndConvertToDataFrame(out$release, n)
-        out$accuracy <- accuracy
-        out$epsilon <- epsilon
+        out$accuracy <- .self$accuracy
+        out$epsilon <- .self$epsilon
+        out$delta <- .self$delta
         out$mechanism <- mechanism
         if (mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
