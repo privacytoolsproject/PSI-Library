@@ -1,3 +1,10 @@
+#' Checks if input n has NULL or NA value.
+#' Errors if emptyOkay is FALSE.
+#'
+#' @param n Arbitrary input n
+#' @param emptyOkay Boolean. If FALSE, function will error if n is NULL or NA. If TRUE, no error is raised.
+#'
+#' @return n
 checkEmpty <- function(n, emptyOkay=FALSE){
   isEmpty <- is.null(n) || is.na(n)
   if (isEmpty && !emptyOkay){
@@ -8,6 +15,14 @@ checkEmpty <- function(n, emptyOkay=FALSE){
   }
 }
 
+#' Check if input n is numeric.
+#' Generally errors if n not numeric.
+#' Errors for NULL or NA values if emptyOkay=FALSE.
+#'
+#' @param n Arbitrary length 1 input
+#' @param emptyOkay If FALSE, function will error if n is NULL or NA. If TRUE, no error is raised.
+#'
+#' @return n
 checkNumeric1D <- function(n, emptyOkay=FALSE){
   checkEmpty(n, emptyOkay)
   if (is.numeric(n) || is.null(n) || is.na(n)){

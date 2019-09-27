@@ -605,43 +605,6 @@ checkImputationBins <- function(imputationBins, bins, varType) {
     }
 }
 
-#' Check if delta value was entered
-#' 
-#' This method is to send the user a warning message if they entered a delta value
-#' that will not be used.
-#' 
-#' If the mechanism is NOT the stabiltiy mechanism and the user entered a delta value, 
-#' send a warning message saying the delta value with not be used and set the delta 
-#' value to NULL. If the stability mechanism is being used and the user entered a 
-#' delta value, set it as the delta value (the value of delta will be checked in the 
-#' stability mechanism). If the stability mechanism is being used and the user did 
-#' not enter a delta value, set the delta to the default value (2^-30).
-#' 
-#' @param mechanism The mechanism chosen by determineMechanism
-#' @param delta The delta value entered by the user, may be NULL
-#' 
-#' @return The value that will be used as the delta value for the statistic, may be NULL.
-
-checkDelta <- function(mechanism, delta) {
-    # throw an error if the stability mechanism is NOT being used and the
-    # user entered a delta value (because a delta value is only used in 
-    # the stability mechanism) and return NULL so the delta value is ignored
-    if (mechanism != 'mechanismStability') {
-        if (!is.null(delta)) {
-            warning('A delta parameter has been entered, but the stability mechanism is not being used. A delta value is only necessary for the stability mechanism. Entered delta value ignored.')
-        }
-        return(NULL)
-    } else {
-        # if the stability mechanism is being used, return the delta value
-        if (is.null(delta)) {
-            # default delta value
-            return(2^-30)
-        } else {
-            return(delta)
-        }
-    }
-}
-
 #' Set histogram range if bins are entered 
 #' 
 #' If the user enters a logical variable, they should not need to enter a

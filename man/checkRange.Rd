@@ -16,7 +16,11 @@ the maximum and minimum bounds on the data.
  Matrix and list types are supported. Internally, matrices are coerced to lists to allow 
  varying dimensions across rows.}
 
+<<<<<<< HEAD
 \item{varType}{The variable type; e.g. 'logical', 'integer', 'numeric'.}
+=======
+\item{varType}{The variable type; e.g. 'logical', 'integer', 'numeric', 'character'.}
+>>>>>>> 05eaaa5b1be1c9883896ea7a2efaca50880d6fe0
 
 \item{formatType}{One of 'vector' or 'list', describing which of the two the input range should be, where 'vector' returns to an atomic vector.
 Since matrices are coerced to lists within the function, when using a matrix as range input, `format type = 'list'` should be specified.}
