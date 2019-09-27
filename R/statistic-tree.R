@@ -1,152 +1,26 @@
-tree <- function(x, depth){
-  i <- 0
-  while(i<=depth){
-    print(funHist(x, varType='numeric', bins=2^depth))
+#' Calculate bins of each leaf in the tree by row
+#'
+#' @param rng Total range of data to be binned into tree in form (min, max) A tuple of numerics of length 2.
+#' @param depth Depth of the tree, considering the root to have depth 0.
+#' @param n Number of data points to be binned.
+#'
+#' Note: This can be calculated entirely publically. The fact that 'n' is input is unnecessary,
+#' but is a residual affect of the fact that the helper function called can also be used if the user
+#' specifies their desired granularity of the bins instead of supplying a range, which may be something 
+#' we want to eventually implement here.
+#' 
+#' @return A list of the bins used in the tree, from the first level of the tree to the leaves.
+treeBins <- function(rng, depth, n){
+  binsByLevel <- list()
+  i <- 1
+  while(i <= depth){
+    nBins <- 2^i
+    bins <- determineNumericIntegerBins(rng, n, nBins, NULL) #NULL is passed as granularity since that is unnecessary here
+    binsByLevel <- append(binsByLevel, list(bins))
     i <- i+1
   }
-} 
-
-#' Accuracy for a differentially private binary tree
-#'
-#' @param epsilon Numeric differential privacy parameter
-#' @param rng Numeric a priori estimate of the variable range
-#' @param gran Numeric granularity
-#' @param alpha Numeric level of statistical significance, default 0.05
-#' @return Accuracy guarantee for the tree given epsilon
-#' @export treeGetAccuracy
-#' @rdname treeGetAccuracy
- 
-# treeGetAccuracy <- function(epsilon, rng, gran, alpha=0.05) {
-#     universeSize <- diff(rng) / gran + 1
-#     accuracy <- (2 * sqrt(2) / epsilon) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
-#     return(accuracy)
-# }
-
-
-#' Epsilon for a differentially private binary tree
-#'
-#' @param accuracy Numeric accuracy needed
-#' @param rng Numeric a priori estimate of the variable range
-#' @param gran Numeric granularity
-#' @param alpha Numeric level of statistical significance, default 0.05
-#' @return Epsilon necessary to guarantee the given accuracy
-#' @export treeGetParameters
-#' @rdname treeGetParameters
-
-# treeGetParameters <- function(accuracy, rng, gran, alpha=0.05) {
-#     universeSize <- diff(rng) / gran + 1
-#     epsilon <- (2 * sqrt(2) / accuracy) * sqrt(log(2 / alpha)) * log2(universeSize)^(1.5)
-#     return(epsilon)
-# }
-
-
-#' Function to truncate negative noisy node counts at zero
-#'
-#' @param release The differentially private noisy binary tree
-#' @return Noisy binary tree truncated at zero
-
-# treePostFormatRelease <- function(release) {
-#     release <- round(release)
-#     release[release < 0] <- 0
-#     return(release)
-# }
-
-
-#' Function to derive CDF from efficient terminal node counts
-#'
-#' @param release Efficient differentially private binary tree
-#' @param rng An a priori estimate of the range of the vector
-#'      being represented as a binary tree
-#' @param terminalIndex Vector of indices corresponding to the terminal
-#'      leaf nodes of the binary tree
-#' @return Differentially private estimate of the empirical cumulative
-#'      distribution function
-
-treePostCDF <- function(release, rng, terminalIndex) {
-    terminal <- release[terminalIndex]
-    stepSize <- diff(rng) / length(terminal)
-    cdfSteps <- seq(rng[1], rng[2], stepSize)
-    cdf <- c(0, cumsum(terminal) / sum(terminal))
-    cdf <- data.frame(list('val' = cdfSteps, 'cdf' = cdf))
-    return(cdf)
+  return(binsByLevel)
 }
-
-
-#' Function to evaluate the mean using the DP CDF
-#'
-#' @param cdf Differentially private estimate of the empirical cumulative
-#'      distribution function
-#' @param rng Numeric a priori estimate of the range
-#' @param gran Granularity
-#' @return Differentially private estimate of the mean
-
-treePostMean <- function(cdf, rng) {
-    ecdf <- cdf$cdf
-    pdf <- sapply(2:length(ecdf), function(i) ecdf[i] - ecdf[i - 1])
-    p <- c(ecdf[1], pdf) * cdf$val
-    return(sum(p))
-}
-
-
-#' Function to evaluate the median using the DP CDF
-#'
-#' @param cdf Differentially private estimate of the empirical cumulative
-#'      distribution function
-#' @return Differentially private estimate of the median
-
-treePostMedian <- function(cdf) {
-    outMedian <- treePostPercentiles(cdf, 0.5)$value
-    return(outMedian)
-}
-
-
-#' Quantile function using the DP CDF
-#'
-#' @param cdf Differentially private estimate of the empirical cumulative
-#'      distribution function
-#' @param percentiles Vector of probabilities given to the quantile function
-#' @return Differnetially private estimate of the values corresponding to
-#'      the provided probabilities
-
-treePostPercentiles <- function(cdf, percentiles) {
-    absArgMin <- function(q, cdf) {
-        target <- abs(q - cdf$cdf)
-        out <- cdf$val[which(target == min(target))]
-        return(c(q, mean(out)))
-    }
-    outValues <- lapply(percentiles, absArgMin, cdf)
-    outValues <- data.frame(do.call(rbind, outValues))
-    names(outValues) <- c('percentile', 'value')
-    return(outValues)
-}
-
-
-#' Function to efficiently estimate noisy node counts
-#'
-#' @param release The truncated differentially private noisy binary tree
-#'      in vector form
-#' @param treeData Data frame with binary tree attributes, including depth
-#'      and indicators of parent and adjacent nodes. Note that
-#'      \code{nrow(treeData) == length(release)}
-#' @param n Number of observations
-#' @param nNodes Number of nodes in the binary tree, also \code{length(release)}
-#' @param variance The variance of the noise used to perturb tree nodes
-#' @param terminalIndex Vector of indices corresponding to the terminal
-#'      leaf nodes of the binary tree
-#' @return Efficient differentially private binary tree
-
-treePostEfficient <- function(release, treeData, n, variance, terminalIndex) {
-    nNodes <- length(release)
-    sigma <- sqrt(variance)
-    invSigmaSq <- 1 / variance
-    tree <- cbind(treeData, release)
-    names(tree)[ncol(tree)] <- 'noisy'
-    tree <- estBottomUp(tree, min(terminalIndex), nNodes, sigma, invSigmaSq)
-    tree <- estTopDown(tree, n, nNodes, sigma, invSigmaSq)
-    tree <- estEfficiently(tree, n, nNodes, sigma, invSigmaSq)
-    return(round(tree$est.efficient))
-}
-
 
 #' Differentially private binary tree
 #'
@@ -176,66 +50,83 @@ dpTree <- setRefClass(
     Class = 'dpTree',
     contains = 'mechanismLaplace',
     fields = list(
-      globalEps = 'numeric'
+      globalEps = 'numeric',
+      depth = 'numeric',
+      binsByLevel = 'list',
+      bins = 'numeric'
     )
     
 )
 
 dpTree$methods(
-    initialize = function(mechanism, varType, variable, n, rng=NULL, gran, epsilon=NULL,
-                          accuracy=NULL, imputeRng=NULL, percentiles=NULL, alpha=0.05, ...) {
+    initialize = function(varType, variable, n, depth, rng=NULL, globalEps=NULL,
+                          accuracy=NULL, imputeRng=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
-        .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
-        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
+        .self$mechanism <- "mechanismLaplace"
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer'))
         .self$variable <- variable
         .self$n <- checkN(n)
-        .self$rng <- checkRange(rng) # CHANGE
-        .self$gran <- checkN(gran, emptyOkay=TRUE) #should be positive whole number
+        .self$depth <- checkN(depth)
+        .self$rng <- checkRange(rng, .self$varType, 'vector')
+        .self$rngFormat <- 'vector'
         .self$alpha <- checkNumeric(alpha)
-        #.self$sens <- 2 * log2(diff(rng) / gran + 1)
         
-        checkVariableType(variable, "character")
+        checkVariableType(typeof(variable), "character")
+        .self$sens <- 2
         
-        if (is.null(epsilon)) {
-            .self$accuracy <- checkAccuracy(accuracy)
-            .self$epsilon <- treeGetParameters(accuracy, rng, gran, alpha)
-        } else {
-            .self$epsilon <- checkEpsilon(epsilon)
-            .self$accuracy <- treeGetAccuracy(epsilon, rng, gran, alpha)
+        # Option 1: Specify global epsilon value
+        if (!is.null(globalEps)){
+          .self$globalEps <- checkEpsilon(globalEps)
+          .self$epsilon <- .self$globalEps/depth
+          .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon)
         }
+        # Option 2: Specify epsilon value for each row of tree
+        else if (!is.null(epsilon)){
+          .self$epsilon <- checkEpsilon(epsilon)
+          .self$globalEps <- checkEpsilon(epsilon*.self$depth)
+          .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon)
+        }
+        # Option 3: Specify an accuracy value
+        else if (!is.null(accuracy)){
+          .self$accuracy <- checkAccuracy(accuracy)
+          .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, .self$alpha)
+          .self$globalEps <- .self$epsilon * .self$depth
+        }
+        
+        .self$binsByLevel <- treeBins(rng, depth, n)
+        
         if (is.null(imputeRng)) {
             .self$imputeRng <- rng
         } else {
             .self$imputeRng <- imputeRng
         }
-        .self$percentiles <- percentiles
 })
 
 dpTree$methods(
     release = function(data) {
         x <- data[, variable]
-        variance <- 2 * sens / epsilon
-        universeSize <- floor(diff(rng) / gran + 1)
-        depth <- ceiling(log2(universeSize))
-        # for (i in 1:depth){
-        #   export(mechanism)$evaluate(funHist, x, sens, (function(out) return(out))) #don't bother with post-processing for now
-        # }
-        #terminalIndex <- seq(2^(depth - 1), 2^depth - 1)
-        #.self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
-        #                                           variance=variance, universeSize=universeSize, 
-        #                                           depth=depth, terminalIndex=terminalIndex, self=.self)
+        counts <- list(n) #n is public so the root of tree need not be noisy
+        i <- 1
+        while(i <= .self$depth){
+          .self$bins <- .self$binsByLevel[[i]]   #Bins of ith row (note this is publically computable)
+          noisyCount <- export(mechanism)$evaluate(funHist, x, .self$sens, (function(out) return(out)))
+          # In evaluate, identity function is passed as postProcess function since we want to postprocess
+          # on all of the noisy counts together.
+          counts <- append(counts, list(noisyCount$release))
+          i <- i+1
+        }
+        #Note: postprocessing is called here instead of in the evaluate function
+        .self$result <- .self$postProcess(counts)
 })
 
-#dpTree$methods(
-    #treeFun = function(x, universeSize, depth) {
-        #tree <- binaryTree(x, n, rng, gran, universeSize, depth)
-        #.self$treeData <- tree[, which(names(tree) != 'count')]
-        #return(tree$count)
-        
-#})
-
 dpTree$methods(
-    postProcess = function(out, ...) {
+    postProcess = function(counts, ...) {
+        out$counts <- counts
+        out$epsilon <- .self$epsilon
+        out$globalEps <- .self$globalEps
+        out$accuracy <- .self$accuracy
+        out$variable <- variable
+        
         # out$variable <- variable
         # out$release <- treePostFormatRelease(out$release)
         # ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
@@ -245,9 +136,10 @@ dpTree$methods(
         # out$mean <- treePostMean(out$cdf, rng)
         # out$median <- treePostMedian(out$cdf)
         # out$accuracy <- .self$accuracy
-        # out$epsilon <- .self$epsilon
+        #out$epsilon <- .self$epsilon
+        #out$globalEps <- .self$globalEps
         # if (!is.null(percentiles)) {
         #     out$percentiles <- treePostPercentiles(out$cdf, percentiles)
         # }
-        # return(out)
+        return(out)
 })

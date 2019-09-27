@@ -466,7 +466,7 @@ determineLogicalBins <- function(impute, object) {
     }
 }
 
-# only called by determineBins()
+# Called by determineBins() and the tree statistic
 determineNumericIntegerBins <- function(rng, n, nBins, granularity) {
     # first check if nBins is NULL, nBins is considered the truth for the number
     # of bins if the user has entered both nBins and granularity.

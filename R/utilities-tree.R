@@ -1,3 +1,110 @@
+#' Function to efficiently estimate noisy node counts
+#'
+#' @param release The truncated differentially private noisy binary tree
+#'      in vector form
+#' @param treeData Data frame with binary tree attributes, including depth
+#'      and indicators of parent and adjacent nodes. Note that
+#'      \code{nrow(treeData) == length(release)}
+#' @param n Number of observations
+#' @param nNodes Number of nodes in the binary tree, also \code{length(release)}
+#' @param variance The variance of the noise used to perturb tree nodes
+#' @param terminalIndex Vector of indices corresponding to the terminal
+#'      leaf nodes of the binary tree
+#' @return Efficient differentially private binary tree
+#' FIX THIS
+treePostEfficient <- function(release, treeData, n, variance, terminalIndex) {
+  nNodes <- length(release)
+  sigma <- sqrt(variance)
+  invSigmaSq <- 1 / variance
+  tree <- cbind(treeData, release)
+  names(tree)[ncol(tree)] <- 'noisy'
+  tree <- estBottomUp(tree, min(terminalIndex), nNodes, sigma, invSigmaSq)
+  tree <- estTopDown(tree, n, nNodes, sigma, invSigmaSq)
+  tree <- estEfficiently(tree, n, nNodes, sigma, invSigmaSq)
+  return(round(tree$est.efficient))
+}
+
+
+#' Function to truncate negative noisy node counts at zero
+#'
+#' @param release The differentially private noisy binary tree
+#' @return Noisy binary tree truncated at zero
+
+# treePostFormatRelease <- function(release) {
+#     release <- round(release)
+#     release[release < 0] <- 0
+#     return(release)
+# }
+
+
+#' Function to derive CDF from efficient terminal node counts
+#'
+#' @param release Efficient differentially private binary tree
+#' @param rng An a priori estimate of the range of the vector
+#'      being represented as a binary tree
+#' @param terminalIndex Vector of indices corresponding to the terminal
+#'      leaf nodes of the binary tree
+#' @return Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' FIX THIS
+treePostCDF <- function(release, rng, terminalIndex) {
+  terminal <- release[terminalIndex]
+  stepSize <- diff(rng) / length(terminal)
+  cdfSteps <- seq(rng[1], rng[2], stepSize)
+  cdf <- c(0, cumsum(terminal) / sum(terminal))
+  cdf <- data.frame(list('val' = cdfSteps, 'cdf' = cdf))
+  return(cdf)
+}
+
+
+#' Function to evaluate the mean using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @param rng Numeric a priori estimate of the range
+#' @param gran Granularity
+#' @return Differentially private estimate of the mean
+#' FIX THIS
+treePostMean <- function(cdf, rng) {
+  ecdf <- cdf$cdf
+  pdf <- sapply(2:length(ecdf), function(i) ecdf[i] - ecdf[i - 1])
+  p <- c(ecdf[1], pdf) * cdf$val
+  return(sum(p))
+}
+
+
+#' Function to evaluate the median using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @return Differentially private estimate of the median
+#' FIX THIS
+treePostMedian <- function(cdf) {
+  outMedian <- treePostPercentiles(cdf, 0.5)$value
+  return(outMedian)
+}
+
+
+#' Quantile function using the DP CDF
+#'
+#' @param cdf Differentially private estimate of the empirical cumulative
+#'      distribution function
+#' @param percentiles Vector of probabilities given to the quantile function
+#' @return Differnetially private estimate of the values corresponding to
+#'      the provided probabilities
+#' FIX THIS
+treePostPercentiles <- function(cdf, percentiles) {
+  absArgMin <- function(q, cdf) {
+    target <- abs(q - cdf$cdf)
+    out <- cdf$val[which(target == min(target))]
+    return(c(q, mean(out)))
+  }
+  outValues <- lapply(percentiles, absArgMin, cdf)
+  outValues <- data.frame(do.call(rbind, outValues))
+  names(outValues) <- c('percentile', 'value')
+  return(outValues)
+}
+
 #' Function to evaluate weights from the noise variance and standard errors in child nodes for the 
 #'  node of a differentially private binary tree
 #'
@@ -166,49 +273,5 @@ estEfficiently <- function(tree, n, nNodes, sigma, invSigmaSq) {
         tree$seEfficient[i] <- stErr(tree$wEfficient[i], sigma)
     }
     tree$estEfficient[tree$estEfficient < 0] <- 0
-    return(tree)
-}
-
-
-#' Function to evaluate a binary tree
-#'
-#' @param x Numeric vector to be represented as a binary tree in vector form
-#' @param n Number of observations in \code{x}
-#' @param rng An a priori estimate of the range of \code{x}
-#' @param gran The granularity at which \code{x} is represented in the tree
-#' @param universeSize Difference in the range of \code{x} over the granularity, plus 1
-#' @param depth The depth of the binary tree
-#' @return A binary tree in vector form
-
-binaryTree <- function(x, n, rng, gran, universeSize, depth) {
-    tree <- rep(0, times=(2^depth + universeSize))
-    for (i in 1:n) {
-        idx <- ((x[i] - rng[1]) / gran) + 2^depth
-        tree[idx] <- tree[idx] + 1
-    }
-    d <- c()
-    for (i in seq(2^depth, 2^depth - 1 + universeSize, 2)) {
-        tree[i / 2] <- tree[i] + tree[i + 1]
-        d <- c(d, depth)
-    }
-    depthCounter <- depth - 1
-    while (depthCounter > 0) {
-        for (i in seq(2^depthCounter, 2^(depthCounter + 1) - 1, 2)) {
-            tree[i / 2] <- tree[i] + tree[i + 1]
-            d <- c(d, depthCounter)
-        }
-        depthCounter <- depthCounter - 1
-    } 
-    tree <- data.frame(tree[1:(2^depth - 1)])
-    names(tree) <- 'count'
-    r <- c(0, rep(c(1, -1), nrow(tree) - 1))
-    tree$depth <- 1
-    tree$parent <- NA
-    tree$adjacent <- NA
-    for(i in 2:nrow(tree)) {
-        tree$parent[i] <- trunc(i/2)
-        tree$depth[i] <- trunc(log2(i)) + 1
-        tree$adjacent[i] <- i + r[i]
-    }
     return(tree)
 }
