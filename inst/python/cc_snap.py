@@ -29,26 +29,46 @@ class Snapping_Mechanism:
         mechanism_input (numeric): Raw (non-private) value of statistic for which you want a private release
         sensitivity (numeric): Sensitivity of function generating mechanism input
         epsilon (numeric): DP-epsilon
-        B (numeric): Suggested bound on the mechanism_input, corresponds to B from Mironov
+        accuracy (numeric): Desired accuracy level
+        alpha (numeric): Desired alpha level for accuracy calculations
+        B (numeric): Suggested clamping bound on the mechanism_input
+        _B_scaled (numeric): Clamping bound scaled by function sensitivity (used only by class internals)
+        precision (numeric): Number of bits of precision used for arithmetic operations
+        epsilon_prime (numeric): Epsilon value used for parameterization of Laplace within the Snapping Mechanism
+        Lambda_prime (numeric): Level at which output is rounded
+        _Lambda_prime_scaled (numeric): Lambda_prime scaled by function sensitivity (used only by class internals)
+        _m (numeric): Power to which 2 is raised to get _Lambda_prime_scaled (used only by class internals)
 
     Methods:
         get_snapped_noise: Returns epsilon-DP noise in according with snapping mechanism
 
     Example:
-        snap_object = Snapping_Mechanism(50, 0.012, 0.001, 200)
+        snap_object = Snapping_Mechanism(mechanism_input = 50, sensitivity = 0.012, B = 200, epsilon = 0.001, accuracy = None)
         snapped_noise = snap_object.get_snapped_noise()
     """
 
-    def __init__(self, mechanism_input, sensitivity, epsilon, B):
+    def __init__(self, mechanism_input, sensitivity, B, epsilon = None, accuracy = None, alpha = 0.05):
         self.mechanism_input = mechanism_input
         self.sensitivity = sensitivity
-        self.epsilon = epsilon
         self.B = B
+        self.epsilon = epsilon
+        self.accuracy = accuracy
+        if self.epsilon is None and self.accuracy is None:
+            raise ValueError('Either epsilon or accuracy must be provided.')
+        self.precision = 118
+        self.alpha = alpha # needs to be set before accuracy
+        if self.epsilon is None:
+            self.epsilon = self._get_epsilon()
+        elif self.accuracy is None:
+            self.accuracy = self._get_accuracy()
+        self._B_scaled,  self.epsilon_prime, self.Lambda_prime, self._Lambda_prime_scaled, self._m = self._parameter_setup()
+        if self.epsilon_prime < 0:
+            raise ValueError('The desired accuracy/epsilon results in epsilon_prime < 0. Please choose a smaller accuracy or larger epsilon.')
 
     def _double_to_bin(self, x):
         """
         Converts a numeric variable (int, float, etc.) to its IEEE 64-bit representation.
-        Representation consists of sign (length 1), exponent (length 11), and matissa (length 52).
+        Representation consists of sign (length 1), exponent (length 11), and mantissa (length 52).
 
         Parameters:
             x (numeric): Number for which 64-bit representation will be returned
@@ -304,62 +324,23 @@ class Snapping_Mechanism:
         else:
             return(1 - (1/2) * math.e**(-x/_lambda) )
 
-    def _F_Z_plus(self, z, _lambda):
+    def _get_accuracy(self):
         """
-        Gets upper bound on F_Z(z), where F_Z is the CDF of |Y'| + Lambda/2.
-        See section 6.2 of snapping_implementation_notes for explanation.
-
-        Parameters:
-            z (numeric): Number for which we want the area to the left
-            _lambda (numeric): Scale parameter for Laplace distribution (represented by Y')
-
-        Return:
-            numeric: Upper bound on P(Z <= z) where Z ~ |Laplace(_lambda)| + Lambda/2
+        Get accuracy
         """
-        return(1 - math.e**(-1/_lambda * z + 1/2))
+        accuracy = ( (1+12*self.B*2**-self.precision) / (self.epsilon-2*2**-self.precision) ) * (1 + math.log(1 / self.alpha)) * (self.sensitivity)
+        return(accuracy)
 
-    def _F_Z_minus(self, z, _lambda):
+    def _get_epsilon(self):
         """
-        Gets lower bound on F_Z(z), where F_Z is the CDF of |Y'| + Lambda/2.
-        See section 6.2 of snapping_implementation_notes for explanation.
-
-        Parameters:
-            z (numeric): Number for which we want the area to the left
-            _lambda (numeric): Scale parameter for Laplace distribution (represented by Y')
-
-        Return:
-            numeric: Lower bound on P(Z <= z) where Z ~ |Laplace(_lambda)| + Lambda/2
+        Get epsilon
         """
-        return(1 - math.e**(-1/_lambda * z + 1))
+        epsilon = ( (1+12*self.B*2**-self.precision) / (self.accuracy) ) * (1 + math.log(1 / self.alpha)) * (self.sensitivity) + 2*2**-self.precision
+        return(epsilon)
 
-    def _get_accuracy(self, f_D, B, P_l_plus, P_u_minus, _lambda, alpha):
+    def _parameter_setup(self):
         """
-        Gets upper bound on accuracy (lower accuracy number means more accurate estimate).
-        See section 6.2 of snapping_implementation_notes for explanation.
-
-        Parameters:
-            f_D (numeric): Private estimate (aka mechanism output)
-            B (numeric): Snapping Mechanism bound
-            P_l_plus (numeric): Upper bound on probability that lower snapping bound is binding
-            P_u_minus (numeric): Lower bound on probability that upper snapping bound is binding
-            _lambda (numeric): Scale parameter for Laplace distribution
-            alpha (numeric): Desired confidence level
-
-        Return:
-            numeric: Accuracy guarantee
-        """
-        if P_l_plus >= alpha:
-            return(B + f_D)
-        elif self._F_Z_minus(B - f_D, _lambda) >= 1 + P_l_plus - alpha:
-            return(_lambda * (1 - math.log(alpha - P_l_plus)))
-        elif self._F_Z_minus(B - f_D, _lambda) + P_u_minus >= 1 + P_l_plus - alpha:
-            return(B - f_D)
-        else:
-            return(_lambda * (1 - math.log(alpha - P_l_plus + P_u_minus)))
-
-    def get_snapped_noise(self):
-        """
-        Generates noise for Snapping Mechanism
+        Set up parameters for calculations (noise, accuracy, etc.)
         """
         # Set bits of numerical precision
         #
@@ -371,7 +352,7 @@ class Snapping_Mechanism:
         # if epsilon < 2*eta, where eta = 2^-precision
         #
         # Exact rounding, described in section 1.1 of http://www.ens-lyon.fr/LIP/Pub/Rapports/RR/RR2005/RR2005-37.pdf,
-        # is an alternative to accurate-faithful calculations (which is what most mathemematical libraries are).
+        # is an alternative to accurate-faithful calculations (which is what most mathematical libraries are).
         # If the real-valued number falls between two floating point numbers, accurate-faithful calculations
         # return one of those two floating point numbers and usually returns the one that is closer to the
         # real number. Exact rounding always returns the floating point number that is closer.
@@ -381,10 +362,7 @@ class Snapping_Mechanism:
         # 2.1 at http://www.ens-lyon.fr/LIP/Pub/Rapports/RR/RR2005/RR2005-37.pdf), but I should clarify this
         # with someone who might know better
 
-        # find necessary precision to ensure epsilon_prime > 0
-        eps_precision = abs(self._get_smallest_greater_power_of_two(self.epsilon)[1]) + 2
-        precision = max(118, eps_precision)
-        gmpy2.get_context().precision = precision
+        gmpy2.get_context().precision = self.precision
 
         '''
         Scale input and bounds to sensitivity 1
@@ -393,44 +371,37 @@ class Snapping_Mechanism:
         So, we scale the input and bounds such that the function has sensitivity 1, implement the snapping mechanism, and rescale back to
         the original sensitivity.
         '''
-        # scale clamping bound and mechanism input by sensitivity
-        mechanism_input_scaled = self.mechanism_input / self.sensitivity
+        # scale clamping bound by sensitivity
         B_scaled = self.B / self.sensitivity
+        epsilon_prime = self._redefine_epsilon(self.epsilon, B_scaled, self.precision)
 
-        '''
-        Construct private estimate
+        # NOTE: this Lambda is calculated relative to lambda = 1/epsilon' rather than sensitivity/epsilon' because we have already
+        #       scaled by the sensitivity
+        Lambda_prime_scaled, m = self._get_smallest_greater_power_of_two(1/epsilon_prime)
+        Lambda_prime = Lambda_prime_scaled * self.sensitivity
+
+        return(B_scaled, epsilon_prime, Lambda_prime, Lambda_prime_scaled, m)
+
+    def get_snapped_noise(self):
+        """
+        Generates noise for Snapping Mechanism
 
         See section 5.2 of Mironov (2012) for the definition of the snapping mechanism implemented below.
-        '''
+        """
+        gmpy2.get_context().precision = self.precision
+
+        # scale mechanism input by sensitivity
+        mechanism_input_scaled = self.mechanism_input / self.sensitivity
+
         # generate random sign and draw from Unif(0,1)
         sign = gmpy2.mpfr(2*secrets.randbits(1) - 1) # using mpfr precision here, even though it's an integer, so that the
                                                                                # precision carries through in later steps
         u_star_sample = self._sample_from_uniform()
-        epsilon_prime = self._redefine_epsilon(self.epsilon, B_scaled, precision)
-        inner_result = self._clamp(mechanism_input_scaled, B_scaled) + (sign * 1/epsilon_prime * crlibm.log_rn(u_star_sample))
+        inner_result = self._clamp(mechanism_input_scaled, self._B_scaled) + (sign * 1/self.epsilon_prime * crlibm.log_rn(u_star_sample))
 
-        # NOTE: this Lambda is calculated relative to lambda = 1/epsilon rather than sensitivity/epsilon because we have already
-        #       scaled by the sensitivity
-        Lambda, m = self._get_smallest_greater_power_of_two(1/epsilon_prime)
-
-        inner_result_rounded = self._get_closest_multiple_of_Lambda(inner_result, m)
+        # perform rounding/snapping
+        inner_result_rounded = self._get_closest_multiple_of_Lambda(inner_result, self._m)
         private_estimate = self._clamp(self.sensitivity * inner_result_rounded, self.B) # put private estimate back on original scale
         snapped_noise = private_estimate - self.mechanism_input
-
-        # # calculate extra quantities needed for accuracy guarantee
-        # # see snapping_implementation_notes.pdf for explanation
-        # lambda_prime = self.sensitivity / epsilon_prime
-        # P_l_plus = self._get_laplace_CDF(x = -self.B - private_estimate + lambda_prime, _lambda = lambda_prime)
-        # P_u_minus = 1 - self._get_laplace_CDF(x = self.B - private_estimate - lambda_prime, _lambda = lambda_prime)
-
-        # # TODO: just testing this below -- not sure if correct and will likely need to define outside
-        # #       of this function to allow user to set alpha
-        # accuracy = self._get_accuracy(f_D = private_estimate,
-        #                               B = self.B,
-        #                               P_l_plus = P_l_plus,
-        #                               P_u_minus = P_u_minus,
-        #                               _lambda = lambda_prime,
-        #                               alpha = 0.05)
-
 
         return(snapped_noise)
