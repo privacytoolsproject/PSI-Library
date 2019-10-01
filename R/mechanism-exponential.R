@@ -13,18 +13,18 @@ mechanismExponential <- setRefClass(
 
 mechanismExponential$methods(
     evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, rng=.self$rng, levels=.self$bins)
-        x <- fillMissing(x, .self$var.type, rng=.self$rng, categories=.self$bins)
+        x <- censorData(x, .self$varType, rng=.self$rng, levels=.self$bins)
+        x <- fillMissing(x, .self$varType, rng=.self$rng, categories=.self$bins)
         fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-        input.vals = c(list(x=x), fun.args)
-        true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
-        quality <- true.val - max(true.val)
-        probs <- ifelse(true.val == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
-        gap <- as.numeric(true.val[.self$k] - true.val[.self$k + 1])
-        if (gap < (-2 / epsilon * log(delta))) {
+        inputVals = c(list(x=x), fun.args)
+        trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
+        quality <- trueVal - max(trueVal)
+        probs <- ifelse(trueVal == 0, 0, exp((.self$epsilon * quality) / (2 * sens)))
+        gap <- as.numeric(trueVal[.self$k] - trueVal[.self$k + 1])
+        if (gap < (-2 / .self$epsilon * log(.self$delta))) {
             out <- list('release' = NULL)
         } else {
-            release <- sample(names(true.val), size=.self$k, prob=probs)
+            release <- sample(names(trueVal), size=.self$k, prob=probs)
             out <- list('release' = release)
             out <- postFun(out, gap)
         }

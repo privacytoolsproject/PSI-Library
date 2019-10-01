@@ -1,7 +1,12 @@
 *.Rproj
 .Rhistory
 .RData
-.Ruserdata
+*.Ruserdata
 vignettes/*.html
 vignettes/*.pdf
-.Rproj.user
+*.Rproj
+.Rbuildignore
+*.DS_Store
+*.aux
+*.log
+*.synctex.gz

@@ -9,7 +9,6 @@
 #' @return Value of the function applied to one bootstrap sample
 #' @import stats
 #' @export
-
 # There are 2 options for handling empty partitions:
 
 # 1: skip it entirely, and say the total number of partitions is just the number of partitions that are not empty
@@ -82,32 +81,33 @@ mechanismBootstrap <- setRefClass(
 )
 
 mechanismBootstrap$methods(
-    bootStatEval = function(xi, fun, ...) {
-        fun.args <- getFuncArgs(boot.fun, inputList=list(...), inputObject=.self)
-        input.vals = c(list(x=xi), fun.args)
-        stat <- do.call(boot.fun, input.vals)
+
+    bootStatEval = function(xi,...) {
+        funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+        inputVals = c(list(x=x), funArgs)
+        stat <- do.call(bootFun, inputVals)
         return(stat)
 })
 
 mechanismBootstrap$methods(
-    bootSE = function(release, n.boot, sens) {
+    bootSE = function(release, nBoot, sens) {
         se <- sd(release)
-        c.alpha <- qchisq(0.01, df=(n.boot - 1))
-        conservative <- sqrt(max(c(se^2 - (c.alpha * sens^2 * n.boot) / (2 * epsilon * (n.boot - 1)), 0)))
-        naive <- sqrt(max(c(se^2 - (sens^2 * n.boot) / (2 * epsilon), 0)))
+        cAlpha <- qchisq(0.01, df=(nBoot - 1))
+        conservative <- sqrt(max(c(se^2 - (cAlpha * sens^2 * nBoot) / (2 * epsilon * (nBoot - 1)), 0)))
+        naive <- sqrt(max(c(se^2 - (sens^2 * nBoot) / (2 * epsilon), 0)))
         return(list('sd' = se,
                     'conservative' = conservative,
                     'naive' = naive))
 })
 
 mechanismBootstrap$methods(
-    evaluate = function(fun, x, sens, postFun, ...) {
-        x <- censordata(x, .self$var.type, .self$rng)
-        x <- fillMissing(x, .self$var.type, .self$impute.rng[0], .self$impute.rng[1])
-        epsilon.part <- epsilon / .self$n.boot
-        release <- replicate(.self$n.boot, bootstrap.replication(x, n, sens, epsilon.part, fun=fun, inputObject = .self, ...))
-        std.error <- .self$bootSE(release, .self$n.boot, sens)
-        out <- list('release' = release, 'std.error' = std.error)
+    evaluate = function(fun, x, sens, postFun) {
+        x <- censorData(x, .self$varType, .self$rng)
+        x <- fillMissing(x, .self$varType, .self$imputeRng[0], .self$imputeRng[1])
+        epsilonPart <- epsilon / .self$nBoot
+        release <- replicate(.self$nBoot, bootstrapReplication(x, n, sens, epsilonPart, fun=.self$bootStatEval))
+        stdError <- .self$bootSE(release, .self$nBoot, sens)
+        out <- list('release' = release, 'stdError' = stdError)
         out <- postFun(out)
         return(out)
 })

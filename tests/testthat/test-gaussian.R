@@ -15,6 +15,6 @@ post = function(out){
   return(out)
 }
 
-mech <- mechanismGaussian$new(epsilon=1, delta=1, var.type='numeric', rng=c(0,5))
+mech <- mechanismGaussian$new(epsilon=1, delta=1, varType='numeric', rng=c(0,5), rngFormat='vector')
 out <- mech$evaluate(identityFun, x, sens, post)
 expect_equal(out$release, x)

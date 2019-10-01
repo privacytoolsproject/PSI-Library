@@ -8,7 +8,7 @@
 \arguments{
 \item{mechanism}{Character, the mechanism used to perturb the output.}
 
-\item{var.type}{Character, the variable type, one of \code{'character'} or
+\item{varType}{Character, the variable type, one of \code{'character'} or
 \code{'factor'}.}
 
 \item{variable}{Character, the variable name in the data frame.}
