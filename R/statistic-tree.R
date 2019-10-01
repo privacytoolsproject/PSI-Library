@@ -127,7 +127,6 @@ dpTree$methods(
         out$accuracy <- .self$accuracy
         out$variable <- variable
         
-        # out$variable <- variable
         # out$release <- treePostFormatRelease(out$release)
         # ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
         # out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))
@@ -135,9 +134,6 @@ dpTree$methods(
         # out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))
         # out$mean <- treePostMean(out$cdf, rng)
         # out$median <- treePostMedian(out$cdf)
-        # out$accuracy <- .self$accuracy
-        #out$epsilon <- .self$epsilon
-        #out$globalEps <- .self$globalEps
         # if (!is.null(percentiles)) {
         #     out$percentiles <- treePostPercentiles(out$cdf, percentiles)
         # }
