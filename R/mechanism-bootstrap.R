@@ -13,7 +13,7 @@
 
 # 1: skip it entirely, and say the total number of partitions is just the number of partitions that are not empty
 
-bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
+bootstrapReplication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
     # make a sorted vector of the partitions of the data
     # because it is not guaranteed that every partition from 1:max.appearances will have a value in it
@@ -40,7 +40,7 @@ bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, 
 
 # 2: treat it as a partition with a statistic of value 0 and keep it in the calculation, adding noise and adding it to the final calculation
 
-# bootstrap.replication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
+# bootstrapReplication <- function(x, n, sensitivity, epsilon, fun, inputObject, ...) {
 #     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
 #     # make a sorted vector of the partitions of the data
 #     # because it is not guaranteed that every partition from 1:max.appearances will have a value in it
@@ -81,10 +81,9 @@ mechanismBootstrap <- setRefClass(
 )
 
 mechanismBootstrap$methods(
-
-    bootStatEval = function(xi,...) {
+    bootStatEval = function(xi, fun,...) {
         funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-        inputVals = c(list(x=x), funArgs)
+        inputVals = c(list(x=xi), funArgs)
         stat <- do.call(bootFun, inputVals)
         return(stat)
 })
@@ -101,11 +100,11 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
-    evaluate = function(fun, x, sens, postFun) {
-        x <- censorData(x, .self$varType, .self$rng)
+    evaluate = function(fun, x, sens, postFun, ...) {
+        x <- censorData(x, .self$varType, .self$rng, rngFormat=.self$rngFormat)
         x <- fillMissing(x, .self$varType, .self$imputeRng[0], .self$imputeRng[1])
         epsilonPart <- epsilon / .self$nBoot
-        release <- replicate(.self$nBoot, bootstrapReplication(x, n, sens, epsilonPart, fun=.self$bootStatEval))
+        release <- replicate(.self$nBoot, bootstrapReplication(x, .self$n, sens, epsilonPart, fun, .self))
         stdError <- .self$bootSE(release, .self$nBoot, sens)
         out <- list('release' = release, 'stdError' = stdError)
         out <- postFun(out)

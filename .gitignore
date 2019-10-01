@@ -10,3 +10,4 @@ vignettes/*.pdf
 *.aux
 *.log
 *.synctex.gz
+.Rproj.user

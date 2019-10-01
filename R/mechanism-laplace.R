@@ -58,8 +58,8 @@ mechanismLaplace$methods(
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censorData(x, .self$varType, .self$rng, .self$bins, .self$rngFormat)
     x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
-    fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    inputVals = c(list(x=x), fun.args)
+    funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+    inputVals = c(list(x=x), funArgs)
     trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
     scale <- sens / .self$epsilon
     release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
