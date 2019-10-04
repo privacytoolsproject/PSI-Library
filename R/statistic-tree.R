@@ -106,6 +106,7 @@ dpTree$methods(
     release = function(data) {
         x <- data[, variable]
         counts <- list(n) #n is public so the root of tree need not be noisy
+        names(counts) <- toString(.self$rng) # adding bin range to the root node
         i <- 1
         while(i <= .self$depth){
           .self$bins <- .self$binsByLevel[[i]]   #Bins of ith row (note this is publically computable)
@@ -126,6 +127,8 @@ dpTree$methods(
         out$globalEps <- .self$globalEps
         out$accuracy <- .self$accuracy
         out$variable <- variable
+        out$bins <- .self$binsByLevel
+        
         
         # out$release <- treePostFormatRelease(out$release)
         # ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
