@@ -275,3 +275,33 @@
 #'     tree$estEfficient[tree$estEfficient < 0] <- 0
 #'     return(tree)
 #' }
+
+#' Calculates variance of Laplace noise. 
+#' 
+#' Recall that the variance of the Laplace distribution is 2b^2, where b is the classic
+#' scaling parameter of the Laplace distribution (which is in fact the inverse of what we
+#' in this library call the scaling parameter). Then, in our case, b = eps/sens.
+#' 
+#' @param sens Sensitivity of function that is to be perturbed
+#' @param eps Privacy parameter used
+
+inverseVariance <- function(sens, eps){
+  b <- eps/sens
+  return (2*b^2)
+}
+
+parentNode <- function(tree, i, j){
+  tree[[i-1]][floor(j/2)]
+}
+
+ChildNodeLeft <- function(tree, i, j){
+  tree[[i+1]][j*2]
+}
+
+ChildNodeRight <- function(tree, i, j){
+  tree[[i+1]][j*2+1]
+}
+
+wEfficient <- function(){
+  
+}
