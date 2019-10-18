@@ -46,7 +46,7 @@ class Snapping_Mechanism:
         get_snapped_noise: Returns epsilon-DP noise in according with snapping mechanism
 
     Example:
-        snap_object = Snapping_Mechanism(mechanism_input = 50, sensitivity = 0.012, B = 200, epsilon = 0.001, accuracy = None)
+        snap_object = Snapping_Mechanism(mechanism_input = 50, sensitivity = 0.012, min_B = 200, epsilon = 0.001, accuracy = None)
         snapped_noise = snap_object.get_snapped_noise()
     """
 
@@ -66,7 +66,7 @@ class Snapping_Mechanism:
             k = (2 + 24*2**-52) / (self.epsilon - 2**-117)
         else:
             epsilon_lb = math.log(1/self.alpha) * (self.sensitivity / self.accuracy)
-            k = (2 + 24*2^-52) / (epsilon_lb - 2**-117)
+            k = (2 + 24*2**-52) / (epsilon_lb - 2**-117)
         self.B = min_B + k/2 * (1 + 2*math.log(1/self.gamma))
 
         # ensure that B*precision <= 2^-52
