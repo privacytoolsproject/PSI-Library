@@ -42,20 +42,8 @@ mechanismSnapping$methods(
 
     # TODO: Below is attempt to appropriately set B for each type of function for which the snapping mechanism might be used.
     #       Need to check further with someone (Ira maybe?) about how best to do this.
-    if (identical(fun, mean)) {
-        B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
-    } else if (identical(fun, var)) {
-        B <- (.self$rng[2] - .self$rng[1])^2 / 4
-    } else if (identical(fun, fun.covar)) {
-        # TODO: figure this out
-    }
-    else if (identical(fun, fun.hist) || identical(fun, boot.hist)) {
-        B <- length(x)
-    } else {
-        stop(paste0('The Snapping Mechanism does not support the ', fun, ' function.'))
-    }
     n = length(true.val)
-    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, B)
+    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, .self$B)
     out <- list('release' = release)
     out <- postFun(out, ...)
     return(out)
