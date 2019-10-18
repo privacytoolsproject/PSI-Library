@@ -147,7 +147,8 @@ boot.mean <- function(xi, n) {
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')
+    contains = c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping'),
+    fields = list(gamma = 'numeric')
 )
 
 dpMean$methods(
@@ -163,7 +164,7 @@ dpMean$methods(
         .self$sens <- diff(.self$rng) / n
         .self$gamma <- gamma
 
-        min_B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
+        .self$min_B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
 
         if (mechanism == 'mechanismSnapping') {
             reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))

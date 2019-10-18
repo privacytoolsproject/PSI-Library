@@ -8,7 +8,8 @@
 
 mechanismSnapping <- setRefClass(
     Class = 'mechanismSnapping',
-    contains = 'mechanism'
+    contains = 'mechanism',
+    fields = list(min_B = 'numeric')
 )
 
 mechanismSnapping$methods(
@@ -43,7 +44,7 @@ mechanismSnapping$methods(
     # TODO: Below is attempt to appropriately set B for each type of function for which the snapping mechanism might be used.
     #       Need to check further with someone (Ira maybe?) about how best to do this.
     n = length(true.val)
-    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, .self$B)
+    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, .self$min_B)
     out <- list('release' = release)
     out <- postFun(out, ...)
     return(out)

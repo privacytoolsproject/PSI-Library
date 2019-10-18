@@ -142,12 +142,12 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @param n An integer giving number of variates needed.
 #' @param sens Sensitivity of the function for which we are releasing a private estimate.
 #' @param epsilon Desired level of differential privacy
-#' @param B Bound such that the true value should lie within [-B, B]
+#' @param min_B Minimum bound B such that the true value is guaranteed to be within [-B, B]
 #'
 #' noise <- snappingNoise(true_val = 50, sens = 5e-4, epsilon = 1e-3, B = 200)
 #' @rdname snappingNoise
 #' @export
-snappingNoise <- function(true_val, n, sens, epsilon, B) {
+snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
     # source snapping mechanism file
     reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
 
@@ -160,7 +160,7 @@ snappingNoise <- function(true_val, n, sens, epsilon, B) {
         snapping_mech <- Snapping_Mechanism(mechanism_input = true_val[[i]],
                                             sensitivity = sens,
                                             epsilon = epsilon,
-                                            B = B)
+                                            min_B = min_B)
 
         # calculate and return noise (as well as epsilon and accuracy)
         noise[[i]] <- snapping_mech$get_snapped_noise()
