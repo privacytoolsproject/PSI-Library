@@ -135,12 +135,12 @@ boot.mean <- function(xi, n) {
 #' @param alpha Numeric, the level of statistical significance. Default 0.05.
 #' @param n.boot Integer, the number of bootstrap replications if using the bootstrap
 #'   bootstrap mechanism, ignored otherwise. Default 20.
+#' @param gamma Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.
 #'
 #' @import methods
 #' @export dpMean
 #' @exportClass dpMean
 #'
-#' @include mechanism.R
 #' @include mechanism-snapping.R
 #' @include mechanism-laplace.R
 #' @include mechanism-bootstrap.R
@@ -152,7 +152,7 @@ dpMean <- setRefClass(
 
 dpMean$methods(
     initialize = function(mechanism, var.type, variable, n, rng=NULL, epsilon=NULL,
-                          accuracy=NULL, impute.rng=NULL, alpha=0.05, n.boot=20, ...) {
+                          accuracy=NULL, impute.rng=NULL, alpha=0.05, n.boot=20, gamma = 0.05, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- mechanism
         .self$var.type <- var.type
@@ -161,14 +161,28 @@ dpMean$methods(
         .self$alpha <- alpha
         .self$rng <- checkrange(rng, var.type)
         .self$sens <- diff(.self$rng) / n
+        .self$gamma <- gamma
+
+        min_B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
+
+        if (mechanism == 'mechanismSnapping') {
+            reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
+            # create dummy version of Snapping Mechanism object in order to get epsilon/accuracy guarantees
+            snap_obj <- Snapping_Mechanism(mechanism_input = 0,
+                                            sensitivity = .self$sens,
+                                            epsilon = epsilon,
+                                            accuracy = accuracy,
+                                            alpha = alpha,
+                                            min_B = min_B,
+                                            gamma = gamma)
+        }
+
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
             if (mechanism == 'mechanismLaplace'){
                 .self$epsilon <- laplace.getEpsilon(.self$sens, .self$accuracy, alpha)
             } else if (mechanism == 'mechanismSnapping'){
-                B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
-                eta <- 2^-52
-                .self$epsilon <- snapping.getEpsilon(.self$sens, .self$accuracy, alpha, B, eta)
+                .self$epsilon <- snap_obj$epsilon
             }
         } else {
             checkepsilon(epsilon)
@@ -176,9 +190,7 @@ dpMean$methods(
             if (mechanism == 'mechanismLaplace'){
                 .self$accuracy <- laplace.getAccuracy(.self$sens, .self$epsilon, alpha)
             } else if (mechanism == 'mechanismSnapping'){
-                B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
-                eta <- 2^-52
-                .self$accuracy <- snapping.getAccuracy(.self$sens, .self$epsilon, alpha, B, eta)
+                .self$accuracy <- snap_obj$accuracy
             }
         }
         if (is.null(impute.rng)) {
@@ -213,7 +225,7 @@ dpMean$methods(
                 bagged.estimate <- mean(out$release)
                 out$std.dev <- mean.postStandardDeviation(bagged.estimate)
                 out$median <- mean.postMedian(bagged.estimate)
-                out$histogram <- mean.postHistgram(bagged.estimate)
+                out$histogram <- mean.postHistogram(bagged.estimate)
             } else {
                 out$std.dev <- mean.postStandardDeviation(out$release)
                 out$median <- mean.postMedian(out$release)
