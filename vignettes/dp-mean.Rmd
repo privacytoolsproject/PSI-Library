@@ -58,9 +58,9 @@ dp.mean4$release(PUMS5extract10000)
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpGLM` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpMean` class. The `new` method, which creates an object of the class, accepts the following arguments.
 
-* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'` or `'mechanismBootstrap'`.
+* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, one of `'mechanismLaplace'`, `'mechanismSnapping'`, or `'mechanismBootstrap'`.
 
 * `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
@@ -77,6 +77,8 @@ In typical usage, there are two methods to the `dpGLM` class. The `new` method, 
 * `n.boot` \ Integer, the number of bootstrap replications to perform. Optional, default `NULL`. If not `NULL`, the privacy cost `epsilon` is partitioned across `n.boot` replications and the estimates for each are returned.
 
 * `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
+
+* `gamma` \ Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Optional, used only for Snapping Mechanism. Default `0.05`.
 
 &nbsp;
 
