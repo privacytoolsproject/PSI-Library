@@ -174,7 +174,7 @@ dpMean$methods(
                                             epsilon = epsilon,
                                             accuracy = accuracy,
                                             alpha = alpha,
-                                            min_B = min_B,
+                                            min_B = .self$min_B,
                                             gamma = gamma)
         }
 
