@@ -17,6 +17,6 @@ boot.hist(xi, var.type, bins = NULL)
 Histogram with counts for each level of \code{xi}.
 }
 \description{
-This is a wrapper for the histogram function used internally by the 
+This is a wrapper for the histogram function used internally by the
 bootstrap mechanism.
 }

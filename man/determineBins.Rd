@@ -10,15 +10,15 @@ determineBins(var.type, rng, bins, n, n.bins, impute, granularity, object)
 \item{var.type}{Character, the variable type.}
 
 \item{rng}{Numeric, a priori estimate of the lower and upper bounds of a
-variable taking numeric values. Ignored for categorical types. Maybe be null for 
+variable taking numeric values. Ignored for categorical types. Maybe be null for
 numeric or integer types, in which case the stability mechanism is used.}
 
-\item{bins}{Character or numeric, the available bins or levels of a variable. Character 
+\item{bins}{Character or numeric, the available bins or levels of a variable. Character
 for categorical variables, a vector of numbers for numeric variables.}
 
 \item{n.bins}{Integer, the number of bins to release.}
 
-\item{impute}{Boolean, if true then the mechanism should replace missing values with known 
+\item{impute}{Boolean, if true then the mechanism should replace missing values with known
 values from the data.If false, the mechanism should leave missing values as `NA`}
 
 \item{granularity}{Numeric, the width of each histogram bin, or the number of observations in each bin}
@@ -26,7 +26,7 @@ values from the data.If false, the mechanism should leave missing values as `NA`
 \item{object}{Object, the dpHistogram object for the given variable (used it access and assign variable type)}
 }
 \value{
-a vector of histogram bins. Character vector for categorical variables. Numeric 
+a vector of histogram bins. Character vector for categorical variables. Numeric
    vector for logical, numeric, and integer variables.
 }
 \description{
@@ -36,8 +36,8 @@ Determine the bins of the histogram based on the inputs from the user
 If the user inputs a list of bins, the input bins will override the data and will
 be released as the histogram bins. If a given bin does not exist in the data, it
 will still be released in the result. It is possible that this non-existent bin
-will still have a count, because it will be an option during data imputation in 
-the call to `fillmissing()`. If the input list of bins does not include a value 
-that exists in the data, the existing value will be changed to `NA` in the call 
+will still have a count, because it will be an option during data imputation in
+the call to `fillmissing()`. If the input list of bins does not include a value
+that exists in the data, the existing value will be changed to `NA` in the call
 to `censordata()` and will then be imputed as one of the input bins in `fillmissing()`.
 }

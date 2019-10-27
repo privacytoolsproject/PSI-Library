@@ -4,7 +4,7 @@
 \alias{snappingNoise}
 \title{Noise Generator for Snapping Mechanism}
 \usage{
-snappingNoise(true_val, n, sens, epsilon, B)
+snappingNoise(true_val, n, sens, epsilon, min_B)
 }
 \arguments{
 \item{true_val}{True value of the parameter.}
@@ -15,7 +15,7 @@ snappingNoise(true_val, n, sens, epsilon, B)
 
 \item{epsilon}{Desired level of differential privacy}
 
-\item{B}{Bound such that the true value should lie within [-B, B]
+\item{min_B}{Minimum bound B such that the true value is guaranteed to be within [-B, B]
 
 noise <- snappingNoise(true_val = 50, sens = 5e-4, epsilon = 1e-3, B = 200)}
 }

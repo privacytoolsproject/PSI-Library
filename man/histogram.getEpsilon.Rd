@@ -10,20 +10,20 @@ histogram.getEpsilon(mechanism, n.bins, n, accuracy, delta = 10^-6,
 \arguments{
 \item{mechanism}{A string indicating the mechanism that will be used to construct the histogram}
 
-\item{n.bins}{A numeric vector of length one specifying the number of cells 
+\item{n.bins}{A numeric vector of length one specifying the number of cells
 in which to tabulate values.}
 
 \item{n}{A numeric vector of length one specifying the number of
 observations in the data.}
 
-\item{accuracy}{A numeric vector representing the accuracy needed to 
+\item{accuracy}{A numeric vector representing the accuracy needed to
 guarantee (percent).}
 
-\item{delta}{The probability of an arbitrary leakage of information from 
-the data. Should be of length one and should be a very small value. 
+\item{delta}{The probability of an arbitrary leakage of information from
+the data. Should be of length one and should be a very small value.
 Default to 10^-6.}
 
-\item{alpha}{A numeric vector of length one specifying the numeric 
+\item{alpha}{A numeric vector of length one specifying the numeric
 statistical significance level. Default to 0.05.}
 }
 \value{

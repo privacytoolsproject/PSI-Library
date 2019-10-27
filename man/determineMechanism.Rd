@@ -10,10 +10,10 @@ determineMechanism(var.type, rng, bins, n.bins, granularity)
 \item{var.type}{Character, the variable type.}
 
 \item{rng}{Numeric, a priori estimate of the lower and upper bounds of a
-variable taking numeric values. Ignored for categorical types. Maybe be 
+variable taking numeric values. Ignored for categorical types. Maybe be
 null for numeric or integer types, in which case the stability mechanism is used.}
 
-\item{bins}{Character or numeric, the available bins or levels of a variable. 
+\item{bins}{Character or numeric, the available bins or levels of a variable.
 Character for categorical variables, a vector of numbers for numeric variables.}
 
 \item{n.bins}{Integer, the number of bins to release.}

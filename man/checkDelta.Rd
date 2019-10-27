@@ -19,10 +19,10 @@ This method is to send the user a warning message if they entered a delta value
 that will not be used.
 }
 \details{
-If the mechanism is NOT the stabiltiy mechanism and the user entered a delta value, 
-send a warning message saying the delta value with not be used and set the delta 
-value to NULL. If the stability mechanism is being used and the user entered a 
-delta value, set it as the delta value (the value of delta will be checked in the 
-stability mechanism). If the stability mechanism is being used and the user did 
+If the mechanism is NOT the stabiltiy mechanism and the user entered a delta value,
+send a warning message saying the delta value with not be used and set the delta
+value to NULL. If the stability mechanism is being used and the user entered a
+delta value, set it as the delta value (the value of delta will be checked in the
+stability mechanism). If the stability mechanism is being used and the user did
 not enter a delta value, set the delta to the default value (2^-30).
 }

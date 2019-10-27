@@ -18,6 +18,6 @@ Histogram with counts for each level of \code{x}.
 }
 \description{
 Function to evaluate a histogram for numeric and categorical types. This function
-is used internally by \code{dpHistogram} to evaluate the true histogram prior to 
+is used internally by \code{dpHistogram} to evaluate the true histogram prior to
 perturbation.
 }

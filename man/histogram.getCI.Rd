@@ -9,7 +9,7 @@ histogram.getCI(release, n.bins, n, accuracy)
 \arguments{
 \item{release}{A numeric vector with a noisy estimate of bin counts.}
 
-\item{n.bins}{A numeric vector of length one specifying the number of cells 
+\item{n.bins}{A numeric vector of length one specifying the number of cells
 in which to tabulate values.}
 
 \item{n}{A numeric vector of length one specifying the number of
@@ -27,8 +27,8 @@ release, given the accuracy.
 \details{
 A confidence interval indicates the range in which we estimate the true value of a
 statistic to be. In this case, the confidence interval indicates the range in which
-the true count for each histogram bin could be. To give an example: say a 
-differentially private release of a histogram bucket has a count of 5. Say the 
-confidence interval for that bucket is [3,7]. We can say "we are 95% confident that 
+the true count for each histogram bin could be. To give an example: say a
+differentially private release of a histogram bucket has a count of 5. Say the
+confidence interval for that bucket is [3,7]. We can say "we are 95% confident that
 the true count of this histogram bin is between 3 and 7."
 }

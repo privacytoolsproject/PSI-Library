@@ -29,6 +29,8 @@ the range provided in \code{rng} is used.}
 
 \item{n.boot}{Integer, the number of bootstrap replications if using the bootstrap
 bootstrap mechanism, ignored otherwise. Default 20.}
+
+\item{gamma}{Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.}
 }
 \description{
 Differentially private mean

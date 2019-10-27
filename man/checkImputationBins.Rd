@@ -19,7 +19,7 @@ a list of the imputation bins that will be used for `fillMissing()`.
 \description{
 Check that the entered imputation bins are a subset of the histogram bins. If yes, return
 the entered imputation bins, which will be used as the imputation bins for the call
-to the utility function `fillMissing()`. If not, return the histogram bins. 
+to the utility function `fillMissing()`. If not, return the histogram bins.
 If the imputation bins are NULL, default to the histogram bins. The histogram bins may be
 NULL, in which case the stability mechanism will be used to determine the histogram bins and
 imputation bins.

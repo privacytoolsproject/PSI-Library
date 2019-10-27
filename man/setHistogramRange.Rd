@@ -14,7 +14,7 @@ setHistogramRange(rng, var.type, bins)
 \item{delta}{The variable type of the data}
 }
 \value{
-The 2-tuple that will be used as the range for the histogram when 
+The 2-tuple that will be used as the range for the histogram when
 calculating sensitivity, censoring data, and imputing values.
 }
 \description{

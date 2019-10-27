@@ -25,6 +25,8 @@
 the range provided in \code{rng} is used.}
 
 \item{alpha}{Numeric, the level of statistical significance. Default 0.05.}
+
+\item{gamma}{Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.}
 }
 \description{
 Differentially private variance

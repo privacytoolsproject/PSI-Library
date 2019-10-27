@@ -23,7 +23,7 @@ variable taking numeric values. Ignored for categorical types.}
 
 \item{n.bins}{Integer, the number of bins to release.}
 
-\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used 
+\item{granularity}{Numeric, the width of each histogram bin (i.e. the inverse of `n.bins`). Used
 to calculate histogram bins in comination with `rng`.}
 
 \item{alpha}{Numeric, level of statistical significance, default 0.05.}
