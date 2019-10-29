@@ -122,17 +122,17 @@ dpTree$methods(
 })
 
 dpTree$methods(
-    postProcess = function(out, counts) {
+    postProcess = function(out) {
+      
         out$epsilon <- .self$epsilon
         out$globalEps <- .self$globalEps
         out$accuracy <- .self$accuracy
         out$variable <- variable
         out$bins <- .self$binsByLevel
         
+        out$optimalCounts <- optimalCount(out$release)
+        out$optimalInverseVariance <
         
-        # out$release <- treePostFormatRelease(out$release)
-        # ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
-        # out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))
         # ellipsisVals <- getFuncArgs(list(...), treePostCDF)
         # out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))
         # out$mean <- treePostMean(out$cdf, rng)

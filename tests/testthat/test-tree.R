@@ -18,7 +18,10 @@ test_that('Tree workflow runs', {
   x <- data.frame(x)
   #will raise warning due to high epsilon
   stat <- expect_warning(dpTree$new('numeric', 'x', 10, 3, c(0,10), globalEps=10000))
-  out <- stat$release(x)$release
+
+  o <- stat$release(x)
+  print(o$optimalCounts)
+  out <- o$release
   
   expect_equal(length(out), 4)
   expect_equal(out[[1]], 10)
