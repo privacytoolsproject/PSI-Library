@@ -1,3 +1,5 @@
+#### Optimal Post-Processed Counts ####
+
 #' Calculates variance of Laplace noise. 
 #' 
 #' Recall that the variance of the Laplace distribution is 2b^2, where b is the classic
@@ -236,3 +238,17 @@ optimalPostProcess <- function(tree, epsilon){
   return(out)
 }
 
+### Post-Processed CDF ###
+
+cdfHelper <- function(){
+  # split range in half
+  
+}
+
+treePostCDF <- function(counts, gran){
+  # check if granularity is less than tree granularity and if so raise warning
+  
+  # get range of root
+  
+  
+}
