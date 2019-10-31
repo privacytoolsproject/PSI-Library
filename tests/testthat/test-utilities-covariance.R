@@ -1,6 +1,11 @@
 library(PSIlence)
 context('utilities-covariance')
 
+test_that('lowerTriangleSize is correct', {
+  expect_equal(lowerTriangleSize(c('a','b','c')),6)
+  expect_equal(lowerTriangleSize(c('a','b','c','d')), 10)
+})
+
 test_that('true covariance function is correct', {
     x1 <- c(0,5,3)
     x2 <- c(1,2,3)
