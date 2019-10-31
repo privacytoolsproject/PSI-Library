@@ -1,9 +1,9 @@
 #' Release additional model coefficients from DP covariance matrix
-#' 
-#' Function to extract regression coefficients using the differentially private covariance matrix 
+#'
+#' Function to extract regression coefficients using the differentially private covariance matrix
 #'    via the sweep operator. This is the function to obtain coefficients for additional models
-#'    after the \code{covariance.release()} function has already been called. 
-#' 
+#'    after the \code{covariance.release()} function has already been called.
+#'
 #' @param formula Formula, regression formula used on data
 #' @param release Numeric, private release of covariance matrix
 #' @param n Integer, indicating number of observations
@@ -12,9 +12,9 @@
 coefficient.release <- function(formula, release, n) {
   intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
   coefficients <- linear.reg(formula, release, n, intercept)
-  release <- list(name='Linear regression', 
-                  n=n, 
-                  formula=formula, 
+  release <- list(name='Linear regression',
+                  n=n,
+                  formula=formula,
                   coefficients=coefficients)
   return(release)
 }
@@ -26,7 +26,7 @@ coefficient.release <- function(formula, release, n) {
 #'    observations in the data frame.
 #' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
 #'    each of P variables in the data frame, dimensions Px2.
-#' @param intercept A logical vector of length one indicating whether an 
+#' @param intercept A logical vector of length one indicating whether an
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
@@ -43,13 +43,42 @@ covariance.sensitivity <- function(n, rng, intercept) {
   return(sensitivity)
 }
 
+#' Function to get maximum covariance (in terms of absolute value) for each pair of variables
+#'
+#' @param n A numeric vector of length one specifying the number of
+#'    observations in the data frame.
+#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
+#'    each of P variables in the data frame, dimensions Px2.
+#' @param intercept A logical vector of length one indicating whether an
+#'    intercept should be added prior to evaluating the inner product x'x.
+#' @return The maximum covariance (in terms of absolute value) for each pair of variables
+#'
+covariance.min_B <- function(n, rng, intercept) {
+  min_Bs <- c()
+
+  # store size of range of each variable
+  diffs <- apply(rng, 1, diff)
+  if (intercept) {
+    diffs <- c(1, diffs)
+  }
+
+  # create list of min_Bs corresponding to lower triangular matrix of covariances
+  for (i in 1:length(diffs)) {
+    for (j in i:length(diffs)) {
+      min_B <- (n/(n-1)) * diffs[i] * diffs[j] / 4
+      min_Bs <- c(min_Bs, min_B)
+    }
+  }
+  return(min_Bs)
+}
+
 
 #' Function to convert unique private covariances into symmetric matrix
 #'
-#' @param release Differentially private release of elements in lower triangle 
+#' @param release Differentially private release of elements in lower triangle
 #'    of covariance matrix.
-#' @param columns A character vector indicating columns in the private 
-#'    covariance to be included in the output. Length should be equal to the 
+#' @param columns A character vector indicating columns in the private
+#'    covariance to be included in the output. Length should be equal to the
 #'    number of columns the user wants to include.
 #' @return A symmetric differentially private covariance matrix.
 #'
@@ -67,13 +96,13 @@ covariance.formatRelease <- function(release, columns) {
 
 #' Function to perform linear regression using private release of covariance matrix
 #'
-#' @param release Differentially private release of elements in lower triangle 
+#' @param release Differentially private release of elements in lower triangle
 #'    of covariance matrix.
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
-#' @param intercept Logical indicating whether the intercept is included in 
+#' @param intercept Logical indicating whether the intercept is included in
 #'    \code{release}.
-#' @param formula A list of the regression equations to be performed on the 
+#' @param formula A list of the regression equations to be performed on the
 #'    covariance matrix.
 #' @return Linear regression coefficients and standard errors for all specified
 #'    \code{formula}.
@@ -112,15 +141,17 @@ fun.covar <- function(x, intercept) {
 #'
 #' @include mechanism.R
 #' @include mechanism-laplace.R
+#' @include mechanism-snapping.R
 
 dpCovariance <- setRefClass(
   Class = 'dpCovariance',
-  contains = 'mechanismLaplace'
+  contains = c('mechanismLaplace', 'mechanismSnapping'),
+  fields = list(gamma = 'numeric')
 )
 
 dpCovariance$methods(
-  initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL, 
-                        intercept=FALSE, formula=NULL, delta=1e-5) {
+  initialize = function(mechanism, var.type, n, epsilon, columns, rng, impute.rng=NULL,
+                        intercept=FALSE, formula=NULL, delta=1e-5, gamma = 0.05, ...) {
     .self$name <- 'Differentially private covariance matrix'
     .self$mechanism <- mechanism
     .self$var.type <- var.type
@@ -128,9 +159,12 @@ dpCovariance$methods(
     .self$epsilon <- epsilon
     .self$delta <- delta
     .self$rng <- rng
-    
+    .self$gamma <- gamma
+
+    .self$min_B <- covariance.min_B(n, rng, intercept)
+
     checkepsilon(epsilon)
-    
+
     if (is.null(impute.rng)) {
       .self$impute.rng <- rng
     } else {
@@ -138,7 +172,7 @@ dpCovariance$methods(
     }
     .self$formula <- formula
     .self$intercept <- intercept
-    if (.self$intercept) { 
+    if (.self$intercept) {
       .self$columns <- c('intercept', columns)
     } else {
       .self$columns <- columns
@@ -146,16 +180,15 @@ dpCovariance$methods(
   })
 
 dpCovariance$methods(
-  release = function(data) {
+  release = function(data, ...) {
     x <- data[columns];
     sens <- covariance.sensitivity(n, rng, intercept)
     .self$result <- export(mechanism)$evaluate(fun=fun.covar, x=x, sens=sens, postFun=.self$postProcess,
-                                               formula=formula, columns=columns, intercept=intercept)
+                                               formula=formula, columns=columns, intercept=intercept, ...)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
-    
     out$release <- covariance.formatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {

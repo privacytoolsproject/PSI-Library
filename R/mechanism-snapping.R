@@ -38,11 +38,7 @@ mechanismSnapping$methods(
     true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
     scale <- sens / .self$epsilon
 
-    # TODO: think more about vectors of noise -- might need to loop over true.val and set
-    #       B separately for each
-
-    # TODO: Below is attempt to appropriately set B for each type of function for which the snapping mechanism might be used.
-    #       Need to check further with someone (Ira maybe?) about how best to do this.
+    # TODO: need to check that this is creating vector correctly
     n = length(true.val)
     release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, .self$min_B)
     out <- list('release' = release)

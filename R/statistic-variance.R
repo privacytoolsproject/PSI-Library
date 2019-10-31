@@ -55,7 +55,7 @@ dpVariance$methods(
         .self$alpha <- alpha
         .self$gamma <- gamma
 
-        .self$min_B <- (abs(.self$rng[1] - .self$rng[2])/2)^2
+        .self$min_B <- (.self$n/(.self$n-1))*(abs(.self$rng[1] - .self$rng[2])/2)^2
 
         if (mechanism == 'mechanismSnapping') {
             reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))

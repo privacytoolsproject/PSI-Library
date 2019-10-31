@@ -54,13 +54,22 @@ histogram.getAccuracy <- function(mechanism, n.bins, n, epsilon, delta=10^-6, al
  	acc <- NULL
 	if(mechanism == 'mechanismStability'){
 		acc <- (2*log(2/(alpha*delta)) /epsilon) + 1
-	}
-	else{
+	} else if (mechanism == 'mechanismLaplace'){
 	    acc <- laplace.getAccuracy(sensitivity, epsilon, alpha)
-	}
+	} else if (mechanism == 'mechanismSnapping'){
+        reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
+        # create dummy version of Snapping Mechanism object in order to get epsilon/accuracy guarantees
+        snap_obj <- Snapping_Mechanism(mechanism_input = 0,
+                                       sensitivity = .self$sens,
+                                       epsilon = epsilon,
+                                       accuracy = accuracy,
+                                       alpha = alpha,
+                                       min_B = .self$min_B,
+                                       gamma = gamma)
+        acc <- snap_obj$accuracy
+    }
 	return(acc)
 }
-
 
 #' Histogram epsilon
 #'
@@ -93,9 +102,20 @@ histogram.getEpsilon <- function(mechanism, n.bins, n, accuracy, delta=10^-6, al
 	if(mechanism == 'mechanismStability'){
 		eps <- 2*log(2/(alpha*delta)) /accuracy
 	}
-	else{
+	else if (mechanism == 'mechanismLaplace'){
 	    eps <- laplace.getEpsilon(sensitivity, accuracy, alpha)
-	}
+	} else if (mechanism == 'mechanismSnapping') {
+        reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
+        # create dummy version of Snapping Mechanism object in order to get epsilon/accuracy guarantees
+        snap_obj <- Snapping_Mechanism(mechanism_input = 0,
+                                       sensitivity = .self$sens,
+                                       epsilon = epsilon,
+                                       accuracy = accuracy,
+                                       alpha = alpha,
+                                       min_B = .self$min_B,
+                                       gamma = gamma)
+        eps <- snap_obj$epsilon
+    }
 	return(eps)
 }
 
@@ -718,6 +738,7 @@ setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
 #'    imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
 #'    histogram will have 3 bins: 0, 1, and NA.
 #' @param n.boot Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)
+#' @param gamma Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.
 #'
 #'
 #' @import methods
@@ -727,10 +748,11 @@ setNumHistogramBins <- function(n.bins, granularity, var.type, bins) {
 #' @include mechanism.R
 #' @include mechanism-laplace.R
 #' @include mechanism-stability.R
+#' @include mechanism-snapping.R
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',
-    contains = c('mechanismLaplace', 'mechanismStability')
+    contains = c('mechanismLaplace', 'mechanismStability', 'mechanismSnapping')
 )
 
 dpHistogram$methods(
@@ -760,6 +782,8 @@ dpHistogram$methods(
         .self$granularity <- granularity # may be null
         .self$boot.fun <- boot.hist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
+
+        .self$min_B <- n
 
         # if the mechanism used is NOT the stability mechanism:
         # 1) determine the bins of the histogram. (If the mechanism is
@@ -797,9 +821,9 @@ dpHistogram$methods(
 })
 
 dpHistogram$methods(
-    release = function(data) {
+    release = function(data, ...) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(fun.hist, x, .self$sens, .self$postProcess)
+        noisy <- export(mechanism)$evaluate(fun.hist, x, .self$sens, .self$postProcess, ...)
         .self$result <- noisy
 })
 

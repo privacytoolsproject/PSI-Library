@@ -144,7 +144,7 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 #' @param epsilon Desired level of differential privacy
 #' @param min_B Minimum bound B such that the true value is guaranteed to be within [-B, B]
 #'
-#' noise <- snappingNoise(true_val = 50, sens = 5e-4, epsilon = 1e-3, B = 200)
+#' noise <- snappingNoise(true_val = 50, sens = 5e-4, epsilon = 1e-3, min_B = 200)
 #' @rdname snappingNoise
 #' @export
 snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
@@ -154,13 +154,23 @@ snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
     # initialize noise vector
     noise <- c()
 
+    # print(paste0('true_val: ', length(true_val)))
+    # print(paste0('sens: ', length(sens)))
+    # print(paste0('epsilon: ', length(epsilon)))
+    # print(paste0('min_B: ', length(min_B)))
+
+    # TODO: Talk to Ira about fixing this, but hacking together handling of epsilon for now
+    if (length(epsilon) == 1) {
+        epsilon <- rep(epsilon, times = n)/n
+    }
+
     for (i in 1:n) {
         # intialize snapping mechanism object
         # TODO: should sens, epsilon, B be able to vary by value of true_val?
         snapping_mech <- Snapping_Mechanism(mechanism_input = true_val[[i]],
-                                            sensitivity = sens,
-                                            epsilon = epsilon,
-                                            min_B = min_B)
+                                            sensitivity = sens[[i]],
+                                            epsilon = epsilon[[i]],
+                                            min_B = min_B[[i]])
 
         # calculate and return noise (as well as epsilon and accuracy)
         noise[[i]] <- snapping_mech$get_snapped_noise()
