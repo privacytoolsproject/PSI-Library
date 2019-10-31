@@ -1,0 +1,78 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amsmath, amssymb, amsthm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand{\lap}{\text{Lap}}
+\newcommand{\pr}{\text{Pr}}
+
+\begin{document}
+
+\begin{definition}
+Let $z$ be the true value of the statistic and let $X$ be the random variable the noisy release is drawn from, i.e. $X = z + c$ where $c \sim \lap(\lambda)$. Let $\alpha$ be the statistical significance level, and let $Y = \vert X-z \vert.$ Then, accuracy $a$ is the $a$ s.t.
+$$ \alpha = \pr[Y > a].$$
+\end{definition}
+
+\begin{theorem}
+The accuracy of an $\epsilon$-differentially private statistic with sensitivity $s$, at statistical significance level $\alpha$ is
+$$ a = \frac{s}{\epsilon}\ln(1/\alpha).$$
+\end{theorem}
+
+\begin{proof}
+Recall that the probability density function $f$ of the Laplace distribution, for $x \sim X$ with location parameter $\mu$ and scaling parameter $\lambda$ is defined to be
+
+$$ f(x) = \frac{1}{2\lambda}e^{\frac{-\vert x-\mu \vert}{ \lambda}}$$
+
+Then, since the pdf $g$ of $Y$ is the same as the folded pdf of $X$, shifted over by $\mu$ and doubled,
+
+$$ g(y) = \frac{1}{\lambda}e^{-y/\lambda}.$$\
+
+Then, 
+
+\begin{align*}
+\alpha &= \pr[Y>a] \\
+	&= 1 - \pr[Y\le a]\\
+	&= 1 - \int_{-\infty}^a g(y) dy \\
+	&= 1 - \int_0^a g(y) dy \\
+	&= 1 - (1-e^{-a/\lambda})
+\end{align*}
+
+Solving for $a$ gives $a = \lambda \ln (1/\alpha)$. Then, since 
+
+$$\lambda = \frac{s}{\epsilon},$$
+
+$$ a = \frac{s}{\epsilon}\ln(1/\alpha) $$
+\end{proof}
+
+\begin{lemma}
+An $\epsilon$-differentially private histogram with sensitivity 2 has accuracy
+$$ a = \frac{2}{\epsilon}\ln(1/\alpha)$$
+\end{lemma}
+
+\begin{theorem}
+An $(\epsilon,\delta)$-differentially private histogram using the stability mechanism has accuracy
+$$ a = \frac{2}{\epsilon}\ln(\frac{2}{\alpha\delta})$$
+\end{theorem}
+
+\begin{proof}
+Recall that the stability mechanism sets any counts smaller than 
+$$ \frac{2}{\epsilon} \ln(2/\delta) + 1 $$
+to 0. Then, each count has accuracy bound by 
+
+\begin{align*}
+a &= \frac{2}{\epsilon}\ln(1/\alpha) +  \frac{2}{\epsilon}\ln(2/\delta) + 1\\
+	&= \frac{2}{\epsilon} \ln(\frac{2}{\alpha\delta}) + 1
+\end{align*}
+
+\end{proof}
+\end{document}  

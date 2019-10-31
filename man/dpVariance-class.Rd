@@ -6,13 +6,17 @@
 \alias{dpVariance}
 \title{Differentially private variance}
 \arguments{
+<<<<<<< HEAD
 \item{mechanism}{Character, the privacy mechanism. For \code{dpVariance}, one
 of \code{c('mechanismLaplace', 'mechanismSnapping')}.}
 
 \item{var.type}{Character, the R variable type. One of \code{c('numeric',
+=======
+\item{varType}{Character, the R variable type. One of \code{c('numeric',
+>>>>>>> b81cbb2da5cb28a55f31b1a53f7ccf3c07aa0a4b
 'integer', 'logical')}.}
 
-\item{Variable}{Character, variable name.}
+\item{variable}{Character, variable name of the variable that you wish to find variance of.}
 
 \item{n}{Integer, number of observations}
 
@@ -22,7 +26,7 @@ of \code{c('mechanismLaplace', 'mechanismSnapping')}.}
 
 \item{accuracy}{Numeric, accuracy guarantee given \code{epsilon}}
 
-\item{impute.rng}{Numeric, range within which missing values are imputed. If \code{NULL},
+\item{imputeRng}{Numeric, range within which missing values are imputed. If \code{NULL},
 the range provided in \code{rng} is used.}
 
 \item{alpha}{Numeric, the level of statistical significance. Default 0.05.}

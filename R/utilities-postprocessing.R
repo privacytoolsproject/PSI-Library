@@ -3,15 +3,15 @@
 #' @export release2json
 
 
-release2json <- function(release, nameslist){
+release2json <- function(release, namesList){
     
     k <- length(release)
     
     names <- NULL
     for(i in 1:k){
-        tempname <- nameslist[[i]] #release[[i]]$result$variable
-        if( ! (tempname %in% names) ){
-            names <- c(names, tempname)
+        tempName <- namesList[[i]] #release[[i]]$result$variable
+        if( ! (tempName %in% names) ){
+            names <- c(names, tempName)
         }
     }
     
@@ -23,7 +23,7 @@ release2json <- function(release, nameslist){
     names(initialized) <- names
     
     for(i in 1:k){
-        att <- nameslist[[i]] #release[[i]]$result$variable
+        att <- namesList[[i]] #release[[i]]$result$variable
         if(!initialized[[att]]){
             variables[[att]] <- createfields(variables[[att]], release[[i]], att)
         }
@@ -31,14 +31,38 @@ release2json <- function(release, nameslist){
     }
     
     
-    dataset_metadata<-list()
-    dataset_metadata$private <- TRUE
+    datasetMetadata<-list()
+    datasetMetadata$private <- TRUE
     
-    releasedMetadata <- list(dataset=dataset_metadata, variables=variables)
+    releasedMetadata <- list(dataset=datasetMetadata, variables=variables)
     result <- jsonlite:::toJSON(releasedMetadata, digits=8)
     
     return(result)
     
+}
+
+#' Function to create JSON file defining differentially private statistics
+
+createJSON <- function() { 
+    
+    statistics <- list(
+        'histogram', 
+        'mean'
+    )
+    
+    statJSON <- function(stat) {
+func <- list(
+  histogram=histogramGetJSON,
+  mean=meanGetJSON
+)[[stat]]
+        out <- list() 
+        out[[stat]] <- func(output.json=FALSE) 
+        return(out)
+    } 
+    
+    json.list <- list('DP Statistics' = lapply(statistics, statJSON))
+    cat(jsonlite::toJSON(json.list, pretty=TRUE), '\n', file=file.path('DP-statistics.json'))
+    return(TRUE)
 }
 
 

@@ -14,8 +14,8 @@ mechanismStability <- setRefClass(
 mechanismStability$methods(
     #' Stability Mechanism 
     #' 
-    #' Differentially private evaluation of input function “fun” with sensitivity “sens” on input data “x” using 
-    #' the stability mechanism. In general, the stability mechanism is one which takes advantage of “stable” 
+    #' Differentially private evaluation of input function `fun` with sensitivity `sens` on input data `x` using 
+    #' the stability mechanism. In general, the stability mechanism is one which takes advantage of `stable` 
     #' functions, i.e. ones where the function output is constant in some neighborhood around the input database. 
     #' In this library, the stability mechanism is implemented to be used specifically for the histogram statistic, 
     #' and should not be used for any other function except by users who are confident in their understanding of 
@@ -28,7 +28,15 @@ mechanismStability$methods(
     #' The accuracy threshold for removing bins with low counts is calculated by: \eqn{1 + (2 * ln(2 / \delta) / \epsilon)}.
     #' 
     #' @name Stability Mechanism
-    #' @references S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
+    #' @references
+    #' S. Vadhan The Complexity of Differential Privacy, Section 3.3 Releasing Stable Values p.23-24. March 2017.
+    #' 
+    #' Also discussed in: 
+    #' 
+    #' A. Smith, A. Thakurta Differentially Private Model Selection via Stability Arguments and the Robustness of the Lasso. 2013.
+    #' 
+    #' C. Dwork, J. Lei Differential Privacy and Robust Statistics. November 2008.
+    #' 
     #'
     #' @param fun function of input x to add Laplace noise to.
     #' @param x input that function fun will be evaluated on. 
@@ -42,12 +50,16 @@ mechanismStability$methods(
     #' @examples 
     #' # the function in `statistic-histogram.R` that creates a histogram from input data
     #' histogram_function <- fun.hist 
+    #' 
     #' # the data frame that holds the data we want to analyze, in this case the data is called "PUMS5extract10000"
     #' data <- data(PUMS5extract10000) 
+    #' 
     #' # the variable for which we want a histogram
     #' variable <- "age"
+    #' 
     #' # the sensitivity for the histogram, the default sensitivity for histograms is 2 
     #' sens <- 2 
+    #' 
     #' # the post-processing function to use to format the histogram release correctly
     #' post_processing_function <- dpHistogram$postProcess 
     #' 
@@ -66,28 +78,28 @@ mechanismStability$methods(
         numHistogramBins <- NULL
         imputationRange <- NULL
         histogramBins <- NULL
-        if (.self$var.type %in% c('numeric', 'integer')) {
+        if (.self$varType %in% c('numeric', 'integer')) {
             dataRange <- range(x)
-            numHistogramBins <- ifelse(is.null(.self$n.bins), .self$n / .self$granularity, .self$n.bins)
+            numHistogramBins <- ifelse(is.null(.self$nBins), .self$n / .self$granularity, .self$nBins)
             histogramBins <- seq(dataRange[1], dataRange[2], length.out=(numHistogramBins + 1))
             # set the imputation range to the detected data range to maintain privacy
             imputationRange <- dataRange
         }
         
-        x <- censordata(x, .self$var.type, dataRange, histogramBins)
-        x <- fillMissing(x, .self$var.type, impute.rng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
+        x <- censorData(x, .self$varType, dataRange, histogramBins, rngFormat)
+        x <- fillMissing(x, .self$varType, imputeRng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
         fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
-        input.vals <- c(list(x=x), fun.args)
-        true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+        inputVals <- c(list(x=x), fun.args)
+        trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
         
         # remove empty bins before noise is added (per definition of stability mechanism)
-        true.val <- true.val[true.val > 0]
+        trueVal <- trueVal[trueVal > 0]
         
         scale <- sens / .self$epsilon
-        release <- true.val + dpNoise(n=length(true.val), scale=scale, dist='laplace')
+        release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
         
         # calculate the accuracy threshold, below which histogram buckets should be removed
-        accuracyThreshold <- 1+2*log(2/delta)/epsilon
+        accuracyThreshold <- 1+2*log(2/.self$delta)/.self$epsilon
         # remove buckets below the threshold
         release <- release[release > accuracyThreshold]
         

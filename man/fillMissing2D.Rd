@@ -4,15 +4,15 @@
 \alias{fillMissing2D}
 \title{Helper function for fillMissing. Fills missing values column-wise for matrix.}
 \usage{
-fillMissing2D(x, var.type, impute.rng = NULL)
+fillMissing2D(x, varType, imputeRng = NULL)
 }
 \arguments{
 \item{x}{Numeric matrix with missing values}
 
-\item{var.type}{Variable type of input array.
+\item{varType}{Variable type of input array.
 Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.}
 
-\item{impute.rng}{Px2 matrix where the pth row contains the range
+\item{imputeRng}{Px2 matrix where the pth row contains the range
 within which the pth variable in x is imputed.}
 }
 \value{

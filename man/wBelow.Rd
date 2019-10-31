@@ -5,10 +5,10 @@
 \title{Function to evaluate weights from the noise variance and standard errors in child nodes for the 
  node of a differentially private binary tree}
 \usage{
-wBelow(inv.sigma.sq, tree, idx)
+wBelow(invSigmaSq, tree, idx)
 }
 \arguments{
-\item{inv.sigma.sq}{Inverse variance of the noise used in perturbing nodes}
+\item{invSigmaSq}{Inverse variance of the noise used in perturbing nodes}
 
 \item{tree}{Data frame with binary tree attributes and node values}
 

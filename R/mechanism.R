@@ -7,22 +7,23 @@
 #' @field mechanism Name of the mechanism
 #' @field name Name of the statistic
 #' @field variable Name of the variable
-#' @field var.type Variable type
-#' @field var.type.orig Variable type at instantiation
+#' @field varType Variable type
+#' @field varTypeOrig Variable type at instantiation
 #' @field n Number of observations
 #' @field epsilon Differential privacy parameter
 #' @field delta Differential privacy parameter
-#' @field rng A priori estimate of the variable range
+#' @field rng A priori estimate of the variable range(s).
+#' @field rngFormat One of 'vector' (for single rng input) or 'list' (for multiple rng inputs)
 #' @field result List with statistical output
 #' @field alpha Level of statistical signficance
 #' @field accuracy Accuracy guarantee of the estimate
 #' @field bins Bins
-#' @field n.bins Number of bins
+#' @field nBins Number of bins
 #' @field k Number of bins desired for the release
 #' @field error Error
-#' @field n.boot Number of bootstrap replications
-#' @field boot.fun Function passed to the bootstrap mechanism
-#' @field impute.rng The range from which to impute missing values
+#' @field nBoot Number of bootstrap replications
+#' @field bootFun Function passed to the bootstrap mechanism
+#' @field imputeRng The range from which to impute missing values
 #' @field impute Logical, impute categorical types?
 #' @field formula R formula for regression models
 #' @field columns Vector of column names
@@ -31,7 +32,7 @@
 #' @field objective Objective function for regression models
 #' @field granularity Granularity
 #' @field percentiles Percentiles evaluated by binary tree
-#' @field tree.data Binary tree attributes needed for efficient estimation
+#' @field treeData Binary tree attributes needed for efficient estimation
 
 mechanism <- setRefClass(
     Class = 'mechanism',
@@ -39,32 +40,33 @@ mechanism <- setRefClass(
         mechanism = 'character',
         name = 'character',
         variable = 'character',
-        var.type = 'character',
-        var.type.orig = 'character',
+        varType = 'character',
+        varTypeOrig = 'character',
         n = 'numeric',
         epsilon = 'numeric',
         delta = 'ANY', # not 'numeric' because it can be NULL if the Stability mechanism is not being used
         rng = 'ANY', # not 'numeric' because it can be NULL (if the Stability mechanism is being used, or the variable is logical)
+        rngFormat = 'character',
         result = 'ANY',
         alpha = 'numeric',
         accuracy = 'ANY', # not 'numeric' because can be NULL if epsilon is given
         bins = 'ANY',
-        n.bins = 'ANY', # not 'numeric' because can be NULL if granularity given
+        nBins = 'ANY', # not 'numeric' because can be NULL if granularity given
         k = 'numeric',
         error = 'numeric',
-        n.boot = 'ANY', # not 'numeric' becuase can be NULL
-        boot.fun = 'function',
-        impute.rng = 'ANY',
-        impute.bins = 'ANY',
+        nBoot = 'ANY', # not 'numeric' becuase can be NULL
+        bootFun = 'function',
+        imputeRng = 'ANY',
+        imputeBins = 'ANY',
         impute = 'logical',
         formula = 'ANY',
         columns = 'ANY',
         intercept = 'logical', 
         stability = 'logical',
         objective = 'function',
-        granularity = 'ANY', # not 'numeric' because can be NULL if n.bins given
+        granularity = 'ANY', # not 'numeric' because can be NULL if nBins given
         percentiles = 'ANY',
-        tree.data = 'ANY',
+        treeData = 'ANY',
         sens = 'numeric'
 ))
 

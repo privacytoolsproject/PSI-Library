@@ -1,7 +1,7 @@
 #' Get accuracy for Laplace statistics
 #'
 #' Function to find the accuracy guarantee of a statistic release at a given epsilon
-#' value.
+#' value. This accuracy guarantee is derived in /extra_docs/accuracy/accuracy.pdf
 #'
 #' @param sensitivity the sensitivity of the statistic
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
@@ -10,7 +10,7 @@
 #'
 #' @return Accuracy guarantee for statistic release given epsilon.
 
-laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
+laplaceGetAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
     accuracy <- log(1 / alpha) * (sensitivity / epsilon)
     return(accuracy)
 }
@@ -39,6 +39,9 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 #' Function to find the epsilon value necessary to meet a desired level of
 #' accuracy for a statistic release.
 #'
+#' This is a direct corollary of the accuracy guarantee of the accuracy derivation in
+#' /extra_docs/accuracy/accuracy.pdf
+#'
 #' @param sensitivity the sensitivity of the statistic
 #' @param accuracy A numeric vector representing the accuracy needed to
 #'    guarantee (percent).
@@ -46,7 +49,7 @@ laplace.getAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 #'
 #' @return The scalar epsilon necessary to guarantee the needed accuracy.
 
-laplace.getEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
+laplaceGetEpsilon <- function(sensitivity, accuracy, alpha=0.05) {
     epsilon <- log(1 / alpha) * (sensitivity / accuracy)
     return(epsilon)
 }
@@ -124,7 +127,7 @@ dpUnif <- function(n, seed=NULL) {
 dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
     u <- dpUnif(n, seed)
     if (dist == 'laplace') {
-        return(qlap(u, b=scale))
+        return(qLap(u, b=scale))
     } else if (dist == 'gaussian') {
         return(qnorm(u, sd=scale))
     } else if (dist == 'gamma') {
@@ -159,14 +162,8 @@ snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
     # print(paste0('epsilon: ', length(epsilon)))
     # print(paste0('min_B: ', length(min_B)))
 
-    # TODO: Talk to Ira about fixing this, but hacking together handling of epsilon for now
-    if (length(epsilon) == 1) {
-        epsilon <- rep(epsilon, times = n)/n
-    }
-
     for (i in 1:n) {
         # intialize snapping mechanism object
-        # TODO: should sens, epsilon, B be able to vary by value of true_val?
         snapping_mech <- Snapping_Mechanism(mechanism_input = true_val[[i]],
                                             sensitivity = sens[[i]],
                                             epsilon = epsilon[[i]],
@@ -188,9 +185,9 @@ snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
 #' @return Random draws from Laplace distribution
 #' @examples
 #'
-#' rlap(size=1000)
+#' rLap(size=1000)
 #' @export
-rlap = function(mu=0, b=1, size=1) {
+rLap = function(mu=0, b=1, size=1) {
     p <- runif(size) - 0.5
     draws <- mu - b * sgn(p) * log(1 - 2 * abs(p))
     return(draws)
@@ -207,15 +204,15 @@ rlap = function(mu=0, b=1, size=1) {
 #' @examples
 #'
 #' x <- seq(-3, 3, length.out=61)
-#' dlap(x)
+#' dLap(x)
 #' @export
-dlap <- function(x, mu=0, b=1) {
+dLap <- function(x, mu=0, b=1) {
     dens <- 0.5 * b * exp(-1 * abs(x - mu) / b)
     return(dens)
 }
 
 
-#' LaPlace Cumulative Distribution Function
+#' Laplace Cumulative Distribution Function
 #'
 #' Determines the probability a draw from a LaPlace distribution is less than
 #'    or equal to the specified value.
@@ -228,10 +225,10 @@ dlap <- function(x, mu=0, b=1) {
 #' @examples
 #'
 #' x <- 0
-#' plap(x)
-#' @rdname plap
+#' pLap(x)
+#' @rdname pLap
 #' @export
-plap <- function(x, mu=0, b=1) {
+pLap <- function(x, mu=0, b=1) {
     cdf <- 0.5 + 0.5 * sgn(x - mu) * (1 - exp(-1 * (abs(x - mu) / b)))
     return(cdf)
 }
@@ -245,9 +242,9 @@ plap <- function(x, mu=0, b=1) {
 #' @return Quantile function
 #' @examples
 #' probs <- c(0.05, 0.50, 0.95)
-#' qlap(probs)
+#' qLap(probs)
 #' @export
-qlap <- function(p, mu=0, b=1) {
+qLap <- function(p, mu=0, b=1) {
     q <- ifelse(p < 0.5, mu + b * log(2 * p), mu - b * log(2 - 2 * p))
     return(q)
 }

@@ -9,7 +9,7 @@
 \item{mechanism}{Character, the privacy mechanism. For \code{dpMean}, one
 of \code{c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')}.}
 
-\item{var.type}{Character, the R variable type. One of \code{c('numeric',
+\item{varType}{Character, the R variable type. One of \code{c('numeric',
 'integer', 'logical')}.}
 
 \item{Variable}{Character, variable name.}
@@ -22,12 +22,12 @@ of \code{c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')}.}
 
 \item{accuracy}{Numeric, accuracy guarantee given \code{epsilon}}
 
-\item{impute.rng}{Numeric, range within which missing values are imputed. If \code{NULL},
+\item{imputeRng}{Numeric, range within which missing values are imputed. If \code{NULL},
 the range provided in \code{rng} is used.}
 
 \item{alpha}{Numeric, the level of statistical significance. Default 0.05.}
 
-\item{n.boot}{Integer, the number of bootstrap replications if using the bootstrap
+\item{nBoot}{Integer, the number of bootstrap replications if using the bootstrap
 bootstrap mechanism, ignored otherwise. Default 20.}
 
 \item{gamma}{Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.}

@@ -12,11 +12,11 @@
 #' 
 #' @param imputationRange The imputation range entered by the user
 #' @param rng The data range entered by the user
-#' @param var.type The variable type for the histogram data
+#' @param varType The variable type for the histogram data
 #' 
 #' @return the imputation range that will be used for `fillMissing()`.
 
-checkImputationRange <- function(imputationRange, rng, var.type) {
+checkImputationRange <- function(imputationRange, rng, varType) {
     # if no imputation range was entered, return the data range.
     # (Note: rng may be NULL, in which case stability mechanism will be used)
     if (is.null(imputationRange)) {
@@ -27,7 +27,7 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
     # with the minimum and maximum of the imputation range.
     # if an imputation range was entered, check that it is
     # within the data range. If it is not, clip it to be within the data range
-    if (var.type %in% c('numeric', 'integer')) {
+    if (varType %in% c('numeric', 'integer')) {
         lowerBound <- NULL
         upperBound <- NULL
         
@@ -77,7 +77,7 @@ checkImputationRange <- function(imputationRange, rng, var.type) {
 #' 
 #' @return n, if n is a positive whole number
 
-check_n_validity <- function(n) {
+checkNValidity <- function(n) {
     if ((n > 0) & (n%%1 == 0)) {
         return(n)
     } else {
@@ -98,18 +98,18 @@ check_n_validity <- function(n) {
 #' @return An ordered pair.
 #' @examples
 #'
-#' checkrange(c(1,3))
-#' checkrange(1:3)
-#' \dontrun{checkrange(1)}
-#' @rdname checkrange
+#' checkRange(c(1,3))
+#' checkRange(1:3)
+#' \dontrun{checkRange(1)}
+#' @rdname checkRange
 #' @export
-checkrange <- function(rng, var.type) {
+checkRange <- function(rng, varType) {
     if (NCOL(rng) > 1) {
         for (i in 1:nrow(rng)) {
             rng[i, ] <- sort(rng[i, ])
         }
     } else {
-        if (var.type == 'logical') {
+        if (varType == 'logical') {
             rng <- c(0,1)
         } else if (length(rng) < 2) {
             stop("range argument in error: requires upper and lower values as vector of length 2.")
@@ -135,12 +135,12 @@ checkrange <- function(rng, var.type) {
 #'
 #' @examples
 #' 
-#' checkepsilon(0.1)
-#' \dontrun{checkepsilon(-2)}
-#' \dontrun{checkepsilon(c(0.1,0.5))}
-#' @rdname checkepsilon
+#' checkEpsilon(0.1)
+#' \dontrun{checkEpsilon(-2)}
+#' \dontrun{checkEpsilon(c(0.1,0.5))}
+#' @rdname checkEpsilon
 #' @export
-checkepsilon <- function(epsilon) {
+checkEpsilon <- function(epsilon) {
     if (epsilon <= 0) {
         stop("Privacy parameter epsilon must be a value greater than zero.")
     }
@@ -151,6 +151,44 @@ checkepsilon <- function(epsilon) {
 }
 
 
+#' Check delta parameter
+#' 
+#' This method is to send the user a warning message if they entered a delta value
+#' that will not be used.
+#' 
+#' If the mechanism is NOT a mechanism that uses a delta value and the user entered a delta value, 
+#' send a warning message saying the delta value with not be used and set the delta 
+#' value to 0. If a mechanism that uses a delta value is being used and the user entered a 
+#' delta value, set it as the delta value (the value of delta will be checked in the 
+#' mechanism). If a mechanism that uses a delta value is being used and the user did 
+#' not enter a delta value, set the delta to the default value (2^-30).
+#' 
+#' @param mechanism The mechanism chosen by determineMechanism
+#' @param delta The delta value entered by the user, may be NULL
+#' 
+#' @return The value that will be used as the delta value for the statistic
+
+checkDelta <- function(mechanism, delta=NULL) {
+    # If a mechanism that uses a delta value is NOT being used, set delta to 0.
+    # If a mechanism that uses a delta value is being used, return the entered value.
+    # If the user did not enter a value, return the default value.
+    # Throw an error if the user entered a value that will not be used.
+    if (!(mechanism %in% c('mechanismStability', 'mechanismGaussian'))) {
+        if (!is.null(delta)) {
+            warning('A delta parameter has been entered, but a mechanism that uses a delta value is not being used. Setting delta to 0.')
+        }
+        return(0)
+    } else {
+        # if the stability or gaussian mechanism is being used, return the delta value
+        if (is.null(delta)) {
+            # default delta value
+            return(2^-30)
+        } else {
+            return(delta)
+        }
+    }
+}
+
 #' Censoring data
 #' 
 #' For numeric types, checks if x is in rng = (min, max) and censors values to 
@@ -158,66 +196,71 @@ checkepsilon <- function(epsilon) {
 #'    values not in `levels` are coded NA.
 #'
 #' @param x A vector of numeric or categorial values to censor.
-#' @param var_type Character indicating the variable type of \code{x}.
+#' @param varType Character indicating the variable type of \code{x}.
 #'    Possible values include: numeric, logical, ...
-#' @param rng For numeric vectors, a vector (min, max) of the bounds of the 
-#'    range. For numeric matrices with nrow N and ncol P, a Px2 matrix of 
-#'    (min, max) bounds.
+#' @param rng For x that is a numeric vector, a vector (min, max) of the bounds of the 
+#'    range. For input x that is a numeric matrices or dataframe with n columns, a list of 
+#'    (min, max) bounds of length n.
 #' @param levels For categorical types, a vector containing the levels to 
 #'    be returned.
+#' @param rngFormat For numeric types, a string describing the format of the range input. One of either
+#'    'vector' for x that is a numeric vector and rng that is a (min, max) tuple, or 'list' for x that
+#'    is a numeric matrix or dataframe with n columns and rng that is a list of (min, max) bounds of
+#'    length n.
 #' 
 #' @return Original vector with values outside the bounds censored to the bounds.
 #' @examples
 #' 
-#' censordata(x=1:10, var_type='integer', rng=c(2.5, 7))
-#' censordata(x=c('a', 'b', 'c', 'd'), var_type='character', levels=c('a', 'b', 'c'))
-#' @rdname censordata
+#' censorData(x=1:10, varType='integer', rng=c(2.5, 7))
+#' censorData(x=c('a', 'b', 'c', 'd'), varType='character', levels=c('a', 'b', 'c'))
+#' @rdname censorData
 #' @export
-censordata <- function(x, var_type, rng=NULL, levels=NULL) {
-    if (var_type %in% c('character', 'factor')) {
+censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
+
+    if (varType %in% c('character', 'factor')){
         if (is.null(levels)) {
             x <- factor(x, exclude=NULL)
         } else {
             x <- factor(x, levels=levels, exclude=NULL)
         }
-    } else {
-        if (is.null(rng)) {
-            stop('range `rng` is required for numeric types')
-        }
-        if (NCOL(x) > 1) {
-            for (j in 1:ncol(x)) {
-                rng[j, ] <- checkrange(rng[j, ], var_type)
-                x[, j][x[, j] < rng[j, 1]] <- rng[j, 1]
-                x[, j][x[, j] > rng[j, 2]] <- rng[j, 2]
+    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical')) && sapply(x, is.numeric)) {
+        if (NCOL(x) > 1 && rngFormat=='list') {
+            checkRange(rng, varType, rngFormat, expectedLength=ncol(x)) 
+            for(i in 1:NCOL(x)){
+                x[,i] <- censorData1D(x[,i], rng[[i]])
             }
+        } else if (NCOL(x)==1 && rngFormat=="vector"){
+            checkRange(rng, varType, rngFormat)
+            x <- censorData1D(x,rng)
         } else {
-            rng <- checkrange(rng, var_type)
-            x[x < rng[1]] <- rng[1]
-            x[x > rng[2]] <- rng[2]
+          stop("range Format (rngFormat) must be either 'list' or 'vector'. If range is a tuple of multiple ranges, it must be formatted as a list.")
         }
+    } else{
+      stop("Input data x and varType do not match.")
     }
     return(x)
 }
 
 
-#' Checking variable types
+#' Helper function to censor data
 #' 
-#' Verifies that the variable is an element in the set of acceptable types.
+#' Takes as input a numeric vector x of length n and replaces any values in x greater than max with max,
+#' and any values less than min with min
+#'
+#' @param x Numeric vector of length n
+#' @param rng Range of values allowed in x, as a single (min, max) tuple
+#'
+#' @return numeric vector of length n equal to x except with any values in x larger than max replaced with max
+#'  and any values in x smaller than min replaced with min.
+#'
+#' @examples
+#' censorData1D(1:7, (2,5))    #returns c(2,2,3,4,5,5,5)
+#' censorData1D(c(1,9,7,3,0), (2,5))     #returns(c(2,5,5,3,2))
 #' 
-#' @param type A character specifying the type of the variable.
-#' @param in_types A vector of acceptable types of variables.
-#' 
-#' @return The original character string indicating the variable type.
-#' @examples 
-#' 
-#' check_variable_type(type='Numeric', in_types=c('Numeric', 'Factor'))
-#' @rdname check_variable_type
-#' @export
-check_variable_type <- function(type, in_types) { 
-    if (!(type %in% in_types)) {
-        stop(paste('Variable type', type, 'should be one of', paste(in_types, collapse = ', ')))
-    } 
-    return(type)
+censorData1D <- function(x, rng){
+  x[x < rng[1]] <- rng[1]
+  x[x > rng[2]] <- rng[2]
+  return(x)
 }
 
 
@@ -236,12 +279,12 @@ check_variable_type <- function(type, in_types) {
 #' @return Logical form of \code{x} coded 0-1.
 #' @examples
 #' 
-#' make_logical(sample(c('cat', 'dog'), size=8, replace=TRUE))
-#' make_logical(sample(c(0, 1), size=8, replace=TRUE))
-#' make_logical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
-#' @rdname make_logical
+#' makeLogical(sample(c('cat', 'dog'), size=8, replace=TRUE))
+#' makeLogical(sample(c(0, 1), size=8, replace=TRUE))
+#' makeLogical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
+#' @rdname makeLogical
 #' @export
-make_logical <- function(x) {
+makeLogical <- function(x) {
     if (!length(unique(x)) <= 2) { # how to handle if contains 1 value only?
         stop('Variable has more than two values')
     }
@@ -255,41 +298,40 @@ make_logical <- function(x) {
     return(x)
 }
 
-
 #' Scaling helper function for fillMissing
 #' 
 #' Takes input array and scales to upper and lower bounds, which are either defined by lower and upper or calculated depending on
-#' the type of variable. (Note that input array will always be numeric; var.type refers to the variable type of the input array in
+#' the type of variable. (Note that input array will always be numeric; varType refers to the variable type of the input array in
 #' the fillMissing function.)
 #' 
 #' @param vals Input array of values to scale Type: numeric array
-#' @param var.type Variable type of input array to fillMissing function; affects how scaling occurs. 
+#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs. 
 #'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
 #' @param lower Lower bound for scaling. Type: numeric
 #' @param upper Upper bound for scaling. Type: numeric
 #' @param categories List of categories. Type: factor
 #'
-#' @return Array of values, either characters, integers, logicals, numerics depending on var.type, scaled according to either the 
-#' number of categories if var.type='factor' or 'character', or based on lower and upper when var.type='logical','numeric', or 'integer'.
+#' @return Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the 
+#' number of categories if varType='factor' or 'character', or based on lower and upper when varType='logical','numeric', or 'integer'.
 #'
-scaleValues = function(vals, var.type, lower=NULL, upper=NULL, categories=NULL) {
-    if (var.type %in% c('character', 'factor')) { 
+scaleValues = function(vals, varType, lower=NULL, upper=NULL, categories=NULL) {
+    if (varType %in% c('character', 'factor')) { 
         lower <- 1
         upper <- length(categories)
     }
     
-    if (var.type == 'logical') {       # logical values can only be 0 or 1 so set bounds accordingly
+    if (varType == 'logical') {       # logical values can only be 0 or 1 so set bounds accordingly
         lower <- 0
         upper <- 2                       # upper bound of 2 not 1 because as.integer always rounds down.
     }
     
     out <- vals * (upper - lower) + lower  # scale uniform random numbers based on upper and lower bounds
     
-    if (var.type %in% c('logical', 'integer')) { # if logical or integer, trim output to integer values
+    if (varType %in% c('logical', 'integer')) { # if logical or integer, trim output to integer values
         out <- as.integer(out)
-    } else if(var.type == 'logical') {
+    } else if(varType == 'logical') {
         
-    } else if (var.type %in% c('character', 'factor')) { # if character or factor, assign output to categories.
+    } else if (varType %in% c('character', 'factor')) { # if character or factor, assign output to categories.
         out <- categories[as.integer(out)]
     }
     
@@ -302,13 +344,13 @@ scaleValues = function(vals, var.type, lower=NULL, upper=NULL, categories=NULL) 
 #' Imputes uniformly in the range of the provided variable.
 #'
 #' @param x Input array of missing values.
-#' @param var.type Variable type of input array to fillMissing function; affects how scaling occurs. 
+#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs. 
 #'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
 #' @param lower Lower bound for scaling. Type: numeric. Default NULL.
 #' @param upper Upper bound for scaling. Type: numeric. Default NULL.
 #' @param categories List of categories. Type: factor. Default NULL.
 #' @return Vector \code{x} with missing values imputed
-fillMissing1D <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) {
+fillMissing1D <- function(x, varType, lower=NULL, upper=NULL, categories=NULL) {
     naIndices <- is.na(x)         # indices of NA values in x
     nMissing <- sum(naIndices)    # number of missing values
     
@@ -317,27 +359,26 @@ fillMissing1D <- function(x, var.type, lower=NULL, upper=NULL, categories=NULL) 
     }
     
     u <- dpUnif(nMissing) # array of uniform random numbers of length nMissing
-    scaledVals <- scaleValues(u, var.type, lower, upper, categories) # scale uniform vals
+    scaledVals <- scaleValues(u, varType, lower, upper, categories) # scale uniform vals
     x[naIndices] <- scaledVals #assign to NAs in input array
     return(x)
 }
-
 
 #' Helper function for fillMissing. Fills missing values column-wise for matrix.
 #'
 #' Impute uniformly in the range of the provided variable
 #'
 #' @param x Numeric matrix with missing values
-#' @param var.type Variable type of input array.
+#' @param varType Variable type of input array.
 #'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
-#' @param impute.rng Px2 matrix where the pth row contains the range
+#' @param imputeRng Px2 matrix where the pth row contains the range
 #'      within which the pth variable in x is imputed.
 #' @return Matrix \code{x} with missing values imputed
 #'
 #' @seealso \code{\link{fillMissing}}
-fillMissing2D <- function(x, var.type, impute.rng=NULL) {
+fillMissing2D <- function(x, varType, imputeRng=NULL) {
     for (j in 1:ncol(x)) {
-        x[, j] <- fillMissing1D(x[, j], var.type, lower=impute.rng[j, 1], upper=impute.rng[j, 2])
+        x[, j] <- fillMissing1D(x[, j], varType, lower=imputeRng[j, 1], upper=imputeRng[j, 2])
     }
     return(x)
 }
@@ -348,7 +389,7 @@ fillMissing2D <- function(x, var.type, impute.rng=NULL) {
 #' Impute uniformly in the range of the provided variable
 #'
 #' @param x Vector with missing values to impute
-#' @param var.type Character specifying the variable type
+#' @param varType Character specifying the variable type
 #' @param lower Numeric lower bound, default NULL
 #' @param upper Numeric upper bound, default NULL
 #' @param categories Set of possible categories from which to choose,
@@ -359,26 +400,26 @@ fillMissing2D <- function(x, var.type, impute.rng=NULL) {
 #' # numeric example
 #' y <- rnorm(100)
 #' y[sample(1:100, size=10)] <- NA
-#' y_imputed <- fillMissing(x=y, var.type='numeric', lower=-1, upper=1)
+#' y_imputed <- fillMissing(x=y, varType='numeric', lower=-1, upper=1)
 #'
 #' # categorical example
 #' cats <- as.factor(c('dog', 'zebra', 'bird', 'hippo'))
 #' s <- sample(cats, size=100, replace=TRUE)
 #' s[sample(1:100, size=10)] <- NA
-#' s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
+#' s_imputed <- fillMissing(x=s, varType='factor', categories=cats)
 #'
 #' @seealso \code{\link{dpUnif}}
 #' @rdname fillMissing
 #' @export
-fillMissing = function(x, var.type, impute.rng=NULL, categories=NULL) {
-    if (var.type %in% c('numeric', 'integer', 'logical')) {
+fillMissing = function(x, varType, imputeRng=NULL, categories=NULL) {
+    if (varType %in% c('numeric', 'integer', 'logical')) {
         if (NCOL(x) > 1) {
-            x <- fillMissing2D(x, var.type, impute.rng)
+            x <- fillMissing2D(x, varType, imputeRng)
         } else {
-            x <- fillMissing1D(x, var.type, impute.rng[1], impute.rng[2])
+            x <- fillMissing1D(x, varType, imputeRng[1], imputeRng[2])
         }
     } else {
-        x <- fillMissing1D(x, var.type, categories=categories)
+        x <- fillMissing1D(x, varType, categories=categories)
     }
     return(x)
 }

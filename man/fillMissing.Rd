@@ -4,12 +4,12 @@
 \alias{fillMissing}
 \title{Fill missing values}
 \usage{
-fillMissing(x, var.type, impute.rng = NULL, categories = NULL)
+fillMissing(x, varType, imputeRng = NULL, categories = NULL)
 }
 \arguments{
 \item{x}{Vector with missing values to impute}
 
-\item{var.type}{Character specifying the variable type}
+\item{varType}{Character specifying the variable type}
 
 \item{categories}{Set of possible categories from which to choose,
 default NULL}
@@ -29,13 +29,13 @@ Impute uniformly in the range of the provided variable
 # numeric example
 y <- rnorm(100)
 y[sample(1:100, size=10)] <- NA
-y_imputed <- fillMissing(x=y, var.type='numeric', lower=-1, upper=1)
+y_imputed <- fillMissing(x=y, varType='numeric', lower=-1, upper=1)
 
 # categorical example
 cats <- as.factor(c('dog', 'zebra', 'bird', 'hippo'))
 s <- sample(cats, size=100, replace=TRUE)
 s[sample(1:100, size=10)] <- NA
-s_imputed <- fillMissing(x=s, var.type='factor', categories=cats)
+s_imputed <- fillMissing(x=s, varType='factor', categories=cats)
 
 }
 \seealso{

@@ -4,18 +4,18 @@
 \alias{estEfficiently}
 \title{Function to estimate a noisy binary tree efficiently using all available information in the tree}
 \usage{
-estEfficiently(tree, n, n.nodes, sigma, inv.sigma.sq)
+estEfficiently(tree, n, nNodes, sigma, invSigmaSq)
 }
 \arguments{
 \item{tree}{Data frame with binary tree attributes and node values}
 
 \item{n}{Number of observations in the vector represented by the binary tree}
 
-\item{n.nodes}{Number of nodes in the binary tree}
+\item{nNodes}{Number of nodes in the binary tree}
 
 \item{sigma}{Standard deviation of the noise used to perturb the estimates}
 
-\item{inv.sigma.sq}{Inverse variance of the noise used in perturbing nodes}
+\item{invSigmaSq}{Inverse variance of the noise used in perturbing nodes}
 }
 \value{
 Efficient estimate of noisy binary tree in vector form

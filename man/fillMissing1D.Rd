@@ -4,13 +4,13 @@
 \alias{fillMissing1D}
 \title{Helper function for fillMissing; fills missing values in one-dimensional array}
 \usage{
-fillMissing1D(x, var.type, lower = NULL, upper = NULL,
+fillMissing1D(x, varType, lower = NULL, upper = NULL,
   categories = NULL)
 }
 \arguments{
 \item{x}{Input array of missing values.}
 
-\item{var.type}{Variable type of input array to fillMissing function; affects how scaling occurs. 
+\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs. 
 Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.}
 
 \item{lower}{Lower bound for scaling. Type: numeric. Default NULL.}
