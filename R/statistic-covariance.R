@@ -195,10 +195,10 @@ dpCovariance$methods(
   })
 
 dpCovariance$methods(
-  release = function(data, ...) {
+  release = function(data) {
     x <- data[columns];
     .self$result <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens, postFun=.self$postProcess,
-                                               formula=formula, columns=columns, intercept=intercept, ...)
+                                               formula=formula, columns=columns, intercept=intercept)
   })
 
 dpCovariance$methods(
