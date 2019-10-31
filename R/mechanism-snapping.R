@@ -31,19 +31,15 @@ mechanismSnapping$methods(
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
   #'
   evaluate = function(fun, x, sens, postFun, ...) {
-    x <- censordata(x, .self$var.type, .self$rng, .self$bins)
-    x <- fillMissing(x, .self$var.type, impute.rng=.self$rng, categories=.self$impute.bins)
+    x <- censorData(x, .self$varType, .self$rng, .self$bins, .self$rngFormat)
+    x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    input.vals = c(list(x=x), fun.args)
-    true.val <- do.call(fun, input.vals)  # Concern: are we confident that the environment this is happening in is getting erased.
+    inputVals = c(list(x=x), fun.args)
+    trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
     scale <- sens / .self$epsilon
-
-    # TODO: need to check that this is creating vector correctly
-    n = length(true.val)
-    release <- true.val + snappingNoise(true.val, n, sens, .self$epsilon, .self$min_B)
+    release <- trueVal + snappingNoise(trueVal, n=length(trueVal), sens, .self$epsilon, .self$min_B)
     out <- list('release' = release)
     out <- postFun(out, ...)
     return(out)
   }
-
 )

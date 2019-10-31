@@ -12,7 +12,7 @@
 #  A complete derivation of the sensitivity of the covariance may be found in
 #' /extra_docs/sensitivities/covariance_sensitivity.pdf
 covarianceSensitivity <- function(n, rng, intercept) {
-    diffs <- sapply(rng, diff)
+    diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
     const <- 2*(n-1)/n
@@ -94,6 +94,7 @@ covar <- function(x, intercept) {
 #'
 #' @include mechanism.R
 #' @include mechanism-laplace.R
+#' @include mechanism-snapping.R
 #'
 #' @field epsilon       Vector of epsilon values where the ith epsilon will be used for the ith covariance calculation in flattened
 #'  lower triangle of covariance matrix.
@@ -110,7 +111,7 @@ covar <- function(x, intercept) {
 
 dpCovariance <- setRefClass(
     Class = 'dpCovariance',
-    contains = 'mechanismLaplace',
+    contains = c('mechanismLaplace', 'mechanismSnapping'),
     fields = list(
         epsilonDist = 'numeric',
         globalEps = 'numeric',
@@ -126,7 +127,7 @@ dpCovariance$methods(
                         alpha=0.05, gamma=0.05) {
 
     .self$name <- 'Differentially private covariance matrix'
-    .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
+    .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismSnapping'))
     .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES
 
 
@@ -134,12 +135,12 @@ dpCovariance$methods(
     .self$intercept <- intercept
     .self$alpha <- alpha
 
+    .self$min_B <- covarianceMinB(n, rng, intercept)
 
     .self$n <- checkN(n)
     .self$rngFormat <- 'list'
     .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns))
     .self$sens <- covarianceSensitivity(n, rng, intercept)
-
 
     checkVariableType(class(formula), c("formula", "character"), emptyOkay=TRUE)
     checkVariableType(typeof(intercept), "logical")

@@ -1,7 +1,7 @@
 #' Differentially private mean
 #'
 #' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
-#'   of \code{c('mechanismLaplace', 'mechanismBootstrap')}.
+#'   of \code{c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping')}.
 #' @param varType Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
 #' @param Variable Character, variable name.
@@ -34,10 +34,10 @@ dpMean$methods(
     initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, alpha=0.05, nBoot=20, gamma = 0.05) {
         .self$name <- 'Differentially private mean'
-        .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismBootstrap'))
+        .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismBootstrap', 'mechanismSnapping'))
         .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical'))
         .self$variable <- variable
-        .self$n <- checkN(n)
+        .self$n <- checkNValidity(n)
         .self$alpha <- checkNumeric(alpha)
         .self$rngFormat <- 'vector'
         .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=1)
@@ -47,7 +47,7 @@ dpMean$methods(
         .self$min_B <- max(abs(.self$rng[1]), abs(.self$rng[2]))
 
         if (mechanism == 'mechanismSnapping') {
-            reticulate::source_python(system.file('python', 'cc_snap.py', package = 'psilence'))
+            reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
             # create dummy version of Snapping Mechanism object in order to get epsilon/accuracy guarantees
             snap_obj <- Snapping_Mechanism(mechanism_input = 0,
                                             sensitivity = .self$sens,
@@ -58,7 +58,7 @@ dpMean$methods(
                                             gamma = gamma)
         }
 
-        checkVariableType(typeof(variable), c('character')
+        checkVariableType(typeof(variable), c('character'))
 
         if (is.null(epsilon)) {
             .self$accuracy <- accuracy
@@ -68,7 +68,7 @@ dpMean$methods(
                 .self$epsilon <- snap_obj$epsilon
             }
         } else {
-            checkepsilon(epsilon)
+            checkEpsilon(epsilon)
             .self$epsilon <- epsilon
             if (mechanism == 'mechanismLaplace'){
                 .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
