@@ -41,19 +41,23 @@ data(PUMS5extract10000)
 
 dpMeanExample <- dpMean$new(mechanism='mechanismLaplace', varType='numeric',
                       variable='income', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 250000))
-dpMeanExample$release(data)
+dpMeanExample$release(PUMS5extract10000)
+print(dpMeanExample$result)
 
 dpMeanExample2 <- dpMean$new(mechanism='mechanismLaplace', varType='logical',
                        variable='sex', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 1))
-dpMeanExample2$release(data)
+dpMeanExample2$release(PUMS5extract10000)
+print(dpMeanExample2$result)
 
 dpMeanExample3 <- dpMean$new(mechanism='mechanismSnapping', varType='numeric',
                       variable='income', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 250000))
-dpMeanExample3$release(data)
+dpMeanExample3$release(PUMS5extract10000)
+print(dpMeanExample3$result)
 
 dpMeanExample4 <- dpMean$new(mechanism='mechanismSnapping', varType='logical',
                        variable='sex', epsilon=0.1, n=nrow(PUMS5extract10000), rng=c(0, 1))
-dpMeanExample4$release(data)
+dpMeanExample4$release(PUMS5extract10000)
+print(dpMeanExample4$result)
 ```
 
 Arguments
