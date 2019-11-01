@@ -31,8 +31,7 @@ test_that('range checks throw correct error', {
                    "Input was expected to be of length  2  but is instead of length  1")
 })
 
-# make sure error thrown when n not positive or a whole number
-test_that('make sure error thrown when n not positive or a whole number',{
+test_that('error thrown when n not positive or a whole number',{
 
     expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = -1,
                                   epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
@@ -41,6 +40,36 @@ test_that('make sure error thrown when n not positive or a whole number',{
                                   epsilon = 1, columns = c("income", "educ"), rng = range, formula='x~y'),
                  "n must be a positive whole number")
 })
+
+test_that('different forms of epsilon inputs operate as intended',{
+  
+  range.income <- range(PUMS5extract10000['income'])
+  range.education <- range(PUMS5extract10000['educ'])
+  range.age <- range(PUMS5extract10000['age'])
+  range <- list(range.income, range.education, range.age)
+  
+  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                            epsilon = rep(1,6), columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
+  expect_equal(dpCov$globalEps,6)
+  
+  dpCov <- expect_warning(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                            globalEps = 6, columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
+  expect_equal(dpCov$epsilon, rep(1,6))
+  
+  dpCov <- expect_warning(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                            globalEps = 6, epsilonDist = c(0.1, 0.1, 0.1, 0.5, 0.1, 0.1), columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
+  expect_equal(dpCov$epsilon, c(0.6, 0.6, 0.6, 3, 0.6, 0.6))
+  
+  dpCov <- expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                                         epsilon = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
+
+  dpCov <- expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                                         epsilon = c(1,1,1), columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
+  
+  dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
+                                         accuracy = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
+  expect_equal(length(dpCov$epsilon), 6)
+  })
 
 ######################### Workflow tests #######################################################
 
@@ -51,7 +80,7 @@ test_that('DP covariance workflow runs', {
     range <- list(range.income, range.education, range.age)
     
     dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
-                              epsilon = c(1,1,1), columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
+                              epsilon = rep(1,6), columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
     out <- dpCov$release(PUMS5extract10000)
     expect_equal(length(out),3)
 })
@@ -63,7 +92,7 @@ test_that('coefficient release function operational in workflow', {
     range.age <- range(PUMS5extract10000['age'])
     range <- list(range.income, range.education, range.age)
     
-    eps <- c(rep(10000000000,3))
+    eps <- c(rep(10000000000,6))
 
     #Next line expected to throw warning due to high epsilon val.
     dpCov <- expect_warning(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,

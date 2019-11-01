@@ -177,7 +177,7 @@ dpCovariance$methods(
     # Option 3: Only enter global epsilon, and have it be split evenly between covariance calculations.
     else if (!is.null(globalEps)){
         .self$globalEps <- checkEpsilon(globalEps)
-        .self$epsilon <- distributeEpsilon(globalEps, nCalcs=outputLength)
+        .self$epsilon <- distributeEpsilon(.self$globalEps, nCalcs=outputLength)
         .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
     }
     # Option 4: Enter an accuracy value instead of an epsilon, and calculate individual epsilons with this accuracy.
