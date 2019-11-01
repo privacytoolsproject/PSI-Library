@@ -23,6 +23,7 @@
 #' @param nBoot Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)
 #' @param gamma Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.
 #'
+#' @param mechanism Character, one of 'mechanismLaplace', 'mechanismStability'. May be NULL, in which mechanism will be chosen automatically.
 #'
 #' @import methods
 #' @export dpHistogram
@@ -41,11 +42,16 @@ dpHistogram <- setRefClass(
 dpHistogram$methods(
     initialize = function(varType, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL,
                           bins=NULL, nBins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
-                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, ...) {
+                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, mechanism=NULL, ...) {
         .self$name <- 'Differentially private histogram'
 
         # determine  which mechanism to use based on inputs
-        .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
+        if (is.null(mechanism)){
+          .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
+        }
+        else {
+          .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismStability', 'mechanismSnapping'))
+        }
 
         # set parameters of the histogram
         .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
@@ -85,10 +91,10 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- checkAccuracy(accuracy)
-            .self$epsilon <- histogramGetEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
+            .self$epsilon <- histogramGetEpsilon(.self$mechanism, accuracy, delta, alpha, .self$sens)
         } else {
             .self$epsilon <- checkEpsilon(epsilon)
-            .self$accuracy <- histogramGetAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
+            .self$accuracy <- histogramGetAccuracy(.self$mechanism, epsilon, delta, alpha, .self$sens)
         }
 
         # get the delta parameter (will be 0 unless stability mechanism is being used)
@@ -104,7 +110,7 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data, ...) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess, ...)
+        noisy <- export(.self$mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess)
         .self$result <- noisy
 })
 
@@ -115,10 +121,10 @@ dpHistogram$methods(
         out$accuracy <- .self$accuracy
         out$epsilon <- .self$epsilon
         out$delta <- .self$delta
-        out$mechanism <- mechanism
-        if (mechanism == 'mechanismStability') out$delta <- delta
+        out$mechanism <- .self$mechanism
+        if (.self$mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
-            if (mechanism == 'mechanismLaplace') {
+            if (.self$mechanism == 'mechanismLaplace') {
                 out$intervals <- histogramGetCI(out$release, nBins, out$accuracy)
             }
         }
