@@ -36,13 +36,14 @@
 
 dpHistogram <- setRefClass(
     Class = 'dpHistogram',
-    contains = c('mechanismLaplace', 'mechanismStability', 'mechanismSnapping')
+    contains = c('mechanismLaplace', 'mechanismStability', 'mechanismSnapping'),
+    fields = list(gamma = 'numeric')
 )
 
 dpHistogram$methods(
-    initialize = function(varType, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL,
+    initialize = function(mechanism=NULL, varType, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL,
                           bins=NULL, nBins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
-                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, mechanism=NULL, ...) {
+                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, gamma = 0.05, ...) {
         .self$name <- 'Differentially private histogram'
 
         # determine  which mechanism to use based on inputs
@@ -67,6 +68,8 @@ dpHistogram$methods(
         .self$bootFun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
         .self$rngFormat <- 'vector' #if range is specified, should always be a vector of two values.
+        .self$min_B <- n
+        .self$gamma <- gamma
 
         checkVariableType(typeof(variable), 'character')
         checkVariableType(typeof(bins), c('character', 'integer', 'double', 'numeric', 'logical'), emptyOkay=TRUE)
@@ -91,10 +94,10 @@ dpHistogram$methods(
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
             .self$accuracy <- checkAccuracy(accuracy)
-            .self$epsilon <- histogramGetEpsilon(.self$mechanism, accuracy, delta, alpha, .self$sens)
+            .self$epsilon <- histogramGetEpsilon(.self$mechanism, accuracy, delta, alpha, .self$sens, .self$min_B, .self$gamma)
         } else {
             .self$epsilon <- checkEpsilon(epsilon)
-            .self$accuracy <- histogramGetAccuracy(.self$mechanism, epsilon, delta, alpha, .self$sens)
+            .self$accuracy <- histogramGetAccuracy(.self$mechanism, epsilon, delta, alpha, .self$sens, .self$min_B, .self$gamma)
         }
 
         # get the delta parameter (will be 0 unless stability mechanism is being used)
@@ -124,7 +127,7 @@ dpHistogram$methods(
         out$mechanism <- .self$mechanism
         if (.self$mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
-            if (.self$mechanism == 'mechanismLaplace') {
+            if (.self$mechanism %in% c('mechanismLaplace', 'mechanismSnapping')) {
                 out$intervals <- histogramGetCI(out$release, nBins, out$accuracy)
             }
         }
