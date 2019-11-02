@@ -84,9 +84,9 @@ dp.mean2 <- dpMean$new(mechanism='mechanismSnapping', varType='logical',
 dp.mean2$release(PUMS5extract10000)
 print(dp.mean2$result)
 
-# release variance on age
-dp.variance <- dpVariance$new(mechanism = 'mechanismSnapping', varType='numeric', variable='age',
-                        n=nrow(PUMS5extract10000), epsilon=0.1, rng=c(0,100))
+# release variance on married status
+dp.variance <- dpVariance$new(mechanism = 'mechanismSnapping', varType='logical', variable='married',
+                        n=nrow(PUMS5extract10000), epsilon=0.1, rng=c(0,1))
 dp.variance$release(PUMS5extract10000)
 print(dp.variance$result)
 
