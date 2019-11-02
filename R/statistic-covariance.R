@@ -15,7 +15,7 @@ covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
-    const <- 2*(n-1)/n
+    const <- 2/n
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
             s <- const * diffs[i] * diffs[j]

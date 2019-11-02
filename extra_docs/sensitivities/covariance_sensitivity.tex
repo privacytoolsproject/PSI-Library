@@ -237,8 +237,18 @@ Now, consider two neighboring databases $X'$ and $X''$. Say $X'$ may still be wr
 \left\vert f_{ij}(X')-f_{ij}(X'') \right\vert &\le \frac{2(n-1)}{n}(M_i - m_i)(M_j - m_j).
 \end{align*}
 
-Can get tighter maybe? (Get rid of the 2?) Try redoing analysis of Eq. \ref{eq:firstterm} with $y$ and $z$ maybe?
+%Can get tighter maybe? (Get rid of the 2?) Try redoing analysis of Eq. \ref{eq:firstterm} with $y$ and $z$ maybe?
 
+\end{proof}
+
+\begin{corollary}
+The sample covariance has sensitivity 
+$$  \frac{2}{n}(M_i - m_i)(M_j - m_j).
+ $$
+\end{corollary}
+
+\begin{proof}
+This follows directly from the above theorem, re-inserting the normalization factor of n-1.
 \end{proof}
 
 \begin{theorem}
