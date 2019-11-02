@@ -78,7 +78,7 @@ test_that('DP covariance workflow runs', {
     range.education <- range(PUMS5extract10000['educ'])
     range.age <- range(PUMS5extract10000['age'])
     range <- list(range.income, range.education, range.age)
-    
+
     dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                               epsilon = rep(1,6), columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
     out <- dpCov$release(PUMS5extract10000)
@@ -91,7 +91,7 @@ test_that('coefficient release function operational in workflow', {
     range.education <- range(PUMS5extract10000['educ'])
     range.age <- range(PUMS5extract10000['age'])
     range <- list(range.income, range.education, range.age)
-    
+
     eps <- c(rep(10000000000,6))
 
     #Next line expected to throw warning due to high epsilon val.
@@ -105,4 +105,14 @@ test_that('coefficient release function operational in workflow', {
     output <- as.numeric(coeffs$coefficients[[1]][1]) #extracts coefficient from output
     expectedOutput <- as.numeric(linreg[[1]][2])
     expect_equal(floor(output), floor(expectedOutput)) #check floor of values due to fact that there is some noise added here
+})
+
+test_that('sensitivity calculation is correct', {
+    range.sex <- range(PUMS5extract10000['sex'])
+    range.married <- range(PUMS5extract10000['married'])
+    range <- list(range.sex, range.married)
+    
+    dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000, rng=range,
+                                             globalEps = 1, columns = c("sex", "married"))
+    expect_equal(dpCov$sens, rep((2*9999)/10000, 3))
 })
