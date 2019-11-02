@@ -15,7 +15,7 @@ covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- sapply(rng, diff)
     if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
-    const <- 2*(n-1)/n
+    const <- 2/n
     for (i in 1:length(diffs)) {
         for (j in i:length(diffs)) {
             s <- const * diffs[i] * diffs[j]
@@ -144,7 +144,7 @@ dpCovariance$methods(
     # Option 3: Only enter global epsilon, and have it be split evenly between covariance calculations.
     else if (!is.null(globalEps)){
         .self$globalEps <- checkEpsilon(globalEps)
-        .self$epsilon <- distributeEpsilon(globalEps, nCalcs=outputLength)
+        .self$epsilon <- distributeEpsilon(.self$globalEps, nCalcs=outputLength)
         .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
     }
     # Option 4: Enter an accuracy value instead of an epsilon, and calculate individual epsilons with this accuracy.
