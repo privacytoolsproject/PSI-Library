@@ -114,5 +114,5 @@ test_that('sensitivity calculation is correct', {
     
     dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000, rng=range,
                                              globalEps = 1, columns = c("sex", "married"))
-    expect_equal(dpCov$sens, rep((2*9999)/10000, 3))
+    expect_equal(dpCov$sens, rep(2/10000, 3))
 })
