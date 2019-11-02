@@ -157,6 +157,25 @@ snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
     # initialize noise vector
     noise <- c()
 
+    # if statistic passes multiple values and only one sens/epsilon/min_B, fix the lengths
+    if (n > 1) {
+        if (length(sens) == 1) {
+            sens <- rep(sens, times = n)
+        }
+        if (length(epsilon) == 1) {
+            epsilon <- rep(epsilon, times = n)
+        }
+        if (length(min_B) == 1) {
+            min_B <- rep(min_B, times = n)
+        }
+    }
+
+    # print(paste0('n: ', n))
+    # print(paste0('true_val: ', true_val))
+    # print(paste0('sens: ', sens))
+    # print(paste0('epsilon: ', epsilon))
+    # print(paste0('min_B: ', min_B))
+
     for (i in 1:n) {
         # intialize snapping mechanism object
         snapping_mech <- Snapping_Mechanism(mechanism_input = true_val[[i]],
