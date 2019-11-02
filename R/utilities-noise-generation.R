@@ -153,20 +153,9 @@ dpNoise <- function(n, scale, dist, shape=NULL, seed=NULL) {
 snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
     # source snapping mechanism file
     reticulate::source_python(system.file('python', 'cc_snap.py', package = 'PSIlence'))
-    options(scipen=999)
 
     # initialize noise vector
     noise <- c()
-
-    # TODO: should be unnecessary now
-    # if (length(epsilon) == 1) {
-        # epsilon <- rep(epsilon, times = length(true_val))/length(true_val)
-    # }
-
-    # print(paste0('true_val: ', true_val))
-    # print(paste0('sens: ', sens))
-    # print(paste0('epsilon: ', epsilon))
-    # print(paste0('min_B: ', min_B))
 
     for (i in 1:n) {
         # intialize snapping mechanism object
@@ -174,10 +163,6 @@ snappingNoise <- function(true_val, n, sens, epsilon, min_B) {
                                             sensitivity = sens[[i]],
                                             epsilon = epsilon[[i]],
                                             min_B = min_B[[i]])
-        # snapping_mech <- Snapping_Mechanism(mechanism_input = c(true_val)[i],
-        #                                     sensitivity = c(sens)[i],
-        #                                     epsilon = c(epsilon)[i],
-        #                                     min_B = c(min_B)[i])
 
         # calculate and return noise (as well as epsilon and accuracy)
         noise[[i]] <- snapping_mech$get_snapped_noise()
