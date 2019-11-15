@@ -105,17 +105,20 @@ dpTree$methods(
 dpTree$methods(
     release = function(data) {
         x <- data[, variable]
-        counts <- list(n) #n is public so the root of tree need not be noisy
-        names(counts) <- toString(.self$rng) # adding bin range to the root node
+        counts <- list(n) #n is public so the root of tree need not be noisy. Double nested just to match fact that later elements are also lists.
+        names(counts[[1]]) <- paste("[",toString(.self$rng),"]") # adding bin range to the root node
+        #counts[.self$rng]
         i <- 1
         while(i <= .self$depth){
           .self$bins <- .self$binsByLevel[[i]]   #Bins of ith row (note this is publically computable)
           noisyCount <- export(mechanism)$evaluate(funHist, x, .self$sens, (function(out) return(out)))
           # In evaluate, identity function is passed as postProcess function since we want to postprocess
           # on all of the noisy counts together.
+          print(names(noisyCount$release))
           counts <- append(counts, list(noisyCount$release))
           i <- i+1
         }
+        print(lapply(counts, names))
         #Note: postprocessing is called here instead of in the evaluate function
         out <- list('release' = counts)
         .self$result <- .self$postProcess(out)
@@ -130,8 +133,8 @@ dpTree$methods(
         out$variable <- variable
         out$bins <- .self$binsByLevel
         
-        out$optimalCounts <- optimalCount(out$release)
-        out$optimalInverseVariance <
+        out$optimalPostProcess <- optimalPostProcess(out$release, .self$epsilon)
+        #out$postCDF <- treePostCDF(out$optimalPostProcess$optimalTree)
         
         # ellipsisVals <- getFuncArgs(list(...), treePostCDF)
         # out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))

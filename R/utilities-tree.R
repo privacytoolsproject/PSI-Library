@@ -240,15 +240,88 @@ optimalPostProcess <- function(tree, epsilon){
 
 ### Post-Processed CDF ###
 
-cdfHelper <- function(){
-  # split range in half
+treePostCDF <- function(tree){
+  print('a')
+  # smallest granularity cdf possible uses leaf buckets
+  vals <- tree[length(tree)][2]
+  counts <- c()
   
+  i <- 0
+  print('b')
+  while (i < length(vals)){
+    print('c')
+    # start out with min and max values at top of tree
+    print(tree)
+    m <- tree[1][2][1]
+    M <- tree[2][2][2]
+    print('d')
+     # initialize count for i
+    count <- 0
+    # iterate through layers of tree
+    index <- 1
+    j <- 1
+    print('e')
+    while (j<=length(tree)){
+      print('f')
+      print(m)
+      print(M)
+      # determine if should traverse tree to left or right
+      mid <- m + (M-m)/2
+      print('g')
+      # if looking at leftmost node in the tree, we know empirical cdf should evaluate to 0 not to bin size.
+      if (i == 1){
+        break
+      }
+      print('h')
+      # if you don't need higher granularity, stop traversal
+      if (vals[i] == M){
+        count <- count + tree[j][1][index]
+        break
+      }
+      print('i')
+      # if at leaves of tree, record the count there
+      if (j == len(tree)-1){
+        count <- count + tree[j][1][index]
+        }
+      # print('j')
+      # if traversing left
+      else if (vals[i] <= mid){
+        # reset max value to the mid, don't add to the count
+        M <- mid
+        # set next index of node to look at in next layer
+        index <- index*2
+        # if at end of tree, record count at that node ?
+      }
+      #print('k')
+      #if traversing right, 
+      else{
+        # reset min value to the mid
+        m <- mid
+        # set to next index of node to look at in next layer
+        index <- index*2 + 1
+        count <- count + tree[j+1][0][index - 1] # add the node's left child to the count
+      } 
+      print('l')
+      j <- j + 1
+    }
+    counts <- append(counts, count) # should change this to be more R friendly
+    i <- i + 1
+  }
+  n <- tree[1][1][1] # pull public n from root of tree
+  percents <- sapply(counts, (function(c) c/n))
+  return (percents)
 }
 
-treePostCDF <- function(counts, gran){
-  # check if granularity is less than tree granularity and if so raise warning
-  
-  # get range of root
-  
-  
+cdfMedian <- function(tree, cdf){
+  if (0.5 %in% cdf){
+    i <- which(2 == tree)
+    val <- tree[length(tree)][2][i]
+  }
+  else{
+    # otherwise, estimate cdf with closest value to 0.5th percentile
+    distances <- sapply(cdf, (function(x) abs(x-0.5)))
+    i <- which(min(distances) == distances)
+    val <- tree[length(tree)][2][i]
+  }
+  return (val)
 }
