@@ -240,88 +240,84 @@ optimalPostProcess <- function(tree, epsilon){
 
 ### Post-Processed CDF ###
 
-treePostCDF <- function(tree){
-  print('a')
-  # smallest granularity cdf possible uses leaf buckets
-  vals <- tree[length(tree)][2]
+treePostCDF <- function(tree, bins){
   counts <- c()
-  
-  i <- 0
-  print('b')
-  while (i < length(vals)){
-    print('c')
+  vals <- bins[[length(bins)]]
+  i <- 1
+  while (i <= length(vals)){
     # start out with min and max values at top of tree
-    print(tree)
-    m <- tree[1][2][1]
-    M <- tree[2][2][2]
-    print('d')
-     # initialize count for i
+    m <- vals[1]
+    M <- vals[length(vals)]
+
+    #initialize count for i
     count <- 0
     # iterate through layers of tree
     index <- 1
     j <- 1
-    print('e')
-    while (j<=length(tree)){
-      print('f')
-      print(m)
-      print(M)
-      # determine if should traverse tree to left or right
-      mid <- m + (M-m)/2
-      print('g')
-      # if looking at leftmost node in the tree, we know empirical cdf should evaluate to 0 not to bin size.
-      if (i == 1){
-        break
-      }
-      print('h')
-      # if you don't need higher granularity, stop traversal
-      if (vals[i] == M){
-        count <- count + tree[j][1][index]
-        break
-      }
-      print('i')
-      # if at leaves of tree, record the count there
-      if (j == len(tree)-1){
-        count <- count + tree[j][1][index]
+    
+     while (j<=length(tree)){
+        
+        # determine if should traverse tree to left or right
+        mid <- m + (M-m)/2
+        
+        # if looking at leftmost node in the tree, we know empirical cdf should evaluate to 0 not to bin size.
+        if (i == 1){
+          count <- 0
+          break
         }
-      # print('j')
-      # if traversing left
-      else if (vals[i] <= mid){
-        # reset max value to the mid, don't add to the count
-        M <- mid
-        # set next index of node to look at in next layer
-        index <- index*2
-        # if at end of tree, record count at that node ?
-      }
-      #print('k')
-      #if traversing right, 
-      else{
-        # reset min value to the mid
-        m <- mid
-        # set to next index of node to look at in next layer
-        index <- index*2 + 1
-        count <- count + tree[j+1][0][index - 1] # add the node's left child to the count
-      } 
-      print('l')
-      j <- j + 1
+        
+        # if you don't need higher granularity, stop traversal
+        if (vals[i] == M){
+          count <- count + as.numeric(tree[[j]][index]) # as.numeric is because R coerces the result of binary ops on named items to have the name of the first thing you are coercing to.
+          break
+        }
+        
+        if (j == length(tree)){ # if at leaves of tree, record the count there
+          count <- count + as.numeric(tree[[j]][index])
+          break
+          }
+        else if (vals[i] <= mid){ # if traversing left
+          # reset max value to the mid, don't add to the count
+          M <- mid
+          # set next index of node to look at in next layer
+          index <- index*2 - 1
+        }
+        else { #if traversing right
+          # reset min value to the mid
+          m <- mid
+          # set to next index of node to look at in next layer
+          index <- index*2
+          count <- count + as.numeric(tree[[j+1]][index - 1]) # add the node's left child to the count
+        }
+        j <- j + 1
     }
-    counts <- append(counts, count) # should change this to be more R friendly
+    counts <- append(counts, count)
     i <- i + 1
   }
-  n <- tree[1][1][1] # pull public n from root of tree
-  percents <- sapply(counts, (function(c) c/n))
-  return (percents)
+  out <- c()
+  out$counts <- counts
+  out$proportions <- counts/count[length(count)] # pull final count out
+  out$bins <- vals
+  return (out)
 }
 
-cdfMedian <- function(tree, cdf){
-  if (0.5 %in% cdf){
-    i <- which(2 == tree)
-    val <- tree[length(tree)][2][i]
+cdfMedian <- function(cdf){
+  if (0.5 %in% cdf$proportions){
+    med <- cdf$bins[cdf$proportions==0.5]
   }
   else{
     # otherwise, estimate cdf with closest value to 0.5th percentile
-    distances <- sapply(cdf, (function(x) abs(x-0.5)))
+    distances <- sapply(cdf$proportions, (function(x) abs(x-0.5)))
     i <- which(min(distances) == distances)
-    val <- tree[length(tree)][2][i]
+    med <- cdf$bins[i+1]
   }
-  return (val)
+  return (med)
+}
+
+treeMean <- function(tree, bins){
+  rng <- bins[[length(bins)]] #pull highest granularity bins
+  # find midpoints of each of the ranges of the bins
+  mids <- (rng[2:length(rng)] - rng[1:length(rng)-1])/2 + rng[1:length(rng)-1]
+  meanEst <- sum(mids * tree[[length(tree)]])/tree[[1]] #estimate mean by weighting sum of bin midpoints by counts in lowest level of tree
+  return(as.numeric(meanEst))
 }

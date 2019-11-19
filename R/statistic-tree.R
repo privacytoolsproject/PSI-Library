@@ -114,11 +114,9 @@ dpTree$methods(
           noisyCount <- export(mechanism)$evaluate(funHist, x, .self$sens, (function(out) return(out)))
           # In evaluate, identity function is passed as postProcess function since we want to postprocess
           # on all of the noisy counts together.
-          print(names(noisyCount$release))
           counts <- append(counts, list(noisyCount$release))
           i <- i+1
         }
-        print(lapply(counts, names))
         #Note: postprocessing is called here instead of in the evaluate function
         out <- list('release' = counts)
         .self$result <- .self$postProcess(out)
@@ -134,14 +132,9 @@ dpTree$methods(
         out$bins <- .self$binsByLevel
         
         out$optimalPostProcess <- optimalPostProcess(out$release, .self$epsilon)
-        #out$postCDF <- treePostCDF(out$optimalPostProcess$optimalTree)
+        out$postCDF <- treePostCDF(out$optimalPostProcess$optimalTree, out$bins)
+        out$postMedian <- cdfMedian(out$postCDF)
+        out$postMean <- treeMean(out$optimalPostProcess$optimalTree, out$bins)
         
-        # ellipsisVals <- getFuncArgs(list(...), treePostCDF)
-        # out$cdf <- do.call(treePostCDF, c(list(release=out$release, rng=rng), ellipsisVals))
-        # out$mean <- treePostMean(out$cdf, rng)
-        # out$median <- treePostMedian(out$cdf)
-        # if (!is.null(percentiles)) {
-        #     out$percentiles <- treePostPercentiles(out$cdf, percentiles)
-        # }
         return(out)
 })
