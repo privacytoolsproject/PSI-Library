@@ -81,7 +81,13 @@ dpMean$methods(
     #' the \code{dpMean$release} function. 
     release = function(data, ...) {
         x <- data[, variable]
-        .self$result <- export(mechanism)$evaluate(mean, x, .self$sens, .self$postProcess, ...)
+        if (mechanism=='mechanismLaplace'){
+          .self$result <- export(mechanism)$evaluate(mean, x, .self$sens, .self$postProcess, ...)
+        }
+        else if (mechanism=='mechanismBootstrap'){
+          .self$result <- export(mechanism)$evaluate(bootMean, x, .self$sens, .self$postProcess, .self$n)
+        }
+        
 })
 
 dpMean$methods(

@@ -37,7 +37,7 @@ Syntax
 
 ```{r, eval = FALSE}
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
+x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
 dpMeanExample <- dpMean$new(mechanism='mechanismLaplace', varType='numeric', 

@@ -1,4 +1,4 @@
-.Rproj.user
+*.Rproj
 .Rhistory
 .RData
 *.Ruserdata
@@ -10,3 +10,4 @@ vignettes/*.pdf
 *.aux
 *.log
 *.synctex.gz
+.Rproj.user

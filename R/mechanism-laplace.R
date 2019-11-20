@@ -17,7 +17,6 @@ mechanismLaplace$methods(
   #' Differentially private evaluation of input function "fun" with sensitivity "sens" on input data 
   #' "x" using the Laplace mechanism.
   #' 
-  #' @name Laplace Mechanism
   #' @references C. Dwork, A. Roth The Algorithmic Foundations of Differential Privacy, Chapter 3.3 The Laplace Mechanism p.30-37. August 2014.
   #'
   #' @param fun function of input x to add Laplace noise to.
@@ -59,8 +58,8 @@ mechanismLaplace$methods(
   evaluate = function(fun, x, sens, postFun, ...) {
     x <- censorData(x, .self$varType, .self$rng, .self$bins, .self$rngFormat)
     x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
-    fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
-    inputVals = c(list(x=x), fun.args)
+    funArgs <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
+    inputVals = c(list(x=x), funArgs)
     trueVal <- do.call(fun, inputVals)  # Concern: are we confident that the environment this is happening in is getting erased.
     scale <- sens / .self$epsilon
     release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
