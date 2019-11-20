@@ -47,7 +47,7 @@ since the tree's depth $d = \lg n$.
 
 Note that since you don't need to distribute each $\eps'$ across each level of the tree, this gives much better accuracy than doing naive noise addition to each node's weight individually. The resulting tree may then be used to estimate a cumulative distribution function for the data. 
 
-As discussed in more detail in \cite{honacker}, the fact that the count at a node is equal to the composition of the sums of its child nodes, or of its parent node minus the count of the adjacent node, etc., may be leveraged to calculate a more efficient count at each node of the tree.
+As discussed in more detail in \cite{honaker}, the fact that the count at a node is equal to the composition of the sums of its child nodes, or of its parent node minus the count of the adjacent node, etc., may be leveraged to calculate a more efficient count at each node of the tree.
 
 You can recursively create an estimate of the count $t_i$ at node $i$ ``from below", which we demarcate as $t_i^-$, by setting $t_i^- = t_i$ and $\sigma(t_i^-)=\sigma^-_i$ at the leaves, then recursively define for all other nodes 
 
@@ -61,7 +61,7 @@ and
 
 $$ \sigma_i^- = \sigma_i \sqrt{w_i^-},$$
 
-which is equation 10 in \cite{honacker}.
+which is equation 10 in \cite{honaker}.
 
 Note that if each node has noise with variance $s$ added to it, then $\forall i, \sigma_i=s$, $\sigma^-(t_{2i}^-) = \sigma^-(t_{2i+1}^-)$, and $w$ will be the same for every node at depth $d$. Then, $w_i$ may be recursively defined as 
 
@@ -94,7 +94,7 @@ and
 
 $$ \sigma^+_i = \sigma_i \sqrt{w_i^+},$$
 
-which is equation 11 in \cite{honacker}.
+which is equation 11 in \cite{honaker}.
 
 Note that if each node has noise with variance $s$, then 
 
@@ -120,12 +120,12 @@ and
 
 $$ \sigma_i^* = \sigma_i^-\sqrt{w_i},$$
 
-which is equation 13 in \cite{honacker}.
+which is equation 13 in \cite{honaker}.
 
 Note that if each node has variance $s$, then the expression for the weights here is the same as the weight for estimation from above.
 
 \begin{thebibliography}{2}
-	 \bibitem[1]{honacker} Honacker, James, ``Efficient Use of Differentially Private Binary Trees," http://hona.kr/papers/files/privatetrees.pdf.
+	 \bibitem[1]{honaker} Honaker, James, ``Efficient Use of Differentially Private Binary Trees," http://hona.kr/papers/files/privatetrees.pdf.
 \end{thebibliography}
 
 \end{document}  
