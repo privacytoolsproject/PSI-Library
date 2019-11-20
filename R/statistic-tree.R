@@ -125,15 +125,19 @@ dpTree$methods(
 dpTree$methods(
     postProcess = function(out) {
       
-        out$epsilon <- .self$epsilon
-        out$globalEps <- .self$globalEps
+        out$epsilon <- .self$epsilon # epsilon used for each of the node calculations
+        out$globalEps <- .self$globalEps # global epsilon used in total
         out$accuracy <- .self$accuracy
         out$variable <- variable
         out$bins <- .self$binsByLevel
         
+        # release an optimal version of the tree that leverages the multiple levels of information to produce higher accuracy counts
         out$optimalPostProcess <- optimalPostProcess(out$release, .self$epsilon)
+        # release a cdf of the tree with highest granularity possible (equivalent to granularity of the bins in the leaf level of the tree)
         out$postCDF <- treePostCDF(out$optimalPostProcess$optimalTree, out$bins)
+        # release the median from the cdf, or a best estimate if the 50th percentile is not an option from the cdf calculation 
         out$postMedian <- cdfMedian(out$postCDF)
+        # release an estimate of the mean from the tree, using the leaf bins and counts. 
         out$postMean <- treeMean(out$optimalPostProcess$optimalTree, out$bins)
         
         return(out)
