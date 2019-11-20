@@ -76,13 +76,13 @@ test_that('cdfMedian runs correctly', {
   b <- list(c(0,2,4,6,8))
   cdf <- treePostCDF(t,b)
   med <- cdfMedian(cdf)
-  expect_equal(med, 6)
+  expect_equal(med$val, 6)
   
   t <- list(c(10), c(5,5), c(2,3,3,2))
   b <- list(c(0,2,4,6,8))
   cdf <- treePostCDF(t,b)
   med <- cdfMedian(cdf)
-  expect_equal(med, 4)
+  expect_equal(med$val, 4)
 })
 
 test_that('treeMean runs correctly', {
