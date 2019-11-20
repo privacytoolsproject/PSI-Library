@@ -269,7 +269,9 @@ optimalPostProcess <- function(tree, epsilon){
 
 ### Post-Processed CDF ###
 
-#' Generates the least noisy CDF for the tree.
+#' Empirical CDF for tree statistic.
+#' 
+#' Generates the least noisy CDF for the tree. 
 #' 
 #' Note that for any numeric histogram, you can generate an empirical CDF for each of the maximal values of the bins by counting the number of items to the
 #' left of that bin edge in the histogram. Here, we could do that by just using the histogram at the smallest level of the tree. This is not desirable
@@ -350,7 +352,9 @@ treePostCDF <- function(tree, bins){
   return (out)
 }
 
-#' (Estimated) Median of Input Data
+#' Median of Input Data
+#' 
+#' Estimated median of input data as postprocessed from tree.
 #' 
 #' Note that the median is just the cdf of a distribution evaluated at the 50th percentile. Given an empirical cdf genderated by the
 #' treePostCDF function, we can report this value according to the noisy counts of the tree exactly if the 50th percentile is included.
@@ -367,10 +371,7 @@ treePostCDF <- function(tree, bins){
 #'
 #' @param cdf CDF generated with the treePostCDF function. 
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return Estimate of the median and the proportion that was used to create the estimate.
 cdfMedian <- function(cdf){
   med <- c()
   if (0.5 %in% cdf$proportions){
@@ -387,10 +388,11 @@ cdfMedian <- function(cdf){
   return (med)
 }
 
-#' Estimated Mean of Input Data
+#' Mean of Input Data
 #' 
-#' Given a histogram of numeric values, you can estimate the mean of the underlying data by calculating the midpoint of each of the bins,
-#' multiplying them by the bin's count, summing 
+#' Estimated mean of input data.
+#' 
+#' Given a histogram of numeric values, you can estimate the mean of the underlying data by calculating the midpoint of each of the bins.
 #' 
 #' Let c_i be the count associated with bin i, and let mid_i be the midpoint of the data range that bin i represents.
 #' Let n be the total number of data points. Then, 
