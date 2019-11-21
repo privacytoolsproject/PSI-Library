@@ -172,7 +172,6 @@ countAbove <- function(tree, countsBelow, wAboves){
 #' @param tree Tree, formatted as a list of arrays where the contents of the ith array in the list is the ith level of the tree.
 #' @param wA Array of weights calculated from above with wAbove
 #' @param cA Array of counts calculated from below with countBelow 
-#' @param wB Array of weights calculated from below with wBelow
 #' @param cB Array of counts calculated from above with countAbove
 #' 
 #' @return List of counts for each node of the tree.
@@ -183,9 +182,9 @@ countAbove <- function(tree, countsBelow, wAboves){
 #' wA <- wAbove(t, wB)
 #' cB <- countBelow(t, wB)
 #' cA <- countAbove(t, cB, wA)
-#' c <- optimalCount(t, wA, cA, wB, cB) #will return t
+#' c <- optimalCount(t, wA, cA, cB) #will return t
 #' 
-optimalCount <- function(tree, wA, cA, wB, cB){
+optimalCount <- function(tree, wA, cA, cB){
   
   counts <- vector('list', length(tree))
   i <- 1
@@ -254,7 +253,7 @@ optimalPostProcess <- function(tree, epsilon){
   cB <- countBelow(tree, wB) # calculate counts from below
   cA <- countAbove(tree, cB, wA) # calculate counts from above
   
-  out <- list('optimalTree'= optimalCount(tree, wA, cA, wB, cB)) # generate optimal count
+  out <- list('optimalTree'= optimalCount(tree, wA, cA, cB)) # generate optimal count
   out$wBelow <- wB # save the weights used for counts from below
   out$wAbove <- wA # save the weights used for counts from above
   out$optVariance <- optimalSigma(wA, wB, epsilon) # calculate variance of optimal count

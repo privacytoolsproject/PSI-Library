@@ -35,7 +35,7 @@ test_that('optimal estimation runs', {
   cB <- countBelow(t, wB)
   cA <- countAbove(t, cB, wA)
   
-  c <- optimalCount(t, wA, cA, wB, cB)
+  c <- optimalCount(t, wA, cA, cB)
   expect_equal(t,c)
 })
 
