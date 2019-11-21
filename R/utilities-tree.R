@@ -186,11 +186,6 @@ countAbove <- function(tree, countsBelow, wAboves){
 #' c <- optimalCount(t, wA, cA, wB, cB) #will return t
 #' 
 optimalCount <- function(tree, wA, cA, wB, cB){
-  wB <- wBelow(tree)
-  cB <- countBelow(tree, wB)
-  
-  wA <- wAbove(tree, wB)
-  cA <- countAbove(tree, cB, wA)
   
   counts <- vector('list', length(tree))
   i <- 1
