@@ -57,7 +57,7 @@ mechanismLaplace$methods(
   #' laplace_mean <- mechanismLaplace$evaluate(mean_function, data[, variable], sens, post_processing_function)
   #' 
   evaluate = function(fun, x, sens, postFun, ...) {
-    x <- censorData(x, .self$varType, .self$rng, .self$bins)
+    x <- censorData(x, .self$varType, .self$rng, .self$bins, .self$rngFormat)
     x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
     inputVals = c(list(x=x), fun.args)

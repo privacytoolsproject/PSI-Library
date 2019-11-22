@@ -201,26 +201,34 @@ dpGLM$methods(
         fn <- glmObjectives[[objective]]()
         .self$name <- fn$name
         .self$objective <- fn$objective
-        .self$mechanism <- mechanism
-        .self$varType <- varType
-        .self$n <- checkNValidity(n)
-        .self$rng <- checkRange(rng, varType)
+        .self$mechanism <- checkMechanism(mechanism, 'mechanismObjective')
+        .self$varType <- checkVariableType(varType, 'numeric')
+        .self$n <- checkN(n)
+        
+        .self$rngFormat <- 'list'
+        #NOTE: will need to add range check where expectedLength = number of columns in the input formula
+        #Putting this off for now since glm needs changes.
+        .self$rng <- rng 
+        
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- glmGetParameters(accuracy, n, alpha)
         } else {
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- glmGetAccuracy(epsilon, n, alpha)
         }
         if (is.null(imputeRng)) {
-            .self$imputeRng <- rng
+            .self$imputeRng <- .self$rng
         } else {
             .self$imputeRng <- checkImputationRange(imputeRng)
         }
         .self$formula <- formula
-        .self$nBoot <- nBoot
+        .self$nBoot <- checkN(nBoot, emptyOkay=TRUE)
         .self$intercept <- intercept
-        .self$alpha <- alpha
+        .self$alpha <- checkNumeric(alpha)
+        
+        checkVariableType(class(formula), c('formula', 'character'))
+        checkVariableType(typeof(intercept), 'logical')
 })
 
 dpGLM$methods(
