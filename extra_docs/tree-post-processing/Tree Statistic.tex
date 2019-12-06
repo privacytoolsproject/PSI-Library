@@ -1,0 +1,131 @@
+\documentclass[11pt, oneside]{article}   	
+\usepackage{geometry}                		
+\geometry{letterpaper}
+\usepackage{amssymb, amsmath, amsthm}
+\usepackage{algorithmic, algorithm}
+
+\newtheorem{theorem}{Theorem}
+
+\newcommand{\x}{\boldsymbol{x}}
+\newcommand{\lap}{\text{Lap}}
+\newcommand{\eps}{\epsilon}
+
+\begin{document}
+
+The idea here is to make a binary tree with weights on each node so that the input data gets binned into each node as it would in a histogram, where the histogram has finer granularity at each level of the binary tree. 
+
+Let $\epsilon$ be the privacy parameter, $\x$ be the input data, $m$ be a lower bound on points in $x$, and $M$ be an upper bound on points in $\x$. Let $n$ be the number of leaves in the tree that will be constructed. Let $T$ be a perfect binary tree with $n$ leaves. For each node $v$ of $T$, associate a range such that the head node of $T$ has range $[m,M)$, and for all nodes $v$ with range $[m', M')$, $v$'s left child has range $[m', m' + \frac{M'-m'}{2})$ and its right child has range $[m' + \frac{M'-m'}{2}, M')$. Let the weight $w$ of each vertex be the number of points in $\x$ that are within $v$'s range. The idea for the differentially private algorithm is to make a histogram at each level of the tree. 
+\begin{algorithm}
+\begin{algorithmic}
+\STATE \textbf{Input:} $\x, \eps, T$.
+\STATE Let $\eps' = \eps / \lg n$. 
+\STATE Initialize $T'$ as a tree identical to $T$ with the weights of each node $w'$ set to 0.
+\FOR{every level of $T$}
+	\STATE For each node at that level, $w' = w + z$, where $z \sim \lap(2/\eps')$.
+\ENDFOR
+\RETURN T'
+\end{algorithmic}
+\caption{Differentially private weighted tree using histogram method to add noise}
+\label{alg: tree}
+\end{algorithm}
+
+\begin{theorem}
+Algorithm \ref{alg: tree} is $\eps$-differentially private.
+\end{theorem}
+
+\begin{proof}
+By definition of the Laplace mechanism, the histograms on each level of the tree are each $\eps'$-differentially private. Then, by composition, if $\boldsymbol{\eps}$ is the net privacy budget used across the whole algorithm, if $d$ is the depth of the tree, by composition
+
+\begin{align*}
+\boldsymbol{\eps} &= d \eps' \\
+	&= \lg n (\eps/\lg n) \\
+	&= \eps,
+\end{align*}
+
+since the tree's depth $d = \lg n$.
+\end{proof}
+
+Note that since you don't need to distribute each $\eps'$ across each level of the tree, this gives much better accuracy than doing naive noise addition to each node's weight individually. The resulting tree may then be used to estimate a cumulative distribution function for the data. 
+
+As discussed in more detail in \cite{honaker}, the fact that the count at a node is equal to the composition of the sums of its child nodes, or of its parent node minus the count of the adjacent node, etc., may be leveraged to calculate a more efficient count at each node of the tree.
+
+You can recursively create an estimate of the count $t_i$ at node $i$ ``from below", which we demarcate as $t_i^-$, by setting $t_i^- = t_i$ and $\sigma(t_i^-)=\sigma^-_i$ at the leaves, then recursively define for all other nodes 
+
+$$ t_i^- = w_i^- t_i + (1-w_i^-)(t_{2i}^- + t_{2i+1}^-), $$
+
+where
+
+$$ w_i^- = \frac{(\sigma_i)^{-2}}{(\sigma_i)^{-2} + \left[ (\sigma_{2i}^-)^2 + (\sigma_{2i+1}^-)^2\right]^{-1}},$$
+
+and 
+
+$$ \sigma_i^- = \sigma_i \sqrt{w_i^-},$$
+
+which is equation 10 in \cite{honaker}.
+
+Note that if each node has noise with variance $s$ added to it, then $\forall i, \sigma_i=s$, $\sigma^-(t_{2i}^-) = \sigma^-(t_{2i+1}^-)$, and $w$ will be the same for every node at depth $d$. Then, $w_i$ may be recursively defined as 
+
+\begin{align*}
+w_i^- &= \frac{s^{-2}}{s^{-2} + (1/2)(\sigma_{2i}^-)^{-2}}\\
+	&= \frac{s^{-2}}{s^{-2} + (1/2)\left(s\sqrt{w_{2i}^-}\right)^{-2}}\\
+	&= \frac{s^{-2}}{s^{-2}(1+(1/2)(w_{2i}^-)^{-1})}\\
+	&= \frac{2w_{2i}^-}{2w_{2i}^- + 1},
+\end{align*}
+
+and only needs to be calculated once per level of the tree.
+
+For the base case, 
+
+$$ w_i^- = 1,$$
+
+since $t_i^- = t_i.$
+
+Similarly, you can recursively create an estimate of the count $t_i$ at node $i$ ``from above", which we demarcate as $t_i^+$. Set $t_1^+ = t_1$, and $\sigma_1^+ = \sigma_1$ if $N$ is private and 0 if $N$ is public. Denote the parent node of node $i$ as $i \Phi 1$ and denote the adjacent\footnote{Here, adjacent means ``the node which is the other child of node $i$'s parent node"} node to node $i$ as $i\Lambda1$. 
+
+Then, we can recursively define $t_i^+$ for all other nodes as  
+
+$$ t_i^+ = w_i^+ t_i + (1-w_i^+) (t_{i\Phi1}^+ - t_{i \Lambda 1}^-),$$
+
+where 
+
+$$ w_i^+ = \frac{(\sigma_i)^{-2}}{(\sigma_i)^{-2} + \left[(\sigma^+_{i\Phi 1})^2 + (\sigma^-_{i \Lambda 1})^2\right]^{-1}},$$
+
+and 
+
+$$ \sigma^+_i = \sigma_i \sqrt{w_i^+},$$
+
+which is equation 11 in \cite{honaker}.
+
+Note that if each node has noise with variance $s$, then 
+
+\begin{align*}
+w_i^+ &= \frac{1}{1 + (w_{i \Phi 1}^+ + w_{i \Lambda 1}^-)^{-1}}, \\
+\end{align*}
+
+and
+
+$$w_1^+ = 1,$$
+
+since $t_1^+ = t_i$.
+
+An optimal estimate may then be derived using both the estimates from below and above: 
+
+$$ t_i^* = w_i t_i^- + (1-w_i) (t_{i \Phi 1} ^+ - t_{i \Lambda 1}^-),$$
+
+where
+
+$$ w_i = \frac{(\sigma_i^-)^{-2}}{(\sigma_i^-)^{-2} + \left[(\sigma_{i\Phi 1}^+)^2 + (\sigma_{i \Lambda 1}^-)^2\right]^{-1}}, $$
+
+and 
+
+$$ \sigma_i^* = \sigma_i^-\sqrt{w_i},$$
+
+which is equation 13 in \cite{honaker}.
+
+Note that if each node has variance $s$, then the expression for the weights here is the same as the weight for estimation from above.
+
+\begin{thebibliography}{2}
+	 \bibitem[1]{honaker} Honaker, James, ``Efficient Use of Differentially Private Binary Trees," http://hona.kr/papers/files/privatetrees.pdf.
+\end{thebibliography}
+
+\end{document}  

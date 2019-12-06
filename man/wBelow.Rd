@@ -2,22 +2,21 @@
 % Please edit documentation in R/utilities-tree.R
 \name{wBelow}
 \alias{wBelow}
-\title{Function to evaluate weights from the noise variance and standard errors in child nodes for the 
- node of a differentially private binary tree}
+\title{Recursive weight estimate from below}
 \usage{
-wBelow(invSigmaSq, tree, idx)
+wBelow(tree)
 }
 \arguments{
-\item{invSigmaSq}{Inverse variance of the noise used in perturbing nodes}
-
-\item{tree}{Data frame with binary tree attributes and node values}
-
-\item{idx}{Index of the node for which the weight is evaluated}
+\item{tree}{Tree, formatted as a list of arrays where the contents of the ith array in the list is the ith level of the tree.}
 }
 \value{
-Weight
+Single weight for each level of the tree.
 }
 \description{
-Function to evaluate weights from the noise variance and standard errors in child nodes for the 
- node of a differentially private binary tree
+See extra_docs/tree-post-processing for formula. This assumes that the variance is the same for every node at in the tree.
+}
+\examples{
+t <- list(c(10), c(6,4), c(3,3,1,3))
+w <- wBelow(t) # should output c(4/7, 2/3, 1)
+
 }
