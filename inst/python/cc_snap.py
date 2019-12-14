@@ -74,7 +74,7 @@ class Snapping_Mechanism:
             self.precision = 118
         else:
             # find smallest greater power of two (k is the power to which two is raised)
-            _, k = self._get_smallest_greater_power_of_two(self.B)
+            _, k = self._get_smallest_greater_or_eq_power_of_two(self.B)
 
             # add to precision to ensure that B*precision <= 2^-52
             extra_precision = k - 66
@@ -140,7 +140,7 @@ class Snapping_Mechanism:
         mantissa = binary[12:]
         return(sign, exponent, mantissa)
 
-    def _get_smallest_greater_power_of_two(self, _lambda):
+    def _get_smallest_greater_or_eq_power_of_two(self, _lambda):
         """
         Gets closest power of two that is >= _lambda.
 
@@ -218,42 +218,6 @@ class Snapping_Mechanism:
 
         return(sign, exponent, mantissa)
 
-    def _round_up_to_nearest_int(self, sign, exponent, mantissa):
-        """
-        Round the IEEE representation up to the nearest integer.
-        """
-
-        # generate numeric version of unbiased exponent
-        unbiased_exponent_num = int(exponent, 2) - 1023
-
-        if unbiased_exponent_num >= 52:
-            return(sign, exponent, mantissa)
-        elif unbiased_exponent_num >= 0:
-            '''IEEE_rep >= Lambda'''
-            # get elements of mantissa that represent integers
-            # (after being multiplied by 2^unbiased_exponent_num)
-            mantissa_subset = mantissa[0:unbiased_exponent_num]
-
-            '''round mantissa up'''
-            # if integer part of mantissa is all 1s, rounding needs to be reflected
-            # in the exponent instead
-            if mantissa_subset == '1' * len(mantissa_subset):
-                mantissa = ''.ljust(52, '0')[0:52]
-                exponent_num = int(exponent, 2) + 1
-                exponent = bin(exponent_num)[2:].ljust(11, '0')
-            else:
-                # if integer part of mantissa not all 1s, just increment mantissa
-                mantissa_subset_inc = bin(int(mantissa_subset, 2) + 1)[2:].zfill(len(mantissa_subset))
-                mantissa = mantissa_subset_inc.ljust(52, '0')[0:52]
-
-        elif unbiased_exponent_num < 0:
-            '''IEEE_rep < Lambda'''
-            # round IEEE_rep to 1
-            mantissa = ''.ljust(52, '0')
-            exponent = '0'.ljust(11, '1')
-
-        return(sign, exponent, mantissa)
-
     def _multiply_by_power_of_two(self, sign, exponent, mantissa, power):
         """
         Multiply by power of two and return updated exponent.
@@ -279,23 +243,6 @@ class Snapping_Mechanism:
         sign, exponent, mantissa = self._get_ieee_representation(self._double_to_bin(x))
         sign_a, exponent_a, mantissa_a = self._divide_by_power_of_two(sign, exponent, mantissa, m)
         sign_b, exponent_b, mantissa_b = self._round_to_nearest_int(sign_a, exponent_a, mantissa_a)
-        sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
-        return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
-
-    def _get_closest_larger_multiple_of_Lambda(self, x, m):
-        """
-        Rounds x to the closest larger multiple of Lambda.
-
-        Parameters:
-            x (numeric): Number to be rounded to closest larger multiple of Lambda
-            m (int): Integer such that Lambda = 2^m
-
-        Return:
-            numeric: x rounded to nearest larger multiple of Lambda
-        """
-        sign, exponent, mantissa = self._get_ieee_representation(self._double_to_bin(x))
-        sign_a, exponent_a, mantissa_a = self._divide_by_power_of_two(sign, exponent, mantissa, m)
-        sign_b, exponent_b, mantissa_b = self._round_up_to_nearest_int(sign_a, exponent_a, mantissa_a)
         sign_c, exponent_c, mantissa_c = self._multiply_by_power_of_two(sign_b, exponent_b, mantissa_b, m)
         return(self._bin_to_double(str(sign_c) + str(exponent_c) + str(mantissa_c)))
 
@@ -371,7 +318,7 @@ class Snapping_Mechanism:
 
         # NOTE: this Lambda is calculated relative to lambda = 1/epsilon' rather than sensitivity/epsilon' because we have already
         #       scaled by the sensitivity
-        Lambda_prime_scaled, m = self._get_smallest_greater_power_of_two(1/epsilon_prime)
+        Lambda_prime_scaled, m = self._get_smallest_greater_or_eq_power_of_two(1/epsilon_prime)
         Lambda_prime = Lambda_prime_scaled * self.sensitivity
 
         return(B_scaled, epsilon_prime, Lambda_prime, Lambda_prime_scaled, m)
