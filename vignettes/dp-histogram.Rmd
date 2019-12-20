@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 Differentially Private Histogram with `dpHistogram`
 -----------------------------------------
 
-The `dpHistogram` class evaluates a privacy-preserving histogram of a vector of values. The class supports any vector type, meaning that it can handle the R types `numeric`, `integer`, `logical`, and `character`.
+The `dpHistogram` class evaluates a privacy-preserving histogram of a vector of values. The class supports any vector type, meaning that it can handle the R types `'numeric'`, `'integer'`, `'logical'`, and `'character'`.
 
 <!--
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
@@ -54,7 +54,7 @@ print(dpHistogramExample$result)
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpHistogram` class: the `new` method and the `release` method. The `new` method creates an object of the class and accepts the following arguments:
+In typical usage, there are two methods to the `dpHistogram` class: the `new` method and the `release` method. The `new` method does not touch any data, it just creates an object that can calculate a differentially private covariance matrix. Only the `release` method touches data, and applies the functionality of the previously created object to the data.
 
 * `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
 
@@ -66,7 +66,7 @@ In typical usage, there are two methods to the `dpHistogram` class: the `new` me
 
 * `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
 
-* `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. In other words, it should be a vector in the form: c(data minimum, data maximum). Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
+* `rng` \ Numeric, a 2-tuple with an estimate of the lower and upper bounds of the data as determined by the user. In other words, it should be a vector in the form: c(lower bound, upper bound). Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
 
 * `bins` \ Numeric or character (must match the variable type in `varType`), a vector of bins for the histogram, as chosen by the user. Optional, default `NULL`. If `NULL`, bins are detected by the histogram statistic. If `NULL` for `'character'` type variables, the detected bins will only be the variables present in the data, and the stability mechanism will be used to calculate the histogram. If `NULL` for `'numeric'` or `'integer'` type variables, the detected bins will be of equal width.
 
@@ -90,9 +90,33 @@ In typical usage, there are two methods to the `dpHistogram` class: the `new` me
 
 &nbsp; 
 
-The `release` method accepts a single argument:
+The `release` method calculates the differentially private histogram of given data and accepts a single argument:
 
 * `data` \ Data frame containing a column corresponding the name specified in `variable`.
+
+Values
+------
+
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. It also contains other elements reflecting variable post-processing of the release.
+
+&nbsp; 
+
+The list in the `result` attribute has the following values:
+
+* `release` \ Differentially private estimate of the histogram. The output is a vector, with each element is labeled with the bin label, with the differentially private estimate of the number of items in the bin underneath. NOTE: the output for each bin will be a real number, not an integer. (This is a result of normalizing the histogram to sum to the input n after adding differentially private noise.)
+* `variable` \ The variable for which the histogram was calculated.
+* `accuracy` \ The accuracy guarantee of the release, given `epsilon`, if `epsilon` was entered. Otherwise, this is the accuracy value entered by the user.
+* `epsilon` \ The privacy cost required to guarantee `accuracy`, if `accuracy` was entered. Otherwise, this is the epsilon value entered by the user.
+* `delta` \ The likelihood of a severe breach of privacy.
+* `mechanism` \ The mechanism used to create the histogram (either "mechanismLaplace", for the Laplace Mechanism, or "mechanismStability", for the Stability Mechanism)
+* `interval` \ Confidence interval of the private estimate of each bin, given `accuracy`.
+* `herfindahl` \ The differentially private Herfindal index (the sum of the squares of the percentage of data points in each bin). Only available for categorical and logical vectors.
+* `mean` \ The mean of the noisy data. Only available for logical vectors.
+* `median` \ The median of the noisy data. Only available for logical vectors.
+* `variance` \ The variance of the noise dat. Only available for logical vectors.
+* `stdDev` \ The standard deviation of the noise dat. Only available for logical vectors.
 
 Examples
 ------
@@ -111,7 +135,7 @@ data(esoph)
 
 __Numeric Examples__
 
-To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
+To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type (`'numeric'`), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
 
 ```{r}
 # create the histogram object
@@ -151,7 +175,7 @@ Note: entering bins is completely optional and should only be done if you have p
 
 __Logical Examples__
 
-To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.) Note: you do not need to enter a range for a logial variable.
+To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to `'logical'`. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.) Note: you do not need to enter a range for a logial variable.
 
 ```{r}
 logicalHistogram <- dpHistogram$new(varType='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
@@ -167,13 +191,13 @@ logicalHistogram$release(PUMS5extract10000)
 print(logicalHistogram$result)
 ```
 
-For logical variables, it is never necessary to enter a vector of bins, you just need to specify whether to impute empty values or not. It is also not necessary to enter a range for logical variables, because the range of a logical variable is known to be c(0,1).
+For logical variables, it is never necessary to enter a vector of bins, you just need to specify whether to impute empty values or not. It is also not necessary to enter a range for logical variables, because the values of a logical variable are known to be {0,1}.
 
 &nbsp;
 
 __Character (or Categorical) Examples__
 
-To calculate the histogram of a categorical (or 'character') variable, input a character variable name into `variable` and update `varType` to 'character'.
+To calculate the histogram of a categorical (or `'character'`) variable, input a character variable name into `variable` and update `varType` to `'character'`.
 
 ```{r}
 characterHistogram <- dpHistogram(varType='character', variable='tobgp', n=88, epsilon=1.5, delta=10^-4)
@@ -192,7 +216,7 @@ characterHistogram$release(SocrataWhiteHouseEmployeeSalaries)
 print(characterHistogram$result)
 ```
 
-If you would like NA (empty or unknown) values to be imputed (or replaced) by a specific subset of input bins, you can specify the imputation bins with `imputeBins`. You may want to do this if you know the underlying data is skewed, meaning an unkown value is more likely to be of a certain value as opposed to others. Specifying `imputeBins` is optional, and if it is not specified the NA values ill be imputed using a uniform distribution on all imput bins (i.e. NA values will be replaced with any known value with equal probability).
+If you would like NA (empty or unknown) values to be imputed (or replaced) by a specific subset of input bins, you can specify the imputation bins with `imputeBins`. You may want to do this if you know the underlying data is skewed, meaning an unkown value is more likely to be of a certain value as opposed to others. Specifying `imputeBins` is optional, and if it is not specified the NA values will be imputed using a uniform distribution on all imput bins (i.e. NA values will be replaced with any known value with equal probability).
 
 ```{r}
 characterHistogram <- dpHistogram(varType='character', variable="Employee.Status", n=469, epsilon=0.5,
@@ -229,30 +253,6 @@ print(numericHistogram$result)
 A delta value was entered in the character stability example above, and was not entered for the numeric stability example. The library has a default delta value of $2^{^-30}$, so it is not necessary to entere one unless you are comfortable with differential privacy concepts.
 
 &nbsp;
-
-Values
-------
-
-The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
-
-* `result` List, contains the accuracy guarantee, privacy cost, and private release. It also contains other elements reflecting variable post-processing of the release.
-
-&nbsp; 
-
-The list in the `result` attribute has the following values:
-
-* `release` \ Differentially private estimate of the histogram. The output is a vector, with each element is labeled with the bin label, with the differentially private estimate of the number of items in the bin underneath. NOTE: the output for each bin will be a real number, not an integer. (This is a result of normalizing the histogram to sum to the input n after adding differentially private noise.)
-* `variable` \ The variable for which the histogram was calculated.
-* `accuracy` \ The accuracy guarantee of the release, given `epsilon`.
-* `epsilon` \ The privacy cost required to guarantee `accuracy`.
-* `delta` \ The likelihood of a severe breach of privacy.
-* `mechanism` \ The mechanism used to create the histogram (either "mechanismLaplace", for the Laplace Mechanism, or "mechanismStability", for the Stability Mechanism)
-* `interval` \ Confidence interval of the private estimate of each bin, given `accuracy`.
-* `herfindahl` \ The differentially private Herfindal index (the sum of the squares of the percentage of data points in each bin). Only available for categorical and logical vectors.
-* `mean` \ The mean of the noisy data. Only available for logical vectors.
-* `median` \ The median of the noisy data. Only available for logical vectors.
-* `variance` \ The variance of the noise dat. Only available for logical vectors.
-* `stdDev` \ The standard deviation of the noise dat. Only available for logical vectors.
 
 Notes
 ------
