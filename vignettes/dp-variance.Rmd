@@ -53,13 +53,6 @@ out2 <- example_dpVariance2$release(data)
 print(out2)
 ```
 
-
-dpVariance$methods(
-    initialize = function(mechanism, varType, variable, n, rng, epsilon,
-                          impute.rng=NULL, alpha=0.05)
-
-
-
 Arguments
 ---------
 
