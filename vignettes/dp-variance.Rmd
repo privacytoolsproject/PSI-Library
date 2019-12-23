@@ -108,7 +108,7 @@ Examples
 
 Import the PSIlence library and attach the sample dataset:
 
-```{r, eval = TRUE}
+```{r, eval = FALSE}
 library(PSIlence)
 data(PUMS5extract10000)
 ```
@@ -119,7 +119,7 @@ __Numeric Example__
 
 To calculate a private variance of a numeric vector with `dpVariance`, enter the mechanism (this will be the Laplace Mechanism, or `'mechanismLaplace'`), the variable type (`'numeric'`), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the range:
 
-```{r}
+```{r, eval = FALSE}
 numericVariance <- dpVariance$new(varType='numeric',
                            variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
 numericVariance$release(PUMS5extract10000)
@@ -132,7 +132,7 @@ __Logical Example__
 
 To calculate the variance of a logical variable, input a the name of a logical vector into `variable` and update `varType` to `'logical'`. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
 
-```{r}
+```{r, eval = FALSE}
 logicalVariance <- dpVariance$new(varType='logical',
                            variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
 logicalVariance$release(PUMS5extract10000)

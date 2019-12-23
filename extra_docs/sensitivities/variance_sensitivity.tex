@@ -1,0 +1,140 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb, amsmath, amsthm}
+						% Activate to display a given date or no date
+
+\usepackage{macros}
+
+\title{Variance Sensitivity Proof}
+\author{Ira Globus-Harris}
+
+\begin{document}
+
+\maketitle
+
+\begin{definition}
+Let variance be defined as 
+$$ s^2 = \frac{1}{n-1} \sum_{i=1}^n (x_i - \mean)^2.$$
+\end{definition}
+
+%\begin{lemma}
+%$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2,$$
+%i.e. the current implementation of sensitivity for variance in the PSI-library is incorrect.
+%\end{lemma}
+%
+%\begin{proof}
+%Let $\x = \{0,100\}, \xprime = \{100,100\}$ be two neighboring databases. Note that $\sigma^2(\x) = 5000$ and $\sigma^2(\xprime)=0$, so variance has local sensitivity of 5000. Note that
+%$$\frac{n-1}{n^2}(M-m)^2 = 2500 < 5000.$$
+%Since global sensitivity of a function must be less than or equal to the local sensitivity for all neighboring databases, it holds that 
+%$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2.$$
+%\end{proof}
+
+
+%\begin{lemma}
+%Perhaps the sensitivity of $\sigma^2$ in the PSI-library is just missing the term in the residual that is due to the actual point being changed, which has an additional affect on the sensitivity of $\sigma^2$ that is bounded above by $(M-m)/(n-1)$. However,
+%$$\Delta \sigma^2 \nleq \frac{n-1}{n^2}(M-m)^2 + \frac{M-m}{n-1}.$$
+%\end{lemma}
+%
+%\begin{proof}
+%Consider the same neighboring databases as in the proof of the previous lemma. Then, 
+%$$ \frac{n-1}{n^2}(M-m)^2 + \frac{M-m}{n-1} = 2600 < 5000.$$
+%\end{proof}
+
+%\begin{theorem}
+%If $\forall x_i \in\x, x_i \in (m, M),$
+%$$ \Delta \sigma^2 \le  2M \left(\frac{M-m}{n}\right) - \left(\frac{M-m}{n}\right)^2 + \frac{M-m}{n-1}.$$
+%
+%\end{theorem}
+%\begin{proof}
+%Let
+%$$ t_i = (x_i - \mean)^2.$$
+%To bound the sensitivity of $\sigma^2$, consider how $t_i$ changes between neighboring databases $\x$ and $\x'$ for an arbitrary observation $j \in \x, \xprime$. Let $M = \max_{x_i}{x}$ and $m = \min_{x_i}{x}$. Then the sensitivity of $\mean$ will be bounded by $\frac{M-m}{n}$. Say $i \ne j$. Note that $t_i$ is an upward-facing parabola as a function of $x_i - \mean$. So, the worst case change in $t_i$ occurs between $x_i - \mean = M$ and $x_i - \mean = M - \frac{M-m}{n}$, i.e.:
+%\begin{align*}
+%\Delta t_i &\le \big\lvert t_i(M) - t_i (M - \frac{M-m}{n}) \big\rvert\\
+%	&= 2M \left(\frac{M-m}{n}\right) - \left(\frac{M-m}{n}\right)^2
+%\end{align*}
+%We can bound the total sensitivity of $\sigma^2$ by the sum of the contributions of each $n-1$ terms that individually contribute $\frac{1}{n-1} \Delta t_i$ to the sensitivity of $\sigma^2$ (where the $\frac{1}{n-1}$ here comes from the normalization term outside the sum in the definition of $\sigma^2$), plus the change in $t_i$ between $\x$ and $\xprime$ when $i=j$,  which may be bounded above by $(M-m)/(n-1)$. Then,
+%
+%\begin{align*}
+%\Delta \sigma^2 &\le 2M \left(\frac{M-m}{n}\right) - \left(\frac{M-m}{n}\right)^2 +\frac{M-m}{n-1}.
+%\end{align*}
+%\end{proof}
+%
+%\begin{lemma}
+%If $\forall x_i \in \x, x_i \in (0,1),$
+%$$ \Delta \sigma^2 \le \frac{1}{n-1} + \frac{2}{n} - \frac{1}{n^2}.$$
+%\end{lemma}
+%\begin{proof}
+%This follows directly from the above theorem, setting $m=0$ and $M=1$. 
+%\end{proof}
+
+\begin{lemma}
+\label{lemma:meansum}
+For arbitrary $a$,
+$$ \sum_{i=1}^n (x_i - a)^2 = \sum_{i=1}^n (x_i - \bar{x})^2 + n(a-\bar{x})^2.$$
+\end{lemma}
+
+\begin{proof}
+\begin{align*}
+\sum_{i=1}^n (x_i - a)^2 &= \sum_{i=1}^n \left( (x_i - \bar{x}) - (a-\bar{x}) \right)^2\\
+	&= \sum_{i=1}^n \left( (x_i - \bar{x})^2 -2(x_i - \bar{x})(a-\bar{x}) + (a-\bar{x})^2\right)\\
+	&= \sum_{i=1}^n (x_i - \bar{x})^2 - 2\sum_{i=1}^n \left(x_ia-x_i\bar{x} -\bar{x}a + \bar{x}^2\right) + \sum_{i=1}^n \left( a^2 -2a\bar{x} + \bar{x}^2\right)\\
+	&=  \sum_{i=1}^n (x_i - \bar{x})^2 -2a\sum_{i=1}^n x_i + 2\bar{x}\sum_{i=1}^n x_i + 2\bar{x}an - 2\bar{x}^2n + a^2n-2a\bar{x}n+\bar{x}^2n\\
+	&=  \sum_{i=1}^n (x_i - \bar{x})^2 + a^2n-2a\bar{x}n+\bar{x}^2n\\
+	&=  \sum_{i=1}^n (x_i - \bar{x})^2 + n(a-\bar{x})^2
+\end{align*}
+
+\end{proof}
+
+\begin{theorem}
+Let 
+$$ f(\x) = \sum_{i=1}^n (x_i - \bar{x})^2.$$
+Then for $\x$ bounded between $m$ and $M,$ $f$ has sensitivity bounded above by
+$$\frac{n-1}{n} (M-m)^2.$$
+\end{theorem}
+
+\begin{proof}
+Consider databases $\xprime$ and $\xprimeprime$ which differ in a single point. For notational ease, call $\x$ the part of $\xprime$ and $\xprimeprime$
+that is the same, and say that $\x$ contains $n$ points. WLOG say that the last data point in the database is the one that differs. I.e.,  
+$\xprime = \x \cup \{x_{n+1}\},$ and $\xprimeprime = \x \cup \{x'_{n+1}\}$. This proof assumes that a ``neighboring database" is one that differs in a single
+data-point, so we will ultimately be comparing $f(\xprime)$ and $f(\xprimeprime)$. However, it is useful to first write $f(\xprime)$ in terms of $f(\x)$.
+Note that
+
+\begin{align}
+\label{eqn:meanprime}
+\bar{x}' &= \frac{1}{n+1} \sum_{i=1}^{n+1} x_i \nonumber \\
+	&= \frac{n\bar{x} + x_{n+1}}{n+1}.
+\end{align}
+
+Then,
+\begin{align*}
+f(\xprime) &= \sum_{i=1}^n (x_i - \bar{x}')^2 + (x_{n+1} - \bar{x}')^2\\
+	&= \sum_{i=1}^n (x_i - \bar{x})^2 + n(\bar{x}'-\bar{x})^2 + (x_{n+1} - \bar{x}')^2 &&\text{(By Lemma \ref{lemma:meansum})}\\
+	&= f(\x) + n\left( \frac{n\bar{x} + x_{n+1}}{n+1}-\bar{x}\right)^2 + \left(x_{n+1} - \frac{n\bar{x} + x_{n+1}}{n+1} \right)^2 &&\text{(By Equation \ref{eqn:meanprime})}\\
+	&= f(\x) + n\left(\frac{x_{n+1}-\bar{x}}{n+1}\right)^2 + \left( \frac{nx_{n+1}-n\bar{x}}{n+1}\right)^2\\
+	&= f(\x) + (x_{n+1}-\bar{x})^2 \frac{n+n^2}{(n+1)^2}\\
+	&= f(\x) + (x_{n+1}-\bar{x})^2 \frac{n}{n+1}\\
+\end{align*}
+
+Now, to bound the sensitivity of $f$, note that
+
+\begin{align*}
+\left\vert f(\xprime) - f(\xprimeprime) \right\vert &= \left\vert (x_{n+1}-\bar{x})^2 \frac{n}{n+1} - (x_{n+1}'-\bar{x})^2 \frac{n}{n+1} \right\vert\\
+	&\le (M-m)^2 \frac{n}{n+1}.
+\end{align*}
+
+Now, usually we're interested in sensitivities in terms of the total number of values in the database, which here is $n+1$. So, redefining $n$ as $n+1$ in the above equation gives
+
+$$ (M-m)^2 \frac{n-1}{n}.$$
+\end{proof}
+
+\begin{corollary}
+Sample variance has sensitivity bounded above by 
+$$ \frac{(M-m)^2 }{n}.$$
+\end{corollary}
+\end{document}  

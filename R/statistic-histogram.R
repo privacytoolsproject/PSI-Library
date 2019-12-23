@@ -21,7 +21,7 @@
 #'    imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1. If false, the
 #'    histogram will have 3 bins: 0, 1, and NA.
 #' @param nBoot Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)
-#' 
+#' @param mechanism Character, one of 'mechanismLaplace', 'mechanismStability'. May be NULL, in which mechanism will be chosen automatically.
 #'
 #' @import methods
 #' @export dpHistogram
@@ -39,30 +39,35 @@ dpHistogram <- setRefClass(
 dpHistogram$methods(
     initialize = function(varType, variable, n, epsilon=NULL, accuracy=NULL, rng=NULL, 
                           bins=NULL, nBins=NULL, granularity=NULL, alpha=0.05, delta=NULL,
-                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, ...) {
+                          imputeRng=NULL, imputeBins=NULL, impute=FALSE, nBoot=NULL, mechanism=NULL, ...) {
         .self$name <- 'Differentially private histogram'
         
-        # check variable type, can only continue initialization for certain variable type: numeric, integer, logical, character
-        checkHistogramVariableType(varType)
-        
         # determine  which mechanism to use based on inputs
-        .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
+        if (is.null(mechanism)){
+          .self$mechanism <- determineMechanism(varType, rng, bins, nBins, granularity)
+        }
+        else {
+          .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismStability'))
+        }
         
         # set parameters of the histogram
-        .self$varType <- varType
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
-        .self$epsilon <- epsilon
-        .self$accuracy <- accuracy
+        .self$n <- checkN(n)
         .self$bins <- bins # may be null
         .self$nBins <- checkHistogramNBins(nBins) # may be null
-        .self$alpha <- alpha
-        .self$imputeRng <- imputeRng
+        .self$alpha <- checkNumeric(alpha, expectedLength=1)
+        .self$imputeRng <- checkImputationRange(imputeRng, .self$rng, .self$varType)
         .self$impute <- impute
-        .self$nBoot <- nBoot
-        .self$granularity <- granularity # may be null
+        .self$nBoot <- checkN(nBoot, emptyOkay=TRUE)
+        .self$granularity <- checkNumeric(granularity, emptyOkay=TRUE) # may be null
         .self$bootFun <- bootHist
         .self$sens <- 2 # the sensitivity of a histogram is 2 because we are using the replacement definition of "neighboring database"
+        .self$rngFormat <- 'vector' #if range is specified, should always be a vector of two values.
+        
+        checkVariableType(typeof(variable), 'character')
+        checkVariableType(typeof(bins), c('character', 'integer', 'double', 'numeric', 'logical'), emptyOkay=TRUE)
+        checkVariableType(typeof(impute), 'logical')
         
         # if the mechanism used is NOT the stability mechanism:
         # 1) determine the bins of the histogram. (If the mechanism is 
@@ -82,14 +87,14 @@ dpHistogram$methods(
         
         # get the epsilon and accuracy
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
-            .self$epsilon <- histogramGetEpsilon(mechanism, accuracy, delta, alpha, .self$sens)
+            .self$accuracy <- checkAccuracy(accuracy)
+            .self$epsilon <- histogramGetEpsilon(.self$mechanism, accuracy, delta, alpha, .self$sens)
         } else {
-            .self$epsilon <- epsilon
-            .self$accuracy <- histogramGetAccuracy(mechanism, epsilon, delta, alpha, .self$sens)
+            .self$epsilon <- checkEpsilon(epsilon)
+            .self$accuracy <- histogramGetAccuracy(.self$mechanism, epsilon, delta, alpha, .self$sens)
         }
         
-        # get the delta parameter (will be NULL unless stability mechanism is being used)
+        # get the delta parameter (will be 0 unless stability mechanism is being used)
         .self$delta <- checkDelta(.self$mechanism, delta)
         
         # set the range for data imputation (will be null if no range entered)
@@ -102,7 +107,7 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess)
+        noisy <- export(.self$mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess)
         .self$result <- noisy
 })
 
@@ -110,12 +115,13 @@ dpHistogram$methods(
     postProcess = function(out) {
         out$variable <- variable
         out$release <- normalizeReleaseAndConvertToDataFrame(out$release, n)
-        out$accuracy <- accuracy
-        out$epsilon <- epsilon
-        out$mechanism <- mechanism
-        if (mechanism == 'mechanismStability') out$delta <- delta
+        out$accuracy <- .self$accuracy
+        out$epsilon <- .self$epsilon
+        out$delta <- .self$delta
+        out$mechanism <- .self$mechanism
+        if (.self$mechanism == 'mechanismStability') out$delta <- delta
         if (length(out$release) > 0) {
-            if (mechanism == 'mechanismLaplace') {
+            if (.self$mechanism == 'mechanismLaplace') {
                 out$intervals <- histogramGetCI(out$release, nBins, out$accuracy)
             }
         }

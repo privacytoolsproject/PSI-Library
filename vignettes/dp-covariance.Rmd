@@ -37,7 +37,7 @@ The user must manually specify the number of observations, variable type, and ra
 Syntax
 ------
 
-```{r}
+```{r, eval = FALSE}
 # import the library
 library(PSIlence)
 
@@ -120,7 +120,7 @@ data(PUMS5extract10000)
 
 To calculate a private covariance matrix of a set of numeric vectors with `dpCovariance`, enter the mechanism (this will be the Laplace Mechanism, or 'mechanismLaplace'), the variable type ('numeric'), the columns of interest (the column names of the variables of interest in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the matrix of ranges of the chosen columns:
 
-```{r}
+```{r, eval=FALSE}
 # before calculating the covariance, create a matrix of the column ranges,
 # where each row contains the minimum and maximum value of a column,
 # in the order of the columns as they are passed into the dpCovariance call

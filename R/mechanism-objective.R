@@ -19,7 +19,7 @@ mechanismObjective$methods(
         x <- x[, cols]
 
         # censor & impute missing values
-        x <- censorData(x, .self$varType, .self$rng, .self$bins)
+        #x <- censorData(x, .self$varType, .self$rng, .self$bins) # NEEDS fixed to support checkRange
         x <- fillMissing(x, .self$varType, imputeRng=.self$imputeRng)
 
         # extract X and y

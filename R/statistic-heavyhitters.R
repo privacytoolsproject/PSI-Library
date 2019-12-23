@@ -85,17 +85,17 @@ dpHeavyHitters <- setRefClass(
 
 dpHeavyHitters$methods(
     initialize = function(mechanism, varType, variable, n, epsilon, 
-                          k, bins, alpha=0.05, delta=1e-5) {
+                          k, bins, alpha=0.05, delta=NULL) {
         .self$name <- 'Differentially private heavy hitters'
         .self$mechanism <- mechanism
         .self$variable <- variable
         .self$varType <- checkVariableType(varType, inTypes=c('character', 'factor'))
-        .self$n <- checkNValidity(n)
+        .self$n <- checkN(n)
         .self$epsilon <- epsilon
         .self$k <- k
         .self$bins <- bins
         .self$alpha <- alpha
-        .self$delta <- delta
+        .self$delta <- checkDelta(.self$mechanism, delta)
 })
 
 dpHeavyHitters$methods(
@@ -109,4 +109,5 @@ dpHeavyHitters$methods(
         out$variable <- variable
         out$accuracy <- heavyhittersGetAccuracy(gap, epsilon, delta)
         out$epsilon <- heavyhittersGetParameters(gap, delta, alpha)
+        out$delta <- .self$delta
 })

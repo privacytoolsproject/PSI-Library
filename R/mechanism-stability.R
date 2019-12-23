@@ -86,7 +86,7 @@ mechanismStability$methods(
             imputationRange <- dataRange
         }
         
-        x <- censorData(x, .self$varType, dataRange, histogramBins)
+        x <- censorData(x, .self$varType, dataRange, histogramBins, rngFormat)
         x <- fillMissing(x, .self$varType, imputeRng=imputationRange, categories=levels(x)) # levels(x) will be NULL for numeric variables, a vector of bins for character variables
         fun.args <- getFuncArgs(fun, inputList=list(bins=histogramBins), inputObject=.self)
         inputVals <- c(list(x=x), fun.args)
@@ -99,7 +99,7 @@ mechanismStability$methods(
         release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
         
         # calculate the accuracy threshold, below which histogram buckets should be removed
-        accuracyThreshold <- 1+2*log(2/delta)/epsilon
+        accuracyThreshold <- 1+2*log(2/.self$delta)/.self$epsilon
         # remove buckets below the threshold
         release <- release[release > accuracyThreshold]
         
