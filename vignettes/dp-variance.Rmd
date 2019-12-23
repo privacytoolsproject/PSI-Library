@@ -35,7 +35,7 @@ The user must manually specify the number of observations, variable type, and ra
 Syntax
 ------
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 # import the library
 library(PSIlence)
 
@@ -45,13 +45,13 @@ x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
 # example on a numeric variable
-dpVarianceExample <- dpVariance$new(varType='numeric',
+dpVarianceExample <- dpVariance$new(mechanism='mechanismLaplace', varType='numeric',
                       variable='x1', epsilon=10, n=10, rng=c(0, 70))
 dpVarianceExample$release(data)
 print(dpVarianceExample$result)
 
 # example on a logical variable
-dpVarianceExample2 <- dpMean$new(varType='logical',
+dpVarianceExample2 <- dpVariance$new(mechanism='mechanismLaplace', varType='logical',
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
 dpVarianceExample2$release(data)
 print(dpVarianceExample2$result)
@@ -61,6 +61,8 @@ Arguments
 ---------
 
 In typical usage, there are two methods to the `dpVariance` class: the `new` method and the `release` method. The `new` method does not touch any data, it just creates an object that can calculate a differentially private covariance matrix. Only the `release` method touches data, and applies the functionality of the previously created object to the data.
+
+* `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, must be `'mechanismLaplace'`.
 
 * `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
@@ -80,7 +82,7 @@ In typical usage, there are two methods to the `dpVariance` class: the `new` met
 
 &nbsp;
 
-The `release` method calculates the mean of given data and accepts a single argument:
+The `release` method accepts a single argument.
 
 * `data` \ Data frame containing numeric columns corresponding the name specified in `variable`.
 
@@ -108,7 +110,7 @@ Examples
 
 Import the PSIlence library and attach the sample dataset:
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(PSIlence)
 data(PUMS5extract10000)
 ```
@@ -119,8 +121,8 @@ __Numeric Example__
 
 To calculate a private variance of a numeric vector with `dpVariance`, enter the mechanism (this will be the Laplace Mechanism, or `'mechanismLaplace'`), the variable type (`'numeric'`), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the range:
 
-```{r, eval = FALSE}
-numericVariance <- dpVariance$new(varType='numeric',
+```{r, eval = TRUE}
+numericVariance <- dpVariance$new(mechanism='mechanismLaplace', varType='numeric',
                            variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
 numericVariance$release(PUMS5extract10000)
 print(numericVariance$result)
@@ -132,8 +134,8 @@ __Logical Example__
 
 To calculate the variance of a logical variable, input a the name of a logical vector into `variable` and update `varType` to `'logical'`. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
 
-```{r, eval = FALSE}
-logicalVariance <- dpVariance$new(varType='logical',
+```{r, eval = TRUE}
+logicalVariance <- dpVariance$new(mechanism='mechanismLaplace', varType='logical',
                            variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
 logicalVariance$release(PUMS5extract10000)
 print(logicalVariance$result)
