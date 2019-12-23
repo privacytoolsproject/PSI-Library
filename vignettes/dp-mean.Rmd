@@ -36,17 +36,16 @@ Syntax
 ------
 
 ```{r, eval = FALSE}
+library(PSIlence)
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE)
+x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
 dpMeanExample <- dpMean$new(mechanism='mechanismLaplace', varType='numeric', 
                       variable='x1', epsilon=0.1, n=10, rng=c(0, 70))
-dpMeanExample$release(data)
-
-dpMeanExample2 <- dpMean$new(mechanism='mechanismLaplace', varType='logical', 
-                       variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
-dpMeanExample2$release(data)
+out <- dpMeanExample$release(data)
+dpMeanExample2 <- dpMean$new(mechanism='mechanismLaplace', varType='logical', variable='x2', epsilon=0.1, n=10)
+out2 <- dpMeanExample2$release(data)
 ```
 
 Arguments
