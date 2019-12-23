@@ -34,5 +34,5 @@ Function to find the accuracy guarantee of a statistic release at a given epsilo
 value.
 
 Function to find the accuracy guarantee of a statistic release at a given epsilon 
-value.
+value. This accuracy guarantee is derived in /extra_docs/accuracy/accuracy.pdf
 }

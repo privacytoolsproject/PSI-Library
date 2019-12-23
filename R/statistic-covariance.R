@@ -2,15 +2,20 @@
 #'
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
-#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
-#'    each of P variables in the data frame, dimensions Px2.
-#' @param intercept A logical vector of length one indicating whether an
+#' @param rng A numeric list of 2-tuples of the lower and upper bounds for
+#'    each of the variables.
+#' @param intercept A logical vector of length one indicating whether an 
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
 #'
 #  A complete derivation of the sensitivity of the covariance may be found in
 #' /extra_docs/sensitivities/covariance_sensitivity.pdf
+#' @example Should output equal to rep(2/10000, 3)
+#' range.sex <- range(PUMS5extract10000['sex'])
+#' range.married <- range(PUMS5extract10000['married'])
+#' range <- list(range.sex, range.married)
+#' covarianceSensitivity(10000, range, FALSE)
 covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(0, diffs) }
