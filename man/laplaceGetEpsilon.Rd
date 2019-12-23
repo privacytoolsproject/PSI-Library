@@ -36,3 +36,7 @@ accuracy for a statistic release.
 Function to find the epsilon value necessary to meet a desired level of 
 accuracy for a statistic release.
 }
+\details{
+This is a direct corollary of the accuracy guarantee of the accuracy derivation in
+/extra_docs/accuracy/accuracy.pdf
+}
