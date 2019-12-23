@@ -10,8 +10,8 @@ covarianceSensitivity(n, rng, intercept)
 \item{n}{A numeric vector of length one specifying the number of
 observations in the data frame.}
 
-\item{rng}{A numeric matrix of 2-tuples with the lower and upper bounds for
-each of P variables in the data frame, dimensions Px2.}
+\item{rng}{A numeric list of 2-tuples of the lower and upper bounds for
+each of the variables.}
 
 \item{intercept}{A logical vector of length one indicating whether an 
 intercept should be added prior to evaluating the inner product x'x.}
