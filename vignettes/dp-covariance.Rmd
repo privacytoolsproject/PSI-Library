@@ -31,17 +31,13 @@ The privacy loss parameter `epsilon` is chosen by the user and represents the de
 
 There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `2^-30`, and never greater than `1/n^2` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
 
-<<<<<<< HEAD
-It is noteworthy the user must manually specify the number of observations, variable type, and range of the data of interest; data will only be touched at the point the estimate to be released is actually computed, and only by the function computing that estimate. This structure decreases the possibility of an unauthorized release of information. Additional parameter specification includes the desired `epsilon` value and post-processing steps the user would like to perform on the released statistic.
-=======
 The user must manually specify the number of observations, variable type, and range of the data of interest.
->>>>>>> f60996564afda3b2bd27874d3ad9f11e16ec9064
 -->
 
 Syntax
 ------
 
-```{r, eval = FALSE}
+```{r}
 # import the library
 library(PSIlence)
 
@@ -56,12 +52,8 @@ range1 <- c(0,70)
 range2 <- c(0,1)
 ranges <- do.call(rbind, list(range1, range2))
 
-<<<<<<< HEAD
-example_dpCovariance <- dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric',
-=======
 dpCovarianceExample <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
->>>>>>> f60996564afda3b2bd27874d3ad9f11e16ec9064
-                                         n=10, epsilon=10, columns = c('x1', 'x2'), rng=ranges)
+                                         n=10, epsilon=c(1,1,1), columns = c('x1', 'x2'), rng=ranges)
 dpCovarianceExample$release(data)
 print(dpCovarianceExample$result)
 ```
@@ -137,7 +129,7 @@ education_range = c(1,16)
 column_ranges_matrix <- matrix(c(income_range, education_range), nrow=2, ncol=2, byrow=TRUE)
 
 numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
-                           columns=c('income', 'educ'), n=10000, epsilon=0.1, rng=column_ranges_matrix)
+                           columns=c('income', 'educ'), n=10000, epsilon=c(0.1,0.1,0.1), rng=column_ranges_matrix)
 numeric_covariance$release(PUMS5extract10000)
 print(numeric_covariance$result)
 ```
