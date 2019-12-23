@@ -1,19 +1,19 @@
 #' Error check imputation range for numeric or integer variables
-#' 
+#'
 #' Check that the entered imputation range is within the entered data range. If yes, return
 #' the entered imputation range, which will be used as the imputation range for the call
-#' to the utility function `fillMissing()`. If not, return the data range. 
+#' to the utility function `fillMissing()`. If not, return the data range.
 #' If the imputation range is NULL, default to the data range.
-#' 
+#'
 #' We check if the imputation range is within the data range because it is a privacy concern.
-#' If the imputation range is outside of the data range, NA values will be replaced with values 
-#' outside of the data range, which will show that there are NA values in the data or skew the 
+#' If the imputation range is outside of the data range, NA values will be replaced with values
+#' outside of the data range, which will show that there are NA values in the data or skew the
 #' result when the differentially private estimate is released.
-#' 
+#'
 #' @param imputationRange The imputation range entered by the user
 #' @param rng The data range entered by the user
 #' @param varType The variable type for the histogram data
-#' 
+#'
 #' @return the imputation range that will be used for `fillMissing()`.
 
 checkImputationRange <- function(imputationRange, rng, varType) {
@@ -22,7 +22,7 @@ checkImputationRange <- function(imputationRange, rng, varType) {
     if (is.null(imputationRange)) {
         return(rng)
     }
-    
+
     # for numeric and integer variables, the imputation range should be a 2-tuple
     # with the minimum and maximum of the imputation range.
     # if an imputation range was entered, check that it is
@@ -30,7 +30,7 @@ checkImputationRange <- function(imputationRange, rng, varType) {
     if (varType %in% c('numeric', 'integer')) {
         lowerBound <- NULL
         upperBound <- NULL
-        
+
         # if the imputation range lower bound is below the data range lower bound,
         # clip the lower bound to the data range
         if (imputationRange[1] < rng[1]) {
@@ -39,7 +39,7 @@ checkImputationRange <- function(imputationRange, rng, varType) {
         } else {
             lowerBound <- imputationRange[1]
         }
-        
+
         # if the imputation range upper bound is above the data range upper bound,
         # clip the upper bound to the data range
         if (imputationRange[2] > rng[2]) {
@@ -48,7 +48,7 @@ checkImputationRange <- function(imputationRange, rng, varType) {
         } else {
             upperBound <- imputationRange[2]
         }
-        
+
         for (entry in imputationRange) {
             if (!is.numeric(entry)) {
                 warning('Imputation range for a numeric variable must be numeric. Setting imputation range to data range.')
@@ -56,10 +56,10 @@ checkImputationRange <- function(imputationRange, rng, varType) {
                 upperBound <- rng[2]
             }
         }
-        
+
         # return the (potentially clipped) imputation range
         return(c(lowerBound,upperBound))
-        
+
     } else {
         # if the variable type is something other than numeric or integer,
         # default to the data range
@@ -70,11 +70,11 @@ checkImputationRange <- function(imputationRange, rng, varType) {
 
 
 #' Check validity of n
-#' 
+#'
 #' n should always be a positive whole number, check the user's input
-#' 
+#'
 #' @param n the input n from te user
-#' 
+#'
 #' @return n, if n is a positive whole number
 
 checkNValidity <- function(n) {
@@ -87,14 +87,14 @@ checkNValidity <- function(n) {
 
 
 #' Range Parameter Check
-#' 
-#' Checks if a supplied range is an ordered pair. Coerces any vector of length 
+#'
+#' Checks if a supplied range is an ordered pair. Coerces any vector of length
 #'    two or greater into an ordered pair, and issues an error for
 #'    shorter vectors.
-#'    
-#' @param rng A numeric vector of length two, that ought to be an 
+#'
+#' @param rng A numeric vector of length two, that ought to be an
 #'    ordered pair.
-#' 
+#'
 #' @return An ordered pair.
 #' @examples
 #'
@@ -125,16 +125,16 @@ checkRange <- function(rng, varType) {
 
 
 #' Epsilon Parameter Check
-#' 
+#'
 #' Utility function for checking that epsilon is acceptably defined.
 #'
 #' @param epsilon A vector, that ought to be positive and of length one.
-#' 
-#' @return The supplied epsilon if acceptable, otherwise an error 
+#'
+#' @return The supplied epsilon if acceptable, otherwise an error
 #'    message interupts.
 #'
 #' @examples
-#' 
+#'
 #' checkEpsilon(0.1)
 #' \dontrun{checkEpsilon(-2)}
 #' \dontrun{checkEpsilon(c(0.1,0.5))}
@@ -152,20 +152,20 @@ checkEpsilon <- function(epsilon) {
 
 
 #' Check delta parameter
-#' 
+#'
 #' This method is to send the user a warning message if they entered a delta value
 #' that will not be used.
-#' 
-#' If the mechanism is NOT a mechanism that uses a delta value and the user entered a delta value, 
-#' send a warning message saying the delta value with not be used and set the delta 
-#' value to 0. If a mechanism that uses a delta value is being used and the user entered a 
-#' delta value, set it as the delta value (the value of delta will be checked in the 
-#' mechanism). If a mechanism that uses a delta value is being used and the user did 
+#'
+#' If the mechanism is NOT a mechanism that uses a delta value and the user entered a delta value,
+#' send a warning message saying the delta value with not be used and set the delta
+#' value to 0. If a mechanism that uses a delta value is being used and the user entered a
+#' delta value, set it as the delta value (the value of delta will be checked in the
+#' mechanism). If a mechanism that uses a delta value is being used and the user did
 #' not enter a delta value, set the delta to the default value (2^-30).
-#' 
+#'
 #' @param mechanism The mechanism chosen by determineMechanism
 #' @param delta The delta value entered by the user, may be NULL
-#' 
+#'
 #' @return The value that will be used as the delta value for the statistic
 
 checkDelta <- function(mechanism, delta=NULL) {
@@ -190,27 +190,27 @@ checkDelta <- function(mechanism, delta=NULL) {
 }
 
 #' Censoring data
-#' 
-#' For numeric types, checks if x is in rng = (min, max) and censors values to 
-#'    either min or max if it is out of the range. For categorical types, 
+#'
+#' For numeric types, checks if x is in rng = (min, max) and censors values to
+#'    either min or max if it is out of the range. For categorical types,
 #'    values not in `levels` are coded NA.
 #'
 #' @param x A vector of numeric or categorial values to censor.
 #' @param varType Character indicating the variable type of \code{x}.
 #'    Possible values include: numeric, logical, ...
-#' @param rng For x that is a numeric vector, a vector (min, max) of the bounds of the 
-#'    range. For input x that is a numeric matrices or dataframe with n columns, a list of 
+#' @param rng For x that is a numeric vector, a vector (min, max) of the bounds of the
+#'    range. For input x that is a numeric matrices or dataframe with n columns, a list of
 #'    (min, max) bounds of length n.
-#' @param levels For categorical types, a vector containing the levels to 
+#' @param levels For categorical types, a vector containing the levels to
 #'    be returned.
 #' @param rngFormat For numeric types, a string describing the format of the range input. One of either
 #'    'vector' for x that is a numeric vector and rng that is a (min, max) tuple, or 'list' for x that
 #'    is a numeric matrix or dataframe with n columns and rng that is a list of (min, max) bounds of
 #'    length n.
-#' 
+#'
 #' @return Original vector with values outside the bounds censored to the bounds.
 #' @examples
-#' 
+#'
 #' censorData(x=1:10, varType='integer', rng=c(2.5, 7))
 #' censorData(x=c('a', 'b', 'c', 'd'), varType='character', levels=c('a', 'b', 'c'))
 #' @rdname censorData
@@ -223,9 +223,9 @@ censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
         } else {
             x <- factor(x, levels=levels, exclude=NULL)
         }
-    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical')) && sapply(x, is.numeric)) {
+    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical'))) {
         if (NCOL(x) > 1 && rngFormat=='list') {
-            checkRange(rng, varType, rngFormat, expectedLength=ncol(x)) 
+            checkRange(rng, varType, rngFormat, expectedLength=ncol(x))
             for(i in 1:NCOL(x)){
                 x[,i] <- censorData1D(x[,i], rng[[i]])
             }
@@ -243,7 +243,7 @@ censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
 
 
 #' Helper function to censor data
-#' 
+#'
 #' Takes as input a numeric vector x of length n and replaces any values in x greater than max with max,
 #' and any values less than min with min
 #'
@@ -256,7 +256,7 @@ censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
 #' @examples
 #' censorData1D(1:7, (2,5))    #returns c(2,2,3,4,5,5,5)
 #' censorData1D(c(1,9,7,3,0), (2,5))     #returns(c(2,5,5,3,2))
-#' 
+#'
 censorData1D <- function(x, rng){
   x[x < rng[1]] <- rng[1]
   x[x > rng[2]] <- rng[2]
@@ -265,7 +265,7 @@ censorData1D <- function(x, rng){
 
 
 #' Logical variable check
-#' 
+#'
 #' Utility function to verify that a variable is dichotomous.
 #'
 #' This function effectively allows the user to ask for any variable containing
@@ -275,10 +275,10 @@ censorData1D <- function(x, rng){
 #' values, the least frequently observed is recoded 1.
 #'
 #' @param x Vector containing two unique types of values.
-#' 
+#'
 #' @return Logical form of \code{x} coded 0-1.
 #' @examples
-#' 
+#'
 #' makeLogical(sample(c('cat', 'dog'), size=8, replace=TRUE))
 #' makeLogical(sample(c(0, 1), size=8, replace=TRUE))
 #' makeLogical(sample(c(-6.87, 3.23), size=8, replace=TRUE))
@@ -299,42 +299,42 @@ makeLogical <- function(x) {
 }
 
 #' Scaling helper function for fillMissing
-#' 
+#'
 #' Takes input array and scales to upper and lower bounds, which are either defined by lower and upper or calculated depending on
 #' the type of variable. (Note that input array will always be numeric; varType refers to the variable type of the input array in
 #' the fillMissing function.)
-#' 
+#'
 #' @param vals Input array of values to scale Type: numeric array
-#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs. 
+#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs.
 #'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
 #' @param lower Lower bound for scaling. Type: numeric
 #' @param upper Upper bound for scaling. Type: numeric
 #' @param categories List of categories. Type: factor
 #'
-#' @return Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the 
+#' @return Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the
 #' number of categories if varType='factor' or 'character', or based on lower and upper when varType='logical','numeric', or 'integer'.
 #'
 scaleValues = function(vals, varType, lower=NULL, upper=NULL, categories=NULL) {
-    if (varType %in% c('character', 'factor')) { 
+    if (varType %in% c('character', 'factor')) {
         lower <- 1
         upper <- length(categories)
     }
-    
+
     if (varType == 'logical') {       # logical values can only be 0 or 1 so set bounds accordingly
         lower <- 0
         upper <- 2                       # upper bound of 2 not 1 because as.integer always rounds down.
     }
-    
+
     out <- vals * (upper - lower) + lower  # scale uniform random numbers based on upper and lower bounds
-    
+
     if (varType %in% c('logical', 'integer')) { # if logical or integer, trim output to integer values
         out <- as.integer(out)
     } else if(varType == 'logical') {
-        
+
     } else if (varType %in% c('character', 'factor')) { # if character or factor, assign output to categories.
         out <- categories[as.integer(out)]
     }
-    
+
     return(out)
 }
 
@@ -344,7 +344,7 @@ scaleValues = function(vals, varType, lower=NULL, upper=NULL, categories=NULL) {
 #' Imputes uniformly in the range of the provided variable.
 #'
 #' @param x Input array of missing values.
-#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs. 
+#' @param varType Variable type of input array to fillMissing function; affects how scaling occurs.
 #'   Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.
 #' @param lower Lower bound for scaling. Type: numeric. Default NULL.
 #' @param upper Upper bound for scaling. Type: numeric. Default NULL.
@@ -353,11 +353,11 @@ scaleValues = function(vals, varType, lower=NULL, upper=NULL, categories=NULL) {
 fillMissing1D <- function(x, varType, lower=NULL, upper=NULL, categories=NULL) {
     naIndices <- is.na(x)         # indices of NA values in x
     nMissing <- sum(naIndices)    # number of missing values
-    
-    if (nMissing == 0) { 
-        return(x) 
+
+    if (nMissing == 0) {
+        return(x)
     }
-    
+
     u <- dpUnif(nMissing) # array of uniform random numbers of length nMissing
     scaledVals <- scaleValues(u, varType, lower, upper, categories) # scale uniform vals
     x[naIndices] <- scaledVals #assign to NAs in input array
@@ -426,7 +426,7 @@ fillMissing = function(x, varType, imputeRng=NULL, categories=NULL) {
 
 
 #' Extract function arguments
-#' 
+#'
 #' Utility function to match arguments of a function with input list and/or attributes of input object
 #'
 #' @param targetFunc A character vector containing the name of the function to find the matching inputs of
@@ -439,21 +439,21 @@ getFuncArgs <- function(targetFunc, inputList=NULL, inputObject=NULL){
     funcArgs <- list()                      # Initialize list of function arguments
     argNames <- names(formals(targetFunc))  # Names of all arguments of targetFunc
     inputListNames <- names(inputList)      # Names of all items in inputList
-    
-    if (!is.null(inputObject)){             
+
+    if (!is.null(inputObject)){
         inputObjectNames <- names(inputObject$getFields()) # Names of all fields of inputObject
     }
     else{
         inputObjectNames <- NULL
     }
-    
+
     for (argument in argNames) {
         # If argument of targetFunc has an associated named attribute in the input list, save that attribute to funcArgs
         if (argument %in% inputListNames) {
-            funcArgs[[argument]] <- inputList[[argument]] 
+            funcArgs[[argument]] <- inputList[[argument]]
         }
-        # If argument of targetFunc has an associated field of inputObject, save that field value to funcArgs 
-        if (argument %in% inputObjectNames) {          
+        # If argument of targetFunc has an associated field of inputObject, save that field value to funcArgs
+        if (argument %in% inputObjectNames) {
             funcArgs[[argument]] <- inputObject[[argument]]
         }
     }
