@@ -37,6 +37,9 @@ covarianceSensitivity <- function(n, rng, intercept) {
 #' the covariance function here outputs a flattened version of the lower triangle of the
 #' covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
 #' matrices are symmetric.
+#' 
+#' The flattened output corresponds to the covariance matrix by proceeding
+#' proceeding top-to-bottom down each column of the lower triangular matrix (including the diagonal).
 #'
 #' The traditional covariance matrix is then reconstructed from the noisy version of this output
 #' as a post-processing step in \code{covarianceFormatRelease}.
@@ -67,14 +70,16 @@ covar <- function(x, intercept) {
 #' @include mechanism-laplace.R
 #'
 #' @field epsilon       Vector of epsilon values where the ith epsilon will be used for the ith covariance calculation in flattened
-#'  lower triangle of covariance matrix.
+#'  lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
 #' @field accuracy      Single accuracy value that will be used to compute each epsilon for each individual covariance calculation
 #'   in the covariance matrix.
 #' @field globalEps     Global epsilon to be split between all of the covariance calculations
 #' @field epsilonDist   Vector of percentages (valued 0 to 1) that describes how global epsilon \code{globalEps} should be
 #'   split for each covariance calculation.
 #' @field  accuracyVals     Vector of accuracy values where the ith accuracy will be used for the ith covariance calculation in
-#'  flattened lower triangle of covariance matrix.
+#'  flattened lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
 #' @field formula       R formula for regression models
 
 dpCovariance <- setRefClass(

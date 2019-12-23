@@ -50,7 +50,7 @@ data <- data.frame(x1, x2)
 # we do this here to make the ranges easier to pass into the call to dpCovariance
 range1 <- c(0,70)
 range2 <- c(0,100)
-ranges <- do.call(rbind, list(range1, range2))
+ranges <- list(range1, range2)
 
 dpCovarianceExample <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
                                          n=10, epsilon=c(1,1,1), columns = c('x1', 'x2'), rng=ranges)
@@ -127,10 +127,10 @@ To calculate a private covariance matrix of a set of numeric vectors with `dpCov
 income_range = c(0, 750000)
 education_range = c(1,16)
 age_range = c(0,120)
-column_ranges_matrix <- matrix(c(income_range, education_range, age_range), nrow=3, ncol=2, byrow=TRUE)
+ranges <- list(income_range, education_range, age_range)
 
 numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
-                           columns=c('income', 'educ', 'age'), n=10000, epsilon=c(0.1,0.1,0.1,0.1,0.1,0.1), rng=column_ranges_matrix)
+                           columns=c('income', 'educ', 'age'), n=10000, epsilon=c(0.1,0.1,0.1,0.1,0.1,0.1), rng=ranges)
 numeric_covariance$release(PUMS5extract10000)
 print(numeric_covariance$result)
 ```
