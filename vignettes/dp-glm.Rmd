@@ -24,6 +24,8 @@ Differentially Private Generalized Linear Models with `dpGLM`
 
 The `dpGLM` class produces fits for generalized linear models using a perturbed objective function. Currently, the class supports fits for continuous dependent variables via `'ols'`, count variables via `'poisson'`, and binary variables via either `'logit'` or `'probit'`. 
 
+KEEPING THIS IN A SEPARATE BRANCH FOR NOW DUE TO ISSUES WITH GLM PRIVACY
+
 <!-- 
 Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private versions of various statistics are available in this package.  For example, the `glm.release()` function releases coefficient estimates for a set of data after adding a precise about of noise to the objective function to guarantee `epsilon` differential privacy. 
 
@@ -177,7 +179,9 @@ print(model$result)
 
 &nbsp; 
 
-Alternatively, use the bootstrap, in which case the release returns a data frame with each row corresponding to a single bootstrap replication, and a separate summary is provided.
+Alternatively, use the bootstrap, in which case the release returns a data frame with each row corresponding to a single bootstrap replication, and a separate summary is provided. 
+
+Note this currently does not run. Keeping this here for future use.
 
 ```{r}
 nBoot <- 20
