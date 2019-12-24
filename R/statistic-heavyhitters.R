@@ -66,7 +66,7 @@ funHeavy <- function(x) {
 #' @param variable Character, the variable name in the data frame.
 #' @param n Integer, the number of observations.
 #' @param epsilon Numeric, the privacy loss parameter.
-#' @param k Integer, the number of bins to release.
+#' @param k Integer, the nunmber of bins to release.
 #' @param bins Character, the available bins, or the levels of the categorical variable.
 #' @param alpha Numeric, level of statistical significance, default 0.05.
 #' @param delta Numeric, probability of privacy loss beyond \code{epsilon}.
@@ -101,11 +101,11 @@ dpHeavyHitters$methods(
 dpHeavyHitters$methods(
     release = function(data) {
         x <- data[, variable]
-        .self$result <- export(mechanism)$evaluate(funHeavy, x, 2, .self$postProcess)
+        .self$result <- export(mechanism)$evaluate(funHeavy, x, 2)
 s})
 
 dpHeavyHitters$methods(
-    postProcess = function(out, gap) {
+    postProcess = function(out, gap) { #is gap allowed to be public?? it isn't released from the exponential mechanism.
         out$variable <- variable
         out$accuracy <- heavyhittersGetAccuracy(gap, epsilon, delta)
         out$epsilon <- heavyhittersGetParameters(gap, delta, alpha)

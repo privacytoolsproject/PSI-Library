@@ -233,7 +233,8 @@ dpGLM$methods(
 
 dpGLM$methods(
     release = function(x, ...) {
-        .self$result <- export(mechanism)$evaluate(x, .self$postProcess, ...)
+        out <- export(mechanism)$evaluate(x, ...)
+        .self$result <- .self$postProcess(out)
 })
 
 dpGLM$methods(

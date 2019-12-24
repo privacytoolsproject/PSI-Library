@@ -112,7 +112,8 @@ dpVariance$methods(
 #' the \code{dpVariance$release} function.
     release = function(data) {
         x <- data[, variable]
-        .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
+        out <- export(mechanism)$evaluate(var, x, sens)
+        .self$result <- .self$postProcess(out)
 })
 
 dpVariance$methods(

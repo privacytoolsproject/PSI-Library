@@ -12,7 +12,7 @@ mechanismObjective <- setRefClass(
 )
 
 mechanismObjective$methods(
-    evaluate = function(x, postFun, ...) {
+    evaluate = function(x, ...) {
 
         # subset data from formula
         cols <- all.vars(as.formula(.self$formula))
@@ -101,6 +101,5 @@ mechanismObjective$methods(
 
         # format output
         out <- list('release' = release)
-        out <- postFun(out, ...)
         return(out)
 })
