@@ -10,7 +10,7 @@ fillMissing1D(x, varType, lower = NULL, upper = NULL,
 \arguments{
 \item{x}{Input array of missing values.}
 
-\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs. 
+\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs.
 Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.}
 
 \item{lower}{Lower bound for scaling. Type: numeric. Default NULL.}

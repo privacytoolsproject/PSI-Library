@@ -13,13 +13,13 @@ observations in the data frame.}
 \item{rng}{A numeric list of 2-tuples of the lower and upper bounds for
 each of the variables.}
 
-\item{intercept}{A logical vector of length one indicating whether an 
+\item{intercept}{A logical vector of length one indicating whether an
 intercept should be added prior to evaluating the inner product x'x.}
 }
 \value{
 The sensitivity of the data frame for which the covariance matrix
   is being calculated.
-  
+
 /extra_docs/sensitivities/covariance_sensitivity.pdf
 }
 \description{

@@ -12,7 +12,7 @@ checkRange(rng, varType, formatType, expectedLength = NULL,
   emptyOkay = FALSE)
 }
 \arguments{
-\item{rng}{A numeric vector of length two, that ought to be an 
+\item{rng}{A numeric vector of length two, that ought to be an
 ordered pair.}
 
 \item{varType}{The variable type; e.g. 'logical', 'integer', 'numeric'.}
@@ -41,7 +41,7 @@ Note that you can input a single ordered pair as a first element of a list, e.g.
 but performance will be slightly worse.
 }
 \description{
-Checks if a supplied range is an ordered pair. Coerces any vector of length 
+Checks if a supplied range is an ordered pair. Coerces any vector of length
    two or greater into an ordered pair, and issues an error for
    shorter vectors.
 

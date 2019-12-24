@@ -1,5 +1,5 @@
 #' Sensitivity of sample variance
-#' 
+#'
 #' For a detailed derivation of the sensitivity, see /extra_docs/variance_sensitivity.pdf.
 #' @name varianceSensitivity
 #' @param n Numeric vector of length one; the number of datapoints in the database.
@@ -13,11 +13,11 @@ varianceSensitivity <- function(n, rng){
 }
 
 #' Postprocessed standard deviation from variance
-#' 
+#'
 #' Function to extract standard deviation from noisy estimate of variance.
 #' @name postStandDev
 #' @param release Differentially private release of variance.
-#' 
+#'
 #' @return Noisy estimate of the standard deviation of \code{release}, if possible to compute. Else returns NULL.
 #' @rdname postStandDev
 
@@ -34,6 +34,8 @@ postStandDev <- function(release) {
 
 #' Differentially private variance
 #'
+#' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
+#'   of \code{c('mechanismLaplace')}.
 #' @param varType Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
 #' @param variable Character, variable name of the variable that you wish to find variance of.
@@ -59,21 +61,21 @@ dpVariance <- setRefClass(
 
 dpVariance$methods(
 
-    initialize = function(varType, variable, n, rng=NULL, epsilon=NULL,
+    initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, alpha=0.05) {
         .self$name <- 'Differentially private variance'
-        .self$mechanism <- 'mechanismLaplace'
+        .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace'))
         .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))
         .self$variable <- variable
-  
+
         .self$n <- checkNValidity(n)
 
         .self$rngFormat <- 'vector'
         .self$rng <- checkRange(rng, .self$varType, .self$rngFormat)
-        
+
         .self$sens <- varianceSensitivity(.self$n, .self$rng)
         checkVariableType(typeof(variable), 'character')
-        
+
         if (is.null(epsilon)) {
             .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
@@ -82,32 +84,32 @@ dpVariance$methods(
             .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
-        
+
         if (is.null(imputeRng)) {
             .self$imputeRng <- rng
         } else {
             .self$imputeRng <- checkImputationRange(imputeRng, .self$rng, .self$varType)
         }
-        
+
         .self$alpha <- checkNumeric(alpha)
 })
 
 dpVariance$methods(
 #' Differentially private variance release
-#' 
+#'
 #' @name dpVarianceRelease
 #' @param data Dataframe with a column named .self$variable, where
-#'  that column has data of type .self$varType and which is bounded by 
+#'  that column has data of type .self$varType and which is bounded by
 #'  .self$rng.
 #'
-#' Assigns to .self$result a dataframe that describes the differentially private 
+#' Assigns to .self$result a dataframe that describes the differentially private
 #' variance, calculated by some mechanism as defined in .self$mechanism, of that
-#' column of the dataframe and any post-processing on that output. This 
+#' column of the dataframe and any post-processing on that output. This
 #' postprocessing is done in @seealso{dpVariance$postProcess}
-#' 
+#'
 #' Note that the actual differentially private release is calculated in a call to the
-#' differentially private mechanism .self$mechanism's \code{evaluate} function within 
-#' the \code{dpVariance$release} function. 
+#' differentially private mechanism .self$mechanism's \code{evaluate} function within
+#' the \code{dpVariance$release} function.
     release = function(data) {
         x <- data[, variable]
         .self$result <- export(mechanism)$evaluate(var, x, sens, .self$postProcess)
@@ -115,16 +117,16 @@ dpVariance$methods(
 
 dpVariance$methods(
 #' Post-processing on differentially private variance, called within the \code{.self$mechanism$evaluate}
-#' function, which in turn is called within \code{dpVariance$release}. 
-#' 
+#' function, which in turn is called within \code{dpVariance$release}.
+#'
 #' @name dpVariancePostProcess
 #' @param out Input dataframe that describes the differentially private release that was created in
-#' \code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute, 
+#' \code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute,
 #' out$release, which is a numeric value of length one that is the differentially private variance.
-#' 
-#' This function then post-processes the standard deviation from the variance and adds it to the dataframe 
+#'
+#' This function then post-processes the standard deviation from the variance and adds it to the dataframe
 #' as \code{out$std}, as long as the variance is positive.
-#' 
+#'
 #' Additionally, known portions of the input such as the variable name and the accuracy
 #' of the DP variance and the epsilon value may be appended with no extra privacy loss.
 #'

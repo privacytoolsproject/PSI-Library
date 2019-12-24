@@ -12,11 +12,11 @@ censorData(x, varType, rng = NULL, levels = NULL, rngFormat = NULL)
 \item{varType}{Character indicating the variable type of \code{x}.
 Possible values include: numeric, logical, ...}
 
-\item{rng}{For x that is a numeric vector, a vector (min, max) of the bounds of the 
-range. For input x that is a numeric matrices or dataframe with n columns, a list of 
+\item{rng}{For x that is a numeric vector, a vector (min, max) of the bounds of the
+range. For input x that is a numeric matrices or dataframe with n columns, a list of
 (min, max) bounds of length n.}
 
-\item{levels}{For categorical types, a vector containing the levels to 
+\item{levels}{For categorical types, a vector containing the levels to
 be returned.}
 
 \item{rngFormat}{For numeric types, a string describing the format of the range input. One of either
@@ -28,8 +28,8 @@ length n.}
 Original vector with values outside the bounds censored to the bounds.
 }
 \description{
-For numeric types, checks if x is in rng = (min, max) and censors values to 
-   either min or max if it is out of the range. For categorical types, 
+For numeric types, checks if x is in rng = (min, max) and censors values to
+   either min or max if it is out of the range. For categorical types,
    values not in `levels` are coded NA.
 }
 \examples{
