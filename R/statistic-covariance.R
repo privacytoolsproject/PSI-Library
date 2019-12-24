@@ -4,7 +4,7 @@
 #'    observations in the data frame.
 #' @param rng A numeric list of 2-tuples of the lower and upper bounds for
 #'    each of the variables.
-#' @param intercept A logical vector of length one indicating whether an 
+#' @param intercept A logical vector of length one indicating whether an
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
@@ -17,7 +17,7 @@
 #' range <- list(range.sex, range.married)
 #' covarianceSensitivity(10000, range, FALSE)
 covarianceSensitivity <- function(n, rng, intercept) {
-    diffs <- apply(rng, 1, diff)
+    diffs <- sapply(rng, diff)
     if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
     const <- 2/n
@@ -42,7 +42,7 @@ covarianceSensitivity <- function(n, rng, intercept) {
 #' the covariance function here outputs a flattened version of the lower triangle of the
 #' covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
 #' matrices are symmetric.
-#' 
+#'
 #' The flattened output corresponds to the covariance matrix by proceeding
 #' proceeding top-to-bottom down each column of the lower triangular matrix (including the diagonal).
 #'
