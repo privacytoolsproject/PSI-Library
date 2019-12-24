@@ -6,10 +6,10 @@
 function, which in turn is called within \code{dpVariance$release}.}
 \arguments{
 \item{out}{Input dataframe that describes the differentially private release that was created in
-\code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute, 
+\code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute,
 out$release, which is a numeric value of length one that is the differentially private variance.
 
-This function then post-processes the standard deviation from the variance and adds it to the dataframe 
+This function then post-processes the standard deviation from the variance and adds it to the dataframe
 as \code{out$std}, as long as the variance is positive.
 
 Additionally, known portions of the input such as the variable name and the accuracy

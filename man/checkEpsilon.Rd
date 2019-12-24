@@ -19,7 +19,7 @@ checkEpsilon(epsilon, expectedLength = 1)
 \item{multipleEps}{A boolean value. If TRUE, multiple epsilon paramaters may be defined. Default to FALSE.}
 }
 \value{
-The supplied epsilon if acceptable, otherwise an error 
+The supplied epsilon if acceptable, otherwise an error
    message interupts.
 
 The supplied epsilon if acceptable, otherwise an error 

@@ -6,6 +6,9 @@
 \alias{dpVariance}
 \title{Differentially private variance}
 \arguments{
+\item{mechanism}{Character, the privacy mechanism. For \code{dpMean}, one
+of \code{c('mechanismLaplace')}.}
+
 \item{varType}{Character, the R variable type. One of \code{c('numeric',
 'integer', 'logical')}.}
 

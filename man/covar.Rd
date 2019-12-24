@@ -15,17 +15,20 @@ covar(x, intercept)
 The lower triangle of the covariance matrix of x, flattened to a 1-dimensional array.
 }
 \description{
-This function is called by \code{mechanismLaplace$evaluate}, which is called within the 
+This function is called by \code{mechanismLaplace$evaluate}, which is called within the
 differentially private covariance release function \code{dpCovariance$release}. It
 produces the true covariance matrix of input \code{x} that is then perturbed within
 \code{mechanismLaplace$evaluate}.
 }
 \details{
-Since the Laplace mechanism as instantiated within \code{mechanismLaplace$evaluate} expects 
-an output of the true function which can have a 1-dimensional vector of noise added to it, 
+Since the Laplace mechanism as instantiated within \code{mechanismLaplace$evaluate} expects
+an output of the true function which can have a 1-dimensional vector of noise added to it,
 the covariance function here outputs a flattened version of the lower triangle of the
 covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
 matrices are symmetric.
+
+The flattened output corresponds to the covariance matrix by proceeding
+proceeding top-to-bottom down each column of the lower triangular matrix (including the diagonal).
 
 The traditional covariance matrix is then reconstructed from the noisy version of this output
 as a post-processing step in \code{covarianceFormatRelease}.
