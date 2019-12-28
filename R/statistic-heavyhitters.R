@@ -66,7 +66,7 @@ funHeavy <- function(x) {
 #' @param variable Character, the variable name in the data frame.
 #' @param n Integer, the number of observations.
 #' @param epsilon Numeric, the privacy loss parameter.
-#' @param k Integer, the nunmber of bins to release.
+#' @param k Integer, the number of bins to release.
 #' @param bins Character, the available bins, or the levels of the categorical variable.
 #' @param alpha Numeric, level of statistical significance, default 0.05.
 #' @param delta Numeric, probability of privacy loss beyond \code{epsilon}.
