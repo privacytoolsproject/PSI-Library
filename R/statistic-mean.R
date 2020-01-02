@@ -81,7 +81,8 @@ dpMean$methods(
     #' the \code{dpMean$release} function. 
     release = function(data, ...) {
         x <- data[, variable]
-        .self$result <- export(mechanism)$evaluate(mean, x, .self$sens, .self$postProcess, ...)
+        out <- export(mechanism)$evaluate(mean, x, .self$sens, ...)
+        .self$result <- .self$postProcess(out)
 })
 
 dpMean$methods(

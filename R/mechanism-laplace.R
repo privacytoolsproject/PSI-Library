@@ -23,8 +23,6 @@ mechanismLaplace$methods(
   #' @param fun function of input x to add Laplace noise to.
   #' @param x input that function fun will be evaluated on. 
   #' @param sens sensitivity of fun. Sensitivity is defined in above citation.
-  #' @param postFun post-processing function. Takes differentially private release as input
-  #'  and returns some form of output in principal based on the differentially private release. 
   #' @param ... any additional (optional) parameters
   #'
   #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
@@ -56,7 +54,7 @@ mechanismLaplace$methods(
   #' 
   #' laplace_mean <- mechanismLaplace$evaluate(mean_function, data[, variable], sens, post_processing_function)
   #' 
-  evaluate = function(fun, x, sens, postFun, ...) {
+  evaluate = function(fun, x, sens, ...) {
     x <- censorData(x, .self$varType, .self$rng, .self$bins, .self$rngFormat)
     x <- fillMissing(x, .self$varType, imputeRng=.self$rng, categories=.self$imputeBins)
     fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
@@ -65,7 +63,6 @@ mechanismLaplace$methods(
     scale <- sens / .self$epsilon
     release <- trueVal + dpNoise(n=length(trueVal), scale=scale, dist='laplace')
     out <- list('release' = release)
-    out <- postFun(out, ...)
     return(out)
   }
 

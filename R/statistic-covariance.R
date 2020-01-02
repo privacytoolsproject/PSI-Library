@@ -174,13 +174,13 @@ dpCovariance$methods(
 dpCovariance$methods(
   release = function(data) {
     x <- data[columns];
-    .self$result <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens, postFun=.self$postProcess,
+    out <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens,
                                                formula=formula, columns=columns, intercept=intercept)
+    .self$result <- .self$postProcess(out, columns, formula, intercept)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
-
     out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {

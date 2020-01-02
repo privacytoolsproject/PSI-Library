@@ -12,7 +12,7 @@ mechanismExponential <- setRefClass(
 )
 
 mechanismExponential$methods(
-    evaluate = function(fun, x, sens, postFun, ...) {
+    evaluate = function(fun, x, sens, ...) {
         x <- censorData(x, .self$varType, rng=.self$rng, levels=.self$bins)
         x <- fillMissing(x, .self$varType, rng=.self$rng, categories=.self$bins)
         fun.args <- getFuncArgs(fun, inputList=list(...), inputObject=.self)
@@ -26,7 +26,7 @@ mechanismExponential$methods(
         } else {
             release <- sample(names(trueVal), size=.self$k, prob=probs)
             out <- list('release' = release)
-            out <- postFun(out, gap)
+            
         }
         return(out)
 })

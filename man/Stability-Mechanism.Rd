@@ -10,9 +10,6 @@
 
 \item{sens}{sensitivity of fun. Sensitivity is defined in above citation.}
 
-\item{postFun}{post-processing function. Takes differentially private release as input
-and returns some form of output in principal based on the differentially private release.}
-
 \item{...}{any additional (optional) parameters}
 }
 \value{

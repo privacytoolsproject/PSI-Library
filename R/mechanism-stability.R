@@ -41,8 +41,6 @@ mechanismStability$methods(
     #' @param fun function of input x to add Laplace noise to.
     #' @param x input that function fun will be evaluated on. 
     #' @param sens sensitivity of fun. Sensitivity is defined in above citation.
-    #' @param postFun post-processing function. Takes differentially private release as input
-    #'  and returns some form of output in principal based on the differentially private release. 
     #' @param ... any additional (optional) parameters
     #'
     #' @return result of post-processing on input function "fun" evaluated on database "x", assuming sensitivity of fun is "sens".
@@ -65,7 +63,7 @@ mechanismStability$methods(
     #' 
     #' stability_histogram <- mechanismStability$evaluate(histogram_function, data[, variable], sens, post_processing_function)
     #'
-    evaluate = function(fun, x, sens, postFun, ...) {
+    evaluate = function(fun, x, sens, ...) {
         # before calculating the histogram statistic, confirm that delta is less than (1/n^2)
         # if delta is greater than or equal to (1/n^2), return an error message to the user
         if (.self$delta >= (1 / (.self$n)^2)) stop("A delta value on the order of 1/n^2 is a privacy risk, as it allows for additional data to leak beyond the privacy parameter epsilon. Choose a smaller value for delta to maintain your privacy guarantee.")
@@ -104,7 +102,6 @@ mechanismStability$methods(
         release <- release[release > accuracyThreshold]
         
         out <- list('release' = release)
-        out <- postFun(out, ...)
         return(out)
     }
     

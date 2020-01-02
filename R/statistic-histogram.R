@@ -107,8 +107,8 @@ dpHistogram$methods(
 dpHistogram$methods(
     release = function(data) {
         x <- data[, variable]
-        noisy <- export(.self$mechanism)$evaluate(funHist, x, .self$sens, .self$postProcess)
-        .self$result <- noisy
+        out <- export(.self$mechanism)$evaluate(funHist, x, .self$sens)
+        .self$result <- .self$postProcess(out)
 })
 
 dpHistogram$methods(

@@ -101,11 +101,11 @@ dpHeavyHitters$methods(
 dpHeavyHitters$methods(
     release = function(data) {
         x <- data[, variable]
-        .self$result <- export(mechanism)$evaluate(funHeavy, x, 2, .self$postProcess)
+        .self$result <- export(mechanism)$evaluate(funHeavy, x, 2)
 s})
 
 dpHeavyHitters$methods(
-    postProcess = function(out, gap) {
+    postProcess = function(out, gap) { #is gap allowed to be public?? it isn't released from the exponential mechanism.
         out$variable <- variable
         out$accuracy <- heavyhittersGetAccuracy(gap, epsilon, delta)
         out$epsilon <- heavyhittersGetParameters(gap, delta, alpha)

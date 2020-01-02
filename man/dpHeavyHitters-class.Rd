@@ -17,7 +17,7 @@
 
 \item{epsilon}{Numeric, the privacy loss parameter.}
 
-\item{k}{Integer, the number of bins to release.}
+\item{k}{Integer, the nunmber of bins to release.}
 
 \item{bins}{Character, the available bins, or the levels of the categorical variable.}
 
