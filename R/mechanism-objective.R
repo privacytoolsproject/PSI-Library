@@ -12,14 +12,14 @@ mechanismObjective <- setRefClass(
 )
 
 mechanismObjective$methods(
-    evaluate = function(x, postFun, ...) {
+    evaluate = function(x, ...) {
 
         # subset data from formula
         cols <- all.vars(as.formula(.self$formula))
         x <- x[, cols]
 
         # censor & impute missing values
-        x <- censorData(x, .self$varType, .self$rng, .self$bins)
+        #x <- censorData(x, .self$varType, .self$rng, .self$bins) # NEEDS fixed to support checkRange
         x <- fillMissing(x, .self$varType, imputeRng=.self$imputeRng)
 
         # extract X and y
@@ -101,6 +101,5 @@ mechanismObjective$methods(
 
         # format output
         out <- list('release' = release)
-        out <- postFun(out, ...)
         return(out)
 })

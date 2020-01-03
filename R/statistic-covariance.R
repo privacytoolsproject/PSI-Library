@@ -1,106 +1,67 @@
-#' Release additional model coefficients from DP covariance matrix
-#' 
-#' Function to extract regression coefficients using the differentially private covariance matrix 
-#'    via the sweep operator. This is the function to obtain coefficients for additional models
-#'    after the \code{covariance.release()} function has already been called. 
-#' 
-#' @param formula Formula, regression formula used on data
-#' @param release Numeric, private release of covariance matrix
-#' @param n Integer, indicating number of observations
-#' @export
-
-coefficientRelease <- function(formula, release, n) {
-  intercept <- ifelse('intercept' %in% names(release), TRUE, FALSE)
-  coefficients <- linearReg(formula, release, n, intercept)
-  release <- list(name='Linear regression', 
-                  n=n, 
-                  formula=formula, 
-                  coefficients=coefficients)
-  return(release)
-}
-
-
-#' Function to get the sensitivity of the covariance matrix
+#' Function to get the sensitivity of the lower triangle of the covariance matrix
 #'
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
-#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
-#'    each of P variables in the data frame, dimensions Px2.
-#' @param intercept A logical vector of length one indicating whether an 
+#' @param rng A numeric list of 2-tuples of the lower and upper bounds for
+#'    each of the variables.
+#' @param intercept A logical vector of length one indicating whether an
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
 #'   is being calculated.
+#'
+#  A complete derivation of the sensitivity of the covariance may be found in
+#' /extra_docs/sensitivities/covariance_sensitivity.pdf
+#' @example Should output equal to rep(2/10000, 3)
+#' range.sex <- range(PUMS5extract10000['sex'])
+#' range.married <- range(PUMS5extract10000['married'])
+#' range <- list(range.sex, range.married)
+#' covarianceSensitivity(10000, range, FALSE)
 covarianceSensitivity <- function(n, rng, intercept) {
-  diffs <- apply(rng, 1, diff)
-  if (intercept) { diffs <- c(1, diffs) }
-  sensitivity <- c()
-  for (i in 1:length(diffs)) {
-    for (j in i:length(diffs)) {
-      s <- ((n - 1) / n) * diffs[i] * diffs[j]
-      sensitivity <- c(sensitivity, s)
+    diffs <- sapply(rng, diff)
+    if (intercept) { diffs <- c(0, diffs) }
+    sensitivity <- c()
+    const <- 2/n
+    for (i in 1:length(diffs)) {
+        for (j in i:length(diffs)) {
+            s <- const * diffs[i] * diffs[j]
+            sensitivity <- append(sensitivity, s)
+        }
     }
-  }
-  return(sensitivity)
+    return(sensitivity)
 }
-
-
-#' Function to convert unique private covariances into symmetric matrix
-#'
-#' @param release Differentially private release of elements in lower triangle 
-#'    of covariance matrix.
-#' @param columns A character vector indicating columns in the private 
-#'    covariance to be included in the output. Length should be equal to the 
-#'    number of columns the user wants to include.
-#' @return A symmetric differentially private covariance matrix.
-#'
-#' This function is used by the mechanism in post-processing and not intended for interactive post-processing
-covarianceFormatRelease <- function(release, columns) {
-  outDim <- length(columns)
-  outMatrix <- matrix(0, nrow=outDim, ncol=outDim)
-  outMatrix[lower.tri(outMatrix, diag=TRUE)] <- release
-  outMatrix[upper.tri(outMatrix, diag=FALSE)] <- t(outMatrix)[upper.tri(outMatrix, diag=FALSE)]
-  release <- data.frame(outMatrix)
-  rownames(release) <- names(release) <- columns
-  return(release)
-}
-
-
-#' Function to perform linear regression using private release of covariance matrix
-#'
-#' @param release Differentially private release of elements in lower triangle 
-#'    of covariance matrix.
-#' @param n A numeric vector of length one specifying the number of
-#'    observations in the data frame.
-#' @param intercept Logical indicating whether the intercept is included in 
-#'    \code{release}.
-#' @param formula A list of the regression equations to be performed on the 
-#'    covariance matrix.
-#' @return Linear regression coefficients and standard errors for all specified
-#'    \code{formula}.
-covariancePostLinearRegression <- function(release, n, intercept, formula) {
-  outSummaries <- vector('list', length(formula))
-  for (f in 1:length(formula)) {
-    outSummaries[[f]] <- linearReg(formula[[f]], release, n, intercept)
-  }
-  return(outSummaries)
-}
-
 
 #' Lower triangle of covariance matrix
 #'
-#' This function is called by \code{dpCovariance} and
-#' produces the true value to be perturbed.
+#' This function is called by \code{mechanismLaplace$evaluate}, which is called within the
+#' differentially private covariance release function \code{dpCovariance$release}. It
+#' produces the true covariance matrix of input \code{x} that is then perturbed within
+#' \code{mechanismLaplace$evaluate}.
 #'
-#' @param x Data frame
-#' @param columns Columns to include in output
-#' @param intercept Logical, should the intercept be included?
+#' Since the Laplace mechanism as instantiated within \code{mechanismLaplace$evaluate} expects
+#' an output of the true function which can have a 1-dimensional vector of noise added to it,
+#' the covariance function here outputs a flattened version of the lower triangle of the
+#' covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
+#' matrices are symmetric.
+#'
+#' The flattened output corresponds to the covariance matrix by proceeding
+#' proceeding top-to-bottom down each column of the lower triangular matrix (including the diagonal).
+#'
+#' The traditional covariance matrix is then reconstructed from the noisy version of this output
+#' as a post-processing step in \code{covarianceFormatRelease}.
+#'
+#' @param x Input data frame that covariance matrix will be calculated with.
+#' @param intercept Logical, indicates if intercept column should be appended to x.
+#' @return The lower triangle of the covariance matrix of x, flattened to a 1-dimensional array.
+#'
+#' @seealso dpCovariance$release
+#' @seealso mechanismLaplace$evaluate
 
-funCovar <- function(x, intercept) {
-  if (intercept) { x <- cbind(1, x) }
-  covariance <- t(as.matrix(x)) %*% as.matrix(x)
-  lower <- lower.tri(covariance, diag=TRUE)
-  covariance <- covariance[lower]
-  return(covariance)
+covar <- function(x, intercept) {
+    if (intercept) { x <- cbind(1, x) }
+    covariance <- cov(x)
+    lower <- lower.tri(covariance, diag=TRUE)
+    covariance <- covariance[lower]
+    return(covariance)
 }
 
 
@@ -112,50 +73,114 @@ funCovar <- function(x, intercept) {
 #'
 #' @include mechanism.R
 #' @include mechanism-laplace.R
+#'
+#' @field epsilon       Vector of epsilon values where the ith epsilon will be used for the ith covariance calculation in flattened
+#'  lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
+#' @field accuracy      Single accuracy value that will be used to compute each epsilon for each individual covariance calculation
+#'   in the covariance matrix.
+#' @field globalEps     Global epsilon to be split between all of the covariance calculations
+#' @field epsilonDist   Vector of percentages (valued 0 to 1) that describes how global epsilon \code{globalEps} should be
+#'   split for each covariance calculation.
+#' @field  accuracyVals     Vector of accuracy values where the ith accuracy will be used for the ith covariance calculation in
+#'  flattened lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
+#' @field formula       R formula for regression models
 
 dpCovariance <- setRefClass(
-  Class = 'dpCovariance',
-  contains = 'mechanismLaplace'
+    Class = 'dpCovariance',
+    contains = 'mechanismLaplace',
+    fields = list(
+        epsilonDist = 'numeric',
+        globalEps = 'numeric',
+        accuracyVals = 'numeric',
+        formula = 'ANY'
+    )
 )
 
 dpCovariance$methods(
-  initialize = function(mechanism, varType, n, epsilon, columns, rng=NULL, imputeRng=NULL, 
-                        intercept=FALSE, formula=NULL, delta=1e-5) {
+  initialize = function(mechanism, varType, n, columns, rng, epsilon=NULL, globalEps=NULL, epsilonDist= NULL,
+                        accuracy=NULL, accuracyVals=NULL, imputeRng=NULL, intercept=FALSE, formula=NULL,
+                        alpha=0.05) {
+
     .self$name <- 'Differentially private covariance matrix'
-    .self$mechanism <- mechanism
-    .self$varType <- varType
-    .self$n <- checkNValidity(n)
-    .self$epsilon <- epsilon
-    .self$delta <- delta
-    .self$rng <- rng
+    .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
+    .self$varType <- checkVariableType(varType, c('integer', 'double', 'numeric', 'logical'))  #NEED TO CHANGE TO ALLOW MULTIPLE VARTYPES
+
+
+    .self$formula <- formula
+    .self$intercept <- intercept
+    .self$alpha <- alpha
+
+
+    .self$n <- checkN(n)
+    .self$rngFormat <- 'list'
+    .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns))
     .self$sens <- covarianceSensitivity(n, rng, intercept)
-    
-    checkEpsilon(epsilon)
-    
-    if (is.null(imputeRng)) {
+
+
+    checkVariableType(class(formula), c("formula", "character"), emptyOkay=TRUE)
+    checkVariableType(typeof(intercept), "logical")
+    checkVariableType(typeof(columns), "character")
+
+
+    if (is.null(imputeRng)) { # NEED TO ALLOW FOR IMPUTING ON ONLY SOME OF THE RANGES
       .self$imputeRng <- rng
     } else {
       .self$imputeRng <- imputeRng
     }
-    .self$formula <- formula
-    .self$intercept <- intercept
-    if (.self$intercept) { 
+
+    if (.self$intercept) {
       .self$columns <- c('intercept', columns)
     } else {
       .self$columns <- columns
+    }
+
+    # Distribute epsilon across all covariances that will be calculated
+    outputLength <- lowerTriangleSize(.self$columns)
+    # Option 1: Enter vector of epsilon values to be used for each covariance calculation in matrix.
+    if (!is.null(epsilon)){
+        .self$epsilon <- checkEpsilon(epsilon, expectedLength=outputLength)
+        .self$globalEps <- sum(.self$epsilon)
+    }
+    # Option 2: Enter global epsilon value and vector of percentages specifying how to split global
+    # epsilon between covariance calculations.
+    else if (!is.null(globalEps) && !is.null(epsilonDist)){
+        .self$globalEps <- checkEpsilon(globalEps)
+        .self$epsilonDist <- checkEpsilonDist(epsilonDist, outputLength)
+        .self$epsilon <- distributeEpsilon(.self$globalEps, epsilonDist=.self$epsilonDist)
+        .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
+    }
+    # Option 3: Only enter global epsilon, and have it be split evenly between covariance calculations.
+    else if (!is.null(globalEps)){
+        .self$globalEps <- checkEpsilon(globalEps)
+        .self$epsilon <- distributeEpsilon(.self$globalEps, nCalcs=outputLength)
+        .self$accuracyVals <- laplaceGetAccuracy(.self$sens, .self$epsilon, .self$alpha)
+    }
+    # Option 4: Enter an accuracy value instead of an epsilon, and calculate individual epsilons with this accuracy.
+    else if (!is.null(accuracy)){
+        .self$accuracy = checkAccuracy(accuracy)
+        .self$epsilon = laplaceGetEpsilon(.self$sens, .self$accuracy, .self$alpha)
+        .self$globalEps = sum(.self$epsilon)
+    }
+    # Option 5: Enter vector of accuracy values, and calculate ith epsilon value from ith accuracy value
+    else if (!is.null(accuracyVals)){
+        .self$accuracyVals = checkAccuracyVals(accuracyVals, outputLength)
+        .self$epsilon = laplaceGetEpsilon(.self$sens, .self$accuracyVals, .self$alpha)
+        .self$globalEps = sum(.self$epsilon)
     }
   })
 
 dpCovariance$methods(
   release = function(data) {
     x <- data[columns];
-    .self$result <- export(mechanism)$evaluate(fun=funCovar, x=x, sens=sens, postFun=.self$postProcess,
+    out <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens,
                                                formula=formula, columns=columns, intercept=intercept)
+    .self$result <- .self$postProcess(out, columns, formula, intercept)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
-    
     out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {

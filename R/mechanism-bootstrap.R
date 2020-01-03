@@ -5,11 +5,9 @@
 #' @param sensitivity Sensitivity of the function
 #' @param epsilon Numeric differential privacy parameter
 #' @param fun Function to evaluate
-#' @param inputObject the Bootstrap mechanism object on which the input function will be evaluated
 #' @return Value of the function applied to one bootstrap sample
 #' @import stats
 #' @export
-
 
 bootstrapReplication <- function(x, n, sensitivity, epsilon, fun) {
     partition <- rmultinom(n=1, size=n, prob=rep(1 / n, n))
@@ -60,13 +58,12 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
-    evaluate = function(fun, x, sens, postFun) {
+    evaluate = function(fun, x, sens) {
         x <- censorData(x, .self$varType, .self$rng)
         x <- fillMissing(x, .self$varType, .self$imputeRng[0], .self$imputeRng[1])
         epsilonPart <- epsilon / .self$nBoot
         release <- replicate(.self$nBoot, bootstrapReplication(x, n, sens, epsilonPart, fun=.self$bootStatEval))
         stdError <- .self$bootSE(release, .self$nBoot, sens)
         out <- list('release' = release, 'stdError' = stdError)
-        out <- postFun(out)
         return(out)
 })

@@ -1,7 +1,7 @@
 #' Get accuracy for Laplace statistics
 #' 
 #' Function to find the accuracy guarantee of a statistic release at a given epsilon 
-#' value.
+#' value. This accuracy guarantee is derived in /extra_docs/accuracy/accuracy.pdf
 #' 
 #' @param sensitivity the sensitivity of the statistic
 #' @param epsilon A numeric vector representing the epsilon privacy parameter.
@@ -20,6 +20,9 @@ laplaceGetAccuracy <- function(sensitivity, epsilon, alpha=0.05) {
 #' 
 #' Function to find the epsilon value necessary to meet a desired level of 
 #' accuracy for a statistic release.
+#' 
+#' This is a direct corollary of the accuracy guarantee of the accuracy derivation in
+#' /extra_docs/accuracy/accuracy.pdf
 #' 
 #' @param sensitivity the sensitivity of the statistic
 #' @param accuracy A numeric vector representing the accuracy needed to 

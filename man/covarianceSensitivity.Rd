@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistic-covariance.R
 \name{covarianceSensitivity}
 \alias{covarianceSensitivity}
-\title{Function to get the sensitivity of the covariance matrix}
+\title{Function to get the sensitivity of the lower triangle of the covariance matrix}
 \usage{
 covarianceSensitivity(n, rng, intercept)
 }
@@ -10,16 +10,18 @@ covarianceSensitivity(n, rng, intercept)
 \item{n}{A numeric vector of length one specifying the number of
 observations in the data frame.}
 
-\item{rng}{A numeric matrix of 2-tuples with the lower and upper bounds for
-each of P variables in the data frame, dimensions Px2.}
+\item{rng}{A numeric list of 2-tuples of the lower and upper bounds for
+each of the variables.}
 
-\item{intercept}{A logical vector of length one indicating whether an 
+\item{intercept}{A logical vector of length one indicating whether an
 intercept should be added prior to evaluating the inner product x'x.}
 }
 \value{
 The sensitivity of the data frame for which the covariance matrix
   is being calculated.
+
+/extra_docs/sensitivities/covariance_sensitivity.pdf
 }
 \description{
-Function to get the sensitivity of the covariance matrix
+Function to get the sensitivity of the lower triangle of the covariance matrix
 }

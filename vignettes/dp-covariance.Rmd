@@ -22,53 +22,62 @@ knitr::opts_chunk$set(
 Differentially Private Covariance with `dpCovariance`
 -----------------------------------------
 
-The `dpCovariance` class evaluates a privacy-preserving covariance of a pair of vectors of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric` and `integer`.
+The `dpCovariance` class evaluates a privacy-preserving covariance of a series of vectors of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric` and `integer`.
 
 <!--
-Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
+Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy.
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
 
-There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `10^-5`, and never greater than `1/n` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
+There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `2^-30`, and never greater than `1/n^2` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
 
-It is noteworthy the user must manually specify the number of observations, variable type, and range of the data of interest; data will only be touched at the point the estimate to be released is actually computed, and only by the function computing that estimate. This structure decreases the possibility of an unauthorized release of information. Additional parameter specification includes the desired `epsilon` value and post-processing steps the user would like to perform on the released statistic. 
+The user must manually specify the number of observations, variable type, and range of the data of interest.
 -->
 
 Syntax
 ------
 
-```{r, eval = FALSE}
-x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
-range1 <- c(0,70)
-x2 <- c(11, 42, 16, 20, 21, 86, 30, 50, 73, 94)
-range2 <- c(0,1)
-data <- data.frame(x1, x2)
-ranges <- do.call(rbind, list(range1, range2))
+```{r, eval = TRUE}
+# import the library
+library(PSIlence)
 
-example_dpCovariance <- dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric', 
-                                         n=10, epsilon=10, columns = c('x1', 'x2'), rng=ranges)
-out1 <- example_dpCovariance$release(data)
-print(out1)
+# example data
+x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
+x2 <- c(11, 42, 16, 20, 21, 86, 30, 50, 73, 94)
+data <- data.frame(x1, x2)
+
+# range of the example data
+# we do this here to make the ranges easier to pass into the call to dpCovariance
+range1 <- c(0,70)
+range2 <- c(0,100)
+ranges <- list(range1, range2)
+
+dpCovarianceExample <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
+                                         n=10, epsilon=c(1,1,1), columns = c('x1', 'x2'), rng=ranges)
+dpCovarianceExample$release(data)
+print(dpCovarianceExample$result)
 ```
 
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpCovariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpCovariance` class: the `new` method and the `release` method. The `new` method does not touch any data, it just creates an object that can calculate a differentially private covariance matrix. Only the `release` method touches data, and applies the functionality of the previously created object to the data.
+
+The `new` method creates an object of the class, and accepts the following arguments:
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, must be `'mechanismLaplace'`.
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'` or `'integer'`.
+* `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'` or `'integer'`.
 
 * `n` \ Integer, the number of observations in the columns.
 
-* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query.
+* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. The vector of epsilons match up with the induced covariance matrix by proceeding top-to-bottom down each column of the lower triangular matrix.
 
 * `columns` \ Character, the columns of the data to include in the output covariance matrix
 
 * `rng` \ Numeric, a matrix of 2-tuples with the lower and upper bounds for each of P variables in the data frame, dimensions Px2.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+* `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
 
 * `intercept` \ Logical, a vector of length one indicating whether an intercept should be added prior to calculaing the covarience. Optional, default `FALSE`.
 
@@ -76,16 +85,31 @@ In typical usage, there are two methods to the `dpCovariance` class. The `new` m
 
 * `delta` \ Numeric, the differential privacy parameter $\delta$, the likelihood of additional privacy loss beyond $\epsilon$. Typically takes values of $10^{-5}$ or less, should never be less than $1/n$
 
-&nbsp; 
+&nbsp;
 
-The `release` method accepts a single argument. 
+The `release` method accepts a single argument.
 
 * `data` \ Data frame containing numeric columns corresponding the names specified in `columns`.
+
+Values
+------
+
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the covariance matrix and the list of the variables in the covariance matrix. Also includes other elements reflecting variable post-processing of the release.
+
+&nbsp;
+
+The list in the `result` attribute has the following values.
+
+* `release` \ Differentially private estimate of the covariance matrix.
+* `variable` \ List of the variables in the covariance matrix (variables listed as strings)
+* `linearRegression` \ the function for the linear regression on the private estimate of the covariance matrix
 
 Examples
 ------
 
-Attach the sample dataset. 
+Import the PSIlence library and attach the sample datasets:
 
 ```{r, eval = TRUE}
 library(PSIlence)
@@ -94,30 +118,23 @@ data(PUMS5extract10000)
 
 &nbsp;
 
-Calculate a private covariance of a set of numeric vectors with `dpCovariance` using the Laplace mechanism:
+To calculate a private covariance matrix of a set of numeric vectors with `dpCovariance`, enter the mechanism (this will be the Laplace Mechanism, or 'mechanismLaplace'), the variable type ('numeric'), the columns of interest (the column names of the variables of interest in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the matrix of ranges of the chosen columns:
 
-```{r}
-# before calculating the covariance, create a matrix of the column ranges
+```{r, eval = TRUE}
+# before calculating the covariance, create a matrix of the column ranges,
+# where each row contains the minimum and maximum value of a column,
+# in the order of the columns as they are passed into the dpCovariance call
 income_range = c(0, 750000)
 education_range = c(1,16)
-column_ranges_matrix <- matrix(c(income_range, education_range), nrow=2, ncol=2, byrow=TRUE)
+age_range = c(0,120)
+ranges <- list(income_range, education_range, age_range)
 
-numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', var.type='numeric', 
-                           columns=c('income', 'educ'), n=10000, epsilon=0.1, rng=column_ranges_matrix)
+numeric_covariance <- dpCovariance$new(mechanism='mechanismLaplace', varType='numeric',
+                           columns=c('income', 'educ', 'age'), n=10000, epsilon=c(0.1,0.1,0.1,0.1,0.1,0.1), rng=ranges)
 numeric_covariance$release(PUMS5extract10000)
 print(numeric_covariance$result)
 ```
 
-Values
+Notes
 ------
-
-The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
-
-* `result` List, contains the covariance matrix and the list of the variables in the covariance matrix. Other elements reflecting variable post-processing of the release.
-
-&nbsp; 
-
-The list in the `result` attribute has the following values.
-
-* `release` \ Differentially private estimate of the covariance matrix.
-* `variable` \ List of the variables in the covariance matrix (variables listed as strings)
+* For the `imputeRng` argument, the imputation strategy is to use a Uniform distribution to choose any value in the imputation range with equal probability.

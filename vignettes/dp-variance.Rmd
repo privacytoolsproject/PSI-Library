@@ -25,51 +25,48 @@ Differentially Private Variance with `dpVariance`
 The `dpVariance` class evaluates a privacy-preserving variance of a vector of values. The class supports any vector type that can be represented numerically, meaning that it can handle the R types `numeric`, `integer`, and `logical`.
 
 <!--
-Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy. 
+Differential privacy is a rigorous mathematical framework for making statistical information about private datasets available. This is done in such a way that guarantees that information about specific individuals in the dataset does not leak out. Differentially private estimates of various statistics are available in this package.  For example, the `mean.release()` function releases a mean of a variable, while adding a precise about of noise to guarantee `epsilon` differential privacy.
 
 The privacy loss parameter `epsilon` is chosen by the user and represents the degree of privacy preservation guaranteed to each observation in the data when releasing information. Typically this is valued between 0 and 1; as the value gets smaller, the level of privacy protection grows. However, greater privacy protection means more noise must be added to the true mean to achieve the desired amount of privacy. Therefore, as epsilon grows smaller, the privacy protection becomes greater, but the accuracy of the statistical release becomes weaker.
 
-There is an additional definition of differential privacy known as `epsilon-delta` differential privacy. The additional privacy loss parameter `delta` is chosen by the user and represents how likely the privacy loss for a given dataset is more than epsilon. In other words, `delta` is the chance that additional privacy loss beyond `epsilon` occurs. This value should be very small, on the order of `2^-30`, and never greater than `1/n^2` (where n is the size of the database). Similar to `epsilon`, as the value of `delta` grows smaller, the level of privacy increases, but the accuracy decreases.
-
-The user must manually specify the number of observations, variable type, and range of the data of interest. 
+The user must manually specify the number of observations, variable type, and range of the data of interest.
 -->
 
 Syntax
 ------
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
+# import the library
+library(PSIlence)
+
+# example data
 x1 <- c(3, 12, 20, 42, 33, 65, 70, 54, 33, 45)
 x2 <- c(TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE)
 data <- data.frame(x1, x2)
 
-example_dpVariance <- dpVariance$new(mechanism='mechanismLaplace', var.type='numeric', 
+# example on a numeric variable
+dpVarianceExample <- dpVariance$new(mechanism='mechanismLaplace', varType='numeric',
                       variable='x1', epsilon=10, n=10, rng=c(0, 70))
-out1 <- example_dpVariance$release(data)
-print(out1)
+dpVarianceExample$release(data)
+print(dpVarianceExample$result)
 
-example_dpVariance2 <- dpMean$new(mechanism='mechanismLaplace', var.type='logical', 
+# example on a logical variable
+dpVarianceExample2 <- dpVariance$new(mechanism='mechanismLaplace', varType='logical',
                        variable='x2', epsilon=0.1, n=10, rng=c(0, 1))
-out2 <- example_dpVariance2$release(data)
-print(out2)
+dpVarianceExample2$release(data)
+print(dpVarianceExample2$result)
 ```
-
-
-dpVariance$methods(
-    initialize = function(mechanism, var.type, variable, n, rng, epsilon,
-                          impute.rng=NULL, alpha=0.05)
-
-
 
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpVariance` class. The `new` method, which creates an object of the class, accepts the following arguments.
+In typical usage, there are two methods to the `dpVariance` class: the `new` method and the `release` method. The `new` method does not touch any data, it just creates an object that can calculate a differentially private covariance matrix. Only the `release` method touches data, and applies the functionality of the previously created object to the data.
 
 * `mechanism` \ Character, the class name of the mechanism used to perturb the true estimate, must be `'mechanismLaplace'`.
 
-* `var.type` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
+* `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
 
-* `variable` \ character, the name of the variable in the data on which to calculate the variance.
+* `variable` \ character, the name of the variable in the data for which to calculate the variance.
 
 * `n` \ Integer, the number of observations in the vector.
 
@@ -77,20 +74,41 @@ In typical usage, there are two methods to the `dpVariance` class. The `new` met
 
 * `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `accuracy`.
 
-* `impute.rng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+* `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
+
+* `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`. See Notes below for more information.
 
 * `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`.
 
-&nbsp; 
+&nbsp;
 
-The `release` method accepts a single argument. 
+The `release` method accepts a single argument.
 
 * `data` \ Data frame containing numeric columns corresponding the name specified in `variable`.
+
+Values
+------
+
+The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
+
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. Other elements reflecting variable post-processing of the release are also included.
+
+&nbsp;
+
+The list in the `result` attribute has the following values.
+
+* `release` \ Differentially private estimate of the variance.
+* `variable` \ The variable n the data for which the differentially private variance was calculated.
+* `std` \ Differentially private estimate of the standard deviation of the variable (the square root of the variance estimate).
+* `accuracy` \ The accuracy guarantee of the release, given `epsilon`, if `epsilon` was entered. Otherwise, this is the accuracy value entered by the user.
+* `epsilon` \ The privacy cost required to guarantee `accuracy`, if `accuracy` was entered. Otherwise, this is the epsilon value entered by the user.
+
+&nbsp;
 
 Examples
 ------
 
-Attach the sample dataset. 
+Import the PSIlence library and attach the sample dataset:
 
 ```{r, eval = TRUE}
 library(PSIlence)
@@ -99,37 +117,30 @@ data(PUMS5extract10000)
 
 &nbsp;
 
-Calculate a private variance of a numeric vector with `dpVariance` using the Laplace mechanism:
+__Numeric Example__
 
-```{r}
-numeric_variance <- dpVariance$new(mechanism='mechanismLaplace', var.type='numeric', 
+To calculate a private variance of a numeric vector with `dpVariance`, enter the mechanism (this will be the Laplace Mechanism, or `'mechanismLaplace'`), the variable type (`'numeric'`), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), and the range:
+
+```{r, eval = TRUE}
+numericVariance <- dpVariance$new(mechanism='mechanismLaplace', varType='numeric',
                            variable='income', n=10000, epsilon=0.1, rng=c(0, 750000))
-numeric_variance$release(PUMS5extract10000)
-print(numeric_variance$result)
+numericVariance$release(PUMS5extract10000)
+print(numericVariance$result)
 ```
 
 &nbsp;
 
-To calculate the variance of a logical vector instead, input a logical vector into `variable` and update `var.type` and `rng` appropriately:
+__Logical Example__
 
-```{r}
-logical_variance <- dpVariance$new(mechanism='mechanismLaplace', var.type='logical', 
+To calculate the variance of a logical variable, input a the name of a logical vector into `variable` and update `varType` to `'logical'`. Note: you do not need to enter a range for a logical variable (because the range is known to be c(0,1)).
+
+```{r, eval = TRUE}
+logicalVariance <- dpVariance$new(mechanism='mechanismLaplace', varType='logical',
                            variable='married', n=10000, epsilon=0.1, rng=c(0, 1))
-logical_variance$release(PUMS5extract10000)
-print(logical_variance$result)
+logicalVariance$release(PUMS5extract10000)
+print(logicalVariance$result)
 ```
 
-Values
+Notes
 ------
-
-The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
-
-* `result` List, contains the accuracy guarantee, privacy cost, and private release. Other elements reflecting variable post-processing of the release.
-
-&nbsp; 
-
-The list in the `result` attribute has the following values.
-
-* `release` \ Differentially private estimate of the variance.
-* `variable` \ The variable n the data for which the differntially private variance was calculated.
-* `std` \ Differentially private estimate of the standard deviation of the variable (the square root of the variance estimate).
+* For the `imputeRng` argument, the imputation strategy is to use a Uniform distribution to choose any value in the imputation range with equal probability.

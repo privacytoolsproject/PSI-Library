@@ -170,22 +170,26 @@ dpTree <- setRefClass(
 )
 
 dpTree$methods(
+    # DO NOT USE
     initialize = function(mechanism, varType, variable, n, rng=NULL, gran, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, percentiles=NULL, alpha=0.05, ...) {
         .self$name <- 'Differentially private binary tree'
-        .self$mechanism <- mechanism
-        .self$varType <- varType
+        .self$mechanism <- checkMechanism(mechanism, "mechanismLaplace")
+        .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical', 'character'))
         .self$variable <- variable
-        .self$n <- checkNValidity(n)
-        .self$rng <- rng
-        .self$gran <- gran
-        .self$alpha <- alpha
+        .self$n <- checkN(n)
+        .self$rng <- checkRange(rng) # CHANGE
+        .self$gran <- checkN(gran, emptyOkay=TRUE) #should be positive whole number
+        .self$alpha <- checkNumeric(alpha)
         .self$sens <- 2 * log2(diff(rng) / gran + 1)
+        
+        checkVariableType(variable, "character")
+        
         if (is.null(epsilon)) {
-            .self$accuracy <- accuracy
+            .self$accuracy <- checkAccuracy(accuracy)
             .self$epsilon <- treeGetParameters(accuracy, rng, gran, alpha)
         } else {
-            .self$epsilon <- epsilon
+            .self$epsilon <- checkEpsilon(epsilon)
             .self$accuracy <- treeGetAccuracy(epsilon, rng, gran, alpha)
         }
         if (is.null(imputeRng)) {
@@ -203,9 +207,10 @@ dpTree$methods(
         universeSize <- floor(diff(rng) / gran + 1)
         depth <- ceiling(log2(universeSize))
         terminalIndex <- seq(2^(depth - 1), 2^depth - 1)
-        .self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
+        out <- export(mechanism)$evaluate(.self$treeFun, x, sens, 
                                                    variance=variance, universeSize=universeSize, 
                                                    depth=depth, terminalIndex=terminalIndex, self=.self)
+        .self$result <- .self$postProcess(out)
 })
 
 dpTree$methods(
@@ -217,7 +222,7 @@ dpTree$methods(
 
 dpTree$methods(
     postProcess = function(out, ...) {
-        out$variable <- variable
+        out$variable <- .self$variable
         out$release <- treePostFormatRelease(out$release)
         ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
         out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))

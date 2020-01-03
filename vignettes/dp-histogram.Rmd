@@ -9,6 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(
         stop_on_error = 2L
@@ -54,7 +55,7 @@ print(dpHistogramExample$result)
 Arguments
 ---------
 
-In typical usage, there are two methods to the `dpHistogram` class: the `new` method and the `release` method. The `new` method creates an object of the class and accepts the following arguments:
+In typical usage, there are two methods to the `dpHistogram` class. The `new` method, creates an object of the class and accepts the following arguments:
 
 * `varType` \ Character, the type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, `'logical'`, or `'character'`.
 
@@ -62,11 +63,11 @@ In typical usage, there are two methods to the `dpHistogram` class: the `new` me
 
 * `n` \ Integer, the number of observations in the data.
 
-* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `accuracy`.
+* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query.
 
 * `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
 
-* `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. In other words, it should be a vector in the form: c(data minimum, data maximum). Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
+* `rng` \ Numeric, a 2-tuple with the lower and upper bounds of the data. In other words, it should be a list of the form: in the form c(data minimum, data maximum). Ignored for `'character'` and `'logical'` data types. Optional for `numeric` and `integer` types, default `NULL`. If `NULL` and `bins` also `NULL`, the stability mechanism will be used to calculate the histogram (see ?stabilityMechanism).
 
 * `bins` \ Numeric or character (must match the variable type in `varType`), a vector of bins for the histogram, as chosen by the user. Optional, default `NULL`. If `NULL`, bins are detected by the histogram statistic. If `NULL` for `'character'` type variables, the detected bins will only be the variables present in the data, and the stability mechanism will be used to calculate the histogram. If `NULL` for `'numeric'` or `'integer'` type variables, the detected bins will be of equal width.
 
@@ -97,7 +98,7 @@ The `release` method accepts a single argument:
 Examples
 ------
 
-Import the PSIlence library and the datasets library, and attach the sample datasets. The `library(datasets)` command is just for the examples in this document:
+Import the PSIlence library and the datasets library, and attach the sample datasets. 
 
 ```{r, eval = TRUE}
 library(PSIlence)
@@ -114,12 +115,9 @@ __Numeric Examples__
 To calculate a private histogram of a numeric vector with `dpHistogram`, enter the variable type ('numeric'), the variable of interest (the column name of the variable in the dataframe), the number of observations in the dataframe, the epsilon value (generally less than 1), the range, and the number of bins for the histogram. For numeric data, you only need to enter the range of the data and number of histogram bins you would like to create a histogram.
 
 ```{r}
-# create the histogram object
 numericHistogram <- dpHistogram$new(varType='numeric', variable='income', n=10000, epsilon=0.1, 
                                      rng=c(0, 750000), nBins = 5)
-# calculate the statistic for the given data, in this case the PUMS5extract10000 dataset
 numericHistogram$release(PUMS5extract10000)
-# print the result
 print(numericHistogram$result)
 ```
 
@@ -151,7 +149,7 @@ Note: entering bins is completely optional and should only be done if you have p
 
 __Logical Examples__
 
-To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.) Note: you do not need to enter a range for a logial variable.
+To calculate the histogram of a logical variable, input a logical vector into `variable` and update `varType` to 'logical'. Also add a boolean flag for `impute` to indicate if you would like empty values to be imputed from the existing data. (If `impute = TRUE`, then there will only be two bins in the histogram: 0 and 1. If `impute = FALSE`, then there will be three bins in the histogram: 0, 1, and NA.)
 
 ```{r}
 logicalHistogram <- dpHistogram$new(varType='logical', variable='married', n=10000, epsilon=0.1, impute = TRUE)
@@ -235,17 +233,16 @@ Values
 
 The `release` method makes a call to the mechanism, which generates a list of statistical summaries available on the `result` field.
 
-* `result` List, contains the accuracy guarantee, privacy cost, and private release. It also contains other elements reflecting variable post-processing of the release.
+* `result` List, contains the accuracy guarantee, privacy cost, and private release. Other elements reflecting variable post-processing of the release.
 
 &nbsp; 
 
-The list in the `result` attribute has the following values:
+The list in the `result` attribute has the following values.
 
 * `release` \ Differentially private estimate of the histogram. The output is a vector, with each element is labeled with the bin label, with the differentially private estimate of the number of items in the bin underneath. NOTE: the output for each bin will be a real number, not an integer. (This is a result of normalizing the histogram to sum to the input n after adding differentially private noise.)
 * `variable` \ The variable for which the histogram was calculated.
 * `accuracy` \ The accuracy guarantee of the release, given `epsilon`.
 * `epsilon` \ The privacy cost required to guarantee `accuracy`.
-* `delta` \ The likelihood of a severe breach of privacy.
 * `mechanism` \ The mechanism used to create the histogram (either "mechanismLaplace", for the Laplace Mechanism, or "mechanismStability", for the Stability Mechanism)
 * `interval` \ Confidence interval of the private estimate of each bin, given `accuracy`.
 * `herfindahl` \ The differentially private Herfindal index (the sum of the squares of the percentage of data points in each bin). Only available for categorical and logical vectors.

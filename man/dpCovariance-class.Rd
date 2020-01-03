@@ -8,4 +8,26 @@
 \description{
 Differentially private covariance matrix
 }
+\section{Fields}{
+
+\describe{
+\item{\code{epsilon}}{Vector of epsilon values where the ith epsilon will be used for the ith covariance calculation in flattened
+lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)}
+
+\item{\code{accuracy}}{Single accuracy value that will be used to compute each epsilon for each individual covariance calculation
+in the covariance matrix.}
+
+\item{\code{globalEps}}{Global epsilon to be split between all of the covariance calculations}
+
+\item{\code{epsilonDist}}{Vector of percentages (valued 0 to 1) that describes how global epsilon \code{globalEps} should be
+split for each covariance calculation.}
+
+\item{\code{accuracyVals}}{Vector of accuracy values where the ith accuracy will be used for the ith covariance calculation in
+flattened lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)}
+
+\item{\code{formula}}{R formula for regression models}
+}}
+
 
