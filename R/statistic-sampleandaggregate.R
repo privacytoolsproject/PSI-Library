@@ -58,7 +58,7 @@ dpSampleAndAggregate$methods(
         .self$innerFun <- checkFunction(innerFun, acceptableInnerFuns, type = 'Inner')
         .self$aggregationFun <- checkFunction(aggregationFun, acceptableAggregationFuns, type = 'Aggregation')
         .self$mechanism <- checkMechanism(mechanism, acceptableMechanisms)
-        .self$numSubsets <- checkN(numSubsets)
+        .self$numSubsets <- checkNumSubsets(numSubsets)
         checkVariableType(typeof(variable), c('character'))
         .self$varType <- checkVariableType(varType, c('numeric', 'integer', 'logical'))
         .self$variable <- variable

@@ -91,6 +91,30 @@ checkN1D <- function(n, emptyOkay=FALSE){
   }
 }
 
+#' Helper function for checkNumSubsets
+#'
+#' Checks that numSubsets is always a positive whole number; numSubsets may be NA or NULL only if emptyOkay=TRUE.
+#'
+#' @param numSubsets the input numSubsets from the user
+#' @param emptyOkay A boolean. True if NA or NULL values are allowed, FALSE otherwise.
+#'
+#' @return numSubsets, if numSubsets is a series of positive integers with expected length and only containing NAs or NULL values if allowed.
+checkNumSubsets1D <- function(numSubsets, emptyOkay=FALSE){
+  isEmpty <- is.null(numSubsets) || is.na(numSubsets)
+  if (emptyOkay && isEmpty){
+    return(numSubsets)
+  } else if (isEmpty){
+    stop("Input numSubsets may not be NA or NULL.")
+  }
+
+  checkNumeric(numSubsets)
+  if (!all(numSubsets > 0) || (numSubsets%%1 != 0)) {
+    stop("numSubsets must be a positive whole number.")
+  } else {
+    return(numSubsets)
+  }
+}
+
 #' Check validity of n
 #'
 #' n(s) should always be a positive whole number, check the user's input
@@ -111,6 +135,28 @@ checkN <- function(n, expectedLength=1, emptyOkay=FALSE) {
     checkN1D(n[i], emptyOkay)
   }
   return(n)
+}
+
+#' Check validity of numSubsets
+#'
+#' n(s) should always be a positive whole number, check the user's input
+#'
+#' @param numSubsets the input numSubsets from the user, or an array of numSubsets' from the user
+#' @param expectedLength Positive integer. The expected length of numSubsets.
+#' @param emptyOkay A boolean. True if NA or NULL values are allowed, FALSE otherwise.
+#'
+#' @return numSubsets, if numSubsets is a series of positive integers with expected length and only containing NAs or NULL values if allowed.
+
+checkNumSubsets <- function(numSubsets, expectedLength=1, emptyOkay=FALSE) {
+
+  if (!is.null(numSubsets)){  # side case where you could have NULL value, and length(NULL)=0
+    checkLength(numSubsets, expectedLength)
+  }
+
+  for (i in 1:length(numSubsets)) {
+    checkNumSubsets1D(numSubsets[i], emptyOkay)
+  }
+  return(numSubsets)
 }
 
 #' Error check imputation range for numeric or integer variables
