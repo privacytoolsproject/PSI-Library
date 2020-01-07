@@ -103,7 +103,7 @@ dpMean$methods(
     #' Note that the actual differentially private release is calculated in a call to the
     #' differentially private mechanism .self$mechanism's \code{evaluate} function within
     #' the \code{dpMean$release} function.
-    release = function(data) {
+    release = function(data, ...) {
         x <- data[, variable]
         out <- export(mechanism)$evaluate(mean, x, .self$sens, ...)
         .self$result <- .self$postProcess(out)
