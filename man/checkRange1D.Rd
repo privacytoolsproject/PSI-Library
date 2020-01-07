@@ -18,7 +18,7 @@ Vector of length 2 or NULL
 }
 \description{
 Helper function for checkRange. Checks if a supplied range is an ordered pair.
-Coerces any vector of length two or greater into an ordered pair, and issues 
+Coerces any vector of length two or greater into an ordered pair, and issues
 an error for shorter vectors.
 }
 \details{

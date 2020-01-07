@@ -19,7 +19,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Collate: 
+Collate:
     'CompositionTheorems.R'
     'datasets.R'
     'mechanism.R'
@@ -34,6 +34,7 @@ Collate:
     'statistic-heavyhitters.R'
     'statistic-histogram.R'
     'statistic-mean.R'
+    'statistic-sampleandaggregate.R'
     'statistic-tree.R'
     'statistic-variance.R'
     'update_parameters.R'
@@ -47,5 +48,6 @@ Collate:
     'utilities-noise-generation.R'
     'utilities-objective.R'
     'utilities-postprocessing.R'
+    'utilities-sampleandaggregate.R'
     'utilities-tree.R'
 VignetteBuilder: knitr

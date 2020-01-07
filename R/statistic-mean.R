@@ -7,6 +7,7 @@
 #' @param Variable Character, variable name.
 #' @param n Integer, number of observations
 #' @param rng Numeric, a priori estimate of the range
+#' @param sens Numeric, sensitivity of the mean -- should be used only for SampleAndAggregate
 #' @param epsilon Numeric, privacy cost parameter
 #' @param accuracy Numeric, accuracy guarantee given \code{epsilon}
 #' @param imputeRng Numeric, range within which missing values are imputed. If \code{NULL},
@@ -25,11 +26,12 @@
 
 dpMean <- setRefClass(
     Class = 'dpMean',
-    contains = c('mechanismLaplace', 'mechanismBootstrap')
+    contains = c('mechanismLaplace', 'mechanismBootstrap'),
+    fields = list(sens = 'numeric')
 )
 
 dpMean$methods(
-    initialize = function(mechanism, varType, variable, n, rng=NULL, epsilon=NULL,
+    initialize = function(mechanism, varType, variable, n, rng=NULL, sens = NULL, epsilon=NULL,
                           accuracy=NULL, imputeRng=NULL, alpha=0.05, nBoot=20, ...) {
         .self$name <- 'Differentially private mean'
         .self$mechanism <- checkMechanism(mechanism, c('mechanismLaplace', 'mechanismBootstrap'))
@@ -39,10 +41,14 @@ dpMean$methods(
         .self$alpha <- checkNumeric(alpha)
         .self$rngFormat <- 'vector'
         .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=1)
-        .self$sens <- diff(.self$rng) / n
-        
+        if (is.null(sens)) {
+            .self$sens <- diff(.self$rng) / n
+        } else {
+            .self$sens <- sens
+        }
+
         checkVariableType(typeof(variable), c('character'))
-        
+
         if (is.null(epsilon)) {
             .self$accuracy <- checkAccuracy(accuracy, expectedLength=1)
             .self$epsilon <- laplaceGetEpsilon(.self$sens, .self$accuracy, alpha)
@@ -51,13 +57,13 @@ dpMean$methods(
             .self$epsilon <- checkEpsilon(epsilon, expectedLength=1)
             .self$accuracy <- laplaceGetAccuracy(.self$sens, .self$epsilon, alpha)
         }
-        
+
         if (is.null(imputeRng)) {
             .self$imputeRng <- .self$rng
         } else {
             .self$imputeRng <- checkImputationRange(imputationRange=imputeRng, rng=.self$rng, varType=.self$varType)
         }
-        
+
         .self$bootFun <- bootMean
         .self$nBoot <- checkN(nBoot)
 })
@@ -65,20 +71,20 @@ dpMean$methods(
 
 dpMean$methods(
     #' Differentially private mean release
-    #' 
+    #'
     #' @name dpMeanRelease
     #' @param data Dataframe with a column named .self$variable, where
-    #'  that column has data of type .self$varType and which is bounded by 
+    #'  that column has data of type .self$varType and which is bounded by
     #'  .self$rng.
     #'
-    #' Assigns to .self$result a dataframe that describes the differentially private 
+    #' Assigns to .self$result a dataframe that describes the differentially private
     #' mean, calculated by some mechanism as defined in .self$mechanism, of that
-    #' column of the dataframe and any post-processing on that output. This 
+    #' column of the dataframe and any post-processing on that output. This
     #' postprocessing is done in @seealso{dpMean$postProcess}
-    #' 
+    #'
     #' Note that the actual differentially private release is calculated in a call to the
-    #' differentially private mechanism .self$mechanism's \code{evaluate} function within 
-    #' the \code{dpMean$release} function. 
+    #' differentially private mechanism .self$mechanism's \code{evaluate} function within
+    #' the \code{dpMean$release} function.
     release = function(data, ...) {
         x <- data[, variable]
         out <- export(mechanism)$evaluate(mean, x, .self$sens, ...)
@@ -87,17 +93,17 @@ dpMean$methods(
 
 dpMean$methods(
     #' Post-processing on differentially private mean, called within the \code{.self$mechanism$evaluate}
-    #' function, which in turn is called within \code{dpMean$release}. 
-    #' 
+    #' function, which in turn is called within \code{dpMean$release}.
+    #'
     #' @name dpMeanPostProcess
     #' @param out Input dataframe that describes the differentially private release that was created in
-    #' \code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute, 
+    #' \code{.self$mechanism$evaluate}. This dataframe will have at least one pre-existing attribute,
     #' out$release, which is a numeric value of length one that is the differentially private mean.
-    #' 
+    #'
     #' This function is able to calculate a confidence interval on the output. If the variable was logical,
     #' standard deviation, median, and a histogram may be additionally computed as post-processing steps.
-    #' 
-    #' Additionally, known portions of the input such as the variable name 
+    #'
+    #' Additionally, known portions of the input such as the variable name
     #' and the epsilon value may be appended with no extra privacy loss.
     #'
     #' @return Dataframe \code{out}, updated to include post-processed values.
@@ -107,7 +113,7 @@ dpMean$methods(
             out$accuracy <- accuracy
             out$epsilon <- epsilon
             out$interval <- meanGetCI(out$release, epsilon, .self$sens, alpha)
-        } 
+        }
         if (varType == 'logical') {
             if (mechanism == 'mechanismBootstrap') {
                 baggedEstimate <- mean(out$release)

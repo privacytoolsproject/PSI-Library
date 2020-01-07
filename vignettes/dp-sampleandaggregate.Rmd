@@ -1,0 +1,128 @@
+---
+title: "Differentially Private Sample and Aggregate Release"
+author: "Christian Covington"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{dp-sampleandaggregate}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(
+        stop_on_error = 2L
+)
+knitr::opts_chunk$set(
+    fig.height = 7,
+    fig.width = 7
+)
+```
+
+# Background
+
+Sample-and-Aggregate was originally proposed in [NRS07](http://www.cse.psu.edu/~ads22/pubs/NRS07/NRS07-full-draft-v1.pdf)
+and could be considered a "meta-algorithm". It is not a DP algorithm itself, but
+rather a framework that can accommodate any differentially private algorithm.
+Releasing a DP version of a statistic via the Sample-and-Aggregate framework consists of four steps:
+
+1. Partition the data.
+2. Perform the function of interest non-privately on each subset of the partition. We call this function `innerFun` and it corresponds to the statistic of interest.
+3. Perform an aggregation function on the results from each subset. We call this function `aggregationFun`.
+4. Release the result from step 3 in a way that respects DP.
+
+One reason to use the Sample-and-Aggregate framework is to reduce the sensitivity of the function of interest.
+Imagine that you want to release the median of a vector. The global sensitivity of the median is equal to
+the difference between the minimum and maximum possible values of your data (we will refer to this as
+`max - min`). Now, imagine that you first
+split your vector into 100 disjoint subsets, found the median on each subset (yielding 100 different medians),
+and then averaged over the medians. The global sensitivity of this process is `(max-min) / 100`; any
+individual data point can affect only one of the 100 medians, and the most it could change that median is
+from `max` to `min` (or vice-versa).
+
+# Arguments
+
+* `innerFun` \ Character, the statistic for which you want a differentially private release, one of `'mean'`, `'median'`, or `'var'` (variance). This function will be calculated on each subset of the partitioned data.
+
+* `aggregationFun` \ Character, the aggregation function used to combine the results of the inner function on each subset. Must be `'Mean'`. Each possible `aggregationFun` corresponds to a DP statistic included in the library. For example, `'Mean'` refers to the class `dpMean`. If there were a `dpMedian` class, we would refer to it with the argument `'Median'`.
+
+* `mechanism` \ Character, the class name of the mechanism used to perform the DP release. Must be `'mechanismLaplace'`.
+
+* `numSubsets` \ Integer, the number of subsets into which the data will be partitioned. Must be `< n` (the number of elements in your data).
+
+<!-- * `varType` \ Character, the data type of values in the data frame that will be passed to the mechanism. Should be one of `'numeric'`, `'integer'`, or `'logical'`.
+* `n` \ Integer, the number of observations in the vector.
+* `rng` \ Numeric, a 2-tuple giving an a priori estimate of the lower and upper bounds of the vector.
+* `epsilon` \ Numeric, the differential privacy parameter $\epsilon$, typically taking values between 0 and 1 and reflecting the privacy cost of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `accuracy`.
+* `accuracy` \ Numeric, the accuracy of the query. Optional, default `NULL`. If `NULL`, the user must specify a value for `epsilon`. If `epsilon` is not `NULL`, this value is ignored and evaluated internally.
+* `imputeRng` \ Numeric, a 2-tuple giving a range within which missing values of the vector are imputed. Optional, default `NULL`. If `NULL`, missing values are imputed using the range provided in `rng`.
+* `alpha` \ Numeric, the statistical significance level used in evaluating accuracy and privacy parameters. If the bootstrap is employed, `alpha` is also used to trim the release. Default `0.05`. -->
+
+* `...` Any other arguments required by the DP statistic to which `aggregationFun` refers.
+
+# Syntax
+
+```{r, eval = TRUE}
+# load library and data
+library(PSIlence)
+data(PUMS5extract10000)
+
+# release mean via sample and aggregate algorithm
+mean_SandA <- dpSampleAndAggregate(innerFun = 'mean', aggregationFun = 'Mean', numSubsets = 10,
+                             mechanism = 'mechanismLaplace', varType = 'numeric',
+                             variable = 'income', n = nrow(PUMS5extract10000), epsilon = 0.1, rng = c(0, 750000))
+
+mean_SandA$release(PUMS5extract10000)
+print(mean_SandA$result)
+
+# release median via sample and aggregate algorithm
+median_SandA <- dpSampleAndAggregate(innerFun = 'median', aggregationFun = 'Mean', numSubsets = 1000,
+                             mechanism = 'mechanismLaplace', varType = 'numeric',
+                             variable = 'income', n = nrow(PUMS5extract10000), epsilon = 0.1, rng = c(0, 750000))
+
+median_SandA$release(PUMS5extract10000)
+print(median_SandA$result)
+```
+
+# Building Out Sample-and-Aggregate's Capabilities
+
+We stated before that Sample-and-Aggregate is a very general framework, able to accommodate any differentially private algorithm.
+However, at the time of this writing (01/06/2020), this implementation of Sample-and-Aggregate is very limited.
+Below we will attempt to lay out some tips for understanding the structure of Sample-and-Aggregate, as well as guidelines
+for contributing to its development.
+
+## Algorithm Structure
+
+Recall the four steps of the Sample-and-Aggregate framework:
+
+### Step 1: Data Partitioning
+This is a straightforward construction of a partition of the data.
+Sample-and-Aggregate can be generalized to work on non-disjoint subsets of the original data, but doing so
+increases the sensitivity of the aggregation function.
+As of 01/06/2020, this step creates a true partition and the sensitivity calculations for the various `aggregationFun`
+reflect this.
+
+### Step 2: Choice of `innerFun`
+The `innerFun` represents the function for which you want a DP release and is a string representation of a function name.
+This function could be one of R's built-in functions, or it could be a function called from elsewhere in the library.
+If you wish to add a new `innerFun`, there are two steps you need to complete:
+
+1. Add the desired function to `acceptableInnerFuns`, located in the `statistic-sampleandaggregate.R` file.
+2. Update the `get_inner_fun_sens` function from the `utilities-sampleandaggregate.R` file. The update needs to include the new function name, as well as the global sensitivity of this function. Notice that the function sensitivites are calculated using `subset_size` (the minimum size of one of the disjoint subsets) as the sample size. If the sample size factors into your new function's sensitivity, it should also use`subset_size`.
+
+### Step 3-4: Choice of `aggregationFun` and DP release `mechanism`
+These steps are combined here because they are conceptually related, but also because they are combined
+within the implementation, via a call to a DP statistic that already exists in the library.
+If you wish to add a new `aggregationFun` (let's call it `MyFun`), it must have an associated
+statistic within the library called `dpMyFun`. Likewise, if you want to use a given `mechanism`
+(called `MyMechanism`), then `MyMechanism` must be included as a valid mechanism within `dpMyFun`.
+
+In the `statistic-sampleandaggregate.R` file, you will need to `@include` both the mechanism and the statistic,
+as well as add the statistic and mechanism class names to the `contains` vector.
+Furthermore, the statistic in question will need to be updated so that it accepts an argument `sens`
+and uses this as its sensitivity, rather than calculating it within the statistic.
+
+## Integration Within `PSI`
+We referred to Sample-and-Aggregate as a "meta-algorithm", but within the library it is treated as a statistic.
+This is simply because, within the existing library infrastructure, we found it easy to have statistics
+call algorithms (and even other statistics), but not for an algorithm to call statistics.

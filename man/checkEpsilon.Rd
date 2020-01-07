@@ -22,7 +22,7 @@ checkEpsilon(epsilon, expectedLength = 1)
 The supplied epsilon if acceptable, otherwise an error
    message interupts.
 
-The supplied epsilon if acceptable, otherwise an error 
+The supplied epsilon if acceptable, otherwise an error
    message interupts.
 }
 \description{

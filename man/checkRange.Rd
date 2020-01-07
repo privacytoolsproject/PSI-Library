@@ -25,11 +25,11 @@ Since matrices are coerced to lists within the function, when using a matrix as 
 \item{emptyOkay}{Boolean. TRUE if a null or NA range is allowed. Defaults to FALSE.}
 
 \item{rng}{Range. A numeric vector of one of two formats:
-1. A vector of length two, that ought to be an atomic ordered pair, representing 
+1. A vector of length two, that ought to be an atomic ordered pair, representing
 the maximum and minimum bounds on the data.
 2. A sequence of ordered pairs as a matrix or as a list, where each row represents
  the maximum and minimum bounds on some subsets of the data (e.g. of different data columns)
- Matrix and list types are supported. Internally, matrices are coerced to lists to allow 
+ Matrix and list types are supported. Internally, matrices are coerced to lists to allow
  varying dimensions across rows.}
 }
 \value{
