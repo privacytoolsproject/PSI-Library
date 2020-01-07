@@ -49,7 +49,7 @@ the imputation range that will be used for `fillMissing()`.
 \description{
 Check that the entered imputation range is within the entered data range. If yes, return
 the entered imputation range, which will be used as the imputation range for the call
-to the utility function `fillMissing()`. If not, return the data range. 
+to the utility function `fillMissing()`. If not, return the data range.
 If the imputation range is NULL, default to the data range.
 
 Check that the entered imputation range is within the entered data range. If yes, return
@@ -59,8 +59,8 @@ If the imputation range is NULL, default to the data range.
 }
 \details{
 We check if the imputation range is within the data range because it is a privacy concern.
-If the imputation range is outside of the data range, NA values will be replaced with values 
-outside of the data range, which will show that there are NA values in the data or skew the 
+If the imputation range is outside of the data range, NA values will be replaced with values
+outside of the data range, which will show that there are NA values in the data or skew the
 result when the differentially private estimate is released.
 
 We check if the imputation range is within the data range because it is a privacy concern.

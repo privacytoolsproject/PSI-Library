@@ -2,8 +2,8 @@
 #'
 #' @param n A numeric vector of length one specifying the number of
 #'    observations in the data frame.
-#' @param rng A numeric matrix of 2-tuples with the lower and upper bounds for
-#'    each of P variables in the data frame, dimensions Px2.
+#' @param rng A numeric list of 2-tuples of the lower and upper bounds for
+#'    each of the variables.
 #' @param intercept A logical vector of length one indicating whether an
 #'    intercept should be added prior to evaluating the inner product x'x.
 #' @return The sensitivity of the data frame for which the covariance matrix
@@ -11,6 +11,11 @@
 #'
 #  A complete derivation of the sensitivity of the covariance may be found in
 #' /extra_docs/sensitivities/covariance_sensitivity.pdf
+#' @example Should output equal to rep(2/10000, 3)
+#' range.sex <- range(PUMS5extract10000['sex'])
+#' range.married <- range(PUMS5extract10000['married'])
+#' range <- list(range.sex, range.married)
+#' covarianceSensitivity(10000, range, FALSE)
 covarianceSensitivity <- function(n, rng, intercept) {
     diffs <- apply(rng, 1, diff)
     if (intercept) { diffs <- c(0, diffs) }
@@ -67,6 +72,9 @@ covarianceMinB <- function(n, rng, intercept) {
 #' covariance matrix, rather than a matrix. The lower triangle is sufficient since covariance
 #' matrices are symmetric.
 #'
+#' The flattened output corresponds to the covariance matrix by proceeding
+#' proceeding top-to-bottom down each column of the lower triangular matrix (including the diagonal).
+#'
 #' The traditional covariance matrix is then reconstructed from the noisy version of this output
 #' as a post-processing step in \code{covarianceFormatRelease}.
 #'
@@ -94,17 +102,18 @@ covar <- function(x, intercept) {
 #'
 #' @include mechanism.R
 #' @include mechanism-laplace.R
-#' @include mechanism-snapping.R
 #'
 #' @field epsilon       Vector of epsilon values where the ith epsilon will be used for the ith covariance calculation in flattened
-#'  lower triangle of covariance matrix.
+#'  lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
 #' @field accuracy      Single accuracy value that will be used to compute each epsilon for each individual covariance calculation
 #'   in the covariance matrix.
 #' @field globalEps     Global epsilon to be split between all of the covariance calculations
 #' @field epsilonDist   Vector of percentages (valued 0 to 1) that describes how global epsilon \code{globalEps} should be
 #'   split for each covariance calculation.
 #' @field  accuracyVals     Vector of accuracy values where the ith accuracy will be used for the ith covariance calculation in
-#'  flattened lower triangle of covariance matrix.
+#'  flattened lower triangle of covariance matrix. (The flattened output corresponds to the covariance matrix by proceeding
+#'  proceeding top-to-bottom down each column of the lower triangular matrix including the diagonal.)
 #' @field formula       R formula for regression models
 #' @field gamma Numeric, used to provide high probability (1-gamma) guarantee that clamping bound does not bind. Default 0.05. Used only for \code{mechanismSnapping}.
 
@@ -197,13 +206,13 @@ dpCovariance$methods(
 dpCovariance$methods(
   release = function(data) {
     x <- data[columns];
-    .self$result <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens, postFun=.self$postProcess,
+    out <- export(mechanism)$evaluate(fun=covar, x=x, sens=sens,
                                                formula=formula, columns=columns, intercept=intercept)
+    .self$result <- .self$postProcess(out, columns, formula, intercept)
   })
 
 dpCovariance$methods(
   postProcess = function(out, columns, formula, intercept) {
-
     out$release <- covarianceFormatRelease(out$release, columns)
     out$variable <- columns
     if (!is.null(formula)) {

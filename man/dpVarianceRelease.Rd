@@ -5,16 +5,16 @@
 \title{Differentially private variance release}
 \arguments{
 \item{data}{Dataframe with a column named .self$variable, where
- that column has data of type .self$varType and which is bounded by 
+ that column has data of type .self$varType and which is bounded by
  .self$rng.
 
-Assigns to .self$result a dataframe that describes the differentially private 
+Assigns to .self$result a dataframe that describes the differentially private
 variance, calculated by some mechanism as defined in .self$mechanism, of that
-column of the dataframe and any post-processing on that output. This 
+column of the dataframe and any post-processing on that output. This
 postprocessing is done in @seealso{dpVariance$postProcess}
 
 Note that the actual differentially private release is calculated in a call to the
-differentially private mechanism .self$mechanism's \code{evaluate} function within 
+differentially private mechanism .self$mechanism's \code{evaluate} function within
 the \code{dpVariance$release} function.}
 }
 \description{

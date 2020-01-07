@@ -223,7 +223,7 @@ censorData <- function(x, varType, rng=NULL, levels=NULL, rngFormat=NULL) {
         } else {
             x <- factor(x, levels=levels, exclude=NULL)
         }
-    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical')) && sapply(x, is.numeric)) {
+    } else if ((varType %in% c('integer', 'double', 'numeric', 'logical'))) {
         if (NCOL(x) > 1 && rngFormat=='list') {
             checkRange(rng, varType, rngFormat, expectedLength=ncol(x))
             for(i in 1:NCOL(x)){

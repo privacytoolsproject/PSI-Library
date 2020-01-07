@@ -58,13 +58,12 @@ mechanismBootstrap$methods(
 })
 
 mechanismBootstrap$methods(
-    evaluate = function(fun, x, sens, postFun) {
+    evaluate = function(fun, x, sens) {
         x <- censorData(x, .self$varType, .self$rng)
         x <- fillMissing(x, .self$varType, .self$imputeRng[0], .self$imputeRng[1])
         epsilonPart <- epsilon / .self$nBoot
         release <- replicate(.self$nBoot, bootstrapReplication(x, n, sens, epsilonPart, fun=.self$bootStatEval))
         stdError <- .self$bootSE(release, .self$nBoot, sens)
         out <- list('release' = release, 'stdError' = stdError)
-        out <- postFun(out)
         return(out)
 })

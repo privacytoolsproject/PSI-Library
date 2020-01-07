@@ -25,8 +25,13 @@ meanSensitivity <- function(rng, n){
 #' @rdname meanPostStandardDeviation
 
 meanPostStandardDeviation <- function(release) {
-    sd <- sqrt(release * (1 - release))
-    return(sd)
+    if(release*(1-release) > 0){
+      sd <- sqrt(release * (1 - release))
+      return(sd)
+    }
+    else{
+      return(FALSE)
+    }   
 }
 
 

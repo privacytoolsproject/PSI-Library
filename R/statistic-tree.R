@@ -207,9 +207,10 @@ dpTree$methods(
         universeSize <- floor(diff(rng) / gran + 1)
         depth <- ceiling(log2(universeSize))
         terminalIndex <- seq(2^(depth - 1), 2^depth - 1)
-        .self$result <- export(mechanism)$evaluate(.self$treeFun, x, sens, .self$postProcess, 
+        out <- export(mechanism)$evaluate(.self$treeFun, x, sens, 
                                                    variance=variance, universeSize=universeSize, 
                                                    depth=depth, terminalIndex=terminalIndex, self=.self)
+        .self$result <- .self$postProcess(out)
 })
 
 dpTree$methods(
@@ -221,7 +222,7 @@ dpTree$methods(
 
 dpTree$methods(
     postProcess = function(out, ...) {
-        out$variable <- variable
+        out$variable <- .self$variable
         out$release <- treePostFormatRelease(out$release)
         ellipsisVals <- getFuncArgs(list(...), treePostEfficient)
         out$release <- do.call(treePostEfficient, c(list(release=out$release, treeData=treeData, n=n), ellipsisVals))

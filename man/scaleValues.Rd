@@ -10,7 +10,7 @@ scaleValues(vals, varType, lower = NULL, upper = NULL,
 \arguments{
 \item{vals}{Input array of values to scale Type: numeric array}
 
-\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs. 
+\item{varType}{Variable type of input array to fillMissing function; affects how scaling occurs.
 Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'numeric'.}
 
 \item{lower}{Lower bound for scaling. Type: numeric}
@@ -20,7 +20,7 @@ Type: one of following strings: 'character', 'factor', 'logical', 'integer', 'nu
 \item{categories}{List of categories. Type: factor}
 }
 \value{
-Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the 
+Array of values, either characters, integers, logicals, numerics depending on varType, scaled according to either the
 number of categories if varType='factor' or 'character', or based on lower and upper when varType='logical','numeric', or 'integer'.
 }
 \description{

@@ -7,11 +7,17 @@
 \title{Differentially private variance}
 \arguments{
 <<<<<<< HEAD
+<<<<<<< HEAD
 \item{mechanism}{Character, the privacy mechanism. For \code{dpVariance}, one
 of \code{c('mechanismLaplace', 'mechanismSnapping')}.}
 
 \item{var.type}{Character, the R variable type. One of \code{c('numeric',
 =======
+=======
+\item{mechanism}{Character, the privacy mechanism. For \code{dpMean}, one
+of \code{c('mechanismLaplace')}.}
+
+>>>>>>> 2b71facd614845e548be9459ca94bc979eed0d4f
 \item{varType}{Character, the R variable type. One of \code{c('numeric',
 >>>>>>> b81cbb2da5cb28a55f31b1a53f7ccf3c07aa0a4b
 'integer', 'logical')}.}

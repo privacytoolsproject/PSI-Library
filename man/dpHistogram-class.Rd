@@ -41,6 +41,8 @@ imputed or not. If true, a logical variable histogram will have 2 bins, 0 and 1.
 histogram will have 3 bins: 0, 1, and NA.}
 
 \item{nBoot}{Numeric, the number of bootstrap iterations to do for bootstrapping (not used for version 1 release)}
+
+\item{mechanism}{Character, one of 'mechanismLaplace', 'mechanismStability'. May be NULL, in which mechanism will be chosen automatically.}
 }
 \description{
 Differentially private histogram
