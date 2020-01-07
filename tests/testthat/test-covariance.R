@@ -22,13 +22,6 @@ test_that('range checks throw correct error', {
                                   epsilon = 0.1, columns = c("income", "education"),
                                   rng=rng),
                  "Input was expected to be of length  2  but is instead of length  1")
-
-    rng <- matrix(c(-10,0,100), nrow=1)
-
-    expect_error(dpCovariance$new(mechanism='mechanismLaplace', varType='numeric', n=10000,
-                                    epsilon=0.1, columns = c("income", "education"),
-                                    rng=rng),
-                   "Input was expected to be of length  2  but is instead of length  1")
 })
 
 test_that('error thrown when n not positive or a whole number',{
@@ -42,30 +35,30 @@ test_that('error thrown when n not positive or a whole number',{
 })
 
 test_that('different forms of epsilon inputs operate as intended',{
-  
+
   range.income <- range(PUMS5extract10000['income'])
   range.education <- range(PUMS5extract10000['educ'])
   range.age <- range(PUMS5extract10000['age'])
   range <- list(range.income, range.education, range.age)
-  
+
   dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                             epsilon = rep(1,6), columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
   expect_equal(dpCov$globalEps,6)
-  
+
   dpCov <- expect_warning(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                             globalEps = 6, columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
   expect_equal(dpCov$epsilon, rep(1,6))
-  
+
   dpCov <- expect_warning(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                             globalEps = 6, epsilonDist = c(0.1, 0.1, 0.1, 0.5, 0.1, 0.1), columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
   expect_equal(dpCov$epsilon, c(0.6, 0.6, 0.6, 3, 0.6, 0.6))
-  
+
   dpCov <- expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                                          epsilon = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
 
   dpCov <- expect_error(dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                                          epsilon = c(1,1,1), columns = c("income", "educ", 'age'), rng = range, formula='income~educ'))
-  
+
   dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000,
                                          accuracy = 1, columns = c("income", "educ", 'age'), rng = range, formula='income~educ')
   expect_equal(length(dpCov$epsilon), 6)
@@ -111,7 +104,7 @@ test_that('sensitivity calculation is correct', {
     range.sex <- range(PUMS5extract10000['sex'])
     range.married <- range(PUMS5extract10000['married'])
     range <- list(range.sex, range.married)
-    
+
     dpCov <- dpCovariance$new(mechanism="mechanismLaplace",varType = 'numeric', n = 10000, rng=range,
                                              globalEps = 1, columns = c("sex", "married"))
     expect_equal(dpCov$sens, rep(2/10000, 3))
