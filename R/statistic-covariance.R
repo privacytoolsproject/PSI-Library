@@ -144,12 +144,12 @@ dpCovariance$methods(
     .self$intercept <- intercept
     .self$alpha <- alpha
 
-    .self$min_B <- covarianceMinB(n, rng, intercept)
-
     .self$n <- checkN(n)
     .self$rngFormat <- 'list'
     .self$rng <- checkRange(rng, .self$varType, .self$rngFormat, expectedLength=length(columns))
     .self$sens <- covarianceSensitivity(n, rng, intercept)
+
+    .self$min_B <- covarianceMinB(n, rng, intercept)
 
     checkVariableType(class(formula), c("formula", "character"), emptyOkay=TRUE)
     checkVariableType(typeof(intercept), "logical")
