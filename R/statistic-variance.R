@@ -34,13 +34,8 @@ postStandDev <- function(release) {
 
 #' Differentially private variance
 #'
-<<<<<<< HEAD
 #' @param mechanism Character, the privacy mechanism. For \code{dpVariance}, one
 #'   of \code{c('mechanismLaplace', 'mechanismSnapping')}.
-=======
-#' @param mechanism Character, the privacy mechanism. For \code{dpMean}, one
-#'   of \code{c('mechanismLaplace')}.
->>>>>>> 2b71facd614845e548be9459ca94bc979eed0d4f
 #' @param varType Character, the R variable type. One of \code{c('numeric',
 #'   'integer', 'logical')}.
 #' @param variable Character, variable name of the variable that you wish to find variance of.
