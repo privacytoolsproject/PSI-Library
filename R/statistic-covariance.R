@@ -17,7 +17,7 @@
 #' range <- list(range.sex, range.married)
 #' covarianceSensitivity(10000, range, FALSE)
 covarianceSensitivity <- function(n, rng, intercept) {
-    diffs <- apply(rng, 1, diff)
+    diffs <- sapply(rng, diff)
     if (intercept) { diffs <- c(0, diffs) }
     sensitivity <- c()
     const <- 2/n
@@ -44,7 +44,7 @@ covarianceMinB <- function(n, rng, intercept) {
   min_Bs <- c()
 
   # store size of range of each variable
-  diffs <- apply(rng, 1, diff)
+  diffs <- sapply(rng, diff)
   if (intercept) {
     diffs <- c(1, diffs)
   }
