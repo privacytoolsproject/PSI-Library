@@ -31,6 +31,7 @@ Collate:
     'mechanism-stability.R'
     'statistic-covariance.R'
     'statistic-glm.R'
+    'statistic-heavyhitters.R'
     'statistic-histogram.R'
     'statistic-mean.R'
     'statistic-tree.R'
