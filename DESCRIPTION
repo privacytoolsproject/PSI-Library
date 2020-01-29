@@ -24,7 +24,6 @@ Collate:
     'datasets.R'
     'mechanism.R'
     'mechanism-bootstrap.R'
-    'mechanism-exponential.R'
     'mechanism-gaussian.R'
     'mechanism-laplace.R'
     'mechanism-objective.R'
