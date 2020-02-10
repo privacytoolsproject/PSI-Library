@@ -1,0 +1,38 @@
+
+{
+  "dp-releases": [
+    {
+      "statistic": "mean",
+      "variable": [
+        "A"
+      ],
+      "releaseInfo": {
+        "mechanism": "Laplace",
+        "releaseValue": 1
+      },
+      "privacyLoss": {
+        "epsilon":0.5,
+        "delta": 0.9,
+        "rho": 0.5,
+        "definition": "pure dp"
+      },
+      "accuracy": {
+        "alpha": 0.5,
+        "accuracyValue": 1
+      },
+      "postprocess": true,
+      "algorithmInfo": {
+        "name": "hash",
+        "cite":"gshjg",
+        "arguments":{
+          "n": 10,
+          "constraint": {
+            "lowerbound": 1,
+            "upperbound": 10
+
+        }
+        }
+      }
+    }
+  ]
+}

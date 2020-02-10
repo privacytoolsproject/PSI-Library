@@ -1,0 +1,220 @@
+{
+  "$id": "https://example.com/arrays.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "description": "Differentially Private Release",
+  "properties": {
+    "dp-releases": {
+      "items": {
+        "$ref": "#/definitions/release"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object",
+  "definitions": {
+    "pure": {
+      "type": "object",
+      "required": [
+        "name",
+        "epsilon"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "pure"
+          ]
+        },
+        "epsilon": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "approxy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "epsilon",
+        "delta"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "approx dp"
+          ]
+        },
+        "epsilon": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "delta": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        }
+      }
+    },
+    "concentrated": {
+      "type": "object",
+      "required": [
+        "name",
+        "rho"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "concentrated dp"
+          ]
+        },
+        "rho": {
+          "description": "dgjg",
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
+      }
+    },
+    "releaseInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mechanism": {
+          "enum": [
+            "Laplace",
+            "Gaussian",
+            "Bootstrap"
+          ],
+          "type": "string"
+        },
+        "releaseValue": {}
+      }
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "batch": {
+          "type": "integer"
+        },
+        "nodeId": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "determins which node the relase come from"
+        },
+        "accuracy": {
+          "additionalProperties": false,
+          "description": "accuracy information:",
+          "properties": {
+            "accuracyValue": {
+              "type": "number"
+            },
+            "alpha": {
+              "description": "hasjahgs",
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
+        "algorithmInfo": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "cite": {
+              "type": "string"
+            },
+            "argument": {
+              "required": [
+                "constraint",
+                "n"
+              ],
+              "type": "object",
+              "properties": {
+                "constraint": {
+                  "properties": {
+                    "lowerbound": {
+                      "description": "Least numeric value that must be given by a user",
+                      "type": "number"
+                    },
+                    "upperbound": {
+                      "description": "Largest numeric value that must be given by a user",
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "lowerbound",
+                    "upperbound"
+                  ],
+                  "type": "object",
+                  "value": [
+                    "number",
+                    "string"
+                  ]
+                },
+                "n": {
+                  "description": "number of observation",
+                  "type": "number"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "argument",
+            "name"
+          ]
+        },
+        "privacyLoss": {
+          "type": "object",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/pure"
+            },
+            {
+              "$ref": "#/definitions/approxy"
+            },
+            {
+              "$ref": "#/definitions/concentrated"
+            }
+          ]
+        },
+        "releaseInfo": {
+          "$ref": "#/definitions/releaseInfo"
+        },
+        "statistic": {
+          "enum": [
+            "mean",
+            "histogram",
+            "covariance",
+            "variance"
+          ],
+          "type": "string"
+        },
+        "variable": {
+          "description": "This describes the column/s in a dataset..",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "statistic",
+        "variable",
+        "releaseInfo",
+        "postprocess",
+        "algorithmInfo",
+        "accuracy",
+        "batch",
+        "privacyLoss"
+      ]
+    }
+  }
+}
