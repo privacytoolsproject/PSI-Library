@@ -1,4 +1,5 @@
 
+
 {
   "dp-releases": [
     {
@@ -11,20 +12,21 @@
         "releaseValue": 1
       },
       "privacyLoss": {
-        "epsilon":0.5,
-        "delta": 0.9,
-        "rho": 0.5,
-        "definition": "pure dp"
+        "name":"concentrated dp",
+        "rho":0.2
       },
       "accuracy": {
         "alpha": 0.5,
         "accuracyValue": 1
       },
+      "batch":1,
+      "nodeID":3,
       "postprocess": true,
       "algorithmInfo": {
+
         "name": "hash",
         "cite":"gshjg",
-        "arguments":{
+        "argument":{
           "n": 10,
           "constraint": {
             "lowerbound": 1,
