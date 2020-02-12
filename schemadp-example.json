@@ -4,7 +4,7 @@
   "dp-releases": [
     {
       "statistic": "mean",
-      "variable": [
+      "variables": [
         "A"
       ],
       "releaseInfo": {

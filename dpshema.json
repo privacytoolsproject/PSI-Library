@@ -76,7 +76,7 @@
           ]
         },
         "rho": {
-          "description": "dgjg",
+          "description": "Reflects the privacy cost of the query",
           "exclusiveMinimum": 0,
           "type": "number"
         }
@@ -202,7 +202,7 @@
           ],
           "type": "string"
         },
-        "variable": {
+        "variables": {
           "description": "This describes the column/s in a dataset..",
           "items": {
             "type": "string"
@@ -212,7 +212,7 @@
       },
       "required": [
         "statistic",
-        "variable",
+        "variables",
         "releaseInfo",
         "postprocess",
         "algorithmInfo",
