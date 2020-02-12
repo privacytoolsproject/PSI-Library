@@ -4,6 +4,122 @@
   "additionalProperties": false,
   "description": "Differentially Private Release",
   "properties": {
+    "self": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "format": "uri"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "created"
+      ]
+    },
+    "dataset": {
+      "additionalProperties": false,
+      "title": "Dataset Level Metadata",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "unitOfAnalysis": {
+          "type": "string"
+        },
+        "structure": {
+          "type": "string",
+          "enum": [
+            "wide",
+            "long",
+            "unknown"
+          ]
+        },
+        "rowCount": {
+          "description": "Number of rows or observations in the dataset",
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string",
+              "enum": [
+                "private"
+              ]
+            }
+          ]
+        },
+        "variableCount": {
+          "type": "integer",
+          "description": "Number of variables or features or columns in the dataset"
+        },
+        "dataSource": {
+          "description": "Object containing descriptions of original source of dataset",
+          "type": [
+            "object",
+            "null"
+          ],
+          "oneOf": [
+            {
+              "properties": {
+                "name": {
+                  "description": "Name such as a file name or database table name",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "Type of data source",
+                  "type": "string",
+                  "enum": [
+                    "File",
+                    "SQL database"
+                  ]
+                },
+                "format": {
+                  "description": "Pertains to the type.  For example, a file that is \"text/csv\" or a SQL database that is \"Postgres version 9.1\"",
+                  "type": "string"
+                },
+                "filesize": {
+                  "description": "Filesize in bytes. (optional)",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "description": "Object containing a schema.org Dataset description",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of the dataset",
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "description",
+        "unitOfAnalysis",
+        "structure",
+        "rowCount",
+        "variableCount"
+      ]
+    },
     "dp-releases": {
       "items": {
         "$ref": "#/definitions/release"
@@ -76,7 +192,7 @@
           ]
         },
         "rho": {
-          "description": "Reflects the privacy cost of the query",
+          "description": "dgjg",
           "exclusiveMinimum": 0,
           "type": "number"
         }
@@ -221,5 +337,10 @@
         "privacyLoss"
       ]
     }
-  }
+  },
+  "required": [
+    "self",
+    "dataset",
+    "dp-releases"
+  ]
 }

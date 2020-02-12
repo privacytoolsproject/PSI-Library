@@ -1,7 +1,21 @@
-
-
-{
-  "dp-releases": [
+{"self": {
+      "schema_version": "https://raw.githubusercontent.com/privacytoolsproject/PSI-Library/develop/v-1-1/dp-schema.json",
+   	  "created": "2020-02-10T17:26:39",
+      "description": "Created by service/pypi package, etc"
+  },
+  "dataset": {
+        "description": "",
+        "unitOfAnalysis": "",
+        "structure": "long",
+        "rowCount":"private",
+        "variableCount": 38,
+        "dataSource": {
+            "name": "4104_DataTable_1_4104.tab",
+            "type": "File",
+            "format": "text/tab-separated-values",
+            "filesize": 6027064
+        }},
+   "dp-releases": [
     {
       "statistic": "mean",
       "variables": [
@@ -13,7 +27,7 @@
       },
       "privacyLoss": {
         "name":"concentrated dp",
-        "rho":0.2
+        "rho":01
       },
       "accuracy": {
         "alpha": 0.5,
