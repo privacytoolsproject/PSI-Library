@@ -4,6 +4,122 @@
   "additionalProperties": false,
   "description": "Differentially Private Release",
   "properties": {
+    "self": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "format": "uri"
+        },
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "created"
+      ]
+    },
+    "dataset": {
+      "additionalProperties": false,
+      "title": "Dataset Level Metadata",
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "unitOfAnalysis": {
+          "type": "string"
+        },
+        "structure": {
+          "type": "string",
+          "enum": [
+            "wide",
+            "long",
+            "unknown"
+          ]
+        },
+        "rowCount": {
+          "description": "Number of rows or observations in the dataset",
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string",
+              "enum": [
+                "private"
+              ]
+            }
+          ]
+        },
+        "variableCount": {
+          "type": "integer",
+          "description": "Number of variables or features or columns in the dataset"
+        },
+        "dataSource": {
+          "description": "Object containing descriptions of original source of dataset",
+          "type": [
+            "object",
+            "null"
+          ],
+          "oneOf": [
+            {
+              "properties": {
+                "name": {
+                  "description": "Name such as a file name or database table name",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "Type of data source",
+                  "type": "string",
+                  "enum": [
+                    "File",
+                    "SQL database"
+                  ]
+                },
+                "format": {
+                  "description": "Pertains to the type.  For example, a file that is \"text/csv\" or a SQL database that is \"Postgres version 9.1\"",
+                  "type": "string"
+                },
+                "filesize": {
+                  "description": "Filesize in bytes. (optional)",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "description": "Object containing a schema.org Dataset description",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Name of the dataset",
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "description",
+        "unitOfAnalysis",
+        "structure",
+        "rowCount",
+        "variableCount"
+      ]
+    },
     "dp-releases": {
       "items": {
         "$ref": "#/definitions/release"
@@ -27,13 +143,14 @@
           ]
         },
         "epsilon": {
+          "description": "Reflects the privacy cost of the query",
           "type": "number",
           "exclusiveMinimum": 0
         }
       },
       "additionalProperties": false
     },
-    "approxy": {
+    "approx": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -48,10 +165,12 @@
           ]
         },
         "epsilon": {
+          "description": "Reflects the privacy cost of the query",
           "type": "number",
           "exclusiveMinimum": 0
         },
         "delta": {
+          "description": "Reflects the privacy cost of the query",
           "maximum": 1,
           "minimum": 0,
           "type": "number"
@@ -103,26 +222,26 @@
         "nodeId": {
           "type": "integer",
           "minimum": 0,
-          "description": "determins which node the relase come from"
+          "description": "Determins which node the relase come from"
         },
         "accuracy": {
           "additionalProperties": false,
+          "type": "object",
           "description": "accuracy information:",
           "properties": {
             "accuracyValue": {
               "type": "number"
             },
             "alpha": {
-              "description": "hasjahgs",
+              "description": "The statistical significance level used to calculate accuracy",
               "type": "number"
             }
-          },
-          "type": "object"
+          }
         },
         "algorithmInfo": {
           "type": "object",
+          "description": "Information about the algorithm",
           "additionalProperties": false,
-          "description": "",
           "properties": {
             "name": {
               "type": "string"
@@ -138,6 +257,7 @@
               "type": "object",
               "properties": {
                 "constraint": {
+                  "description": "User-provided clipping bounds for the data",
                   "properties": {
                     "lowerbound": {
                       "description": "Least numeric value that must be given by a user",
@@ -159,7 +279,7 @@
                   ]
                 },
                 "n": {
-                  "description": "number of observation",
+                  "description": "The number of observations in the data",
                   "type": "number"
                 }
               },
@@ -173,12 +293,13 @@
         },
         "privacyLoss": {
           "type": "object",
+          "description": "The differential privacy definition",
           "oneOf": [
             {
               "$ref": "#/definitions/pure"
             },
             {
-              "$ref": "#/definitions/approxy"
+              "$ref": "#/definitions/approx"
             },
             {
               "$ref": "#/definitions/concentrated"
@@ -197,7 +318,7 @@
           ],
           "type": "string"
         },
-        "variable": {
+        "variables": {
           "description": "This describes the column/s in a dataset..",
           "items": {
             "type": "string"
@@ -207,7 +328,7 @@
       },
       "required": [
         "statistic",
-        "variable",
+        "variables",
         "releaseInfo",
         "postprocess",
         "algorithmInfo",
@@ -216,5 +337,10 @@
         "privacyLoss"
       ]
     }
-  }
+  },
+  "required": [
+    "self",
+    "dataset",
+    "dp-releases"
+  ]
 }
