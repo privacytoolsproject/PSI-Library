@@ -1,24 +1,5 @@
 #' UnbiasedPrivacy "Statistic"
 #'
-#' @param innerFun Character, the function calculated within each subset of the partition.
-#' @param aggregationFun Character, the function calculated over the set of results from
-#'   each subset of the partition.
-#' @param mechanism Character, the privacy mechanism. For \code{dpSampleAndAggregate}, one
-#'   of \code{c('mechanismLaplace')}.
-#' @param numSubsets, Numeric, the number of subsets desired in the partition
-#' @param varType Character, the R variable type. One of \code{c('numeric',
-#'   'integer', 'logical')}.
-#' @param variable Character, variable name.
-#' @param n Integer, number of observations
-#' @param innerFunSens Numeric, sensitivity of inner function.
-#' @param aggregationFunSens Numeric, sensitivity of aggregation function.
-#' @param subsetSize Numeric, minimum size of a subset of the partition.
-#' @param rng Numeric, a priori estimate of the range
-#' @param epsilon Numeric, privacy cost parameter
-#' @param accuracy Numeric, accuracy guarantee given \code{epsilon}
-#' @param imputeRng Numeric, range within which missing values are imputed. If \code{NULL},
-#'   the range provided in \code{rng} is used.
-#' @param alpha Numeric, the level of statistical significance. Default 0.05.
 #'
 #'BEGIN UNBIASED PRIVACY
 #' @param statistic Function that calculates quantity of interest (should change this to a character name)
@@ -52,8 +33,17 @@ dpUnbiasedPrivacy <- setRefClass(
    #              'dpMean'),
    # NOTE: "contains" vector will need to contain every mechanism and
                            # aggregationFun used. The aggregationFuns all correspond to DP statistics
-    fields = list(statistic, B, n, P, lambda, lambda_var, delta, epsilon = 0.1, epsilon_alpha = 0.1, 
-                                           censoring_cutoff = 0.6, bias_cutoff = 0.1)
+    fields = list(statistic = 'ANY', 
+                  B = 'numeric',
+                  n = 'numeric', 
+                  P = 'numeric', 
+                  lambda = 'numeric', 
+                  lambda_var = 'numeric', 
+                  delta ='numeric', 
+                  epsilon = 'numeric', 
+                  epsilon_alpha = 'numeric', 
+                  censoring_cutoff = 'numeric', 
+                  bias_cutoff = 'numeric')
 )
 
 dpSampleAndAggregate$methods(

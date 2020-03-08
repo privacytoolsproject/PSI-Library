@@ -126,7 +126,8 @@ trueLambdaCalc <- function(true_theta, X, P, y_var, alpha, upper = T){
 #' @export
 #'
 udpSim <- function(param_row, save_path){
-  browser()
+ # TODO remove browser comments
+ # browser()
   pr <- param_row
   dat <- generateData(pr$N, pr$intercept, pr$beta, pr$y_var, seed = pr$seed) # generate new dataset
   
@@ -145,4 +146,5 @@ udpSim <- function(param_row, save_path){
   
   fname <- paste0(save_path, '/sim_', pr$seed, '.Rdata')
   save(sim, file = fname)
+  return(sim)
 }
