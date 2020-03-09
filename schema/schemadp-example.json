@@ -22,7 +22,6 @@
         "A"
       ],
       "releaseInfo": {
-        "mechanism": "Laplace",
         "releaseValue": 1
       },
       "privacyLoss": {
@@ -38,7 +37,7 @@
       "postprocess": true,
       "algorithmInfo": {
 
-        "name": "hash",
+        "mechanism": "Laplace",
         "cite":"gshjg",
         "argument":{
           "n": 10,

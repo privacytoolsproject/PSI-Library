@@ -202,14 +202,6 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "mechanism": {
-          "enum": [
-            "Laplace",
-            "Gaussian",
-            "Bootstrap"
-          ],
-          "type": "string"
-        },
         "releaseValue": {}
       }
     },
@@ -243,7 +235,12 @@
           "description": "Information about the algorithm",
           "additionalProperties": false,
           "properties": {
-            "name": {
+            "mechanism": {
+              "enum": [
+                "Laplace",
+                "Gaussian",
+                "Bootstrap"
+              ],
               "type": "string"
             },
             "cite": {
@@ -288,7 +285,7 @@
           },
           "required": [
             "argument",
-            "name"
+            "mechanism"
           ]
         },
         "privacyLoss": {
