@@ -33,7 +33,8 @@ dpUnbiasedPrivacy <- setRefClass(
    #              'dpMean'),
    # NOTE: "contains" vector will need to contain every mechanism and
                            # aggregationFun used. The aggregationFuns all correspond to DP statistics
-    fields = list(statistic = 'ANY', 
+    fields = list(statistic = 'ANY',
+                  name = 'character',
                   B = 'numeric',
                   n = 'numeric', 
                   P = 'numeric', 
@@ -46,7 +47,7 @@ dpUnbiasedPrivacy <- setRefClass(
                   bias_cutoff = 'numeric')
 )
 
-dpSampleAndAggregate$methods(
+dpUnbiasedPrivacy$methods(
     initialize = function(statistic, B, n, P, lambda, lambda_var, delta, epsilon = 0.1, epsilon_alpha = 0.1, 
                           censoring_cutoff = 0.6, bias_cutoff = 0.1, ...) {
         ### establish acceptable inner functions, aggregation functions, and privacy mechanisms ###
@@ -89,8 +90,19 @@ dpUnbiasedPrivacy$methods(
     #' Note that the actual differentially private release is calculated in a call to the
     #' differentially private mechanism .self$mechanism's \code{evaluate} function within
     #' the \code{dpSampleAndAggregate$release} function.
-    release = function(data, ...) {
-       algorithmUDP(data, self$statistic, self$B, self$n, self$P, self$lambda, self$lambda_var,
-                    self$delta, self$epsilon, self$epsilon_alpha, self$censoring_cutoff, self$bias_cutoff)
+    #' TODO: make the passing of form & coef (for statistic coefFn) more dynamic
+    #' TODO: remove parallelize
+    #' TODO: remove hardcoded ref to coefFn
+    release = function(data, form, coef...) {
+        # call from simulation code:
+        #sim <- algorithmUDP(data = dat, statistic = coefFn, B = pr$R, n = pr$b, P = pr$P, lambda = l, lambda_var = 0.025, 
+        #           delta = 0.01, epsilon = pr$e, epsilon_alpha = pr$e_alpha, 
+        #            parallelize = F, censoring_cutoff = 0.9,
+       #            bias_cutoff = 0.1, form = form, coef = coef)
+        
+       algorithmUDP(data = data, statistic = coefFn, B = .self$B, n= .self$n, P = .self$P, lambda =  .self$lambda, lambda_var = .self$lambda_var,
+                    delta = .self$delta, epsilon =  .self$epsilon, epsilon_alpha =  .self$epsilon_alpha, 
+                    parallelize = F, censoring_cutoff =  .self$censoring_cutoff, 
+                    bias_cutoff =  .self$bias_cutoff, form = form, coef = coef)
     }
 )
