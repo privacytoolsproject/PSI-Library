@@ -1,21 +1,23 @@
-#  This is being done in the test file now
-#TODO remove if not needed
-#source('functions-unbiasedprivacy.R')
-#source('utilities-unbiasedprivacy.R')
+#This is a temporary file, just to do testing, while we are working on the unit test, 
+#TODO remove this file when we switch just to unit test
+if (FALSE) {
+source('functions-unbiasedprivacy.R')
+source('utilities-unbiasedprivacy.R')
 
-#Commenting these because we are trying to do it in testthat
-#param_combos <- read.csv('ellen_param_combos.csv')
+param_combos <- read.csv('ellen_param_combos.csv')
 
-#param_row <- param_combos[5,]
+param_row <- param_combos[5,]
 
-#param_row
+param_row
 
 # run UDP sim
-#save_path = '.'
-#udpSim(param_row, save_path = save_path)
+save_path = '.'
+udpSim(param_row, save_path = save_path)
+}
 
 #FROM UNIT TEST - 
 # instantiate sample and aggregate for Mean with one subset and normal dpMean calculation
+if (TRUE) {
 param_row <- list( N = 25000, 
                    sim=2,
                    alpha= 0.25,
@@ -39,28 +41,8 @@ l <- trueLambdaCalc(pr$beta, dat$X, pr$P, pr$y_var, pr$alpha)
 # QOI
 form <- as.formula(Y1~X)
 coef <- 'X'
-# initialize = function(statistic, B, n, P, lambda, lambda_var, delta, epsilon = 0.1, epsilon_alpha = 0.1, 
-#                          censoring_cutoff = 0.6, bias_cutoff = 0.1, ...) {
 
-#    sim <- algorithmUDP(data = dat, 
-#                         statistic = coefFn, 
-#                         B = pr$R, 
-#                         n = pr$b, 
-#                         P = pr$P, 
-#                         lambda = l, 
-#                         lambda_var = 0.025, 
-#                         delta = 0.01,
-#                         epsilon = pr$e, 
-#                         epsilon_alpha = pr$e_alpha, 
-#                         parallelize = F, 
-#                         censoring_cutoff = 0.9,
-#                         bias_cutoff = 0.1, 
-#                         form = form, 
-#                         coef = coef)
-#TODO: remove this TRUE/FALSE condition
-if (TRUE) {
-  
-  unbiased_privacy_test <- dpUnbiasedPrivacy(statistic = coefFn,
+unbiased_privacy_test <- dpUnbiasedPrivacy(statistic = coefFn,
                                              B=param_row$R,
                                              n=param_row$b,
                                              P=param_row$P,
@@ -76,5 +58,6 @@ if (TRUE) {
   save_path <- '.'
   fname <- paste0(save_path, '/sim_', pr$seed, '.Rdata')
   save(unbiased_sim, file = fname)
-}                                      
+                                      
 
+}

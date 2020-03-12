@@ -29,6 +29,7 @@ Collate:
     'mechanism-laplace.R'
     'mechanism-objective.R'
     'mechanism-stability.R'
+    'functions-unbiasedprivacy.R'
     'statistic-covariance.R'
     'statistic-glm.R'
     'statistic-heavyhitters.R'
@@ -37,6 +38,7 @@ Collate:
     'statistic-sampleandaggregate.R'
     'statistic-tree.R'
     'statistic-variance.R'
+    'statistic-unbiasedprivacy.R'
     'update_parameters.R'
     'utilities-categorical.R'
     'utilities-covariance.R'
@@ -49,5 +51,7 @@ Collate:
     'utilities-objective.R'
     'utilities-postprocessing.R'
     'utilities-sampleandaggregate.R'
+    'utilities-unbiasedprivacy.R'
     'utilities-tree.R'
+    'runSim.R'
 VignetteBuilder: knitr
