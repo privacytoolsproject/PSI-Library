@@ -4,7 +4,7 @@ author: "Megan Fantes"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{dp-covariance}
+  %\VignetteIndexEntry{dp-histogram}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

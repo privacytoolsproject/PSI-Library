@@ -66,9 +66,28 @@ generateData <- function(N, alpha, beta, var, n_sims = 1, seed = 1234){
 #' 
 #' @export
 #' 
-coefFn<- function(data, w, form, coef){
+coefFn<- function(data, w, form, coefVal){
   data[, 'w'] <- w
-  coef(lm(form, data = data, w = w))[coef]
+  coef(lm(form, data = data, w = w))[coefVal]
+}
+
+#' Weighted Mean function
+#'
+#'Runs a specified weighted mean and returns the mean value
+#'
+#' @param data Dataset
+#' @param w Weights to use in the mean
+#' @param col Name of column that the mean will be calculated on
+#' @return Weighted mean value
+#' 
+#' @examples
+#' \dontrun{meanFn(dat, w = w,  coefVal = 'X')}
+#' 
+#' @export
+#' 
+meanFn<- function(data, w, form, coefVal){
+  # browser()
+  weighted.mean(data[,coefVal], w)
 }
 
 #' Weighted logistic regression coefficient function

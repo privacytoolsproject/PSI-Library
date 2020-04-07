@@ -1,8 +1,8 @@
 #' UnbiasedPrivacy "Statistic"
 #'
 #'
-#'BEGIN UNBIASED PRIVACY
-#' @param statistic Function that calculates quantity of interest (should change this to a character name)
+#'
+#' @param statistic Function that calculates quantity of interest (should change this to a character name?)
 #' @param B Integer, Number of bootstraps to run via BLB algorithm
 #' @param n Integer, Split size
 #' @param P Integer of partitions 
@@ -93,16 +93,16 @@ dpUnbiasedPrivacy$methods(
     #' TODO: make the passing of form & coef (for statistic coefFn) more dynamic
     #' TODO: remove parallelize
     #' TODO: remove hardcoded ref to coefFn
-    release = function(data, form, coef...) {
+    release = function(data, form, coefVal...) {
         # call from simulation code:
         #sim <- algorithmUDP(data = dat, statistic = coefFn, B = pr$R, n = pr$b, P = pr$P, lambda = l, lambda_var = 0.025, 
         #           delta = 0.01, epsilon = pr$e, epsilon_alpha = pr$e_alpha, 
         #            parallelize = F, censoring_cutoff = 0.9,
        #            bias_cutoff = 0.1, form = form, coef = coef)
-        
-       algorithmUDP(data = data, statistic = coefFn, B = .self$B, n= .self$n, P = .self$P, lambda =  .self$lambda, lambda_var = .self$lambda_var,
+      # browser()
+       algorithmUDP(data = data, statistic = .self$statistic, B = .self$B, n= .self$n, P = .self$P, lambda =  .self$lambda, lambda_var = .self$lambda_var,
                     delta = .self$delta, epsilon =  .self$epsilon, epsilon_alpha =  .self$epsilon_alpha, 
                     parallelize = F, censoring_cutoff =  .self$censoring_cutoff, 
-                    bias_cutoff =  .self$bias_cutoff, form = form, coef = coef)
+                    bias_cutoff =  .self$bias_cutoff, form = form, coefVal = coefVal)
     }
 )

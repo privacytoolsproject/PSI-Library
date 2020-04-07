@@ -458,7 +458,8 @@ varianceSimulation <- function(theta_tilde, sigma_hat, theta_hat_dp_overall, a_1
 
 algorithmUDP <- function(data, statistic, B, n, P, lambda, lambda_var, delta, epsilon = 0.1, epsilon_alpha = 0.1, 
                          censoring_cutoff = 0.6, bias_cutoff = 0.1, parallelize = F, ...) {
-  
+ 
+ 
   # STEP 0: Assign placeholder variables and check inputs
   var_sim <- list(NA, NA, NA, NA, NA, NA, NA, NA, NA,NA)
   if(delta > 1){
@@ -484,10 +485,11 @@ algorithmUDP <- function(data, statistic, B, n, P, lambda, lambda_var, delta, ep
     cl <- parallel::makeCluster(parallel::detectCores() - 1)
     parallel::clusterExport(cl, var_list, envir=environment())
     est <- parallel::parLapply(cl, data_splits, fun = function(i)
-      innerBLB(data[i, ], statistic, metric, B, N, lambda, form, coef))
+      innerBLB(data[i, ], statistic, metric, B, N, lambda, form, coefVal))
     parallel::stopCluster(cl)
   }
   else{
+  #  browser()
     est <- lapply(data_splits, FUN = function(i) innerBLB(data[i, ], statistic, metric, 
                                                           B, N, lambda, ...))
   }
